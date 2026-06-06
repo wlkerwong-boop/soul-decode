@@ -359,8 +359,8 @@ function buildReading(upperNum: number, lowerNum: number, movingLine: number): P
   const getRelation = (zhi: string): string => {
     const el = ZHI_WUXING[zhi] || '土';
     // 五行生克定六亲
-    const ganKe = { '木': '土', '土': '水', '水': '火', '火': '金', '金': '木' };
-    const ganSheng = { '木': '火', '火': '土', '土': '金', '金': '水', '水': '木' };
+    const ganKe: Record<string, string> = { '木': '土', '土': '水', '水': '火', '火': '金', '金': '木' };
+    const ganSheng: Record<string, string> = { '木': '火', '火': '土', '土': '金', '金': '水', '水': '木' };
     if (el === guaElement) return '兄弟';
     if (ganSheng[guaElement] === el) return '子孙';
     if (ganSheng[el] === guaElement) return '父母';
