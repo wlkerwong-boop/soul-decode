@@ -30,6 +30,11 @@ export type PlumBlossomResult = {
   movingLine: number;         // 动爻位置(1-6)
   yearElement: string;        // 当年五行
   interpretation: string;     // 综合解读
+  // 新增：京氏易体系
+  sixRelations: string[];     // 六亲 (6爻对应的六亲)
+  shiYing: { shi: number; ying: number };  // 世应位置
+  nayinStem: string[];        // 纳甲天干
+  nayinBranch: string[];      // 纳甲地支
 };
 
 // 八卦定义 (先天八卦序)
@@ -284,6 +289,88 @@ function buildReading(upperNum: number, lowerNum: number, movingLine: number): P
 
   const interpretation = `本卦「${primaryHex.name}」→ 变卦「${changedHex.name}」，${movingLine}爻动。体卦为${bodyTrigram.name}（${bodyTrigram.element}），用卦为${useTrigram.name}（${useTrigram.element}），体用关系：${bodyUseRelation}。${bodyUseDesc}。`;
 
+  // === 京氏易：世应定位 ===
+  // 八纯卦世在上爻(6)，应在三爻(3)
+  // 一世卦世在初爻(1)，应在四爻(4)
+  // 二世卦世在二爻(2)，应在五爻(5)
+  // 三世卦世在三爻(3)，应在六爻(6)
+  // 四世卦世在四爻(4)，应在初爻(1)
+  // 五世卦世在五爻(5)，应在二爻(2)
+  // 游魂卦世在四爻(4)，应在初爻(1)
+  // 归魂卦世在三爻(3)，应在六爻(6)
+  const guaGroup = Math.floor((primaryCode - 1) / 8); // 0-7
+  const guaPos = ((primaryCode - 1) % 8); // 0-7 在组内位置
+  let shiPos = 6; // default: 八纯
+  let yingPos = 3;
+  if (guaPos === 0) { shiPos = 6; yingPos = 3; }       // 八纯
+  else if (guaPos === 1) { shiPos = 1; yingPos = 4; }  // 一世
+  else if (guaPos === 2) { shiPos = 2; yingPos = 5; }  // 二世
+  else if (guaPos === 3) { shiPos = 3; yingPos = 6; }  // 三世
+  else if (guaPos === 4) { shiPos = 4; yingPos = 1; }  // 四世
+  else if (guaPos === 5) { shiPos = 5; yingPos = 2; }  // 五世
+  else if (guaPos === 6) { shiPos = 4; yingPos = 1; }  // 游魂
+  else if (guaPos === 7) { shiPos = 3; yingPos = 6; }  // 归魂
+
+  // === 京氏易：纳甲（天干地支配卦） ===
+  // 乾纳甲壬，坤纳乙癸，艮纳丙，兑纳丁，坎纳戊，离纳己，震纳庚，巽纳辛
+  const NAYIN_GAN: Record<string, string[]> = {
+    '乾': ['甲', '壬'], '坤': ['乙', '癸'], '艮': ['丙', '丙'],
+    '兑': ['丁', '丁'], '坎': ['戊', '戊'], '离': ['己', '己'],
+    '震': ['庚', '庚'], '巽': ['辛', '辛'],
+  };
+  // 地支纳甲 (阳卦顺行，阴卦逆行)
+  const NAYIN_ZHI: Record<string, string[]> = {
+    '乾': ['子', '寅', '辰', '午', '申', '戌'],
+    '坤': ['未', '巳', '卯', '丑', '亥', '酉'],
+    '震': ['子', '寅', '辰', '午', '申', '戌'],
+    '巽': ['丑', '亥', '酉', '未', '巳', '卯'],
+    '坎': ['寅', '辰', '午', '申', '戌', '子'],
+    '离': ['卯', '丑', '亥', '酉', '未', '巳'],
+    '艮': ['辰', '午', '申', '戌', '子', '寅'],
+    '兑': ['巳', '卯', '丑', '亥', '酉', '未'],
+  };
+
+  const upperName = bodyInUpper ? upperTrigram.name : lowerTrigram.name; // 用上卦定纳甲
+  const ganList = NAYIN_GAN[upperName] || ['甲', '甲'];
+  const zhiList = NAYIN_ZHI[upperName] || ['子', '寅', '辰', '午', '申', '戌'];
+
+  const nayinStems = lines.map((_, i) => {
+    const trigramName = i < 3 ? lowerTrigram.name : upperTrigram.name;
+    return (NAYIN_GAN[trigramName] || ['甲'])[i < 3 ? 0 : 1];
+  });
+  const nayinBranches = lines.map((_, i) => {
+    const trigramName = i < 3 ? lowerTrigram.name : upperTrigram.name;
+    return (NAYIN_ZHI[trigramName] || ['子', '寅', '辰', '午', '申', '戌'])[i];
+  });
+
+  // === 京氏易：六亲 ===
+  // 以卦宫五行 (上卦五行) 为"我"，与各爻纳甲地支五行比较
+  const ZHI_WUXING: Record<string, string> = {
+    '子': '水', '丑': '土', '寅': '木', '卯': '木',
+    '辰': '土', '巳': '火', '午': '火', '未': '土',
+    '申': '金', '酉': '金', '戌': '土', '亥': '水',
+  };
+  const guaElement = bodyTrigram.element; // 体卦五行 = "我"
+  const SIX_RELATIONS: Record<string, string> = {
+    'same': '兄弟', 'generateMe': '父母', 'iGenerate': '子孙',
+    'controlMe': '官鬼', 'iControl': '妻财',
+  };
+
+  const getRelation = (zhi: string): string => {
+    const el = ZHI_WUXING[zhi] || '土';
+    // 五行生克定六亲
+    const ganKe = { '木': '土', '土': '水', '水': '火', '火': '金', '金': '木' };
+    const ganSheng = { '木': '火', '火': '土', '土': '金', '金': '水', '水': '木' };
+    if (el === guaElement) return '兄弟';
+    if (ganSheng[guaElement] === el) return '子孙';
+    if (ganSheng[el] === guaElement) return '父母';
+    if (ganKe[guaElement] === el) return '妻财';
+    if (ganKe[el] === guaElement) return '官鬼';
+    return '兄弟';
+  };
+
+  const sixRelations = nayinBranches.map(zhi => getRelation(zhi));
+
   return {
     primary: {
       name: primaryHex.name,
@@ -301,6 +388,10 @@ function buildReading(upperNum: number, lowerNum: number, movingLine: number): P
     movingLine,
     yearElement: '',
     interpretation,
+    sixRelations,
+    shiYing: { shi: shiPos, ying: yingPos },
+    nayinStem: nayinStems,
+    nayinBranch: nayinBranches,
   };
 }
 

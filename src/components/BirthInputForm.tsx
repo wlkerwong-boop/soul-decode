@@ -575,10 +575,28 @@ export default function BirthInputForm() {
             <p className="text-[var(--text-secondary)] text-sm">
               报告 ID：{reportId} · 仅供个人参考
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
-              <button onClick={handleShare} className="btn-gold flex-1">🖼️ 生成分享图</button>
-              <button onClick={handleShareText} className="btn-gold flex-1">📤 复制文字</button>
-              <button onClick={handleReset} className="btn-gold flex-1">🔄 重新解码</button>
+            <div className="flex flex-wrap gap-3 justify-center max-w-lg mx-auto">
+              <button onClick={handleShare} className="btn-gold flex-1 min-w-[140px]">🖼️ 分享图</button>
+              <button onClick={handleShareText} className="btn-gold flex-1 min-w-[140px]">📤 复制文字</button>
+              <button onClick={() => window.location.href = '#section-growth'} className="btn-gold flex-1 min-w-[140px]">🌱 成长方案</button>
+              <button onClick={handleReset} className="btn-gold flex-1 min-w-[140px]">🔄 重新</button>
+            </div>
+
+            {/* 打赏区 */}
+            <div className="mt-8 p-4 rounded-xl mx-auto max-w-sm"
+              style={{
+                background: 'linear-gradient(135deg, rgba(201,169,110,0.08), rgba(201,169,110,0.02))',
+                border: '1px solid rgba(201,169,110,0.15)',
+              }}
+            >
+              <p className="text-sm text-[var(--text-accent)] mb-2">☕ 如果这份报告对你有帮助</p>
+              <p className="text-xs text-[var(--text-secondary)] opacity-60 mb-3">
+                打赏一杯咖啡，支持我们持续精进算法
+              </p>
+              <div className="inline-block p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                <p className="text-xs text-[var(--text-secondary)]">请师兄微信转账</p>
+                <p className="text-xs text-[var(--text-accent)] mt-1 font-mono">感谢随喜 🙏</p>
+              </div>
             </div>
           </div>
         </div>
