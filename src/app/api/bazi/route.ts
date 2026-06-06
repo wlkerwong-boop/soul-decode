@@ -42,11 +42,14 @@ export async function POST(request: NextRequest) {
     // 八字排盘（瞬时计算）
     const bazi = calculateBazi(yearNum, monthNum, dayNum, hourNum);
 
-    // 能量曲线（瞬时计算）
+    // 能量曲线（瞬时计算，v2升级版）
     const lifeEnergy = generateLifeEnergy(
       yearNum, monthNum, dayNum,
       bazi.dayMasterElement,
       bazi.elementDistribution,
+      bazi.pillars,
+      bazi.ganElements,
+      bazi.zhiElements,
     );
 
     // 报告 ID

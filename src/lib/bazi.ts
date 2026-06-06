@@ -220,12 +220,14 @@ function generateSummary(dayMasterElement: string, distribution: Record<string, 
 }
 
 /**
- * 生成人生能量曲线数据
+ * 生成人生能量曲线数据（v2 升级版）
  *
- * 模拟K线风格的能量走势：
- * - 基于日主五行与每年天干地支的生克关系计算能量波动
- * - 大运每10年一个转向，改变能量基线
- * - 流年作用于能量之上，产生年度波动
+ * 改进要点：
+ * - 使用八字四柱的天干地支五行做个性化基线
+ * - 大运过渡采用3年渐入/渐出而非突变
+ * - 流年五行生克计算更精确
+ * - 加入人生阶段标签
+ * - 基于日主旺衰调整能量波动幅度
  */
 export function generateLifeEnergy(
   birthYear: number,
@@ -233,53 +235,181 @@ export function generateLifeEnergy(
   birthDay: number,
   dayMasterElement: string,
   distribution: Record<string, number>,
+  pillars?: string[],
+  ganElements?: string[],
+  zhiElements?: string[],
 ): LifeLineData {
   const currentYear = new Date().getFullYear();
-  const startYear = birthYear;
-  const endYear = birthYear + 80; // 80年生命跨度
-  const birthAge = 0;
 
-  // 五行生克关系
+  // 五行生克关系（生我/我生/克我/我克）
+  // 正值=生助/相合，负值=相克/相耗
   const generateRelation: Record<string, Record<string, number>> = {
-    '木': { '木': 0.5, '火': 0.8, '土': -0.3, '金': -0.7, '水': 0.6 },
+    '木': { '木': 0.5, '火': 0.8, '土': -0.4, '金': -0.7, '水': 0.6 },
     '火': { '木': 0.6, '火': 0.5, '土': 0.7, '金': -0.3, '水': -0.8 },
     '土': { '木': -0.4, '火': 0.7, '土': 0.5, '金': 0.6, '水': -0.3 },
-    '金': { '木': -0.7, '火': -0.3, '土': 0.8, '金': 0.5, '水': 0.6 },
+    '金': { '木': -0.7, '火': -0.4, '土': 0.8, '金': 0.5, '水': 0.6 },
     '水': { '木': 0.8, '火': -0.7, '土': -0.3, '金': 0.6, '水': 0.5 },
   };
 
-  // 各元素的流年年份周期影响
-  // 每5年一个大周期
-  const elementCycle = ['木', '火', '土', '金', '水'];
+  // 五行相生顺序（用于大运演进）
+  const ELEMENT_CYCLE_GENERATE: Record<string, string> = {
+    '木': '火', '火': '土', '土': '金', '金': '水', '水': '木',
+  };
+  // 五行相克顺序
+  const ELEMENT_CYCLE_CONTROL: Record<string, string> = {
+    '木': '土', '土': '水', '水': '火', '火': '金', '金': '木',
+  };
+
+  const ELEMENT_CYCLE = ['木', '火', '土', '金', '水'];
+
+  // ----- 计算大运起始元素 -----
+  // 用月柱的天干五行决定大运起始方向
+  let startLuckElement = dayMasterElement;
+  if (ganElements && ganElements.length > 1 && ganElements[1] !== '—') {
+    // 月干五行作为大运的起点偏移
+    const monthGanIdx = ELEMENT_CYCLE.indexOf(ganElements[1]);
+    if (monthGanIdx >= 0) {
+      // 用月干偏移日主2位，产生"错位"效果使每个命盘曲线不同
+      const dayMasterIdx = ELEMENT_CYCLE.indexOf(dayMasterElement);
+      const offset = ((monthGanIdx - dayMasterIdx + 5) % 5);
+      startLuckElement = ELEMENT_CYCLE[(dayMasterIdx + Math.floor(offset / 2)) % 5];
+    }
+  }
+
+  // ----- 计算五行均衡度（影响曲线波动幅度） -----
+  const elementCounts = Object.values(distribution);
+  const maxCount = Math.max(...elementCounts, 1);
+  const minCount = Math.min(...elementCounts, 0);
+  const balanceRatio = 1 - (maxCount - minCount) / (maxCount + 1); // 0-1, 越高越均衡
+
+  // 五行均衡的人波动小，不均衡的人波动大
+  const volatilityMultiplier = 0.7 + (1 - balanceRatio) * 0.6;
+
+  // ----- 计算初始能量基线 -----
+  // 日主受月令(月支五行)的影响
+  let baseEnergyOffset = 0;
+  if (zhiElements && zhiElements.length > 1 && zhiElements[1] !== '—') {
+    const monthElement = zhiElements[1];
+    const monthRelation = generateRelation[dayMasterElement]?.[monthElement] || 0;
+    baseEnergyOffset = monthRelation * 10;
+  }
+
+  // 受年支（社会环境）影响
+  if (zhiElements && zhiElements.length > 0 && zhiElements[0] !== '—') {
+    const yearElement = zhiElements[0];
+    const yearRelation = generateRelation[dayMasterElement]?.[yearElement] || 0;
+    baseEnergyOffset += yearRelation * 5;
+  }
 
   const curve: EnergyPoint[] = [];
   const turningPoints: { year: number; age: number; label: string; significance: 'major' | 'minor' }[] = [];
+
+  // 人生阶段标签
+  const lifeStages = [
+    { start: 0, end: 17, label: '🧒 成长探索期' },
+    { start: 18, end: 25, label: '🚀 青年奋斗期' },
+    { start: 26, end: 35, label: '🏗️ 立业深耕期' },
+    { start: 36, end: 45, label: '👑 成就爆发期' },
+    { start: 46, end: 55, label: '🧠 智慧沉淀期' },
+    { start: 56, end: 65, label: '🌿 自在收放期' },
+    { start: 66, end: 80, label: '🍂 圆满回甘期' },
+  ];
+
+  // 10年大运序列（基于日主五行和偏移计算）
+  const luckSequence: string[] = [];
+  let currentLuckEl = startLuckElement;
+  for (let i = 0; i < 10; i++) {
+    luckSequence.push(currentLuckEl);
+    // 大运的变化方向：阴阳交替
+    // 用顺逆结合产生更自然的序列
+    if (i % 2 === 0) {
+      currentLuckEl = ELEMENT_CYCLE_GENERATE[currentLuckEl];
+    } else {
+      currentLuckEl = ELEMENT_CYCLE_CONTROL[currentLuckEl];
+    }
+  }
+
+  // 起运年龄（基于五行分布）
+  const startLuckAge = 3 + Math.round((1 - balanceRatio) * 4);
+
+  // 计算大运起止
+  const majorLuckChanges: { age: number; element: string }[] = [];
+  for (let i = 0; i < luckSequence.length; i++) {
+    const luckStartAge = startLuckAge + i * 10;
+    if (luckStartAge <= 80) {
+      majorLuckChanges.push({
+        age: luckStartAge,
+        element: luckSequence[i],
+      });
+    }
+  }
 
   // 计算每一年能量
   for (let age = 0; age <= 80; age++) {
     const year = birthYear + age;
 
-    // 大运周期：每10年一个运势转向
-    const luckPeriod = Math.floor(age / 10);
-    const luckElement = elementCycle[luckPeriod % 5];
+    // ----- 大运能量 -----
+    // 找到当前所在的大运
+    let currentLuckEl = luckSequence[0];
+    let currentLuckIndex = 0;
+    let progressInLuck = 0; // 0-1, 当前大运的进度
 
-    // 大运基点能量
-    const baseRelation = generateRelation[dayMasterElement]?.[luckElement] || 0;
-    const baseEnergy = 50 + baseRelation * 30;
+    for (let i = majorLuckChanges.length - 1; i >= 0; i--) {
+      if (age >= majorLuckChanges[i].age) {
+        currentLuckEl = majorLuckChanges[i].element;
+        currentLuckIndex = i;
+        const luckStart = majorLuckChanges[i].age;
+        const luckEnd = (i + 1 < majorLuckChanges.length) ? majorLuckChanges[i + 1].age : 80;
+        progressInLuck = (age - luckStart) / (luckEnd - luckStart);
+        break;
+      }
+    }
 
-    // 流年（每年天干对应的五行）
-    const yearElement = elementCycle[(year - 4) % 5]; // 基准偏移
-    const yearRelation = generateRelation[dayMasterElement]?.[yearElement] || 0;
+    // 大运与日主的关系
+    const luckRelation = generateRelation[dayMasterElement]?.[currentLuckEl] || 0;
 
-    // 年度波动（正弦波 + 随机）
-    const waveAmplitude = 15;
-    const yearWave = Math.sin(age * 0.3 + luckPeriod * 1.2) * waveAmplitude;
-    const yearBonus = yearRelation * 20;
-    const noise = (Math.sin(age * 1.7) * 5 + Math.cos(age * 0.9) * 5);
+    // 大运过渡平滑：大运更替时有3年渐入/渐出
+    let luckMultiplier = 1;
+    for (const change of majorLuckChanges) {
+      const yearsSinceChange = age - change.age;
+      if (yearsSinceChange >= 0 && yearsSinceChange < 3) {
+        // 新运渐入
+        luckMultiplier = 0.6 + yearsSinceChange * 0.15; // 0.6 -> 1.0
+      }
+      if (yearsSinceChange >= -3 && yearsSinceChange < 0) {
+        // 旧运渐出
+        luckMultiplier = 1.0 + yearsSinceChange * 0.13; // 1.0 -> 0.6
+      }
+    }
 
-    const energy = Math.max(5, Math.min(98, Math.round(baseEnergy + yearWave + yearBonus + noise)));
+    const baseFromLuck = 50 + luckRelation * 25 * luckMultiplier;
 
-    // 类型分配（模拟K线的开高低收）
+    // ----- 流年能量 -----
+    // 流年天干基于年份的天干五行
+    const yearGanIndex = (year - 4) % 10; // 甲=0
+    const yearGanElement = ELEMENT_CYCLE[Math.floor(yearGanIndex / 2) % 5];
+    const yearRelation = generateRelation[dayMasterElement]?.[yearGanElement] || 0;
+    const yearBonus = yearRelation * 15;
+
+    // ----- 季节能量（基于出生月份） -----
+    const seasonFactor = Math.sin((age + birthMonth / 2) * 0.15) * 3;
+
+    // ----- 综合波动 -----
+    const waveAmplitude = 12 * volatilityMultiplier;
+    const wave1 = Math.sin(age * 0.25 + currentLuckIndex * 1.5) * waveAmplitude;
+    const wave2 = Math.cos(age * 0.12 + currentLuckIndex * 0.8) * waveAmplitude * 0.5;
+    const noise = (Math.sin(age * 1.3) * 4 + Math.cos(age * 0.7) * 3);
+
+    // 人生阶段基线偏移（中年后趋于平稳）
+    let stageOffset = 0;
+    if (age < 18) stageOffset = 5; // 青少年期偏高
+    else if (age > 60) stageOffset = -3; // 老年略有下降
+
+    const energy = Math.round(Math.max(5, Math.min(98,
+      baseFromLuck + baseEnergyOffset + yearBonus + seasonFactor + wave1 + wave2 + noise + stageOffset
+    )));
+
+    // 类型分配
     let type: 'high' | 'low' | 'mid';
     if (energy > 65) type = 'high';
     else if (energy < 35) type = 'low';
@@ -289,41 +419,69 @@ export function generateLifeEnergy(
       age,
       year,
       energy,
-      element: yearElement,
-      period: `第${luckPeriod + 1}大运·${luckElement}运`,
+      element: yearGanElement,
+      period: `第${currentLuckIndex + 1}运·${currentLuckEl}运`,
       type,
     });
+  }
 
-    // 标记重大转折点
-    if (age % 10 === 0 && age > 0) {
-      turningPoints.push({
-        year,
-        age,
-        label: `${luckElement}运起`,
-        significance: 'major',
-      });
+  // ----- 标记转折点 -----
+  for (const change of majorLuckChanges) {
+    turningPoints.push({
+      year: birthYear + change.age,
+      age: change.age,
+      label: `「${change.element}」运起`,
+      significance: 'major',
+    });
+  }
+
+  // 标记高能/低能年份（去重，取第1次出现）
+  const seenLabels = new Set<string>();
+  for (const point of curve) {
+    if (point.energy >= 85 && !seenLabels.has(`高能${point.age}`)) {
+      if (point.age >= 5) {
+        seenLabels.add(`高能${point.age}`);
+        turningPoints.push({
+          year: point.year,
+          age: point.age,
+          label: '🌊 高能年',
+          significance: 'major',
+        });
+      }
     }
-
-    // 极端年份标记
-    if (energy >= 85) {
-      turningPoints.push({
-        year,
-        age,
-        label: '🌊 高能年',
-        significance: 'major',
-      });
-    } else if (energy <= 15) {
-      turningPoints.push({
-        year,
-        age,
-        label: '⛰️ 蛰伏期',
-        significance: 'minor',
-      });
+    if (point.energy <= 18 && point.age >= 10) {
+      if (!seenLabels.has(`蛰伏${point.age}`)) {
+        seenLabels.add(`蛰伏${point.age}`);
+        turningPoints.push({
+          year: point.year,
+          age: point.age,
+          label: '⛰️ 蛰伏期',
+          significance: 'minor',
+        });
+      }
     }
   }
 
-  // 起运年龄（简化为3岁起运）
-  const startLuckAge = 3;
+  // 添加人生阶段标签
+  for (const stage of lifeStages) {
+    if (stage.start >= 0 && stage.start <= 80) {
+      const existing = turningPoints.find(t => Math.abs(t.age - stage.start) <= 2);
+      if (!existing) {
+        turningPoints.push({
+          year: birthYear + stage.start,
+          age: stage.start,
+          label: stage.label,
+          significance: 'minor',
+        });
+      }
+    }
+  }
+
+  // 排序并去重 + 限制数量
+  const sorted = turningPoints
+    .filter((p, i, arr) => arr.findIndex(t => Math.abs(t.age - p.age) <= 2 && t.label === p.label) === i)
+    .sort((a, b) => a.age - b.age)
+    .slice(0, 25);
 
   // 平均能量
   const averageEnergy = Math.round(
@@ -332,7 +490,7 @@ export function generateLifeEnergy(
 
   return {
     curve,
-    turningPoints: turningPoints.slice(0, 20), // 最多20个标记点
+    turningPoints: sorted,
     startLuckAge,
     averageEnergy,
   };
