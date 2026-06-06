@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import citiesData from '@/data/cities.json';
 import BaziCard from './BaziCard';
 import LifeEnergyChart from './LifeEnergyChart';
+import ReportShareCard from './ReportShareCard';
 
 const CITIES_DB = (citiesData as any).cities as Record<string, { cities: string[]; tags: string[]; description: string }>;
 
@@ -129,6 +130,7 @@ export default function BirthInputForm() {
   const [step, setStep] = useState<'form' | 'loading' | 'report'>('form');
   const [selectedProvince, setSelectedProvince] = useState('');
   const [showHistory, setShowHistory] = useState(false);
+  const [showShareCard, setShowShareCard] = useState(false);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [activeSection, setActiveSection] = useState<string>('bazi');
 
@@ -314,6 +316,10 @@ export default function BirthInputForm() {
   }, []);
 
   const handleShare = useCallback(() => {
+    setShowShareCard(true);
+  }, []);
+
+  const handleShareText = useCallback(() => {
     if (!baziData) return;
     const text = `🔮 灵魂解码 · 我的命盘已开启\n\n八字：${baziData.pillars.filter(p => p !== '--').join(' ')}\n日主：${baziData.dayMaster}（${baziData.dayMasterElement}）\n生肖：${baziData.zodiac}\n${lifeEnergyData ? `能量均值：${lifeEnergyData.averageEnergy}` : ''}\n\n你的呢？输入出生信息，即刻解码 → https://soul-decode.vercel.app`;
 
@@ -470,7 +476,10 @@ export default function BirthInputForm() {
               </button>
             )}
             <button onClick={handleShare} className="text-sm text-[var(--text-accent)] hover:text-[var(--text-accent-hover)] transition-colors">
-              📤 分享命盘
+              🖼️ 生成分享图
+            </button>
+            <button onClick={handleShareText} className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-colors">
+              📤 复制文字
             </button>
           </div>
 
@@ -567,11 +576,32 @@ export default function BirthInputForm() {
               报告 ID：{reportId} · 仅供个人参考
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
-              <button onClick={handleShare} className="btn-gold flex-1">📤 分享命盘</button>
-              <button onClick={handleReset} className="btn-gold flex-1">🔄 为另一个人解码</button>
+              <button onClick={handleShare} className="btn-gold flex-1">🖼️ 生成分享图</button>
+              <button onClick={handleShareText} className="btn-gold flex-1">📤 复制文字</button>
+              <button onClick={handleReset} className="btn-gold flex-1">🔄 重新解码</button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* 分享卡片弹窗 */}
+      {showShareCard && baziData && (
+        <ReportShareCard
+          data={{
+            pillars: baziData.pillars,
+            ganElements: baziData.ganElements,
+            zhiElements: baziData.zhiElements,
+            zodiac: baziData.zodiac,
+            dayMaster: baziData.dayMaster,
+            dayMasterElement: baziData.dayMasterElement,
+            nayin: baziData.nayin,
+            summary: baziData.summary,
+            elementDistribution: baziData.elementDistribution,
+            averageEnergy: lifeEnergyData?.averageEnergy || 60,
+            birthInfo: inputSummary,
+          }}
+          onClose={() => setShowShareCard(false)}
+        />
       )}
 
       {/* 历史记录弹窗 */}
