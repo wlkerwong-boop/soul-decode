@@ -6,6 +6,7 @@ import BaziCard from './BaziCard';
 import LifeEnergyChart from './LifeEnergyChart';
 import ReportShareCard from './ReportShareCard';
 import PlumBlossomCard from './PlumBlossomCard';
+import PromptTemplates from './PromptTemplates';
 
 const CITIES_DB = (citiesData as any).cities as Record<string, { cities: string[]; tags: string[]; description: string }>;
 
@@ -470,6 +471,7 @@ export default function BirthInputForm() {
                 { id: 'energy', label: '📈 能量K线' },
                 { id: 'report', label: '📜 深度报告' + (reportText && !reportComplete ? ' ⏳' : '') },
                 { id: 'growth', label: '🌱 成长方案' },
+                { id: 'templates', label: '🎙️ 深度对话' },
               ].map(section => (
                 <button
                   key={section.id}
@@ -667,6 +669,13 @@ export default function BirthInputForm() {
             {growthPlanText && (
               <div className="report-content leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(growthPlanText) }} />
             )}
+          </section>
+
+          <div className="gold-divider max-w-3xl mx-auto" />
+
+          {/* Section: 深度对话模板 */}
+          <section id="section-templates">
+            <PromptTemplates />
           </section>
 
           {/* 底部操作 */}
