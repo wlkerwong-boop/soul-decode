@@ -5,6 +5,7 @@ import citiesData from '@/data/cities.json';
 import BaziCard from './BaziCard';
 import LifeEnergyChart from './LifeEnergyChart';
 import ReportShareCard from './ReportShareCard';
+import PlumBlossomCard from './PlumBlossomCard';
 
 const CITIES_DB = (citiesData as any).cities as Record<string, { cities: string[]; tags: string[]; description: string }>;
 
@@ -140,6 +141,9 @@ export default function BirthInputForm() {
   const [reportMeta, setReportMeta] = useState<ReportMeta | null>(null);
   const [reportId, setReportId] = useState<string>('');
   const [inputSummary, setInputSummary] = useState('');
+  const [plumBlossomData, setPlumBlossomData] = useState<any>(null);
+  const [growthPlanText, setGrowthPlanText] = useState('');
+  const [growthPlanLoading, setGrowthPlanLoading] = useState(false);
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -210,6 +214,15 @@ export default function BirthInputForm() {
       setLifeEnergyData(baziData.lifeEnergy);
       setReportMeta(baziData.meta);
       setReportId(baziData.reportId);
+
+      // 并行获取梅花易数（瞬时算法，不阻塞）
+      fetch('/api/plum-blossom', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'date', year: formData.year, month: formData.month, day: formData.day, hour: formData.hour }),
+      }).then(r => r.json()).then(d => {
+        if (d.success) setPlumBlossomData(d.hexagram);
+      }).catch(() => {});
 
       // 切换到报告视图（此时八字+能量曲线已可见）
       setStep('report');
@@ -295,6 +308,9 @@ export default function BirthInputForm() {
     setReportMeta(null);
     setReportText('');
     setReportComplete(false);
+    setPlumBlossomData(null);
+    setGrowthPlanText('');
+    setGrowthPlanLoading(false);
     setError(null);
     setStep('form');
     setShowHistory(false);
@@ -450,8 +466,10 @@ export default function BirthInputForm() {
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {[
                 { id: 'bazi', label: '🔮 八字命盘' },
+                { id: 'plum', label: '☯ 梅花易数' },
                 { id: 'energy', label: '📈 能量K线' },
                 { id: 'report', label: '📜 深度报告' + (reportText && !reportComplete ? ' ⏳' : '') },
+                { id: 'growth', label: '🌱 成长方案' },
               ].map(section => (
                 <button
                   key={section.id}
@@ -497,6 +515,15 @@ export default function BirthInputForm() {
               summary={baziData.summary}
             />
           </section>
+
+          <div className="gold-divider max-w-3xl mx-auto" />
+
+          {/* Section: 梅花易数 */}
+          {plumBlossomData && (
+            <section id="section-plum">
+              <PlumBlossomCard data={plumBlossomData} />
+            </section>
+          )}
 
           <div className="gold-divider max-w-3xl mx-auto" />
 
@@ -566,6 +593,79 @@ export default function BirthInputForm() {
                   正在召唤 AI 解码者...
                 </p>
               </div>
+            )}
+          </section>
+
+          <div className="gold-divider max-w-3xl mx-auto" />
+
+          {/* Section: 成长方案 */}
+          <section id="section-growth">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-2 mb-2">
+                <span className="text-2xl">🌱</span>
+                <h2 className="text-xl font-bold text-[var(--text-accent)] tracking-wider">
+                  年度成长方案
+                  {growthPlanLoading && (
+                    <span className="inline-block w-2 h-4 bg-[var(--text-accent)] ml-1 animate-pulse" />
+                  )}
+                </h2>
+                <span className="text-2xl">🌱</span>
+              </div>
+              {!growthPlanText && !growthPlanLoading && (
+                <button
+                  onClick={async () => {
+                    setGrowthPlanLoading(true);
+                    setGrowthPlanText('');
+                    setActiveSection('growth');
+                    try {
+                      const res = await fetch('/api/growth-plan', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData),
+                      });
+                      if (!res.ok) throw new Error('生成失败');
+                      const reader = res.body?.getReader();
+                      if (!reader) throw new Error('无法读取');
+                      const decoder = new TextDecoder();
+                      let buf = '', full = '';
+                      while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        buf += decoder.decode(value, { stream: true });
+                        const lines = buf.split('\n');
+                        buf = lines.pop() || '';
+                        for (const line of lines) {
+                          if (!line.startsWith('data: ')) continue;
+                          try {
+                            const d = JSON.parse(line.slice(6));
+                            if (d.content) { full += d.content; setGrowthPlanText(full); }
+                            if (d.done) break;
+                          } catch {}
+                        }
+                      }
+                    } catch (err: any) {
+                      setGrowthPlanText('生成失败：' + err.message);
+                    } finally {
+                      setGrowthPlanLoading(false);
+                    }
+                  }}
+                  className="btn-gold !w-auto !px-8 mt-2"
+                >
+                  🌱 生成我的成长方案
+                </button>
+              )}
+              {growthPlanLoading && !growthPlanText && (
+                <div className="flex flex-col items-center py-12">
+                  <div className="cosmic-loader mb-6" style={{ width: 60, height: 60 }}>
+                    <div className="cosmic-ring cosmic-ring-3" style={{ width: '100%', height: '100%' }} />
+                    <div className="cosmic-center text-xs">✦</div>
+                  </div>
+                  <p className="text-[var(--text-secondary)] text-sm opacity-60">正在生成你的专属成长方案...</p>
+                </div>
+              )}
+            </div>
+            {growthPlanText && (
+              <div className="report-content leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(growthPlanText) }} />
             )}
           </section>
 
