@@ -40,9 +40,15 @@ function getConfig() {
 }
 
 function buildReportPrompt(userContext: string): string {
+  const currentYear = new Date().getFullYear();
   return `请根据以下用户信息，生成一份完整的【灵魂解码】人生使命解读报告。
 
 ${userContext}
+
+⚠️ 重要时间基准：当前时间为 ${currentYear}年。报告中第六模块的时间线必须严格按照以下划分：
+- 过去阶段：回溯用户出生以来到 ${currentYear - 1}年（即${currentYear - 1}年及以前）
+- 当下核心转折点：${currentYear}年
+- 未来指引：从 ${currentYear + 1}年起，逐年拆解未来5年
 
 报告需严格按照以下6个模块的结构输出：
 
@@ -77,9 +83,9 @@ ${userContext}
 - 地理机遇区域
 
 ## 六、人生时间线与年度指引
-- 过去阶段回顾（2-3个关键阶段）
-- 当下核心转折点
-- 起当前年份起未来5年逐年拆解（每年含：年度主题、道路方向、关键行动、成长标志）
+- 过去阶段回顾（2-3个关键阶段，从出生到${new Date().getFullYear() - 1}年）
+- 当下核心转折点（${new Date().getFullYear()}年）
+- 未来逐年拆解（从${new Date().getFullYear() + 1}年起，连续5年，每年含：年度主题、道路方向、关键行动、成长标志）
 
 请用 Markdown 格式输出完整报告。`;
 }
