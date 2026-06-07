@@ -773,20 +773,33 @@ export default function BirthInputForm() {
             </div>
 
             {/* 打赏区 */}
-            <div className="mt-8 p-4 rounded-xl mx-auto max-w-sm"
+            <div id="donation-section" className="mt-8 p-5 rounded-xl mx-auto max-w-md"
               style={{
                 background: 'linear-gradient(135deg, rgba(201,169,110,0.08), rgba(201,169,110,0.02))',
                 border: '1px solid rgba(201,169,110,0.15)',
               }}
             >
-              <p className="text-sm text-[var(--text-accent)] mb-2">☕ 如果这份报告对你有帮助</p>
-              <p className="text-xs text-[var(--text-secondary)] opacity-60 mb-3">
+              <p className="text-sm text-[var(--text-accent)] mb-1 text-center">☕ 如果这份报告对你有帮助</p>
+              <p className="text-xs text-[var(--text-secondary)] opacity-60 mb-4 text-center">
                 打赏一杯咖啡，支持我们持续精进算法
               </p>
-              <div className="inline-block p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                <p className="text-xs text-[var(--text-secondary)]">请师兄微信转账</p>
-                <p className="text-xs text-[var(--text-accent)] mt-1 font-mono">感谢随喜 🙏</p>
+              <div className="flex justify-center gap-6">
+                <div className="text-center">
+                  <img src="/images/wechat-pay.jpg" alt="微信支付"
+                    className="w-32 h-32 rounded-lg object-cover"
+                    style={{ border: '1px solid rgba(201,169,110,0.2)' }}
+                  />
+                  <p className="text-xs text-[var(--text-secondary)] mt-1.5 opacity-60">微信</p>
+                </div>
+                <div className="text-center">
+                  <img src="/images/alipay-pay.jpg" alt="支付宝"
+                    className="w-32 h-32 rounded-lg object-cover"
+                    style={{ border: '1px solid rgba(201,169,110,0.2)' }}
+                  />
+                  <p className="text-xs text-[var(--text-secondary)] mt-1.5 opacity-60">支付宝</p>
+                </div>
               </div>
+              <p className="text-xs text-[var(--text-accent)] text-center mt-3">感谢随喜 🙏</p>
             </div>
           </div>
         </div>

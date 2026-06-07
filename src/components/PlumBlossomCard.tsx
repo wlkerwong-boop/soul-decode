@@ -355,7 +355,11 @@ export default function PlumBlossomCard({ data, interpretText, interpretLoading 
                           付费 9.9 元解锁完整内容
                         </p>
                       </div>
-                      <button className="btn-gold !w-auto !px-8">
+                      <button className="btn-gold !w-auto !px-8"
+                        onClick={() => {
+                          const donationEl = document.querySelector('#donation-section');
+                          if (donationEl) donationEl.scrollIntoView({ behavior: 'smooth' });
+                        }}>
                         🔓 解锁完整解读 · ¥9.9
                       </button>
                     </div>
