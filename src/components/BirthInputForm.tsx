@@ -464,35 +464,11 @@ export default function BirthInputForm() {
     if (savedAccess) setHasAccess(true);
   }, []);
 
-  // 下载报告（Markdown）
-  const handleDownloadReport = useCallback(() => {
+  // 下载报告（PDF - 通过浏览器打印功能）
+  const handleDownloadPDF = useCallback(() => {
     if (!reportText || !baziData) return;
-    const md = `# 灵魂解码 · 人生使命解读报告
-
-**出生信息**：${inputSummary}
-**八字**：${baziData.pillars.filter(p => p !== '--').join(' / ')}
-**日主**：${baziData.dayMaster}（${baziData.dayMasterElement}）
-**生肖**：${baziData.zodiac}
-
----
-
-${reportText}
-
----
-
-*报告由 灵魂解码 (soul-decode.vercel.app) 生成*
-`;
-
-    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `灵魂解码报告-${baziData.dayMaster}日主.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, [reportText, baziData, inputSummary]);
+    window.print();
+  }, []);
 
   const scrollToSection = useCallback((id: string) => {
     setActiveSection(id);
@@ -726,6 +702,18 @@ ${reportText}
               </div>
             )}
 
+            {/* 封面（只用于打印） */}
+            <div className="report-cover">
+              <div className="cover-title">✦ 灵魂解码</div>
+              <div className="cover-subtitle">你的人生使命解读报告</div>
+              <div className="cover-divider" />
+              <div className="cover-meta">
+                <div>出生信息：{inputSummary}</div>
+                <div>报告编号：{reportId}</div>
+                <div>生成时间：{new Date().toLocaleString('zh-CN')}</div>
+              </div>
+            </div>
+
             {/* 报告内容（在生成中实时更新） */}
             {reportText && (
               <div
@@ -838,9 +826,9 @@ ${reportText}
               <button onClick={handleShare} className="btn-gold flex-1 min-w-[140px]">🖼️ 分享图</button>
               <button onClick={handleShareText} className="btn-gold flex-1 min-w-[140px]">📤 复制文字</button>
               <button onClick={() => window.location.href = '#section-growth'} className="btn-gold flex-1 min-w-[140px]">🌱 成长方案</button>
-              <button onClick={handleDownloadReport} className="btn-gold flex-1 min-w-[140px]"
-                disabled={!reportComplete || !hasAccess}>
-                📥 下载报告
+              <button onClick={handleDownloadPDF} className="btn-gold flex-1 min-w-[140px]"
+                disabled={!reportComplete}>
+                📄 导出PDF
               </button>
               <button onClick={handleReset} className="btn-gold flex-1 min-w-[140px]">🔄 重新</button>
             </div>

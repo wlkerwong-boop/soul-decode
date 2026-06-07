@@ -311,3 +311,177 @@ select.input-gold {
     font-size: 18px;
   }
 }
+
+/* ========================================
+   PDF / 打印样式
+   用户点击"导出PDF"时触发生成
+   ======================================== */
+@media print {
+  /* 隐藏页面上的交互元素 */
+  nav, footer, button, .btn-gold, .tag-pill,
+  .sticky, .cosmic-loader, .cosmic-background,
+  .cosmic-ring, .loading-pulse,
+  #donation-section, #feedback-section,
+  [class*="plum-container"] .btn-gold,
+  [class*="history"],
+  .gold-divider,
+  select, input, textarea,
+  .report-content + *:not(.print-report-area) {
+    display: none !important;
+  }
+
+  /* 基础重置 */
+  * {
+    background: white !important;
+    color: #1a1a2e !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  body {
+    font-family: 'PingFang SC', 'Noto Sans SC', 'Songti SC', 'SimSun', Georgia, serif !important;
+    font-size: 12pt;
+    line-height: 1.8;
+    color: #1a1a2e !important;
+    padding: 0;
+    margin: 0;
+  }
+
+  @page {
+    margin: 2.5cm 2cm 2.5cm 2cm;
+    size: A4;
+  }
+
+  @page :first {
+    margin-top: 3cm;
+  }
+
+  /* 报告内容区域 */
+  .report-content {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .report-content h2 {
+    color: #8b6914 !important;
+    font-size: 18pt !important;
+    font-weight: 700 !important;
+    margin-top: 36pt !important;
+    margin-bottom: 14pt !important;
+    padding-bottom: 6pt !important;
+    border-bottom: 1px solid #d4a843 !important;
+    page-break-after: avoid;
+  }
+
+  .report-content h3 {
+    color: #6b4c0a !important;
+    font-size: 14pt !important;
+    font-weight: 600 !important;
+    margin-top: 24pt !important;
+    margin-bottom: 10pt !important;
+    page-break-after: avoid;
+  }
+
+  .report-content h4 {
+    color: #333 !important;
+    font-size: 12pt !important;
+    font-weight: 600 !important;
+    margin-top: 18pt !important;
+    margin-bottom: 8pt !important;
+  }
+
+  .report-content p {
+    font-size: 11pt !important;
+    line-height: 1.9 !important;
+    margin-bottom: 10pt !important;
+    color: #333 !important;
+    orphans: 3;
+    widows: 3;
+  }
+
+  .report-content strong {
+    color: #8b6914 !important;
+    font-weight: 700 !important;
+  }
+
+  .report-content blockquote {
+    border-left: 3px solid #d4a843 !important;
+    padding-left: 16pt !important;
+    margin: 12pt 0 !important;
+    color: #555 !important;
+    font-style: italic !important;
+  }
+
+  .report-content ul {
+    margin: 8pt 0 14pt 20pt !important;
+  }
+
+  .report-content li {
+    font-size: 11pt !important;
+    line-height: 1.8 !important;
+    margin-bottom: 4pt !important;
+    list-style-type: disc !important;
+    color: #333 !important;
+  }
+
+  /* 封面区 - 报告开头自动生成 */
+  .report-cover {
+    text-align: center;
+    padding-top: 4cm;
+    padding-bottom: 2cm;
+    page-break-after: always;
+  }
+
+  .report-cover .cover-title {
+    font-size: 28pt;
+    font-weight: 700;
+    color: #8b6914;
+    letter-spacing: 4pt;
+    margin-bottom: 20pt;
+  }
+
+  .report-cover .cover-subtitle {
+    font-size: 14pt;
+    color: #555;
+    font-style: italic;
+    margin-bottom: 30pt;
+  }
+
+  .report-cover .cover-meta {
+    font-size: 10pt;
+    color: #888;
+    margin-top: 40pt;
+    line-height: 2;
+  }
+
+  .report-cover .cover-divider {
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #d4a843, transparent) !important;
+    margin: 20pt auto;
+    display: block !important;
+  }
+
+  /* 避免跨页断行 */
+  h2, h3, h4 {
+    page-break-after: avoid;
+  }
+
+  .report-content p {
+    page-break-inside: avoid;
+  }
+
+  /* 每章从新页开始 */
+  .report-content h2 {
+    page-break-before: auto;
+  }
+
+  /* 页脚页码 */
+  @page {
+    @bottom-center {
+      content: counter(page);
+      font-size: 9pt;
+      color: #aaa;
+    }
+  }
+}
