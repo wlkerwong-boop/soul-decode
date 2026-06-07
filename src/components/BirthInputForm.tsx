@@ -145,8 +145,75 @@ export default function BirthInputForm() {
   const [plumBlossomData, setPlumBlossomData] = useState<any>(null);
   const [growthPlanText, setGrowthPlanText] = useState('');
   const [growthPlanLoading, setGrowthPlanLoading] = useState(false);
+  // 白话解读状态
+  const [plumInterpretText, setPlumInterpretText] = useState('');
+  const [plumInterpretLoading, setPlumInterpretLoading] = useState(false);
 
   const abortRef = useRef<AbortController | null>(null);
+
+  // 当八字和梅花数据都可用时，自动生成白话解读
+  useEffect(() => {
+    if (!baziData || !plumBlossomData || plumInterpretLoading || plumInterpretText) return;
+    
+    setPlumInterpretLoading(true);
+    setPlumInterpretText('');
+
+    const body = {
+      birthInfo: inputSummary,
+      pillars: baziData.pillars,
+      dayMaster: baziData.dayMaster,
+      dayMasterElement: baziData.dayMasterElement,
+      elementDistribution: baziData.elementDistribution,
+      zodiac: baziData.zodiac,
+      lifePathNumber: reportMeta?.lifePathNumber || undefined,
+      primaryName: plumBlossomData.primary.name,
+      primaryJudgment: plumBlossomData.primary.judgment,
+      changingName: plumBlossomData.changing?.name || '',
+      changingJudgment: plumBlossomData.changing?.judgment || '',
+      mutualName: plumBlossomData.mutual?.name || '',
+      bodyTrigram: plumBlossomData.bodyTrigram.name,
+      bodyElement: plumBlossomData.bodyTrigram.element,
+      useTrigram: plumBlossomData.useTrigram.name,
+      useElement: plumBlossomData.useTrigram.element,
+      bodyUseRelation: plumBlossomData.bodyUseRelation,
+      movingLine: plumBlossomData.movingLine,
+      sixRelations: plumBlossomData.sixRelations,
+    };
+
+    fetch('/api/plum-blossom-interpret', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error('解读生成失败');
+        const reader = res.body?.getReader();
+        if (!reader) throw new Error('无法读取响应');
+        const decoder = new TextDecoder();
+        let buf = '';
+        let full = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const lines = buf.split('\n');
+          buf = lines.pop() || '';
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue;
+            try {
+              const d = JSON.parse(line.slice(6));
+              if (d.content) { full += d.content; setPlumInterpretText(full); }
+              if (d.done) break;
+            } catch {}
+          }
+        }
+      })
+      .catch((err) => {
+        console.error('白话解读失败:', err);
+        setPlumInterpretText(''); // 失败时清空，让用户手动触发
+      })
+      .finally(() => setPlumInterpretLoading(false));
+  }, [baziData, plumBlossomData]);
 
   const currentProvinceCities = selectedProvince ? CITIES_DB[selectedProvince]?.cities || [] : [];
 
@@ -236,7 +303,14 @@ export default function BirthInputForm() {
       const reportRes = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          baziPillars: baziData.bazi.pillars,
+          plumPrimary: plumBlossomData?.primary?.name,
+          plumChanging: plumBlossomData?.changing?.name,
+          bodyUseRelation: plumBlossomData?.bodyUseRelation,
+          movingLine: plumBlossomData?.movingLine,
+        }),
         signal: abortController.signal,
       });
 
@@ -312,6 +386,8 @@ export default function BirthInputForm() {
     setPlumBlossomData(null);
     setGrowthPlanText('');
     setGrowthPlanLoading(false);
+    setPlumInterpretText('');
+    setPlumInterpretLoading(false);
     setError(null);
     setStep('form');
     setShowHistory(false);
@@ -523,7 +599,12 @@ export default function BirthInputForm() {
           {/* Section: 梅花易数 */}
           {plumBlossomData && (
             <section id="section-plum">
-              <PlumBlossomCard data={plumBlossomData} />
+              <PlumBlossomCard
+                data={plumBlossomData}
+                interpretText={plumInterpretText}
+                interpretLoading={plumInterpretLoading}
+                hasAccess={true} // 支付接入后改为动态值
+              />
             </section>
           )}
 

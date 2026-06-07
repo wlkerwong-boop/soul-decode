@@ -67,13 +67,25 @@ function getConfig() {
   return configs[provider] || configs.deepseek;
 }
 
-function buildReportPrompt(userContext: string): string {
+function buildReportPrompt(userContext: string, baziPillars?: string[], plumPrimary?: string, plumChanging?: string, bodyUseRelation?: string, movingLine?: number): string {
   const CY = new Date().getFullYear(); // current year
+  let crossValidateSection = '';
+
+  if (baziPillars && baziPillars.length > 0 && plumPrimary) {
+    crossValidateSection = `\n\n⚠️ **交叉验证要求**：以下有多个方法得出的分析结果，你必须在报告开头（开篇第一段）明确融合这些方法的共同指向：
+- 八字：${baziPillars.filter(p => p !== '--').join(' / ')}
+- 梅花易数：本卦「${plumPrimary}」${plumChanging ? `→ 变卦「${plumChanging}」` : ''}，体用关系：${bodyUseRelation || '未知'}，动爻：第${movingLine}爻
+- 生命路径数字（见下文）
+
+**你的任务是**：在开篇用一个段落指出这些方法共同揭示的**核心主题**。例如："你的八字、梅花卦象与生命路径数字三者指向同一个核心主题——……"。不用逐条罗列数据，而是提炼出**共性结论**。`;
+  }
+
   return `请根据以下用户信息，生成一份完整的【灵魂解码】人生使命解读报告。
 
 ${userContext}
 
 ⚠️ 时间基准：当前为 ${CY}年。第六模块中：过去截止到 ${CY-1}年，当下为 ${CY}年，未来从 ${CY+1}年起拆解5年。
+${crossValidateSection}
 
 你必须严格按照以下6个模块的结构输出，每个模块需保持独立的角色语气。每个模块的篇幅不得少于400字。
 
@@ -148,7 +160,8 @@ ${userContext}
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { year, month, day, hour, location, gender, timezone } = body;
+    const { year, month, day, hour, location, gender, timezone,
+      baziPillars, plumPrimary, plumChanging, bodyUseRelation, movingLine } = body;
 
     if (!year || !month || !day) {
       return new Response(JSON.stringify({ error: '请填写完整的出生日期' }), {
@@ -175,7 +188,7 @@ export async function POST(request: NextRequest) {
       timezone ? `时区：${timezone}` : '',
     ].filter(Boolean).join('\n');
 
-    const prompt = buildReportPrompt(userContextLines);
+    const prompt = buildReportPrompt(userContextLines, baziPillars, plumPrimary, plumChanging, bodyUseRelation, movingLine);
 
     // 调用 DeepSeek streaming API
     const response = await fetch(`${config.baseUrl}/chat/completions`, {

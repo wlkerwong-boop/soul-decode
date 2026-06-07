@@ -29,9 +29,15 @@ interface PlumBlossomDisplayProps {
     sixRelations: string[];
     interpretation: string;
   };
+  /** 白话解读文本（流式加载） */
+  interpretText?: string;
+  /** 是否正在加载白话解读 */
+  interpretLoading?: boolean;
+  /** 是否已付费解锁完整版（默认true，支付接入后改） */
+  hasAccess?: boolean;
 }
 
-export default function PlumBlossomCard({ data }: PlumBlossomDisplayProps) {
+export default function PlumBlossomCard({ data, interpretText, interpretLoading = false, hasAccess = true }: PlumBlossomDisplayProps) {
   const { primary, changing, mutual, bodyTrigram, useTrigram, bodyUseRelation, movingLine, sixRelations } = data;
 
   // 体用生克颜色
@@ -260,6 +266,105 @@ export default function PlumBlossomCard({ data }: PlumBlossomDisplayProps) {
         <p className="text-[var(--text-primary)] mt-2 leading-relaxed text-center italic">
           「{primary.judgment}」
         </p>
+      </div>
+
+      {/* 白话解卦（AI生成） */}
+      <div className="mt-6">
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center gap-2 mb-1">
+            <span className="text-xl">🗣️</span>
+            <h3 className="text-lg font-bold text-[var(--text-accent)] tracking-wider">
+              白话解卦
+            </h3>
+            <span className="text-xl">🗣️</span>
+          </div>
+          <p className="text-xs text-[var(--text-secondary)] opacity-60">
+            把卦象翻译成你听得懂的生活语言
+            {!hasAccess && <span className="text-[var(--text-accent)] ml-1">· 免费预览部分</span>}
+          </p>
+        </div>
+
+        {interpretLoading && !interpretText && (
+          <div className="flex flex-col items-center py-12">
+            <div className="cosmic-loader mb-4" style={{ width: 60, height: 60 }}>
+              <div className="cosmic-ring cosmic-ring-3" style={{ width: '100%', height: '100%' }} />
+              <div className="cosmic-center text-xs">✦</div>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)] opacity-60">正在解读卦象...</p>
+          </div>
+        )}
+
+        {interpretText && (
+          <div
+            className="rounded-xl p-5 text-sm leading-relaxed space-y-4"
+            style={{
+              background: 'linear-gradient(135deg, rgba(201,169,110,0.05), rgba(201,169,110,0.01))',
+              border: '1px solid rgba(201,169,110,0.1)',
+            }}
+          >
+            {/* 免费用户只显示前3-5句 */}
+
+            {(() => {
+              // 按段落拆分
+              const sections = interpretText.split('\n').filter(Boolean);
+              const previewCount = 4; // 前4个段落/标题作为免费预览
+
+              if (hasAccess) {
+                // 已付费：显示完整内容
+                return (
+                  <div className="interpret-content">
+                    {sections.map((para, i) => {
+                      if (para.startsWith('### ')) {
+                        return <h4 key={i} className="text-[var(--text-accent)] font-semibold mt-4 mb-2">{para.replace('### ', '')}</h4>;
+                      }
+                      if (para.startsWith('## ')) {
+                        return <h3 key={i} className="text-[var(--text-accent-light)] font-bold text-base mt-6 mb-3">{para.replace('## ', '')}</h3>;
+                      }
+                      if (para.trim() === '') return null;
+                      return <p key={i} className="text-[var(--text-secondary)] leading-relaxed">{para}</p>;
+                    })}
+                    {interpretLoading && (
+                      <span className="inline-block w-2 h-4 bg-[var(--text-accent)] ml-1 animate-pulse" />
+                    )}
+                  </div>
+                );
+              } else {
+                // 未付费：只显示预览
+                const previewSections = sections.slice(0, previewCount);
+                return (
+                  <div>
+                    {previewSections.map((para, i) => {
+                      if (para.startsWith('### ')) {
+                        return <h4 key={i} className="text-[var(--text-accent)] font-semibold mt-4 mb-2">{para.replace('### ', '')}</h4>;
+                      }
+                      if (para.startsWith('## ')) {
+                        return <h3 key={i} className="text-[var(--text-accent-light)] font-bold text-base mt-6 mb-3">{para.replace('## ', '')}</h3>;
+                      }
+                      if (para.trim() === '') return null;
+                      return <p key={i} className="text-[var(--text-secondary)] leading-relaxed">{para}</p>;
+                    })}
+
+                    {/* 付费墙 */}
+                    <div className="mt-6 pt-4 border-t border-[var(--border-color)] text-center">
+                      <div className="mb-3">
+                        <span className="text-2xl">🔒</span>
+                        <p className="text-sm text-[var(--text-accent)] font-medium mt-1">
+                          完整版解读包含：本卦详解 · 动爻破局 · 变卦行动指南 · 体用生克 · 一句话总结
+                        </p>
+                        <p className="text-xs text-[var(--text-secondary)] opacity-60 mt-1">
+                          付费 9.9 元解锁完整内容
+                        </p>
+                      </div>
+                      <button className="btn-gold !w-auto !px-8">
+                        🔓 解锁完整解读 · ¥9.9
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+            })()}
+          </div>
+        )}
       </div>
     </div>
   );
