@@ -7,6 +7,7 @@ import LifeEnergyChart from './LifeEnergyChart';
 import ReportShareCard from './ReportShareCard';
 import PlumBlossomCard from './PlumBlossomCard';
 import PromptTemplates from './PromptTemplates';
+import FeedbackForm from './FeedbackForm';
 
 const CITIES_DB = (citiesData as any).cities as Record<string, { cities: string[]; tags: string[]; description: string }>;
 
@@ -153,7 +154,7 @@ export default function BirthInputForm() {
   const [freeCode, setFreeCode] = useState('');
   const [codeStatus, setCodeStatus] = useState<{ valid: boolean; message: string } | null>(null);
   const [codeChecking, setCodeChecking] = useState(false);
-  const [hasAccess, setHasAccess] = useState(false); // 是否解锁（付费/免费码）
+  const [hasAccess, setHasAccess] = useState(true); // 测试期间全免费，后续接入付费
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -914,6 +915,14 @@ ${reportText}
                 )}
               </div>
             )}
+
+            {/* 反馈区（测试数据收集） */}
+            <FeedbackForm
+              reportId={reportId}
+              province={selectedProvince}
+              city={formData.location}
+              birthYear={formData.year}
+            />
           </div>
         </div>
       )}
