@@ -148,6 +148,11 @@ export default function BirthInputForm() {
   // 白话解读状态
   const [plumInterpretText, setPlumInterpretText] = useState('');
   const [plumInterpretLoading, setPlumInterpretLoading] = useState(false);
+  // 免费码
+  const [freeCode, setFreeCode] = useState('');
+  const [codeStatus, setCodeStatus] = useState<{ valid: boolean; message: string } | null>(null);
+  const [codeChecking, setCodeChecking] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false); // 是否解锁（付费/免费码）
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -388,6 +393,8 @@ export default function BirthInputForm() {
     setGrowthPlanLoading(false);
     setPlumInterpretText('');
     setPlumInterpretLoading(false);
+    setCodeStatus(null);
+    setFreeCode('');
     setError(null);
     setStep('form');
     setShowHistory(false);
@@ -424,6 +431,66 @@ export default function BirthInputForm() {
       navigator.clipboard.writeText(text).catch(() => {});
     }
   }, [baziData, lifeEnergyData]);
+
+  // 免费码验证
+  const handleVerifyCode = useCallback(async () => {
+    if (!freeCode.trim()) return;
+    setCodeChecking(true);
+    setCodeStatus(null);
+    try {
+      const res = await fetch('/api/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: freeCode.trim().toUpperCase() }),
+      });
+      const data = await res.json();
+      setCodeStatus(data);
+      if (data.valid) {
+        setHasAccess(true);
+        localStorage.setItem('soul-decode-access', 'free');
+      }
+    } catch {
+      setCodeStatus({ valid: false, message: '验证失败，请重试' });
+    } finally {
+      setCodeChecking(false);
+    }
+  }, [freeCode]);
+
+  // 检查本地存储的访问权限
+  useEffect(() => {
+    const savedAccess = localStorage.getItem('soul-decode-access');
+    if (savedAccess) setHasAccess(true);
+  }, []);
+
+  // 下载报告（Markdown）
+  const handleDownloadReport = useCallback(() => {
+    if (!reportText || !baziData) return;
+    const md = `# 灵魂解码 · 人生使命解读报告
+
+**出生信息**：${inputSummary}
+**八字**：${baziData.pillars.filter(p => p !== '--').join(' / ')}
+**日主**：${baziData.dayMaster}（${baziData.dayMasterElement}）
+**生肖**：${baziData.zodiac}
+
+---
+
+${reportText}
+
+---
+
+*报告由 灵魂解码 (soul-decode.vercel.app) 生成*
+`;
+
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `灵魂解码报告-${baziData.dayMaster}日主.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [reportText, baziData, inputSummary]);
 
   const scrollToSection = useCallback((id: string) => {
     setActiveSection(id);
@@ -603,7 +670,7 @@ export default function BirthInputForm() {
                 data={plumBlossomData}
                 interpretText={plumInterpretText}
                 interpretLoading={plumInterpretLoading}
-                hasAccess={true} // 支付接入后改为动态值
+                hasAccess={hasAccess}
               />
             </section>
           )}
@@ -769,8 +836,17 @@ export default function BirthInputForm() {
               <button onClick={handleShare} className="btn-gold flex-1 min-w-[140px]">🖼️ 分享图</button>
               <button onClick={handleShareText} className="btn-gold flex-1 min-w-[140px]">📤 复制文字</button>
               <button onClick={() => window.location.href = '#section-growth'} className="btn-gold flex-1 min-w-[140px]">🌱 成长方案</button>
+              <button onClick={handleDownloadReport} className="btn-gold flex-1 min-w-[140px]"
+                disabled={!reportComplete || !hasAccess}>
+                📥 下载报告
+              </button>
               <button onClick={handleReset} className="btn-gold flex-1 min-w-[140px]">🔄 重新</button>
             </div>
+            {!hasAccess && reportComplete && (
+              <p className="text-xs text-[var(--text-secondary)] opacity-60 mt-2">
+                付费或输入免费码后可下载完整报告
+              </p>
+            )}
 
             {/* 打赏区 */}
             <div id="donation-section" className="mt-8 p-5 rounded-xl mx-auto max-w-md"
@@ -801,6 +877,42 @@ export default function BirthInputForm() {
               </div>
               <p className="text-xs text-[var(--text-accent)] text-center mt-3">感谢随喜 🙏</p>
             </div>
+
+            {/* 免费码输入 */}
+            {!hasAccess && (
+              <div className="mt-4 rounded-xl p-4 mx-auto max-w-md text-center"
+                style={{
+                  border: '1px dashed rgba(201,169,110,0.2)',
+                }}
+              >
+                <p className="text-xs text-[var(--text-secondary)] mb-2 opacity-70">
+                  或者输入朋友给你的免费码
+                </p>
+                <div className="flex gap-2 max-w-xs mx-auto">
+                  <input
+                    className="input-gold flex-1 text-sm text-center uppercase"
+                    placeholder="SOUL-GIFT-XXX"
+                    value={freeCode}
+                    onChange={e => setFreeCode(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleVerifyCode()}
+                  />
+                  <button onClick={handleVerifyCode} disabled={codeChecking || !freeCode.trim()}
+                    className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
+                    style={{
+                      background: codeChecking ? 'rgba(201,169,110,0.2)' : 'linear-gradient(135deg, #c9a96e, #b8944e)',
+                      color: codeChecking ? '#c9a96e' : '#0a0a0f',
+                    }}
+                  >
+                    {codeChecking ? '验证中' : '验证'}
+                  </button>
+                </div>
+                {codeStatus && (
+                  <p className={`text-xs mt-2 ${codeStatus.valid ? 'text-green-400' : 'text-red-400'}`}>
+                    {codeStatus.message}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

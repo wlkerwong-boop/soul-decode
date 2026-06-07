@@ -59,6 +59,9 @@ export default function Home() {
           <div className="max-w-5xl mx-auto text-center text-sm text-[var(--text-secondary)] opacity-40">
             <p>灵魂解码 · 用AI看见真实的自己</p>
             <p className="mt-1">你的出生信息仅用于生成本次报告，不会存储</p>
+            <p className="mt-2">
+              <a href="/admin" className="hover:text-[var(--text-accent)] transition-colors opacity-30 hover:opacity-60">⚙️ 管理</a>
+            </p>
           </div>
         </footer>
       </div>
