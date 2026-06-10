@@ -8,7 +8,7 @@
  */
 
 // 报告类型
-export type ReportType = 'health' | 'bazi' | 'mbti' | 'astrology';
+export type ReportType = 'health' | 'bazi' | 'mbti' | 'astrology' | 'tcm';
 
 // 报告元数据
 export interface ReportMeta {
@@ -79,6 +79,7 @@ export function getReportTypeLabel(type: ReportType): string {
     bazi: '八字命理·深度解读',
     mbti: 'MBTI性格测试',
     astrology: '星座占星·AI解读',
+    tcm: '中医辨证·诊断报告',
   };
   return labels[type] || type;
 }
