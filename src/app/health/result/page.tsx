@@ -6,6 +6,7 @@ import Link from 'next/link';
 import CosmicBackground from '@/components/CosmicBackground';
 import TTSReader from '@/components/TTSReader';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import SaveToArchive from '@/components/SaveToArchive';
 
 export default function HealthResultPage() {
   const router = useRouter();
@@ -87,6 +88,13 @@ export default function HealthResultPage() {
           <div className="p-6 md:p-10 rounded-xl border border-[var(--border-color)] bg-black/40 backdrop-blur-sm mb-8">
             <MarkdownRenderer content={content} />
           </div>
+
+          {/* 保存到健康档案 */}
+          <SaveToArchive
+            content={content}
+            reportType="health"
+            defaultTitle="身心健康·AI辨证分析"
+          />
 
           {/* 操作按钮 */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">

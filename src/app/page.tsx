@@ -15,6 +15,7 @@ export default function Home() {
             <span className="text-[var(--text-accent)] text-xl font-bold tracking-wider">✦ 灵魂解码</span>
           </div>
           <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
+            <a href="/my" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">📁 档案</a>
             <a href="/health" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">身心健康</a>
             <a href="/mbti" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">MBTI性格</a>
             <a href="/astrology" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">星座占星</a>
