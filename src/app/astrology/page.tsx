@@ -1,0 +1,134 @@
+'use client';
+
+import { useState } from 'react';
+import { getZodiacByDate, getChineseZodiac, getChineseZodiacElement, zodiacSigns } from '@/lib/astrology';
+import CosmicBackground from '@/components/CosmicBackground';
+
+export default function AstrologyPage() {
+  const [year, setYear] = useState('');
+  const [month, setMonth] = useState('');
+  const [day, setDay] = useState('');
+  const [result, setResult] = useState<{ zodiac: any; chineseZodiac: string; element: string } | null>(null);
+  const [showAll, setShowAll] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const m = parseInt(month);
+    const d = parseInt(day);
+    const y = parseInt(year);
+    if (m < 1 || m > 12 || d < 1 || d > 31 || y < 1900 || y > 2100) return;
+    const zodiac = getZodiacByDate(m, d);
+    setResult({
+      zodiac,
+      chineseZodiac: getChineseZodiac(y),
+      element: getChineseZodiacElement(y),
+    });
+  };
+
+  return (
+    <div className="relative min-h-screen">
+      <CosmicBackground />
+      <div className="relative z-10 py-16 px-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <span className="tag-pill text-xs tracking-widest mb-4 inline-block">占星学</span>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-4">
+              星座与生肖
+              <br />
+              <span className="text-[var(--text-accent)]">星辰之书</span>
+            </h1>
+            <p className="text-[var(--text-secondary)]">
+              探索你的太阳星座、生肖属相和五行属性
+            </p>
+          </div>
+
+          {/* Input Form */}
+          <div className="max-w-md mx-auto mb-12">
+            <form onSubmit={handleSubmit} className="p-6 rounded-xl border border-[var(--border-color)] bg-black/30">
+              <div className="text-sm text-[var(--text-secondary)] mb-4 text-center">输入你的出生日期</div>
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div>
+                  <label className="text-xs text-[var(--text-secondary)] block mb-1">年</label>
+                  <input type="number" value={year} onChange={e => setYear(e.target.value)} placeholder="1990" className="w-full p-2.5 rounded-lg bg-black/40 border border-[var(--border-color)] text-white text-center" />
+                </div>
+                <div>
+                  <label className="text-xs text-[var(--text-secondary)] block mb-1">月</label>
+                  <input type="number" value={month} onChange={e => setMonth(e.target.value)} placeholder="1" min={1} max={12} className="w-full p-2.5 rounded-lg bg-black/40 border border-[var(--border-color)] text-white text-center" />
+                </div>
+                <div>
+                  <label className="text-xs text-[var(--text-secondary)] block mb-1">日</label>
+                  <input type="number" value={day} onChange={e => setDay(e.target.value)} placeholder="1" min={1} max={31} className="w-full p-2.5 rounded-lg bg-black/40 border border-[var(--border-color)] text-white text-center" />
+                </div>
+              </div>
+              <button type="submit" className="w-full py-2.5 bg-[var(--text-accent)] text-black font-bold rounded-lg hover:opacity-90 transition-all">
+                解析我的星座
+              </button>
+            </form>
+          </div>
+
+          {/* Result */}
+          {result && result.zodiac && (
+            <div className="space-y-8 mb-12">
+              <div className="text-center">
+                <div className="text-6xl mb-2">{result.zodiac.symbol}</div>
+                <div className="text-3xl font-bold text-[var(--text-accent)] mb-1">{result.zodiac.name}</div>
+                <div className="text-[var(--text-secondary)]">{result.zodiac.englishName}</div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: '日期范围', value: result.zodiac.dateRange },
+                  { label: '星座属性', value: result.zodiac.element + '象' },
+                  { label: '属相', value: result.chineseZodiac + '年' },
+                  { label: '五行', value: result.element },
+                  { label: '模式', value: result.zodiac.quality + '星座' },
+                  { label: '守护星', value: result.zodiac.rulingPlanet },
+                ].map((item, i) => (
+                  <div key={i} className="p-4 rounded-lg border border-[var(--border-color)] bg-black/20 text-center">
+                    <div className="text-xs text-[var(--text-secondary)] mb-1">{item.label}</div>
+                    <div className="font-bold text-sm">{item.value}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-8 rounded-xl border border-[var(--border-color)] bg-black/30 backdrop-blur-sm">
+                <h2 className="text-xl font-bold mb-4 text-[var(--text-accent)]">性格特质</h2>
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {result.zodiac.traits.map((t: string, i: number) => (
+                    <span key={i} className="px-3 py-1 rounded-lg bg-[var(--text-accent)]/10 border border-[var(--text-accent)]/20 text-sm">{t}</span>
+                  ))}
+                </div>
+                <p className="text-[var(--text-secondary)] leading-relaxed">{result.zodiac.description}</p>
+              </div>
+            </div>
+          )}
+
+          {/* All Zodiac Signs Gallery */}
+          <div className="text-center mb-6">
+            <button onClick={() => setShowAll(!showAll)} className="text-sm text-[var(--text-accent)] hover:underline">
+              {showAll ? '收起' : '查看全部十二星座'}
+            </button>
+          </div>
+
+          {showAll && (
+            <div className="grid md:grid-cols-3 gap-4">
+              {zodiacSigns.map((z, i) => (
+                <div key={i} className="p-4 rounded-lg border border-[var(--border-color)] bg-black/20 hover:border-[var(--text-accent)] transition-all cursor-pointer">
+                  <div className="text-2xl mb-1">{z.symbol}</div>
+                  <div className="font-bold text-sm text-[var(--text-accent)]">{z.name}</div>
+                  <div className="text-xs text-[var(--text-secondary)]">{z.dateRange}</div>
+                  <div className="text-xs text-[var(--text-secondary)] mt-1">{z.element}象 · {z.quality} · {z.rulingPlanet}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="text-center mt-12">
+            <a href="/" className="text-sm text-[var(--text-accent)] hover:underline">← 返回首页</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
