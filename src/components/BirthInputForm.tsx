@@ -8,6 +8,7 @@ import ReportShareCard from './ReportShareCard';
 import PlumBlossomCard from './PlumBlossomCard';
 import PromptTemplates from './PromptTemplates';
 import FeedbackForm from './FeedbackForm';
+import TTSReader from './TTSReader';
 
 const CITIES_DB = (citiesData as any).cities as Record<string, { cities: string[]; tags: string[]; description: string }>;
 
@@ -671,6 +672,12 @@ export default function BirthInputForm() {
 
           {/* Section 3: AI报告（流式） */}
           <section id="section-report">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold">📜 灵魂解码报告</h2>
+              {reportText && reportComplete && (
+                <TTSReader text={reportText.replace(/<[^>]+>/g, '').replace(/#{1,6}\s/g, '').replace(/\*\*/g, '').replace(/\n{2,}/g, '，')} label="🎧 听完整报告" />
+              )}
+            </div>
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-2 mb-2">
                 <span className="text-2xl">📜</span>

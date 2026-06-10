@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { getZodiacByDate, getChineseZodiac, getChineseZodiacElement, zodiacSigns } from '@/lib/astrology';
 import CosmicBackground from '@/components/CosmicBackground';
+import TTSReader from '@/components/TTSReader';
 
 export default function AstrologyPage() {
   const [year, setYear] = useState('');
@@ -10,6 +11,9 @@ export default function AstrologyPage() {
   const [day, setDay] = useState('');
   const [result, setResult] = useState<{ zodiac: any; chineseZodiac: string; element: string } | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const [aiContent, setAiContent] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,6 +27,39 @@ export default function AstrologyPage() {
       chineseZodiac: getChineseZodiac(y),
       element: getChineseZodiacElement(y),
     });
+    setAiContent(null);
+    setAiError(null);
+  };
+
+  const generateAIInterpretation = async () => {
+    if (!result?.zodiac || aiLoading) return;
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const res = await fetch('/api/astrology-interpret', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          year: parseInt(year),
+          month: parseInt(month),
+          day: parseInt(day),
+          zodiacName: result.zodiac.name,
+          zodiacEnglish: result.zodiac.englishName,
+          element: result.zodiac.element,
+          quality: result.zodiac.quality,
+          rulingPlanet: result.zodiac.rulingPlanet,
+          chineseZodiac: result.chineseZodiac,
+          chineseElement: result.element,
+        }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setAiContent(data.content);
+    } catch (err: any) {
+      setAiError(err.message);
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   return (
@@ -30,17 +67,13 @@ export default function AstrologyPage() {
       <CosmicBackground />
       <div className="relative z-10 py-16 px-6">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
           <div className="text-center mb-12">
             <span className="tag-pill text-xs tracking-widest mb-4 inline-block">占星学</span>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-4">
-              星座与生肖
-              <br />
+              星座与生肖<br />
               <span className="text-[var(--text-accent)]">星辰之书</span>
             </h1>
-            <p className="text-[var(--text-secondary)]">
-              探索你的太阳星座、生肖属相和五行属性
-            </p>
+            <p className="text-[var(--text-secondary)]">探索你的太阳星座、生肖属相和五行属性</p>
           </div>
 
           {/* Input Form */}
@@ -61,9 +94,7 @@ export default function AstrologyPage() {
                   <input type="number" value={day} onChange={e => setDay(e.target.value)} placeholder="1" min={1} max={31} className="w-full p-2.5 rounded-lg bg-black/40 border border-[var(--border-color)] text-white text-center" />
                 </div>
               </div>
-              <button type="submit" className="w-full py-2.5 bg-[var(--text-accent)] text-black font-bold rounded-lg hover:opacity-90 transition-all">
-                解析我的星座
-              </button>
+              <button type="submit" className="w-full py-2.5 bg-[var(--text-accent)] text-black font-bold rounded-lg hover:opacity-90 transition-all">解析我的星座</button>
             </form>
           </div>
 
@@ -92,14 +123,51 @@ export default function AstrologyPage() {
                 ))}
               </div>
 
+              {/* Description with TTS */}
               <div className="p-8 rounded-xl border border-[var(--border-color)] bg-black/30 backdrop-blur-sm">
-                <h2 className="text-xl font-bold mb-4 text-[var(--text-accent)]">性格特质</h2>
+                <div className="flex justify-between items-start mb-4">
+                  <h2 className="text-xl font-bold text-[var(--text-accent)]">性格特质</h2>
+                  <TTSReader text={`你是${result.zodiac.name}。${result.zodiac.description}你的性格特质包括：${result.zodiac.traits.join('、')}。`} label="听描述" />
+                </div>
                 <div className="flex flex-wrap gap-2 mb-6">
                   {result.zodiac.traits.map((t: string, i: number) => (
                     <span key={i} className="px-3 py-1 rounded-lg bg-[var(--text-accent)]/10 border border-[var(--text-accent)]/20 text-sm">{t}</span>
                   ))}
                 </div>
                 <p className="text-[var(--text-secondary)] leading-relaxed">{result.zodiac.description}</p>
+              </div>
+
+              {/* AI Deep Interpretation */}
+              <div className="p-8 rounded-xl border border-[var(--text-accent)]/30 bg-[var(--text-accent)]/5 backdrop-blur-sm">
+                <div className="flex justify-between items-start mb-4">
+                  <h2 className="text-xl font-bold text-[var(--text-accent)]">AI 占星解读</h2>
+                  {aiContent && <TTSReader text={aiContent.replace(/#{1,6}\s/g, '').replace(/\*\*/g, '').replace(/\n/g, '，')} label="听解读" />}
+                </div>
+                {!aiContent && !aiLoading && (
+                  <div className="text-center py-6">
+                    <p className="text-sm text-[var(--text-secondary)] mb-4">让AI结合你的星座、生肖和五行，生成一份深度的占星解读</p>
+                    <button onClick={generateAIInterpretation} className="px-6 py-3 bg-[var(--text-accent)] text-black font-bold rounded-lg hover:opacity-90 transition-all">
+                      生成AI占星解读
+                    </button>
+                  </div>
+                )}
+                {aiLoading && (
+                  <div className="text-center py-6">
+                    <div className="inline-block w-6 h-6 border-2 border-[var(--text-accent)] border-t-transparent rounded-full animate-spin mb-2" />
+                    <p className="text-sm text-[var(--text-secondary)]">星辰之力正在解读中...</p>
+                  </div>
+                )}
+                {aiError && (
+                  <div className="p-4 rounded-lg bg-red-900/20 border border-red-800/30 text-red-400 text-sm mb-4">
+                    {aiError}
+                    <button onClick={generateAIInterpretation} className="ml-3 underline">重试</button>
+                  </div>
+                )}
+                {aiContent && (
+                  <div className="text-[var(--text-secondary)] leading-relaxed text-sm whitespace-pre-wrap">
+                    {aiContent}
+                  </div>
+                )}
               </div>
             </div>
           )}
