@@ -6,9 +6,9 @@ import CosmicBackground from '@/components/CosmicBackground';
 import TTSReader from '@/components/TTSReader';
 
 export default function AstrologyPage() {
-  const [year, setYear] = useState('');
-  const [month, setMonth] = useState('');
-  const [day, setDay] = useState('');
+  const [year, setYear] = useState('1990');
+  const [month, setMonth] = useState('1');
+  const [day, setDay] = useState('1');
   const [result, setResult] = useState<{ zodiac: any; chineseZodiac: string; element: string } | null>(null);
   const [showAll, setShowAll] = useState(false);
   const [aiContent, setAiContent] = useState<string | null>(null);
@@ -20,7 +20,7 @@ export default function AstrologyPage() {
     const m = parseInt(month);
     const d = parseInt(day);
     const y = parseInt(year);
-    if (m < 1 || m > 12 || d < 1 || d > 31 || y < 1900 || y > 2100) return;
+    if (isNaN(m) || isNaN(d) || isNaN(y) || m < 1 || m > 12 || d < 1 || d > 31 || y < 1900 || y > 2100) return;
     const zodiac = getZodiacByDate(m, d);
     setResult({
       zodiac,
