@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
           { role: 'user', content: prompt },
         ],
         temperature: 0.85,
-        max_tokens: 6000,
+        max_tokens: 8000,
         stream: true,
       }),
     });
