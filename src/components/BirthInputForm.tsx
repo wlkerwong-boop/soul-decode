@@ -155,7 +155,7 @@ export default function BirthInputForm() {
   const [freeCode, setFreeCode] = useState('');
   const [codeStatus, setCodeStatus] = useState<{ valid: boolean; message: string } | null>(null);
   const [codeChecking, setCodeChecking] = useState(false);
-  const [hasAccess, setHasAccess] = useState(true); // 测试期间全免费，后续接入付费
+  const [hasAccess, setHasAccess] = useState(false); // 默认需要免费码或打赏解锁，验证通过后 localStorage 记住
 
   const abortRef = useRef<AbortController | null>(null);
 
