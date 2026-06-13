@@ -217,6 +217,9 @@ export default function TCMPage() {
             <Link href="/astrology" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
               星座占星
             </Link>
+            <Link href="/dharma" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+              ☸ 法藏
+            </Link>
             <span className="opacity-50 hidden md:inline">·</span>
             <span className="opacity-50 hidden md:inline">倪海厦 · 人纪课程</span>
           </div>

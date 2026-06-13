@@ -19,6 +19,8 @@ export default function Home() {
             <a href="/health" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">身心健康</a>
             <a href="/mbti" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">MBTI性格</a>
             <a href="/astrology" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">星座占星</a>
+            <a href="/tcm" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">中医通鉴</a>
+            <a href="/dharma" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">☸ 法藏</a>
             <span className="opacity-50 hidden md:inline">·</span>
             <span className="opacity-50 hidden md:inline">八字排盘 · 能量K线 · AI深度解读</span>
           </div>
