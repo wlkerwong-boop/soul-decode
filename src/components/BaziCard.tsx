@@ -47,7 +47,7 @@ export default function BaziCard({
           </h2>
           <span className="text-2xl">🔮</span>
         </div>
-        <p className="text-sm text-[var(--text-secondary)] opacity-70">
+        <p className="text-sm text-[var(--text-secondary)]">
           基于真实天干地支算法排盘 · {zodiac}年 · 日主{dayMaster}（{dayMasterElement}）
         </p>
       </div>
@@ -73,7 +73,7 @@ export default function BaziCard({
                 borderColor: `${color}44`,
               }}
             >
-              <div className="text-xs text-[var(--text-secondary)] opacity-60 uppercase tracking-wider mb-2">
+              <div className="text-xs text-[var(--text-secondary)] uppercase tracking-wider mb-2">
                 {PILLAR_NAMES[i]}
                 {i === 2 && <span className="text-[var(--text-accent)] ml-1">★</span>}
               </div>
@@ -119,7 +119,7 @@ export default function BaziCard({
               </div>
 
               {/* 纳音 */}
-              <div className="text-[10px] text-[var(--text-secondary)] opacity-50">
+              <div className="text-[10px] text-[var(--text-secondary)]">
                 {nayin[i]}
               </div>
             </div>
@@ -129,7 +129,7 @@ export default function BaziCard({
 
       {/* 五行分布 */}
       <div className="max-w-xl mx-auto mb-8">
-        <h3 className="text-sm text-[var(--text-secondary)] mb-3 text-center opacity-70">
+        <h3 className="text-sm text-[var(--text-secondary)] mb-3 text-center">
           五行分布
         </h3>
         <div className="flex justify-center gap-4">
@@ -161,7 +161,7 @@ export default function BaziCard({
                 <div className="text-xs font-bold" style={{ color }}>
                   {element}
                 </div>
-                <div className="text-[10px] text-[var(--text-secondary)] opacity-50">
+                <div className="text-[10px] text-[var(--text-secondary)]">
                   {count}次
                 </div>
               </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getUserReports, getReportTypeLabel, isAdminPassword, getPresetCases, type ReportMeta } from '@/lib/report-store';
-import CosmicBackground from '@/components/CosmicBackground';
+
 
 export default function MyPage() {
   const router = useRouter();
@@ -45,7 +45,6 @@ export default function MyPage() {
   if (!loggedIn) {
     return (
       <div className="relative min-h-screen">
-        <CosmicBackground />
         <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
           <div className="max-w-md w-full text-center">
             <div className="text-4xl mb-4">🔐</div>
@@ -79,7 +78,6 @@ export default function MyPage() {
 
   return (
     <div className="relative min-h-screen">
-      <CosmicBackground />
       <div className="relative z-10 py-16 px-6">
         <div className="max-w-4xl mx-auto">
           {/* Header */}

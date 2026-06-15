@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { mbtiQuestions, calculateMBTI, getDimensionScore } from '@/data/mbti-questions';
-import CosmicBackground from '@/components/CosmicBackground';
+
 
 export default function MBTIPage() {
   const router = useRouter();
@@ -33,7 +33,6 @@ export default function MBTIPage() {
   if (showStart) {
     return (
       <div className="relative min-h-screen">
-        <CosmicBackground />
         <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
           <div className="max-w-2xl text-center">
             <span className="tag-pill text-xs tracking-widest mb-6 inline-block">心理学测评</span>
@@ -67,7 +66,6 @@ export default function MBTIPage() {
 
   return (
     <div className="relative min-h-screen">
-      <CosmicBackground />
       <div className="relative z-10 min-h-screen flex flex-col">
         <div className="w-full h-1 bg-black/30">
           <div className="h-full bg-[var(--text-accent)] transition-all duration-300" style={{ width: progress + '%' }} />

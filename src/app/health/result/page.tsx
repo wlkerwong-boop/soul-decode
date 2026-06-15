@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import CosmicBackground from '@/components/CosmicBackground';
+
 import TTSReader from '@/components/TTSReader';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import SaveToArchive from '@/components/SaveToArchive';
@@ -44,7 +44,6 @@ export default function HealthResultPage() {
   if (loading) {
     return (
       <div className="relative min-h-screen flex items-center justify-center">
-        <CosmicBackground />
         <div className="relative z-10 text-center">
           <div className="cosmic-loader mx-auto mb-6">
             <div className="cosmic-ring cosmic-ring-1" />
@@ -62,7 +61,6 @@ export default function HealthResultPage() {
 
   return (
     <div className="relative min-h-screen">
-      <CosmicBackground />
       <div className="relative z-10 gradient-bg min-h-screen py-12 px-6">
         <div className="max-w-3xl mx-auto">
           {/* 页面标题 */}

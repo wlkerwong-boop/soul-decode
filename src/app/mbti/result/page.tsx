@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getMBTITypeInfo } from '@/data/mbti-types';
-import CosmicBackground from '@/components/CosmicBackground';
+
 import TTSReader from '@/components/TTSReader';
 
 export default function MBTIResultPage() {
@@ -58,7 +58,6 @@ export default function MBTIResultPage() {
 
   return (
     <div className="relative min-h-screen">
-      <CosmicBackground />
       <div className="relative z-10 py-16 px-6">
         <div className="max-w-3xl mx-auto">
           {/* Result Header */}

@@ -271,7 +271,7 @@ export default function LifeEnergyChart({
           </h2>
           <span className="text-2xl">📈</span>
         </div>
-        <p className="text-sm text-[var(--text-secondary)] opacity-70">
+        <p className="text-sm text-[var(--text-secondary)]">
           从{curve[0]?.year || '出生'}到{curve[curve.length - 1]?.year || '晚年'} · 一生运势曲线
         </p>
       </div>
@@ -284,13 +284,13 @@ export default function LifeEnergyChart({
             border: '1px solid rgba(201,169,110,0.15)',
           }}
         >
-          <div className="text-xs text-[var(--text-secondary)] opacity-60 mb-1">当前能量</div>
+          <div className="text-xs text-[var(--text-secondary)] mb-1">当前能量</div>
           <div className="text-2xl font-bold" style={{
             color: currentEnergy > 65 ? '#4ade80' : currentEnergy < 35 ? '#ef4444' : '#c9a96e'
           }}>
             {currentEnergy}
           </div>
-          <div className="text-xs text-[var(--text-secondary)] opacity-50">{new Date().getFullYear()}年</div>
+          <div className="text-xs text-[var(--text-secondary)]">{new Date().getFullYear()}年</div>
         </div>
         <div className="energy-metric rounded-xl px-5 py-3 text-center"
           style={{
@@ -298,9 +298,9 @@ export default function LifeEnergyChart({
             border: '1px solid rgba(201,169,110,0.15)',
           }}
         >
-          <div className="text-xs text-[var(--text-secondary)] opacity-60 mb-1">平均能量</div>
+          <div className="text-xs text-[var(--text-secondary)] mb-1">平均能量</div>
           <div className="text-2xl font-bold text-[var(--text-accent)]">{averageEnergy}</div>
-          <div className="text-xs text-[var(--text-secondary)] opacity-50">一生总趋势</div>
+          <div className="text-xs text-[var(--text-secondary)]">一生总趋势</div>
         </div>
         <div className="energy-metric rounded-xl px-5 py-3 text-center"
           style={{
@@ -308,9 +308,9 @@ export default function LifeEnergyChart({
             border: '1px solid rgba(201,169,110,0.15)',
           }}
         >
-          <div className="text-xs text-[var(--text-secondary)] opacity-60 mb-1">起运年龄</div>
+          <div className="text-xs text-[var(--text-secondary)] mb-1">起运年龄</div>
           <div className="text-2xl font-bold text-[var(--text-accent)]">{startLuckAge}</div>
-          <div className="text-xs text-[var(--text-secondary)] opacity-50">大运始</div>
+          <div className="text-xs text-[var(--text-secondary)]">大运始</div>
         </div>
       </div>
 

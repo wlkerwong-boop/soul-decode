@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import CosmicBackground from '@/components/CosmicBackground';
 import TTSReader from '@/components/TTSReader';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import SaveToArchive from '@/components/SaveToArchive';
@@ -54,8 +53,7 @@ export default function TcmReportPage() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center">
-        <CosmicBackground />
+      <div className="min-h-screen gradient-bg flex items-center justify-center">
         <div className="relative z-10 text-center">
           <div className="cosmic-loader mx-auto mb-6">
             <div className="cosmic-ring cosmic-ring-1" />
@@ -72,9 +70,8 @@ export default function TcmReportPage() {
   if (!content) return null;
 
   return (
-    <div className={`relative min-h-screen ${printMode ? 'print-mode' : ''}`}>
-      <CosmicBackground />
-      <div className="relative z-10 gradient-bg min-h-screen py-12 px-6">
+    <div className={`min-h-screen gradient-bg ${printMode ? 'print-mode' : ''}`}>
+      <div className="relative z-10 min-h-screen py-12 px-6">
         <div className="max-w-3xl mx-auto">
 
           {/* 页面标题 */}
@@ -106,7 +103,7 @@ export default function TcmReportPage() {
           </div>
 
           {/* 报告内容 */}
-          <div className="p-6 md:p-10 rounded-xl border border-[var(--border-color)] bg-black/40 backdrop-blur-sm mb-8">
+          <div className="card-jade p-6 md:p-10 mb-8">
             <div className="print-report-area">
               <MarkdownRenderer content={content} />
             </div>

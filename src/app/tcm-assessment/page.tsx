@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import CosmicBackground from '@/components/CosmicBackground';
+
 
 // ── 十问数据结构 ──────────────────────────────────────────────
 type QuestionId =
@@ -395,7 +395,6 @@ export default function TcmAssessmentPage() {
   // ── 渲染 ───────────────────────────────────────────────────
   return (
     <div className="relative min-h-screen">
-      <CosmicBackground />
       <div className="relative z-10 gradient-bg min-h-screen py-12 px-4 md:px-6">
         <div className="max-w-3xl mx-auto">
           {/* 页头 */}

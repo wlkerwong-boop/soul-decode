@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import CosmicBackground from '@/components/CosmicBackground';
+
 
 const steps = [
   {
@@ -29,7 +29,6 @@ const steps = [
 export default function HealthPage() {
   return (
     <div className="relative min-h-screen">
-      <CosmicBackground />
       <div className="relative z-10 gradient-bg min-h-screen">
         {/* 导航 */}
         <nav className="flex items-center justify-between px-6 py-5 max-w-5xl mx-auto">

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import CosmicBackground from '@/components/CosmicBackground';
+
 
 // ── 模块数据 ──────────────────────────────────────────────────
 const modules = [
@@ -194,8 +194,6 @@ export default function TCMPage() {
 
   return (
     <div className="relative min-h-screen">
-      <CosmicBackground />
-
       <div className="relative z-10 gradient-bg min-h-screen">
         {/* ── 导航 ──────────────────────────────────────────── */}
         <nav className="flex items-center justify-between px-6 py-5 max-w-5xl mx-auto">

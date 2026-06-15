@@ -509,7 +509,7 @@ export default function BirthInputForm() {
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
-            <p className="text-xs text-[var(--text-secondary)] mt-1 opacity-60">精确到小时可排出完整时柱</p>
+            <p className="text-xs text-[var(--text-secondary)] mt-1">精确到小时可排出完整时柱</p>
           </div>
 
           <div>
@@ -563,7 +563,7 @@ export default function BirthInputForm() {
             {loading ? '正在解码...' : '🔮 开始解码'}
           </button>
 
-          <p className="text-xs text-[var(--text-secondary)] text-center opacity-40 mt-4">
+          <p className="text-xs text-[var(--text-secondary)] text-center mt-4">
             你的出生信息仅用于生成本次报告，不会被存储
           </p>
         </form>
@@ -578,7 +578,7 @@ export default function BirthInputForm() {
             <div className="cosmic-center">✦</div>
           </div>
           <p className="text-[var(--text-accent)] text-lg loading-pulse">正在排盘中...</p>
-          <p className="text-[var(--text-secondary)] text-sm mt-3 opacity-60">八字排盘 · 五行推演</p>
+          <p className="text-[var(--text-secondary)] text-sm mt-3">八字排盘 · 五行推演</p>
         </div>
       )}
 
@@ -690,9 +690,9 @@ export default function BirthInputForm() {
                 <span className="text-2xl">📜</span>
               </div>
               {!reportComplete && reportText ? (
-                <p className="text-xs text-[var(--text-secondary)] opacity-60 animate-pulse">AI正在生成中，逐字呈现...</p>
+                <p className="text-xs text-[var(--text-secondary)] animate-pulse">AI正在生成中，逐字呈现...</p>
               ) : !reportText ? (
-                <p className="text-xs text-[var(--text-secondary)] opacity-60 animate-pulse">AI正在思考，请稍候...</p>
+                <p className="text-xs text-[var(--text-secondary)] animate-pulse">AI正在思考，请稍候...</p>
               ) : null}
             </div>
 
@@ -736,7 +736,7 @@ export default function BirthInputForm() {
                   <div className="cosmic-ring cosmic-ring-3" style={{ width: '100%', height: '100%' }} />
                   <div className="cosmic-center text-sm">✦</div>
                 </div>
-                <p className="text-[var(--text-secondary)] text-sm opacity-60">
+                <p className="text-[var(--text-secondary)] text-sm">
                   正在召唤 AI 解码者...
                 </p>
               </div>
@@ -807,7 +807,7 @@ export default function BirthInputForm() {
                     <div className="cosmic-ring cosmic-ring-3" style={{ width: '100%', height: '100%' }} />
                     <div className="cosmic-center text-xs">✦</div>
                   </div>
-                  <p className="text-[var(--text-secondary)] text-sm opacity-60">正在生成你的专属成长方案...</p>
+                  <p className="text-[var(--text-secondary)] text-sm">正在生成你的专属成长方案...</p>
                 </div>
               )}
             </div>
@@ -840,7 +840,7 @@ export default function BirthInputForm() {
               <button onClick={handleReset} className="btn-gold flex-1 min-w-[140px]">🔄 重新</button>
             </div>
             {!hasAccess && reportComplete && (
-              <p className="text-xs text-[var(--text-secondary)] opacity-60 mt-2">
+              <p className="text-xs text-[var(--text-secondary)] mt-2">
                 付费或输入免费码后可下载完整报告
               </p>
             )}
@@ -853,7 +853,7 @@ export default function BirthInputForm() {
               }}
             >
               <p className="text-sm text-[var(--text-accent)] mb-1 text-center">☕ 如果这份报告对你有帮助</p>
-              <p className="text-xs text-[var(--text-secondary)] opacity-60 mb-4 text-center">
+              <p className="text-xs text-[var(--text-secondary)] mb-4 text-center">
                 打赏一杯咖啡，支持我们持续精进算法
               </p>
               <div className="flex justify-center gap-6">
@@ -862,14 +862,14 @@ export default function BirthInputForm() {
                     className="w-32 h-32 rounded-lg object-cover"
                     style={{ border: '1px solid rgba(201,169,110,0.2)' }}
                   />
-                  <p className="text-xs text-[var(--text-secondary)] mt-1.5 opacity-60">微信</p>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1.5">微信</p>
                 </div>
                 <div className="text-center">
                   <img src="/images/alipay-pay.jpg" alt="支付宝"
                     className="w-32 h-32 rounded-lg object-cover"
                     style={{ border: '1px solid rgba(201,169,110,0.2)' }}
                   />
-                  <p className="text-xs text-[var(--text-secondary)] mt-1.5 opacity-60">支付宝</p>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1.5">支付宝</p>
                 </div>
               </div>
               <p className="text-xs text-[var(--text-accent)] text-center mt-3">感谢随喜 🙏</p>
@@ -882,7 +882,7 @@ export default function BirthInputForm() {
                   border: '1px dashed rgba(201,169,110,0.2)',
                 }}
               >
-                <p className="text-xs text-[var(--text-secondary)] mb-2 opacity-70">
+                <p className="text-xs text-[var(--text-secondary)] mb-2">
                   或者输入朋友给你的免费码
                 </p>
                 <div className="flex gap-2 max-w-xs mx-auto">
@@ -967,7 +967,7 @@ export default function BirthInputForm() {
                           {entry.meta.cityTags.length > 0 && ` · ${entry.meta.cityTags.slice(0, 2).join(' ')}`}
                         </p>
                       </div>
-                      <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap mt-0.5 opacity-50">{entry.date}</span>
+                      <span className="text-xs text-[var(--text-secondary)] whitespace-nowrap mt-0.5">{entry.date}</span>
                     </div>
                   </button>
                 ))}

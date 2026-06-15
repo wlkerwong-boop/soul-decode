@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getReport, getReportAdmin, type Report } from '@/lib/report-store';
-import CosmicBackground from '@/components/CosmicBackground';
 import TTSReader from '@/components/TTSReader';
 
 export default function CasePage() {
@@ -55,20 +54,15 @@ export default function CasePage() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen">
-        <CosmicBackground />
-        <div className="relative z-10 min-h-screen flex items-center justify-center">
+      <div className="min-h-screen gradient-bg flex items-center justify-center">
           <div className="w-6 h-6 border-2 border-[var(--text-accent)] border-t-transparent rounded-full animate-spin" />
-        </div>
       </div>
     );
   }
 
   if (!report) {
     return (
-      <div className="relative min-h-screen">
-        <CosmicBackground />
-        <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
+      <div className="min-h-screen gradient-bg flex items-center justify-center px-6">
           <div className="max-w-md w-full text-center">
             <div className="text-4xl mb-4">🔒</div>
             <h1 className="text-2xl font-bold mb-2">私密报告</h1>
@@ -95,15 +89,12 @@ export default function CasePage() {
               <a href="/my" className="text-sm text-[var(--text-accent)] hover:underline">← 返回我的档案</a>
             </div>
           </div>
-        </div>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen">
-      <CosmicBackground />
-      <div className="relative z-10 py-16 px-6">
+    <div className="min-h-screen gradient-bg py-16 px-6">
         <div className="max-w-3xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
@@ -137,6 +128,5 @@ export default function CasePage() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

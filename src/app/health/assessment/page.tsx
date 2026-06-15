@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import CosmicBackground from '@/components/CosmicBackground';
+
 
 const SYMPTOM_EXAMPLE = `例如：
 头痛：太阳穴两侧胀痛，下午加重，持续3天
@@ -74,7 +74,6 @@ export default function HealthAssessmentPage() {
 
   return (
     <div className="relative min-h-screen">
-      <CosmicBackground />
       <div className="relative z-10 gradient-bg min-h-screen py-12 px-6">
         <div className="max-w-3xl mx-auto">
           {/* 页面标题 */}

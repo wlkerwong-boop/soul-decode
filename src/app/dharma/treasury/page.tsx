@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import CosmicBackground from '@/components/CosmicBackground';
 import {
   topics,
   categoryInfo,
@@ -105,7 +104,7 @@ function TopicModal({
         </div>
 
         {/* 详细描述 */}
-        <div className="mb-6 p-5 rounded-xl bg-[var(--bg-deep)] border border-[var(--border-color)]">
+        <div className="mb-6 p-5 rounded-xl bg-[var(--bg-section-alt)] border border-[var(--border-color)]">
           <p className="text-sm text-[var(--text-primary)] leading-relaxed">{topic.details}</p>
         </div>
 
@@ -145,7 +144,7 @@ function TopicModal({
               {relatedTopics.map(rt => (
                 <span
                   key={rt.id}
-                  className="px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs text-[var(--text-secondary)] bg-black/20"
+                  className="px-3 py-1.5 rounded-lg border border-[var(--border-color)] text-xs text-[var(--text-secondary)] bg-[var(--bg-card)]"
                 >
                   {rt.icon} {rt.title}
                 </span>
@@ -166,23 +165,23 @@ export default function TreasuryPage() {
   const filteredTopics = activeCategory === 'all' ? topics : topics.filter(t => t.category === activeCategory);
 
   return (
-    <div className="relative min-h-screen">
-      <CosmicBackground />
-
-      <div className="relative z-10 gradient-bg min-h-screen">
+    <div className="relative min-h-screen gradient-bg">
+      <div className="relative z-10 min-h-screen">
         {/* ── 导航 ──────────────────────────────────────── */}
-        <nav className="flex items-center justify-between px-6 py-5 max-w-5xl mx-auto">
-          <div className="flex items-center gap-2">
-            <Link href="/" className="text-[var(--text-accent)] text-xl font-bold tracking-wider">
-              ✦ 灵魂解码
-            </Link>
-          </div>
-          <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
+        <nav className="glass-nav sticky top-0 z-50 px-6 py-4">
+          <div className="max-w-5xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Link href="/" className="gradient-text text-xl font-bold tracking-wider">
+                ✦ 灵魂解码
+              </Link>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
             <Link href="/dharma" className="hover:text-[var(--text-accent)] transition-colors">
               ☸ 法藏
             </Link>
             <span className="opacity-50 hidden md:inline">·</span>
             <span className="opacity-50 hidden md:inline">寂如法藏 · 22主题</span>
+          </div>
           </div>
         </nav>
 
@@ -288,11 +287,11 @@ export default function TreasuryPage() {
 
         {/* ── 底部 ──────────────────────────────────────── */}
         <footer className="border-t border-[var(--border-color)] py-8 px-6">
-          <div className="max-w-5xl mx-auto text-center text-sm text-[var(--text-secondary)] opacity-40">
+          <div className="max-w-5xl mx-auto text-center text-sm text-[var(--text-secondary)]">
             <p>📖 寂如法藏 · 22主题 · 552万字开示 · 双师传承</p>
             <p className="mt-1">寂如师父致力于传承佛陀正法，以佛法智慧引导现代人走向觉醒与解脱</p>
             <p className="mt-2">
-              <Link href="/dharma" className="hover:text-[var(--text-accent)] transition-colors opacity-30 hover:opacity-60">
+              <Link href="/dharma" className="hover:text-[var(--text-accent)] transition-colors opacity-60 hover:opacity-100">
                 ← 返回法藏首页
               </Link>
             </p>

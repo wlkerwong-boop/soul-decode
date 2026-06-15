@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { getZodiacByDate, getChineseZodiac, getChineseZodiacElement, zodiacSigns } from '@/lib/astrology';
-import CosmicBackground from '@/components/CosmicBackground';
 import TTSReader from '@/components/TTSReader';
 
 export default function AstrologyPage() {
@@ -63,8 +62,7 @@ export default function AstrologyPage() {
   };
 
   return (
-    <div className="relative min-h-screen">
-      <CosmicBackground />
+    <div className="relative min-h-screen gradient-bg">
       <div className="relative z-10 py-16 px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
@@ -78,20 +76,20 @@ export default function AstrologyPage() {
 
           {/* Input Form */}
           <div className="max-w-md mx-auto mb-12">
-            <form onSubmit={handleSubmit} className="p-6 rounded-xl border border-[var(--border-color)] bg-black/30">
+            <form onSubmit={handleSubmit} className="card-jade p-6">
               <div className="text-sm text-[var(--text-secondary)] mb-4 text-center">输入你的出生日期</div>
               <div className="grid grid-cols-3 gap-3 mb-4">
                 <div>
                   <label className="text-xs text-[var(--text-secondary)] block mb-1">年</label>
-                  <input type="number" value={year} onChange={e => setYear(e.target.value)} placeholder="1990" className="w-full p-2.5 rounded-lg bg-black/40 border border-[var(--border-color)] text-white text-center" />
+                  <input type="number" value={year} onChange={e => setYear(e.target.value)} placeholder="1990" className="input-jade text-center" />
                 </div>
                 <div>
                   <label className="text-xs text-[var(--text-secondary)] block mb-1">月</label>
-                  <input type="number" value={month} onChange={e => setMonth(e.target.value)} placeholder="1" min={1} max={12} className="w-full p-2.5 rounded-lg bg-black/40 border border-[var(--border-color)] text-white text-center" />
+                  <input type="number" value={month} onChange={e => setMonth(e.target.value)} placeholder="1" min={1} max={12} className="input-jade text-center" />
                 </div>
                 <div>
                   <label className="text-xs text-[var(--text-secondary)] block mb-1">日</label>
-                  <input type="number" value={day} onChange={e => setDay(e.target.value)} placeholder="1" min={1} max={31} className="w-full p-2.5 rounded-lg bg-black/40 border border-[var(--border-color)] text-white text-center" />
+                  <input type="number" value={day} onChange={e => setDay(e.target.value)} placeholder="1" min={1} max={31} className="input-jade text-center" />
                 </div>
               </div>
               <button type="submit" className="w-full py-2.5 bg-[var(--text-accent)] text-black font-bold rounded-lg hover:opacity-90 transition-all">解析我的星座</button>
@@ -116,7 +114,7 @@ export default function AstrologyPage() {
                   { label: '模式', value: result.zodiac.quality + '星座' },
                   { label: '守护星', value: result.zodiac.rulingPlanet },
                 ].map((item, i) => (
-                  <div key={i} className="p-4 rounded-lg border border-[var(--border-color)] bg-black/20 text-center">
+                  <div key={i} className="card-jade p-4 text-center">
                     <div className="text-xs text-[var(--text-secondary)] mb-1">{item.label}</div>
                     <div className="font-bold text-sm">{item.value}</div>
                   </div>
@@ -124,7 +122,7 @@ export default function AstrologyPage() {
               </div>
 
               {/* Description with TTS */}
-              <div className="p-8 rounded-xl border border-[var(--border-color)] bg-black/30 backdrop-blur-sm">
+              <div className="card-jade p-8">
                 <div className="flex justify-between items-start mb-4">
                   <h2 className="text-xl font-bold text-[var(--text-accent)]">性格特质</h2>
                   <TTSReader text={`你是${result.zodiac.name}。${result.zodiac.description}你的性格特质包括：${result.zodiac.traits.join('、')}。`} label="听描述" />
@@ -138,7 +136,7 @@ export default function AstrologyPage() {
               </div>
 
               {/* AI Deep Interpretation */}
-              <div className="p-8 rounded-xl border border-[var(--text-accent)]/30 bg-[var(--text-accent)]/5 backdrop-blur-sm">
+              <div className="card-jade p-8">
                 <div className="flex justify-between items-start mb-4">
                   <h2 className="text-xl font-bold text-[var(--text-accent)]">AI 占星解读</h2>
                   {aiContent && <TTSReader text={aiContent.replace(/#{1,6}\s/g, '').replace(/\*\*/g, '').replace(/\n/g, '，')} label="听解读" />}
@@ -182,7 +180,7 @@ export default function AstrologyPage() {
           {showAll && (
             <div className="grid md:grid-cols-3 gap-4">
               {zodiacSigns.map((z, i) => (
-                <div key={i} className="p-4 rounded-lg border border-[var(--border-color)] bg-black/20 hover:border-[var(--text-accent)] transition-all cursor-pointer">
+                <div key={i} className="card-jade p-4 hover:border-[var(--text-accent)] transition-all cursor-pointer">
                   <div className="text-2xl mb-1">{z.symbol}</div>
                   <div className="font-bold text-sm text-[var(--text-accent)]">{z.name}</div>
                   <div className="text-xs text-[var(--text-secondary)]">{z.dateRange}</div>
