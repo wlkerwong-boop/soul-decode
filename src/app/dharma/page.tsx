@@ -30,20 +30,11 @@ export default function DharmaPage() {
     {
       icon: '🧭',
       title: '修学路径',
-      subtitle: '次第 · 指引 · 规划',
-      description: '从入门到深入的修学路径规划，明确各阶段的重点、次第和方法，帮助行者稳步前行。',
+      subtitle: '次第 · 指引',
+      description: '基于寂如师父22个主题的修学次第规划，从基础到全局的渐进式学习路径。',
       href: '/dharma/sequence',
       color: 'rgba(74, 222, 128, 0.06)',
       borderColor: 'rgba(74, 222, 128, 0.2)',
-    },
-    {
-      icon: '📿',
-      title: '金刚法藏',
-      subtitle: '传承 · 师承 · 心印',
-      description: '寂如师父的师承脉络与金刚法藏传承，了解法脉源流与核心心法。',
-      href: '/dharma/master',
-      color: 'rgba(192, 132, 252, 0.06)',
-      borderColor: 'rgba(192, 132, 252, 0.2)',
     },
     {
       icon: '🔍',
@@ -111,7 +102,6 @@ export default function DharmaPage() {
           <span className="tag-pill">📝 552万字开示</span>
           <span className="tag-pill">🧘 实修次第</span>
           <span className="tag-pill">🪷 般若智慧</span>
-          <span className="tag-pill">👥 双师传承</span>
         </div>
       </section>
 
@@ -192,7 +182,7 @@ export default function DharmaPage() {
       {/* ── 底部 ── */}
       <footer className="border-t border-[var(--border-color)] py-8 px-6">
         <div className="max-w-5xl mx-auto text-center text-sm text-[var(--text-secondary)]">
-          <p>☸ 法藏 Dhārma Treasury · 22主题 · 552万字开示 · 双师传承</p>
+          <p>☸ 法藏 Dhārma Treasury · 22主题 · 552万字开示</p>
           <p className="mt-1">寂如师父开示 · 佛法修学知识库</p>
           <p className="mt-2">
             <Link href="/" className="hover:text-[var(--text-accent)] transition-colors opacity-60 hover:opacity-100">

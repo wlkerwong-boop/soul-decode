@@ -288,7 +288,7 @@ export default function TreasuryPage() {
         {/* ── 底部 ──────────────────────────────────────── */}
         <footer className="border-t border-[var(--border-color)] py-8 px-6">
           <div className="max-w-5xl mx-auto text-center text-sm text-[var(--text-secondary)]">
-            <p>📖 寂如法藏 · 22主题 · 552万字开示 · 双师传承</p>
+            <p>📖 寂如法藏 · 22主题 · 552万字开示 · 寂如师父</p>
             <p className="mt-1">寂如师父致力于传承佛陀正法，以佛法智慧引导现代人走向觉醒与解脱</p>
             <p className="mt-2">
               <Link href="/dharma" className="hover:text-[var(--text-accent)] transition-colors opacity-60 hover:opacity-100">
