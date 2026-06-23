@@ -14,6 +14,16 @@ const tools = [
     status: 'ready' as const,
   },
   {
+    icon: '📚',
+    title: '先贤人物谱',
+    subtitle: '浏览全部125位古圣先贤',
+    desc: '按阵营分类浏览全部先贤人物，点击查看详细介绍、精神特质与金句。活动选人参考，也可作为日常学习资料。',
+    href: '/tools/figures',
+    color: 'rgba(74, 124, 111, 0.08)',
+    borderColor: 'rgba(74, 124, 111, 0.25)',
+    status: 'ready' as const,
+  },
+  {
     icon: '💬',
     title: '亲子对话卡',
     subtitle: '挑话题 · 和孩子聊先贤',

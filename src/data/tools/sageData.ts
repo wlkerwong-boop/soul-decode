@@ -8,7 +8,8 @@ export interface SageFigure {
   dynasty: string;
   camp: string;
   description: string; // 一句话简介
-  keywords: string[]; // 匹配关键词：性格/兴趣/特质
+  bio?: string; // 详细简介（可选，另有sageBioData.ts集中存储）
+  keywords: string[]; // 匹配关键词
   slogan: string; // 宣传栏金句
   imageHint: string; // 人物照片来源建议
 }
