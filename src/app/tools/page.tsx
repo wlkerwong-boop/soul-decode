@@ -21,7 +21,7 @@ const tools = [
     href: '/tools/talk',
     color: 'rgba(201, 160, 110, 0.08)',
     borderColor: 'rgba(201, 160, 110, 0.25)',
-    status: 'soon' as const,
+    status: 'ready' as const,
   },
   {
     icon: '🤖',
@@ -51,7 +51,7 @@ const tools = [
     href: '/tools/orid',
     color: 'rgba(130, 106, 201, 0.08)',
     borderColor: 'rgba(130, 106, 201, 0.25)',
-    status: 'soon' as const,
+    status: 'ready' as const,
   },
   {
     icon: '🌟',
