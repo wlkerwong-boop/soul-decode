@@ -637,14 +637,14 @@ export default function TcmAssessmentPage() {
             >
               📖 健康评测介绍
             </Link>
-            <span className="text-[var(--border-color)] hidden sm:inline">|</span>
+            <span className="text-[var(--border-color)] ">|</span>
             <Link
               href="/health/assessment"
               className="text-sm text-[var(--text-secondary)] hover:text-white transition-colors"
             >
               自由描述式辨证
             </Link>
-            <span className="text-[var(--border-color)] hidden sm:inline">|</span>
+            <span className="text-[var(--border-color)] ">|</span>
             <Link
               href="/"
               className="text-sm text-[var(--text-secondary)] hover:text-white transition-colors"

@@ -11,24 +11,27 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <span className="gradient-text text-xl font-bold tracking-wider">✦ 灵魂解码</span>
           </div>
-          <div className="flex items-center gap-6 text-sm text-[var(--text-secondary)]">
-            <a href="/my" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+          <div className="flex items-center gap-6 text-sm text-[var(--text-secondary)] overflow-x-auto scrollbar-hide whitespace-nowrap -mb-1 px-2">
+            <a href="/my" className="hover:text-[var(--text-accent)] transition-colors">
               📁 档案
             </a>
-            <a href="/health" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+            <a href="/health" className="hover:text-[var(--text-accent)] transition-colors">
               身心健康
             </a>
-            <a href="/mbti" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+            <a href="/mbti" className="hover:text-[var(--text-accent)] transition-colors">
               MBTI性格
             </a>
-            <a href="/astrology" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+            <a href="/astrology" className="hover:text-[var(--text-accent)] transition-colors">
               星座占星
             </a>
-            <a href="/tcm" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+            <a href="/tcm" className="hover:text-[var(--text-accent)] transition-colors">
               中医通鉴
             </a>
-            <a href="/dharma" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+            <a href="/dharma" className="hover:text-[var(--text-accent)] transition-colors">
               ☸ 法藏
+            </a>
+            <a href="/tools" className="hover:text-[var(--text-accent)] transition-colors text-[var(--text-accent)] font-semibold">
+              🧰 亲子工具
             </a>
             <span className="opacity-30 hidden md:inline">·</span>
             <span className="text-xs text-[var(--text-secondary)] opacity-50 hidden md:inline">

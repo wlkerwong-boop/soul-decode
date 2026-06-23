@@ -45,6 +45,15 @@ export default function DharmaPage() {
       color: 'rgba(96, 165, 250, 0.06)',
       borderColor: 'rgba(96, 165, 250, 0.2)',
     },
+    {
+      icon: '🔔',
+      title: '正念铃音',
+      subtitle: '修行语音包 · 闹钟提醒',
+      description: '融合圣多纳释放法与金刚种子智慧的每日修行语音包。10段引导音频，覆盖晨起、日间、睡前，设为手机闹铃，形成觉察的习惯回路。',
+      href: '/dharma/bell',
+      color: 'rgba(201, 160, 110, 0.06)',
+      borderColor: 'rgba(201, 160, 110, 0.2)',
+    },
   ];
 
   return (
@@ -57,23 +66,23 @@ export default function DharmaPage() {
               ✦ 灵魂解码
             </Link>
           </div>
-          <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
-            <Link href="/my" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+          <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)] overflow-x-auto scrollbar-hide whitespace-nowrap -mb-1 px-2">
+            <Link href="/my" className="hover:text-[var(--text-accent)] transition-colors">
               📁 档案
             </Link>
-            <Link href="/health" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+            <Link href="/health" className="hover:text-[var(--text-accent)] transition-colors">
               身心健康
             </Link>
-            <Link href="/mbti" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+            <Link href="/mbti" className="hover:text-[var(--text-accent)] transition-colors">
               MBTI性格
             </Link>
-            <Link href="/astrology" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+            <Link href="/astrology" className="hover:text-[var(--text-accent)] transition-colors">
               星座占星
             </Link>
-            <Link href="/tcm" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+            <Link href="/tcm" className="hover:text-[var(--text-accent)] transition-colors">
               中医通鉴
             </Link>
-            <Link href="/dharma" className="text-[var(--text-accent)] transition-colors hidden sm:inline font-semibold">
+            <Link href="/dharma" className="text-[var(--text-accent)] transition-colors font-semibold">
               ☸ 法藏
             </Link>
             <span className="opacity-60 hidden md:inline">·</span>

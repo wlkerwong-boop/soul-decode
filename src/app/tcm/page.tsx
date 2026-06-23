@@ -202,20 +202,20 @@ export default function TCMPage() {
               ✦ 灵魂解码
             </Link>
           </div>
-          <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
-            <Link href="/my" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+          <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)] overflow-x-auto scrollbar-hide whitespace-nowrap -mb-1 px-2">
+            <Link href="/my" className="hover:text-[var(--text-accent)] transition-colors ">
               📁 档案
             </Link>
-            <Link href="/health" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+            <Link href="/health" className="hover:text-[var(--text-accent)] transition-colors ">
               身心健康
             </Link>
-            <Link href="/mbti" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+            <Link href="/mbti" className="hover:text-[var(--text-accent)] transition-colors ">
               MBTI性格
             </Link>
-            <Link href="/astrology" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+            <Link href="/astrology" className="hover:text-[var(--text-accent)] transition-colors ">
               星座占星
             </Link>
-            <Link href="/dharma" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">
+            <Link href="/dharma" className="hover:text-[var(--text-accent)] transition-colors ">
               ☸ 法藏
             </Link>
             <span className="opacity-50 hidden md:inline">·</span>
@@ -235,7 +235,7 @@ export default function TCMPage() {
           </h1>
           <p className="text-lg text-[var(--text-secondary)] leading-relaxed max-w-3xl mx-auto mb-4">
             系统整理倪海厦先生人纪系列五套课程（针灸、神农本草、黄帝内经、伤寒论、金匮要略）
-            <br className="hidden sm:inline" />
+            <br className="" />
             融合 <span className="text-[var(--text-primary)]">板书截图证据索引</span>，构建可溯源的中医知识体系
           </p>
           <div className="flex flex-wrap justify-center gap-3 mt-8">

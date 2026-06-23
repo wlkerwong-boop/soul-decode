@@ -35,9 +35,9 @@ export default function HealthPage() {
           <Link href="/" className="flex items-center gap-2">
             <span className="text-[var(--text-accent)] text-xl font-bold tracking-wider">✦ 灵魂解码</span>
           </Link>
-          <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)]">
-            <Link href="/mbti" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">MBTI性格</Link>
-            <Link href="/astrology" className="hover:text-[var(--text-accent)] transition-colors hidden sm:inline">星座占星</Link>
+          <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)] overflow-x-auto scrollbar-hide whitespace-nowrap -mb-1 px-2">
+            <Link href="/mbti" className="hover:text-[var(--text-accent)] transition-colors ">MBTI性格</Link>
+            <Link href="/astrology" className="hover:text-[var(--text-accent)] transition-colors ">星座占星</Link>
           </div>
         </nav>
 
@@ -53,7 +53,7 @@ export default function HealthPage() {
           </h1>
           <p className="text-lg text-[var(--text-secondary)] leading-relaxed max-w-3xl mx-auto mb-4">
             融合<span className="text-[var(--text-primary)]">中医通鉴数据库</span>与AI深度解读，
-            <br className="hidden sm:inline" />
+            <br className="" />
             以黄元御「一气周流」理论为辨证核心，为您生成精准的体质分析与调理方案
           </p>
           <div className="flex flex-wrap justify-center gap-3 mt-8">
