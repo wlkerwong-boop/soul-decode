@@ -10,6 +10,7 @@ import PromptTemplates from './PromptTemplates';
 import FeedbackForm from './FeedbackForm';
 import TTSReader from './TTSReader';
 import AIChat from './AIChat';
+import DailyFortune from './DailyFortune';
 
 const CITIES_DB = (citiesData as any).cities as Record<string, { cities: string[]; tags: string[]; description: string }>;
 
@@ -751,6 +752,19 @@ export default function BirthInputForm() {
               <AIChat
                 context={`用户出生信息：${inputSummary}\n八字：${baziData.pillars.filter(p => p !== '--').join('/')}\n日主：${baziData.dayMaster}`}
                 maxFreeMessages={3}
+              />
+            </div>
+          )}
+
+          {/* ── 每日运势 ── */}
+          {reportComplete && baziData && (
+            <div className="max-w-3xl mx-auto">
+              <div className="gold-divider my-10" />
+              <DailyFortune
+                dayMaster={baziData.dayMaster}
+                dayMasterElement={baziData.dayMasterElement}
+                pillars={baziData.pillars}
+                zodiac={baziData.zodiac}
               />
             </div>
           )}
