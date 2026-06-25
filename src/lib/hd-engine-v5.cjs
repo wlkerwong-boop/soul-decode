@@ -2,16 +2,13 @@
  * HD引擎v5 — 全内联版（零外部依赖，Vercel兼容）
  * 预计算星历表 + 内联所有HD计算逻辑
  */
-const fs = require('fs');
 const path = require('path');
 const { DateTime } = require('luxon');
 
-// ── 1. 加载预计算星历表 ──
+// 加载预计算星历表（使用require而非fs，避免Turbopack问题）
 let GATES_TABLE = {};
 try {
-  GATES_TABLE = JSON.parse(
-    fs.readFileSync(path.join(__dirname, '../data/ephemeris/planet-gates.json'), 'utf-8')
-  );
+  GATES_TABLE = require('../data/ephemeris/planet-gates.json');
 } catch (e) {}
 
 const PLANET_NAMES = ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
