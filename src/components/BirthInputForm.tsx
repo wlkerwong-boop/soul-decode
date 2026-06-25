@@ -13,6 +13,7 @@ import AIChat from './AIChat';
 import DailyFortune from './DailyFortune';
 import PaywallOverlay from './PaywallOverlay';
 import { saveReport } from '@/lib/report-store';
+import { isUserPremium } from '@/lib/access-control';
 
 const CITIES_DB = (citiesData as any).cities as Record<string, { cities: string[]; tags: string[]; description: string }>;
 
@@ -754,8 +755,22 @@ export default function BirthInputForm() {
           {/* ── AI追问对话 ── */}
           {reportComplete && reportText && (
             <div className="max-w-3xl mx-auto">
-              {/* 付费墙提醒 */}
-              <PaywallOverlay feature="完整报告" inline={true} />
+              {/* 付费墙：非会员只显示报告前30%，加模糊效果 */}
+              {isUserPremium() ? null : (
+                <div className="relative mb-8">
+                  <div className="overflow-hidden max-h-[400px] relative">
+                    <div
+                      className="report-content leading-relaxed blur-sm select-none"
+                      dangerouslySetInnerHTML={{ __html: renderMarkdown(reportText.slice(0, Math.floor(reportText.length * 0.3))) }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--bg-card)]" />
+                  </div>
+                  <PaywallOverlay feature="完整报告" inline={true} />
+                </div>
+              )}
+              {isUserPremium() && (
+                <div className="report-content leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(reportText) }} />
+              )}
 
               <div className="gold-divider my-10" />
               <AIChat
