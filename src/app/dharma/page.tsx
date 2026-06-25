@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { wisdomQuotes, categoryInfo } from '@/data/dharma/topics';
+import DharmaQA from '@/components/DharmaQA';
 
 function getRandomQuote() {
   return wisdomQuotes[Math.floor(Math.random() * wisdomQuotes.length)];
@@ -186,6 +187,18 @@ export default function DharmaPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* ── 金色分隔 ── */}
+      <div className="gold-divider max-w-5xl mx-auto mb-12" />
+
+      {/* ── AI法藏问答 ── */}
+      <section className="px-6 pb-16 max-w-5xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold mb-2 gradient-text">☸ 法藏问答</h2>
+          <p className="text-sm text-[var(--text-secondary)]">基于寂如师父开示体系，AI辅助解答你的佛法疑问</p>
+        </div>
+        <DharmaQA />
       </section>
 
       {/* ── 底部 ── */}

@@ -11,6 +11,7 @@ import FeedbackForm from './FeedbackForm';
 import TTSReader from './TTSReader';
 import AIChat from './AIChat';
 import DailyFortune from './DailyFortune';
+import { saveReport } from '@/lib/report-store';
 
 const CITIES_DB = (citiesData as any).cities as Record<string, { cities: string[]; tags: string[]; description: string }>;
 
@@ -362,7 +363,7 @@ export default function BirthInputForm() {
 
       setReportComplete(true);
 
-      // 保存到历史记录
+      // 保存到历史记录（兼容旧系统和新系统）
       saveToHistory({
         id: baziData.reportId,
         date: new Date().toLocaleString('zh-CN'),
@@ -372,6 +373,10 @@ export default function BirthInputForm() {
         meta: baziData.meta,
         report: fullReport,
       });
+      // 同时保存到新报告系统
+      try {
+        saveReport(fullReport, 'bazi', `八字解读·${summary}`, '', baziData.reportId);
+      } catch { /* ignore */ }
 
     } catch (err: any) {
       if (err.name !== 'AbortError') {

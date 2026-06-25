@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "index:dharma": "python3 scripts/build-dharma-index.py"
   },
   "dependencies": {
     "@next/swc-wasm-nodejs": "^16.2.6",
