@@ -122,6 +122,12 @@ export default function HealthResultPage() {
             </Link>
           </div>
 
+          <div className="text-center pb-8">
+            <button onClick={() => { document.title = '健康报告'; window.print(); }} className="px-5 py-2.5 rounded-lg border border-[var(--border-color)] text-sm hover:border-[var(--text-accent)] transition-all">
+              📄 下载PDF
+            </button>
+          </div>
+
           {/* 免责声明 */}
           <div className="text-center pb-12">
             <p className="text-xs text-[var(--text-secondary)] opacity-40">

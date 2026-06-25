@@ -586,3 +586,49 @@ section {
 .card-stagger > *:nth-child(10) { animation-delay: 0.50s; }
 .card-stagger > *:nth-child(11) { animation-delay: 0.55s; }
 .card-stagger > *:nth-child(12) { animation-delay: 0.60s; }
+
+/* ── 打印样式（PDF导出专用） ── */
+@media print {
+  @page { size: A4; margin: 2.5cm; }
+  body {
+    background: white !important;
+    color: #1a1a1a !important;
+    font-size: 11pt !important;
+    line-height: 1.8 !important;
+  }
+  nav, footer, .btn-jade, .btn-gold, .btn, button,
+  .cosmic-loader, .spinner, .gold-divider,
+  [class*="paywall"], [class*="Paywall"],
+  [class*="AIChat"], [class*="DailyFortune"],
+  [class*="Share"], [class*="Feedback"],
+  .feedback-form, .prompt-templates {
+    display: none !important;
+  }
+  .gradient-bg { background: white !important; }
+  .report-content, .report-content p, .report-content li {
+    color: #1a1a1a !important; font-size: 11pt !important;
+  }
+  .report-content h2 {
+    color: #2d5a4f !important; font-size: 16pt !important;
+    border-bottom: 1px solid #ccc !important; margin-top: 28pt !important;
+  }
+  .report-content h3 { color: #4a7c6f !important; font-size: 13pt !important; }
+  .report-content strong { color: #2d5a4f !important; }
+  .report-content blockquote {
+    border-left: 3px solid #c9a06e !important; color: #555 !important;
+    margin: 12pt 0 !important; padding-left: 16pt !important;
+  }
+  .card-jade, section {
+    box-shadow: none !important; border: none !important;
+    background: transparent !important;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .tag-pill, .tag-pill-gold {
+    border: 1px solid #ccc !important; background: transparent !important;
+    color: #555 !important;
+  }
+  .gradient-text {
+    background: none !important; -webkit-text-fill-color: #2d5a4f !important;
+    color: #2d5a4f !important;
+  }
+}

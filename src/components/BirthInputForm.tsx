@@ -478,8 +478,10 @@ export default function BirthInputForm() {
   // 下载报告（PDF - 通过浏览器打印功能）
   const handleDownloadPDF = useCallback(() => {
     if (!reportText || !baziData) return;
+    // Set page title for PDF filename
+    document.title = `灵魂解码报告-${formData.year}${formData.month}${formData.day}`;
     window.print();
-  }, []);
+  }, [reportText, baziData, formData]);
 
   const scrollToSection = useCallback((id: string) => {
     setActiveSection(id);

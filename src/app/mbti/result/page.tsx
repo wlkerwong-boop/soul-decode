@@ -182,6 +182,9 @@ export default function MBTIResultPage() {
             <button onClick={() => router.push('/mbti')} className="px-6 py-3 border border-[var(--border-color)] text-[var(--text-secondary)] rounded-lg hover:border-[var(--text-accent)] transition-all">
               重新测试
             </button>
+            <button onClick={() => { document.title = `MBTI-${type}`; window.print(); }} className="px-6 py-3 border border-[var(--border-color)] text-[var(--text-secondary)] rounded-lg hover:border-[var(--text-accent)] transition-all ml-3">
+              📄 下载PDF
+            </button>
             <div className="mt-6">
               <a href="/" className="text-sm text-[var(--text-accent)] hover:underline">← 返回首页</a>
             </div>
