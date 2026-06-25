@@ -12,6 +12,7 @@ import TTSReader from './TTSReader';
 import AIChat from './AIChat';
 import DailyFortune from './DailyFortune';
 import PaywallOverlay from './PaywallOverlay';
+import ShareReferral from './ShareReferral';
 import { saveReport } from '@/lib/report-store';
 import { isUserPremium } from '@/lib/access-control';
 
@@ -790,6 +791,14 @@ export default function BirthInputForm() {
                 pillars={baziData.pillars}
                 zodiac={baziData.zodiac}
               />
+            </div>
+          )}
+
+          {/* ── 分享裂变 ── */}
+          {reportComplete && (
+            <div className="max-w-md mx-auto">
+              <div className="gold-divider my-10" />
+              <ShareReferral />
             </div>
           )}
 
