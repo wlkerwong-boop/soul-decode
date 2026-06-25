@@ -1,169 +1,150 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getUserReports, getReportTypeLabel, isAdminPassword, getPresetCases, type ReportMeta } from '@/lib/report-store';
-
+import { useAuth } from '@/components/AuthContext';
+import { getAllReports, getReportTypeLabel, type ReportMeta } from '@/lib/report-store';
+import { useState } from 'react';
 
 export default function MyPage() {
   const router = useRouter();
-  const [password, setPassword] = useState('');
-  const [loggedIn, setLoggedIn] = useState(false);
+  const { user, isLoggedIn, isLoading, logout } = useAuth();
   const [reports, setReports] = useState<ReportMeta[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [presetCases, setPresetCases] = useState<ReportMeta[]>([]);
-  const [error, setError] = useState('');
-  const [tab, setTab] = useState<'my' | 'admin'>('my');
 
-  const handleLogin = () => {
-    if (!password.trim()) {
-      setError('请输入密码');
-      return;
-    }
-    const userReports = getUserReports(password);
-    if (userReports.length === 0 && !isAdminPassword(password)) {
-      setError('密码错误或暂无报告');
-      return;
-    }
-    setReports(userReports);
-    setLoggedIn(true);
-    setIsAdmin(isAdminPassword(password));
-    if (isAdminPassword(password)) {
-      setPresetCases(getPresetCases(password));
-    }
-    setError('');
-  };
-
-  // Check if user just completed an assessment
   useEffect(() => {
-    const justSaved = sessionStorage.getItem('my-report-just-saved');
-    if (justSaved) {
-      sessionStorage.removeItem('my-report-just-saved');
+    if (!isLoading && !isLoggedIn) {
+      router.replace('/auth/login');
+      return;
     }
-  }, []);
+    if (isLoggedIn) {
+      setReports(getAllReports());
+    }
+  }, [isLoading, isLoggedIn, router]);
 
-  if (!loggedIn) {
+  if (isLoading || !isLoggedIn || !user) {
     return (
-      <div className="relative min-h-screen">
-        <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
-          <div className="max-w-md w-full text-center">
-            <div className="text-4xl mb-4">🔐</div>
-            <h1 className="text-3xl font-bold mb-2">我的健康档案</h1>
-            <p className="text-sm text-[var(--text-secondary)] mb-8">
-              输入您在健康评测时设置的查看密码
-            </p>
-            <div className="p-6 rounded-xl border border-[var(--border-color)] bg-black/30">
-              <input
-                type="password"
-                value={password}
-                onChange={e => { setPassword(e.target.value); setError(''); }}
-                onKeyDown={e => e.key === 'Enter' && handleLogin()}
-                placeholder="输入查看密码"
-                className="w-full p-3 rounded-lg bg-black/40 border border-[var(--border-color)] text-white text-center mb-4 focus:border-[var(--text-accent)] outline-none"
-                autoFocus
-              />
-              {error && <p className="text-red-400 text-sm mb-3">{error}</p>}
-              <button onClick={handleLogin} className="w-full py-3 bg-[var(--text-accent)] text-black font-bold rounded-lg hover:opacity-90 transition-all">
-                查看我的档案
-              </button>
-            </div>
-            <p className="text-xs text-[var(--text-secondary)] mt-4 opacity-50">
-              首次使用？完成健康评测或八字分析后，系统会提示您设置密码
-            </p>
-          </div>
-        </div>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center px-6">
+        <div className="spinner mb-4" />
+        <p className="text-sm text-[var(--text-secondary)]">{isLoading ? '加载中…' : '请先登录'}</p>
       </div>
     );
   }
 
+  const formatTime = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const maskPhone = (phone: string) => `${phone.slice(0, 3)}****${phone.slice(-4)}`;
+
   return (
-    <div className="relative min-h-screen">
-      <div className="relative z-10 py-16 px-6">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <span className="tag-pill text-xs tracking-widest mb-4 inline-block">🔐 我的健康档案</span>
-            <h1 className="text-3xl font-bold mb-2">我的报告</h1>
-            <p className="text-sm text-[var(--text-secondary)]">
-              共 {reports.length + (isAdmin ? presetCases.length : 0)} 份报告
-            </p>
-          </div>
+    <div className="py-12 md:py-16 px-4 md:px-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-10">
+          <span className="tag-pill text-xs tracking-widest mb-4 inline-block">📁 我的灵魂档案</span>
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">个人中心</h1>
+          <p className="text-sm text-[var(--text-secondary)]">管理你的账号信息与历史报告</p>
+        </div>
 
-          {/* Tabs (only show admin tab for admin) */}
-          {isAdmin && (
-            <div className="flex gap-4 mb-6 justify-center">
-              <button onClick={() => setTab('my')} className={`px-4 py-2 rounded-lg text-sm transition-all ${tab === 'my' ? 'bg-[var(--text-accent)] text-black font-bold' : 'border border-[var(--border-color)] text-[var(--text-secondary)]'}`}>
-                我的报告
-              </button>
-              <button onClick={() => setTab('admin')} className={`px-4 py-2 rounded-lg text-sm transition-all ${tab === 'admin' ? 'bg-[var(--text-accent)] text-black font-bold' : 'border border-[var(--border-color)] text-[var(--text-secondary)]'}`}>
-                管理员 · 预设案例
-              </button>
+        {/* Profile Card */}
+        <div className="card-jade p-6 md:p-8 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center gap-6">
+            <div
+              className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold shrink-0"
+              style={{
+                background: 'linear-gradient(135deg, rgba(74,124,111,0.15), rgba(201,160,110,0.15))',
+                border: '1px solid var(--border-accent)',
+                color: 'var(--text-accent)',
+              }}
+            >
+              {user.nickname.slice(0, 1)}
             </div>
-          )}
-
-          {/* Admin presets */}
-          {isAdmin && tab === 'admin' && (
-            <div className="mb-8">
-              <h2 className="text-lg font-bold text-[var(--text-accent)] mb-3">📋 预设案例（内部参考）</h2>
-              <div className="space-y-3">
-                {presetCases.map((report) => (
-                  <div key={report.id} className="p-4 rounded-xl border border-[var(--border-color)] bg-black/30 hover:border-[var(--text-accent)] transition-all cursor-pointer"
-                    onClick={() => router.push(`/my/cases/${report.id}`)}>
-                    <div className="flex justify-between items-start mb-1">
-                      <div>
-                        <span className="text-xs px-2 py-0.5 rounded bg-[var(--text-accent)]/10 text-[var(--text-accent)]">{getReportTypeLabel(report.type)}</span>
-                        <span className="text-xs text-[var(--text-secondary)] ml-2">{new Date(report.date).toLocaleDateString('zh-CN')}</span>
-                      </div>
-                      <span className="text-[var(--text-accent)] text-sm">→</span>
-                    </div>
-                    <div className="font-bold text-sm mt-1">{report.title}</div>
-                    <div className="text-xs text-[var(--text-secondary)] mt-1">{report.summary}</div>
-                  </div>
-                ))}
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-3">
+                <h2 className="text-xl font-bold">{user.nickname}</h2>
+                <span className="text-sm text-[var(--text-secondary)]">{maskPhone(user.phone)}</span>
               </div>
-            </div>
-          )}
-
-          {/* User reports */}
-          <div className="space-y-3">
-            {reports.length === 0 && !isAdmin && (
-              <div className="text-center py-12 text-[var(--text-secondary)]">
-                <div className="text-3xl mb-3">📄</div>
-                <p>暂无报告</p>
-                <p className="text-sm mt-2">完成健康评测或八字分析后，报告会自动保存到这里</p>
-                <div className="flex gap-3 justify-center mt-4">
-                  <button onClick={() => router.push('/health')} className="px-4 py-2 border border-[var(--border-color)] text-sm rounded-lg hover:border-[var(--text-accent)] transition-all">
-                    去做健康评测
-                  </button>
-                  <button onClick={() => router.push('/')} className="px-4 py-2 border border-[var(--border-color)] text-sm rounded-lg hover:border-[var(--text-accent)] transition-all">
-                    去做八字分析
-                  </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <div className="px-3 py-2 rounded-lg bg-[var(--bg-highlight)]">
+                  <span className="text-[var(--text-secondary)]">注册时间：</span>
+                  <span className="text-[var(--text-primary)]">{formatTime(user.registerTime)}</span>
+                </div>
+                <div className="px-3 py-2 rounded-lg bg-[var(--bg-highlight)]">
+                  <span className="text-[var(--text-secondary)]">最近登录：</span>
+                  <span className="text-[var(--text-primary)]">{formatTime(user.loginTime)}</span>
                 </div>
               </div>
-            )}
-            {reports.map((report) => (
-              <div key={report.id} className="p-4 rounded-xl border border-[var(--border-color)] bg-black/30 hover:border-[var(--text-accent)] transition-all cursor-pointer"
-                onClick={() => router.push(`/my/cases/${report.id}`)}>
-                <div className="flex justify-between items-start mb-1">
-                  <div>
-                    <span className="text-xs px-2 py-0.5 rounded bg-[var(--text-accent)]/10 text-[var(--text-accent)]">{getReportTypeLabel(report.type)}</span>
-                    <span className="text-xs text-[var(--text-secondary)] ml-2">{new Date(report.date).toLocaleDateString('zh-CN')}</span>
-                  </div>
-                  <span className="text-[var(--text-accent)] text-sm">→</span>
-                </div>
-                <div className="font-bold text-sm mt-1">{report.title}</div>
-                <div className="text-xs text-[var(--text-secondary)] mt-1">{report.summary}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <button onClick={() => { setLoggedIn(false); setPassword(''); }} className="text-sm text-[var(--text-secondary)] hover:text-white transition-colors">
-              退出 · 切换账号
+            </div>
+            <button
+              onClick={() => logout()}
+              className="px-5 py-2.5 rounded-lg border border-red-200 text-red-500 text-sm font-medium hover:bg-red-500/5 transition-colors shrink-0"
+            >
+              退出登录
             </button>
-            <span className="mx-3 text-[var(--text-secondary)] opacity-30">|</span>
-            <a href="/" className="text-sm text-[var(--text-accent)] hover:underline">返回首页</a>
           </div>
+        </div>
+
+        {/* Reports Section */}
+        <div className="mb-6 flex items-center justify-between">
+          <h3 className="text-lg font-bold">历史报告</h3>
+          <span className="text-sm text-[var(--text-secondary)]">共 {reports.length} 份</span>
+        </div>
+
+        <div className="space-y-3">
+          {reports.length === 0 ? (
+            <div className="card-jade p-10 text-center">
+              <div className="text-4xl mb-3">📄</div>
+              <p className="text-[var(--text-secondary)] mb-2">暂无报告</p>
+              <p className="text-sm text-[var(--text-secondary)] opacity-70 mb-6">
+                完成健康评测、八字分析或其他测评后，报告会自动保存到这里
+              </p>
+              <div className="flex flex-wrap gap-3 justify-center">
+                <a
+                  href="/health"
+                  className="px-5 py-2 rounded-lg border border-[var(--border-color)] text-sm hover:border-[var(--text-accent)] transition-colors"
+                >
+                  去做健康评测
+                </a>
+                <a
+                  href="/"
+                  className="px-5 py-2 rounded-lg bg-[var(--text-accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+                >
+                  去做八字分析
+                </a>
+              </div>
+            </div>
+          ) : (
+            reports.map((report) => (
+              <div
+                key={report.id}
+                className="card-jade p-4 md:p-5 cursor-pointer hover:border-[var(--text-accent)] transition-colors"
+                onClick={() => router.push(`/my/cases/${report.id}`)}
+              >
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <span className="text-xs px-2 py-0.5 rounded bg-[var(--bg-highlight)] text-[var(--text-accent)]">
+                        {getReportTypeLabel(report.type)}
+                      </span>
+                      <span className="text-xs text-[var(--text-secondary)]">
+                        {new Date(report.date).toLocaleDateString('zh-CN')}
+                      </span>
+                    </div>
+                    <h4 className="font-bold text-base mb-1 truncate">{report.title}</h4>
+                    <p className="text-sm text-[var(--text-secondary)] line-clamp-2">{report.summary}</p>
+                  </div>
+                  <span className="text-[var(--text-accent)] text-lg shrink-0">→</span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
