@@ -11,6 +11,7 @@ import FeedbackForm from './FeedbackForm';
 import TTSReader from './TTSReader';
 import AIChat from './AIChat';
 import DailyFortune from './DailyFortune';
+import PaywallOverlay from './PaywallOverlay';
 import { saveReport } from '@/lib/report-store';
 
 const CITIES_DB = (citiesData as any).cities as Record<string, { cities: string[]; tags: string[]; description: string }>;
@@ -753,6 +754,9 @@ export default function BirthInputForm() {
           {/* ── AI追问对话 ── */}
           {reportComplete && reportText && (
             <div className="max-w-3xl mx-auto">
+              {/* 付费墙提醒 */}
+              <PaywallOverlay feature="完整报告" inline={true} />
+
               <div className="gold-divider my-10" />
               <AIChat
                 context={`用户出生信息：${inputSummary}\n八字：${baziData.pillars.filter(p => p !== '--').join('/')}\n日主：${baziData.dayMaster}`}

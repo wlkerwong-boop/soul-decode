@@ -59,38 +59,8 @@ export default function DharmaPage() {
 
   return (
     <div className="min-h-screen gradient-bg">
-      {/* ── 导航 ── */}
-      <nav className="glass-nav sticky top-0 z-50 px-6 py-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Link href="/" className="gradient-text text-xl font-bold tracking-wider">
-              ✦ 灵魂解码
-            </Link>
-          </div>
-          <div className="flex items-center gap-4 text-sm text-[var(--text-secondary)] overflow-x-auto scrollbar-hide whitespace-nowrap -mb-1 px-2">
-            <Link href="/my" className="hover:text-[var(--text-accent)] transition-colors">
-              📁 档案
-            </Link>
-            <Link href="/health" className="hover:text-[var(--text-accent)] transition-colors">
-              身心健康
-            </Link>
-            <Link href="/mbti" className="hover:text-[var(--text-accent)] transition-colors">
-              MBTI性格
-            </Link>
-            <Link href="/astrology" className="hover:text-[var(--text-accent)] transition-colors">
-              星座占星
-            </Link>
-            <Link href="/tcm" className="hover:text-[var(--text-accent)] transition-colors">
-              中医通鉴
-            </Link>
-            <Link href="/dharma" className="text-[var(--text-accent)] transition-colors font-semibold">
-              ☸ 法藏
-            </Link>
-            <span className="opacity-60 hidden md:inline">·</span>
-            <span className="opacity-60 hidden md:inline">寂如师父 · 佛法修学</span>
-          </div>
-        </div>
-      </nav>
+      {/* ── 导航（由全局Nav组件接管） ── */}
+
 
       {/* ── Hero ── */}
       <section className="px-6 pt-16 pb-8 text-center max-w-4xl mx-auto">
