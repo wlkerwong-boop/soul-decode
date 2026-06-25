@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ['swisseph', '@it-healer/human-design-calculator'],
+  experimental: {
+    serverComponentsExternalPackages: ['swisseph'],
+  },
 };
 
 export default nextConfig;
