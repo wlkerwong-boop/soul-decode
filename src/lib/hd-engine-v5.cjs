@@ -4,13 +4,15 @@
  */
 const path = require('path');
 
-// 加载预计算星历表（从public目录，避免Turbopack编译）
+// 加载预计算星历表
 let GATES_TABLE = {};
 try {
+  // First try public dir, then fallback
   const fs = require('fs');
-  GATES_TABLE = JSON.parse(
-    fs.readFileSync(path.join(process.cwd(), 'public/planet-gates.json'), 'utf-8')
-  );
+  const p = path.join(process.cwd(), 'public/planet-gates.json');
+  if (fs.existsSync(p)) {
+    GATES_TABLE = JSON.parse(fs.readFileSync(p, 'utf-8'));
+  }
 } catch (e) {}
 
 const PLANET_NAMES = ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
