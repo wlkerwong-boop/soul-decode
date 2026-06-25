@@ -26,6 +26,7 @@ export default function Nav() {
   const displayName = user?.nickname || (user?.phone ? user.phone.slice(0, 3) + '****' + user.phone.slice(-4) : '');
 
   const navLinks = [
+    { href: '/daily', label: '🌅 每日' },
     { href: '/health', label: '身心健康' },
     { href: '/compatibility', label: '💞 关系合盘' },
     { href: '/mbti', label: 'MBTI性格' },

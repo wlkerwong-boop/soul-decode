@@ -1,0 +1,1 @@
+对 https://soul-decode.vercel.app 进行可用性测试。用curl测试每个页面是否返回200状态码，输出每个URL的状态和大小。测试以下页面：/ , /auth/login , /auth/register , /payment , /compatibility , /mbti , /dharma , /tools , /my 。最后汇总通过的页面数和失败的页面数。
