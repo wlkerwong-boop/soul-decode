@@ -3,7 +3,6 @@
  * 预计算星历表 + 内联所有HD计算逻辑
  */
 const path = require('path');
-const { DateTime } = require('luxon');
 
 // 加载预计算星历表（从public目录，避免Turbopack编译）
 let GATES_TABLE = {};
@@ -79,15 +78,25 @@ function getPlanetGates(year, month, day) {
 }
 
 // ── 3. 主计算函数 ──
-async function calculateBodygraph(dateStr, timeStr, tz, lat, lon) {
-  const localDt = DateTime.fromISO(dateStr + 'T' + timeStr, { zone: tz });
-  if (!localDt.isValid) throw new Error('Invalid date/time');
+function calculateBodygraph(dateStr, timeStr, tz, lat, lon) {
+  // Parse date without luxon
+  const parts = dateStr.split('T')[0].split('-');
+  const timeParts = timeStr.split(':');
+  const y = parseInt(parts[0]), m = parseInt(parts[1]), d = parseInt(parts[2]);
+  const h = parseInt(timeParts[0]), min = parseInt(timeParts[1] || '0');
   
-  const birth = localDt.toUTC();
-  const design = localDt.minus({ days: 88 }).toUTC();
+  // UTC conversion
+  const localMs = Date.UTC(y, m-1, d, h, min, 0);
   
-  const birthData = getPlanetGates(birth.year, birth.month, birth.day);
-  const designData = getPlanetGates(design.year, design.month, design.day);
+  // For China (UTC+8), use local time directly
+  const birthMs = localMs; // assume already China time
+  const designMs = birthMs - 88 * 86400000;
+  
+  const birth = new Date(birthMs);
+  const design = new Date(designMs);
+  
+  const birthData = getPlanetGates(birth.getUTCFullYear(), birth.getUTCMonth() + 1, birth.getUTCDate());
+  const designData = getPlanetGates(design.getUTCFullYear(), design.getUTCMonth() + 1, design.getUTCDate());
   
   const personality = {};
   const designObj = {};

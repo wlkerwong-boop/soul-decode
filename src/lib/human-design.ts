@@ -10,9 +10,9 @@ export interface HDResult {
   activatedGates: number[]; channels: string[]; circuitries: string[];
 }
 
-export async function calculateHumanDesign(
+export function calculateHumanDesign(
   year: number, month: number, day: number, hour: number
-): Promise<HDResult> {
+): HDResult {
   const mod = require('./hd-engine-v5.cjs');
   const ds = `${String(year).padStart(4,'0')}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
   const ts = `${String(hour||12).padStart(2,'0')}:00`;

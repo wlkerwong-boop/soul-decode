@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     // Dynamic require CJS engine
     const mod = require('../../../lib/hd-engine-v5.cjs');
-    const result = await mod.calculateBodygraph(
+    const result = mod.calculateBodygraph(
       `${String(body.year).padStart(4,'0')}-${String(body.month).padStart(2,'0')}-${String(body.day).padStart(2,'0')}`,
       `${String(body.hour || '12').padStart(2,'0')}:00`,
       'Asia/Shanghai', 39.9, 116.4
