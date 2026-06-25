@@ -1,15 +1,21 @@
 /**
- * Human Design 计算引擎 v2
- * 使用 sweph（Swiss Ephemeris）精准星历，预编译支持Vercel
+ * Human Design 计算引擎 v3
+ * 使用 ephemeris-astronomy（纯JS，零原生依赖）
  */
 
-let swe: any = null;
+let ea: any = null;
 
-async function getSwe(): Promise<any> {
-  if (swe) return swe;
-  const mod = await import('sweph');
-  swe = mod;
-  return swe;
+async function getEA(): Promise<any> {
+  if (ea) return ea;
+  ea = require('ephemeris-astronomy');
+  return ea;
+}
+
+function getPlanetLon(data: any, planet: string): number {
+  try {
+    const lon = data?.observed?.[planet]?.apparentLongitudeDd;
+    return typeof lon === 'number' ? lon : 0;
+  } catch { return 0; }
 }
 
 // 64 gates → 能量中心映射
@@ -56,48 +62,39 @@ export async function calculateHumanDesign(
   year: number, month: number, day: number,
   hour: number, lat: number, lon: number, tz: string = 'Asia/Shanghai'
 ): Promise<HDResult> {
-  const swe = await getSwe();
-
-  // Birth date in local time → UTC
+  const eaMod = await getEA();
   const localDate = new Date(year, month - 1, day, hour || 12, 0, 0);
-  const jd = swe.julday(localDate.getUTCFullYear(), localDate.getUTCMonth() + 1, localDate.getUTCDate(),
-    localDate.getUTCHours() + localDate.getUTCMinutes() / 60, 1);
 
   // Design date: 88 days before birth
   const designDate = new Date(localDate.getTime() - 88 * 24 * 60 * 60 * 1000);
-  const jdDesign = swe.julday(designDate.getUTCFullYear(), designDate.getUTCMonth() + 1, designDate.getUTCDate(),
-    designDate.getUTCHours() + designDate.getUTCMinutes() / 60, 1);
 
-  const FLAG = 4; // Moshier ephemeris (works without separate files)
-  const PLANET_IDS: Record<string, number> = {
-    Sun: 0, Moon: 1, Mercury: 2, Venus: 3, Mars: 4,
-    Jupiter: 5, Saturn: 6, Uranus: 7, Neptune: 8, Pluto: 9,
-    NorthNode: 10,
+  const planetNames = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+  const nameMap: Record<string, string> = {
+    sun: 'Sun', moon: 'Moon', mercury: 'Mercury', venus: 'Venus', mars: 'Mars',
+    jupiter: 'Jupiter', saturn: 'Saturn', uranus: 'Uranus', neptune: 'Neptune', pluto: 'Pluto',
   };
 
   const personality: Record<string, any> = {};
   const design: Record<string, any> = {};
 
-  for (const [name, id] of Object.entries(PLANET_IDS)) {
+  for (const pName of planetNames) {
     try {
-      const pos = swe.calc_ut(jd, id, FLAG);
-      if (pos && pos.data) {
-        const lonDeg = pos.data[0] || 0;
-        const { gate, line } = longitudeToGateAndLine(lonDeg);
-        personality[name] = { gate, line, longitude: lonDeg };
+      const data = eaMod.getPlanet(pName, localDate);
+      const lon = parseInt(getPlanetLon(data, pName)?.toFixed(4)) || 0;
+      if (lon) {
+        const { gate, line } = longitudeToGateAndLine(lon);
+        personality[nameMap[pName]] = { gate, line, longitude: lon };
       }
     } catch { continue; }
   }
 
-  // Design: sun, moon, mercury, venus, mars, jupiter, north node
-  for (const name of ['Sun','Moon','Mercury','Venus','Mars','Jupiter','NorthNode']) {
+  for (const pName of ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter']) {
     try {
-      const id = PLANET_IDS[name];
-      const pos = swe.calc_ut(jdDesign, id, FLAG);
-      if (pos && pos.data) {
-        const lonDeg = pos.data[0] || 0;
-        const { gate, line } = longitudeToGateAndLine(lonDeg);
-        design[name] = { gate, line, longitude: lonDeg };
+      const data = eaMod.getPlanet(pName, designDate);
+      const lon = parseInt(getPlanetLon(data, pName)?.toFixed(4)) || 0;
+      if (lon) {
+        const { gate, line } = longitudeToGateAndLine(lon);
+        design[nameMap[pName]] = { gate, line, longitude: lon };
       }
     } catch { continue; }
   }
