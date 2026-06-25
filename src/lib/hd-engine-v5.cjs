@@ -63,13 +63,19 @@ function dateToKey(year, month, day) {
 
 function getPlanetGates(year, month, day) {
   const key = dateToKey(year, month, day);
-  const gates = GATES_TABLE[key];
-  if (gates && gates.length >= 10) return gates;
-  // Fallback: estimate
+  const packed = GATES_TABLE[key];
+  if (packed && packed.length >= 20) {
+    const gates = [];
+    const lines = [];
+    for (let i = 0; i < 10; i++) { gates.push(packed[i*2]); lines.push(packed[i*2+1]); }
+    return { gates, lines };
+  }
+  // Fallback
   const approx = [279, 100, 180, 220, 60, 150, 290, 300, 310, 240];
   const speeds = [0.9856, 13.176, 1.383, 1.383, 0.524, 0.083, 0.033, 0.012, 0.006, 0.005];
   const dayOfYear = Math.floor((Date.UTC(year, month-1, day) - Date.UTC(2000, 0, 1)) / 86400000);
-  return approx.map((a, i) => Math.floor(((a + speeds[i] * dayOfYear) % 360 + 360) % 360 / 5.625) + 1);
+  const gates = approx.map((a, i) => Math.floor(((a + speeds[i] * dayOfYear) % 360 + 360) % 360 / 5.625) + 1);
+  return { gates, lines: gates.map(() => 1) };
 }
 
 // ── 3. 主计算函数 ──
@@ -80,21 +86,32 @@ async function calculateBodygraph(dateStr, timeStr, tz, lat, lon) {
   const birth = localDt.toUTC();
   const design = localDt.minus({ days: 88 }).toUTC();
   
-  const birthGates = getPlanetGates(birth.year, birth.month, birth.day);
-  const designGates = getPlanetGates(design.year, design.month, design.day);
+  const birthData = getPlanetGates(birth.year, birth.month, birth.day);
+  const designData = getPlanetGates(design.year, design.month, design.day);
   
   const personality = {};
   const designObj = {};
   
   PLANET_NAMES.forEach((name, i) => {
-    const lon = birthGates[i] * 5.625 - 2.8125;
-    personality[name] = getActivation(lon);
-    const dLon = designGates[i] * 5.625 - 2.8125;
+    const g = birthData.gates[i];
+    const l = birthData.lines[i];
+    // Convert back to longitude: gate center + line offset
+    const baseLon = (g - 1) * 5.625 + (l - 1) * 0.9375 + 0.46875;
+    personality[name] = getActivation(baseLon);
+    
+    const dg = designData.gates[i];
+    const dl = designData.lines[i];
+    const dLon = (dg - 1) * 5.625 + (dl - 1) * 0.9375 + 0.46875;
     designObj[name] = getActivation(dLon);
   });
   
-  personality.Earth = getActivation((birthGates[0] * 5.625 + 177.1875) % 360);
-  designObj.Earth = getActivation((designGates[0] * 5.625 + 177.1875) % 360);
+  // Earth = opposite of Sun
+  const sunG = birthData.gates[0]; const sunL = birthData.lines[0];
+  const earthLon = ((sunG - 1) * 5.625 + (sunL - 1) * 0.9375 + 0.46875 + 180) % 360;
+  personality.Earth = getActivation(earthLon);
+  const dsg = designData.gates[0]; const dsl = designData.lines[0];
+  const dEarthLon = ((dsg - 1) * 5.625 + (dsl - 1) * 0.9375 + 0.46875 + 180) % 360;
+  designObj.Earth = getActivation(dEarthLon);
   
   // Collect all gates
   const allGates = new Set();
