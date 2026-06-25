@@ -5,10 +5,13 @@
 const path = require('path');
 const { DateTime } = require('luxon');
 
-// 加载预计算星历表（使用require而非fs，避免Turbopack问题）
+// 加载预计算星历表（从public目录，避免Turbopack编译）
 let GATES_TABLE = {};
 try {
-  GATES_TABLE = require('../data/ephemeris/planet-gates.json');
+  const fs = require('fs');
+  GATES_TABLE = JSON.parse(
+    fs.readFileSync(path.join(process.cwd(), 'public/planet-gates.json'), 'utf-8')
+  );
 } catch (e) {}
 
 const PLANET_NAMES = ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
