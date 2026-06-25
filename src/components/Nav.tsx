@@ -27,6 +27,7 @@ export default function Nav() {
 
   const navLinks = [
     { href: '/health', label: '身心健康' },
+    { href: '/compatibility', label: '💞 关系合盘' },
     { href: '/mbti', label: 'MBTI性格' },
     { href: '/astrology', label: '星座占星' },
     { href: '/tcm', label: '中医通鉴' },
