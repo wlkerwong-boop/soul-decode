@@ -1,36 +1,20 @@
 /**
- * 人类图计算引擎 — 精简TypeScript包装
- * 实际计算委托给 hd-engine.cjs (sweph瑞士星历)
+ * 人类图计算 — 委托给 hd-engine-v5.cjs
  */
-
-const hdEngine = require('./hd-engine.cjs');
-
 export interface HDResult {
-  type: string;
-  strategy: string;
-  authority: string;
-  profile: string;
-  definition: string;
-  incarnationCross: string;
-  signature: string;
-  notSelfTheme: string;
-  definedCenters: string[];
-  undefinedCenters: string[];
+  type: string; strategy: string; authority: string;
+  profile: string; definition: string; incarnationCross: string;
+  signature: string; notSelfTheme: string;
+  definedCenters: string[]; undefinedCenters: string[];
   centerDefinition: Record<string, boolean>;
-  activatedGates: number[];
-  channels: string[];
-  circuitries: string[];
+  activatedGates: number[]; channels: string[]; circuitries: string[];
 }
 
 export async function calculateHumanDesign(
-  year: number, month: number, day: number,
-  hour: number, lat: number, lon: number
+  year: number, month: number, day: number, hour: number
 ): Promise<HDResult> {
-  return hdEngine.calculateHD({
-    year: String(year),
-    month: String(month),
-    day: String(day),
-    hour: String(hour || 12),
-    location: '',
-  });
+  const mod = require('./hd-engine-v5.cjs');
+  const ds = `${String(year).padStart(4,'0')}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  const ts = `${String(hour||12).padStart(2,'0')}:00`;
+  return mod.calculateBodygraph(ds, ts, 'Asia/Shanghai', 39.9, 116.4);
 }
