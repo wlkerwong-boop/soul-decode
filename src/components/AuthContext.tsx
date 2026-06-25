@@ -72,17 +72,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { ok: false, message: '验证码错误，开发期固定为 888888' };
     }
 
+    // Auto-register if not found (seamless UX)
     const existing = loadUserFromStorage();
-    if (!existing || existing.phone !== normalized) {
-      return { ok: false, message: '该手机号尚未注册，请先注册' };
+    if (existing && existing.phone === normalized) {
+      const updated: User = {
+        ...existing,
+        loginTime: new Date().toISOString(),
+      };
+      saveUserToStorage(updated);
+      setUser(updated);
+      return { ok: true };
     }
 
-    const updated: User = {
-      ...existing,
-      loginTime: new Date().toISOString(),
+    // Auto-create user on first login
+    const now = new Date().toISOString();
+    const newUser: User = {
+      phone: normalized,
+      nickname: normalized.slice(0, 3) + '****' + normalized.slice(-4),
+      registerTime: now,
+      loginTime: now,
     };
-    saveUserToStorage(updated);
-    setUser(updated);
+    saveUserToStorage(newUser);
+    setUser(newUser);
     return { ok: true };
   }, []);
 
