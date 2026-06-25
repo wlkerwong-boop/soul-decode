@@ -10,6 +10,8 @@
     "index:dharma": "python3 scripts/build-dharma-index.py"
   },
   "dependencies": {
+    "@fusionstrings/swisseph-wasm": "^0.1.5",
+    "@it-healer/human-design-calculator": "^1.0.2",
     "@next/swc-wasm-nodejs": "^16.2.6",
     "astronomy-engine": "^2.1.19",
     "echarts": "^6.1.0",
@@ -19,7 +21,9 @@
     "lunar-javascript": "^1.7.7",
     "next": "16.2.6",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "sweph": "^2.10.3-5",
+    "swisseph": "^0.5.17"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
