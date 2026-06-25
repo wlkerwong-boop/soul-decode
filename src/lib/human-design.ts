@@ -1,15 +1,15 @@
 /**
  * Human Design 计算引擎 v2
- * 使用 @swisseph/node 精准星历
+ * 使用 sweph（Swiss Ephemeris）精准星历，预编译支持Vercel
  */
 
-let sweInstance: any = null;
+let swe: any = null;
 
 async function getSwe(): Promise<any> {
-  if (sweInstance) return sweInstance;
-  const mod = await import('@swisseph/node');
-  sweInstance = mod;
-  return sweInstance;
+  if (swe) return swe;
+  const mod = await import('sweph');
+  swe = mod;
+  return swe;
 }
 
 // 64 gates → 能量中心映射
@@ -60,28 +60,32 @@ export async function calculateHumanDesign(
 
   // Birth date in local time → UTC
   const localDate = new Date(year, month - 1, day, hour || 12, 0, 0);
-  const jd = swe.dateToJulianDay(localDate);
+  const jd = swe.julday(localDate.getUTCFullYear(), localDate.getUTCMonth() + 1, localDate.getUTCDate(),
+    localDate.getUTCHours() + localDate.getUTCMinutes() / 60, 1);
 
-  // Design date: 88 days before birth (approximately)
+  // Design date: 88 days before birth
   const designDate = new Date(localDate.getTime() - 88 * 24 * 60 * 60 * 1000);
-  const jdDesign = swe.dateToJulianDay(designDate);
+  const jdDesign = swe.julday(designDate.getUTCFullYear(), designDate.getUTCMonth() + 1, designDate.getUTCDate(),
+    designDate.getUTCHours() + designDate.getUTCMinutes() / 60, 1);
 
+  const FLAG = 4; // Moshier ephemeris (works without separate files)
   const PLANET_IDS: Record<string, number> = {
     Sun: 0, Moon: 1, Mercury: 2, Venus: 3, Mars: 4,
     Jupiter: 5, Saturn: 6, Uranus: 7, Neptune: 8, Pluto: 9,
     NorthNode: 10,
   };
 
-  const flags = swe.CalculationFlag?.Moshier || 0;
   const personality: Record<string, any> = {};
   const design: Record<string, any> = {};
 
   for (const [name, id] of Object.entries(PLANET_IDS)) {
     try {
-      const pos = swe.calculatePosition(jd, id, flags);
-      const lonDeg = pos.longitude || 0;
-      const { gate, line } = longitudeToGateAndLine(lonDeg);
-      personality[name] = { gate, line, longitude: lonDeg };
+      const pos = swe.calc_ut(jd, id, FLAG);
+      if (pos && pos.data) {
+        const lonDeg = pos.data[0] || 0;
+        const { gate, line } = longitudeToGateAndLine(lonDeg);
+        personality[name] = { gate, line, longitude: lonDeg };
+      }
     } catch { continue; }
   }
 
@@ -89,10 +93,12 @@ export async function calculateHumanDesign(
   for (const name of ['Sun','Moon','Mercury','Venus','Mars','Jupiter','NorthNode']) {
     try {
       const id = PLANET_IDS[name];
-      const pos = swe.calculatePosition(jdDesign, id, flags);
-      const lonDeg = pos.longitude || 0;
-      const { gate, line } = longitudeToGateAndLine(lonDeg);
-      design[name] = { gate, line, longitude: lonDeg };
+      const pos = swe.calc_ut(jdDesign, id, FLAG);
+      if (pos && pos.data) {
+        const lonDeg = pos.data[0] || 0;
+        const { gate, line } = longitudeToGateAndLine(lonDeg);
+        design[name] = { gate, line, longitude: lonDeg };
+      }
     } catch { continue; }
   }
 
