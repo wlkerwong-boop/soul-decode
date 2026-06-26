@@ -16,6 +16,12 @@ export async function POST(request: NextRequest) {
         status: 400, headers: { 'Content-Type': 'application/json' },
       });
     }
+    const y = parseInt(year), m = parseInt(month), d = parseInt(day);
+    if (isNaN(y) || isNaN(m) || isNaN(d) || m < 1 || m > 12 || d < 1 || d > 31) {
+      return new Response(JSON.stringify({ error: '无效的日期参数' }), {
+        status: 400, headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     // Dynamic require CJS engine
     const mod = require('../../../lib/hd-engine-v5.cjs');
