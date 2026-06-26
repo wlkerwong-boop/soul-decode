@@ -58,10 +58,11 @@ export default function HumanDesignPage() {
     if (!form.year || !form.month || !form.day) { setError('请填写完整的出生日期'); return; }
     setLoading(true); setError(''); setHd(null); setInterp('');
     try {
+      const payload = { ...form, timezone: form.timezone || 'Asia/Shanghai' };
       const res = await fetch('/api/human-design', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error || '生成失败');
@@ -127,6 +128,18 @@ export default function HumanDesignPage() {
             <select className="input-jade" value={form.location} onChange={e => setForm(p => ({...p, location: e.target.value}))}>
               <option value="">选择省份</option>
               {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm text-[var(--text-secondary)] mb-2 font-medium">时区</label>
+            <select className="input-jade" value={form.timezone} onChange={e => setForm(p => ({...p, timezone: e.target.value}))}>
+              <option value="Asia/Shanghai">中国标准时间（默认）</option>
+              <option value="America/Los_Angeles">美国洛杉矶（UTC-7/8）</option>
+              <option value="America/New_York">美国纽约（UTC-4/5）</option>
+              <option value="Europe/London">英国伦敦（UTC+0/1）</option>
+              <option value="Europe/Paris">欧洲巴黎（UTC+1/2）</option>
+              <option value="Australia/Sydney">澳大利亚悉尼（UTC+10/11）</option>
+              <option value="Asia/Tokyo">日本东京（UTC+9）</option>
             </select>
           </div>
           {error && <div className="text-sm text-red-500 bg-red-500/5 border border-red-500/15 rounded-lg px-4 py-3">{error}</div>}

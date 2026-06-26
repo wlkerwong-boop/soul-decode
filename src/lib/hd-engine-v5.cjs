@@ -81,17 +81,35 @@ function getPlanetGates(year, month, day) {
 
 // ── 3. 主计算函数 ──
 function calculateBodygraph(dateStr, timeStr, tz, lat, lon) {
-  // Parse date without luxon
-  const parts = dateStr.split('T')[0].split('-');
+  // Parse date
+  const parts = dateStr.split('-');
   const timeParts = timeStr.split(':');
-  const y = parseInt(parts[0]), m = parseInt(parts[1]), d = parseInt(parts[2]);
-  const h = parseInt(timeParts[0]), min = parseInt(timeParts[1] || '0');
+  let y = parseInt(parts[0]), m = parseInt(parts[1]), d = parseInt(parts[2]);
+  let h = parseInt(timeParts[0]), min = parseInt(timeParts[1] || '0');
   
-  // UTC conversion
-  const localMs = Date.UTC(y, m-1, d, h, min, 0);
+  // Timezone conversion: non-China timezones → adjust to China time
+  if (tz && tz !== 'Asia/Shanghai') {
+    // Convert local time to UTC, then to China time (UTC+8)
+    const localMs = Date.UTC(y, m-1, d, h, min, 0);
+    // Get UTC offset for the timezone (simplified: use standard offsets)
+    const tzOffsets = {
+      'America/Los_Angeles': -7, 'America/New_York': -4,
+      'Europe/London': 0, 'Europe/Paris': 1,
+      'Australia/Sydney': 10, 'Asia/Tokyo': 9,
+      'America/Chicago': -5, 'America/Denver': -6,
+    };
+    const localOffset = tzOffsets[tz] || 0;
+    const utcMs = localMs - localOffset * 3600000;
+    const chinaMs = utcMs + 8 * 3600000;
+    const chinaDt = new Date(chinaMs);
+    y = chinaDt.getUTCFullYear();
+    m = chinaDt.getUTCMonth() + 1;
+    d = chinaDt.getUTCDate();
+    h = chinaDt.getUTCHours();
+    min = chinaDt.getUTCMinutes();
+  }
   
-  // For China (UTC+8), use local time directly
-  const birthMs = localMs; // assume already China time
+  const birthMs = Date.UTC(y, m-1, d, h, min, 0);
   const designMs = birthMs - 88 * 86400000;
   
   const birth = new Date(birthMs);
