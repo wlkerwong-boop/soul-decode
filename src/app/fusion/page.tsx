@@ -286,6 +286,8 @@ export default function FusionPage() {
   const [astro, setAstro] = useState<AstrologyResponse['astrology'] | null>(null);
   const [plum, setPlum] = useState<PlumBlossomResponse['hexagram'] | null>(null);
   const [fusion, setFusion] = useState('');
+  const [hdInterp, setHdInterp] = useState('');
+  const [hdInterpLoading, setHdInterpLoading] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const reportRef = useRef<HTMLDivElement>(null);
 
@@ -420,6 +422,19 @@ export default function FusionPage() {
       setHD(hdRes.bodygraph);
       setAstro(astroRes.astrology);
       setPlum(plumRes.hexagram);
+
+      // 自动生成人类图深度解读报告
+      setHdInterpLoading(true);
+      try {
+        const interpRes = await fetch('/api/hd-interpret', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bodygraph: hdRes.bodygraph }),
+        });
+        const interpData = await interpRes.json();
+        setHdInterp(interpData.interpretation || '');
+      } catch { setHdInterp('解读生成失败'); }
+      finally { setHdInterpLoading(false); }
 
       // 融合分析（客户端生成）
       const fusionText = generateFusionText(baziRes.bazi, hdRes.bodygraph, astroRes.astrology, plumRes.hexagram);
@@ -587,7 +602,7 @@ export default function FusionPage() {
                 </div>
               </div>
 
-              {/* 占星卡片 */}
+            {/* 占星卡片 */}
               <div className="card-jade p-5">
                 <h3 className="text-base font-bold mb-3 flex items-center gap-2">
                   <span>✨</span> 西方占星
@@ -660,6 +675,41 @@ export default function FusionPage() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* ═══ 人类图深度解读报告 ═══ */}
+            <div className="card-jade p-5">
+              <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+                <span>📜</span> 人类图深度解读报告
+              </h3>
+              {hdInterpLoading ? (
+                <div className="text-center py-6">
+                  <div className="cosmic-loader mx-auto mb-3" style={{width:36,height:36}}>
+                    <div className="cosmic-ring cosmic-ring-3" style={{width:'100%',height:'100%'}}/>
+                    <div className="cosmic-center text-xs">📜</div>
+                  </div>
+                  <p className="text-xs text-[var(--text-secondary)]">正在生成深度解读...</p>
+                </div>
+              ) : hdInterp ? (
+                <div className="text-sm leading-relaxed report-content whitespace-pre-line">
+                  {hdInterp.split('## ').filter(Boolean).map((section, i) => {
+                    const lines = section.trim().split('\n');
+                    const title = lines[0].trim();
+                    const body = lines.slice(1).join('\n').trim();
+                    return (
+                      <div key={i} className="mb-5 last:mb-0">
+                        <h4 className="text-sm font-bold text-[var(--text-accent)] mb-2 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--text-accent)] inline-block" />
+                          {title}
+                        </h4>
+                        <div className="text-sm leading-relaxed text-[var(--text-primary)]/90">{body}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-xs text-[var(--text-secondary)]">解读生成中...</p>
+              )}
             </div>
 
             {/* ═══ 八字详细信息 ═══ */}
@@ -1033,7 +1083,7 @@ export default function FusionPage() {
             {/* ═══ 操作按钮 ═══ */}
             <div className="flex flex-wrap justify-center gap-3 no-print pt-2">
               <button
-                onClick={() => { setBazi(null); setDayun(null); setHD(null); setAstro(null); setPlum(null); setFusion(''); }}
+                onClick={() => { setBazi(null); setDayun(null); setHD(null); setAstro(null); setPlum(null); setFusion(''); setHdInterp(''); }}
                 className="btn-jade max-w-xs inline-flex"
                 style={{ width: 'auto' }}
               >

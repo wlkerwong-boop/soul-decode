@@ -632,3 +632,13 @@ section {
     color: #2d5a4f !important;
   }
 }
+
+/* 打印隐藏 */
+@media screen {
+  .print-only { display: none !important; }
+}
+@media print {
+  .print-hidden { display: none !important; }
+  .card-jade { break-inside: avoid; }
+  nav, footer { display: none !important; }
+}
