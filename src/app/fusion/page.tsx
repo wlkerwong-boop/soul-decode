@@ -104,6 +104,42 @@ interface HDResponse {
   bodygraph: HDData;
 }
 
+/* ── 梅花易数类型 ── */
+
+interface TrigramData {
+  name: string;
+  symbol: string;
+  element: string;
+  nature: string;
+}
+
+interface HexagramInfo {
+  name: string;
+  code: number;
+  upper: TrigramData;
+  lower: TrigramData;
+  judgment: string;
+  lines?: boolean[];
+}
+
+interface PlumBlossomResponse {
+  success: boolean;
+  hexagram: {
+    primary: HexagramInfo;
+    changing: HexagramInfo | null;
+    mutual: HexagramInfo | null;
+    bodyTrigram: TrigramData;
+    useTrigram: TrigramData;
+    bodyUseRelation: string;
+    movingLine: number;
+    sixRelations: string[];
+    shiYing: { shi: number; ying: number };
+    nayinStem: string[];
+    nayinBranch: string[];
+    interpretation: string;
+  };
+}
+
 /* ── 常量 ── */
 
 const PROVINCES = ['北京','上海','天津','重庆','河北','山西','内蒙古','辽宁','吉林','黑龙江','江苏','浙江','安徽','福建','江西','山东','河南','湖北','湖南','广东','广西','海南','四川','贵州','云南','西藏','陕西','甘肃','青海','宁夏','新疆','香港','澳门','台湾'];
@@ -123,6 +159,17 @@ const ASPECT_LABELS: Record<string, string> = {
 const ASPECT_EMOJI: Record<string, string> = {
   'conjunction':'●','opposition':'⚡','trine':'△','square':'□','sextile':'⬡',
 };
+
+/* ── 八卦三爻符号 ── */
+
+const TRIGRAM_EMOJI: Record<string, string> = {
+  '乾': '☰', '兑': '☱', '离': '☲', '震': '☳',
+  '巽': '☴', '坎': '☵', '艮': '☶', '坤': '☷',
+};
+
+function getTrigramEmoji(name: string): string {
+  return TRIGRAM_EMOJI[name] || '✦';
+}
 
 /* ── 辅助组件 ── */
 
@@ -237,6 +284,7 @@ export default function FusionPage() {
   const [dayun, setDayun] = useState<DayunData | null>(null);
   const [hd, setHD] = useState<HDData | null>(null);
   const [astro, setAstro] = useState<AstrologyResponse['astrology'] | null>(null);
+  const [plum, setPlum] = useState<PlumBlossomResponse['hexagram'] | null>(null);
   const [fusion, setFusion] = useState('');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const reportRef = useRef<HTMLDivElement>(null);
@@ -251,6 +299,7 @@ export default function FusionPage() {
     b: BaziResponse['bazi'],
     h: HDData,
     a: AstrologyResponse['astrology'],
+    p: PlumBlossomResponse['hexagram'],
   ): string => {
     const lines: string[] = [];
 
@@ -269,9 +318,19 @@ export default function FusionPage() {
       lines.push(`【占星视角】太阳${a.sunSign.label}（${a.sunSign.element}），主要行星能量分布反映先天性格特质。`);
     }
 
+    // 梅花易数
+    if (p) {
+      const primaryName = p.primary?.name || '未知';
+      const changingName = p.changing?.name || '无';
+      const bodyName = p.bodyTrigram?.name || '?';
+      const useName = p.useTrigram?.name || '?';
+      lines.push(`【梅花易数视角】本卦「${primaryName}」变卦「${changingName}」，体卦${bodyName}（${p.bodyTrigram?.element}）用卦${useName}（${p.useTrigram?.element}），体用关系：${p.bodyUseRelation}。`);
+    }
+
     // 交叉分析
     const element = b.dayMasterElement;
     const sunElement = a?.sunSign?.element || '';
+    const plumBodyElement = p?.bodyTrigram?.element || '';
     let xing = '';
     if (element && sunElement) {
       if (element === sunElement) {
@@ -286,8 +345,42 @@ export default function FusionPage() {
         xing = `八字日主${element}与太阳星座${sunElement}元素不同，提示内在先天能量与后天性格表达的互补关系。`;
       }
     }
-    lines.push(`【交叉分析】${xing}`);
-    lines.push(`人类图${h.type}类型与八字日主${b.dayMasterElement}、太阳${a?.sunSign?.label || ''}之间形成三系统能量印证。建议综合参考八字五行喜忌、人类图策略权威、以及占星星座特质，全面认识自我。`);
+    lines.push(`【八字×占星交叉】${xing}`);
+
+    // 梅花易数与八字/人类图/占星交叉
+    if (p && element && plumBodyElement) {
+      if (element === plumBodyElement) {
+        lines.push(`【八字×梅花易数交叉】日主五行${element}与体卦${p.bodyTrigram.name}（${plumBodyElement}）五行相同，先天命运与当下卦象同频共振。`);
+      } else if (
+        (element === '金' && plumBodyElement === '土') || (element === '土' && plumBodyElement === '火') ||
+        (element === '火' && plumBodyElement === '木') || (element === '木' && plumBodyElement === '水') ||
+        (element === '水' && plumBodyElement === '金')
+      ) {
+        lines.push(`【八字×梅花易数交叉】日主${element}生体卦${plumBodyElement}（相生），先天命盘滋养当前形势，顺遂之象。`);
+      } else if (
+        (plumBodyElement === '金' && element === '土') || (plumBodyElement === '土' && element === '火') ||
+        (plumBodyElement === '火' && element === '木') || (plumBodyElement === '木' && element === '水') ||
+        (plumBodyElement === '水' && element === '金')
+      ) {
+        lines.push(`【八字×梅花易数交叉】体卦${plumBodyElement}生日主${element}（相生），当前形势对命主有助益。`);
+      } else {
+        lines.push(`【八字×梅花易数交叉】日主${element}与体卦${plumBodyElement}五行不同，提示需调和内外能量。`);
+      }
+    }
+
+    if (p && h) {
+      lines.push(`【人类图×梅花易数交叉】${h.type}类型对应本卦「${p.primary.name}」的${p.bodyUseRelation.includes('吉') ? '积极' : '审慎'}态势，策略与卦象呼应。`);
+    }
+
+    if (p && a && sunElement && plumBodyElement) {
+      if (sunElement === plumBodyElement) {
+        lines.push(`【占星×梅花易数交叉】太阳${sunElement}元素与体卦${plumBodyElement}相同，灵魂表达与当下际遇一致。`);
+      } else {
+        lines.push(`【占星×梅花易数交叉】太阳${sunElement}元素与体卦${plumBodyElement}不同，内在灵魂倾向与现实处境需要调和。`);
+      }
+    }
+
+    lines.push(`综合八字五行喜忌、人类图策略权威、占星星座特质以及梅花易数卦象启示，四系统相互印证，全面认知自我与当下。`);
 
     return lines.join('\n');
   }, []);
@@ -297,7 +390,7 @@ export default function FusionPage() {
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.year || !form.month || !form.day) { setError('请填写完整的出生日期'); return; }
-    setLoading(true); setError(''); setBazi(null); setDayun(null); setHD(null); setAstro(null); setFusion('');
+    setLoading(true); setError(''); setBazi(null); setDayun(null); setHD(null); setAstro(null); setPlum(null); setFusion('');
 
     const body = {
       year: form.year,
@@ -310,23 +403,26 @@ export default function FusionPage() {
     };
 
     try {
-      const [baziRes, hdRes, astroRes] = await Promise.all([
+      const [baziRes, hdRes, astroRes, plumRes] = await Promise.all([
         fetch('/api/bazi', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json()),
         fetch('/api/human-design', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json()),
         fetch('/api/astrology', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json()),
+        fetch('/api/plum-blossom', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'date', year: form.year, month: form.month, day: form.day, hour: form.hour || undefined }) }).then(r => r.json()),
       ]);
 
       if (!baziRes.success) throw new Error(baziRes.error || '八字生成失败');
       if (!hdRes.success) throw new Error(hdRes.error || '人类图生成失败');
       if (!astroRes.success) throw new Error(astroRes.error || '占星生成失败');
+      if (!plumRes.success) throw new Error(plumRes.error || '梅花易数起卦失败');
 
       setBazi(baziRes.bazi);
       setDayun(baziRes.dayun);
       setHD(hdRes.bodygraph);
       setAstro(astroRes.astrology);
+      setPlum(plumRes.hexagram);
 
       // 融合分析（客户端生成）
-      const fusionText = generateFusionText(baziRes.bazi, hdRes.bodygraph, astroRes.astrology);
+      const fusionText = generateFusionText(baziRes.bazi, hdRes.bodygraph, astroRes.astrology, plumRes.hexagram);
       setFusion(fusionText);
 
       // 也尝试调用融合API获取更丰富的AI解读
@@ -366,14 +462,14 @@ export default function FusionPage() {
       <div className="py-6 md:py-12 px-4 max-w-6xl mx-auto" ref={reportRef}>
         {/* ── 标题 ── */}
         <div className="text-center mb-8 no-print">
-          <div className="text-3xl mb-2">🔮🧬✨</div>
-          <h1 className="text-2xl md:text-3xl font-bold gradient-text mb-2">八字 · 人类图 · 占星 融合分析</h1>
-          <p className="text-sm text-[var(--text-secondary)]">输入出生信息，获得东方命理 · 人类设计 · 西方占星三系统交叉解读</p>
+          <div className="text-3xl mb-2">🔮🧬✨☯</div>
+          <h1 className="text-2xl md:text-3xl font-bold gradient-text mb-2">八字 · 人类图 · 占星 · 梅花易数 融合分析</h1>
+          <p className="text-sm text-[var(--text-secondary)]">输入出生信息，获得东方命理 · 人类设计 · 西方占星 · 梅花易数四系统交叉解读</p>
         </div>
 
         {/* ── 打印用标题 ── */}
         <div className="hidden print-area text-center mb-6">
-          <h1 className="text-2xl font-bold" style={{ color: '#2d5a4f' }}>八字 · 人类图 · 占星 融合分析报告</h1>
+          <h1 className="text-2xl font-bold" style={{ color: '#2d5a4f' }}>八字 · 人类图 · 占星 · 梅花易数 融合分析报告</h1>
           <p className="text-sm" style={{ color: '#666' }}>
             出生时间：{form.year}年{form.month}月{form.day}日{form.hour ? ` ${form.hour}时` : ''}
             {form.location ? ` · ${form.location}` : ''}
@@ -420,7 +516,7 @@ export default function FusionPage() {
             </div>
             {error && <div className="text-sm text-red-500">{error}</div>}
             <button type="submit" className="btn-jade w-full" disabled={loading}>
-              {loading ? '🔮🧬✨ 三系统同步分析中...' : '🔮🧬✨ 生成三系统融合报告'}
+              {loading ? '🔮🧬✨☯ 四系统同步分析中...' : '🔮🧬✨☯ 生成四系统融合报告'}
             </button>
           </form>
         )}
@@ -434,15 +530,15 @@ export default function FusionPage() {
               <div className="cosmic-ring cosmic-ring-3" />
               <div className="cosmic-center">☯</div>
             </div>
-            <p className="text-sm text-[var(--text-secondary)]">正在并行计算八字、人类图和西方占星...</p>
+            <p className="text-sm text-[var(--text-secondary)]">正在并行计算八字、人类图、西方占星和梅花易数...</p>
           </div>
         )}
 
         {/* ── 结果 ── */}
-        {bazi && hd && astro && (
+        {bazi && hd && astro && plum && (
           <div className="space-y-5">
-            {/* ═══ 三栏系统总览 ═══ */}
-            <div className="grid md:grid-cols-3 gap-4">
+            {/* ═══ 四栏系统总览 ═══ */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* 八字卡片 */}
               <div className="card-jade p-5">
                 <h3 className="text-base font-bold mb-3 flex items-center gap-2">
@@ -517,6 +613,52 @@ export default function FusionPage() {
                   </div>
                 </div>
                 <div className="text-xs text-[var(--text-secondary)] mb-1">宫位制：{astro.houses}</div>
+              </div>
+
+              {/* 梅花易数卡片 */}
+              <div className="card-jade p-5">
+                <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+                  <span>☯</span> 梅花易数
+                </h3>
+                <div className="text-center mb-3">
+                  <div className="text-3xl mb-1">
+                    {getTrigramEmoji(plum.primary.upper.name)}{getTrigramEmoji(plum.primary.lower.name)}
+                  </div>
+                  <div className="text-lg font-bold gradient-text">{plum.primary.name}</div>
+                  {plum.changing && (
+                    <div className="text-xs text-[var(--text-secondary)] mt-1">
+                      → {getTrigramEmoji(plum.changing.upper.name)}{getTrigramEmoji(plum.changing.lower.name)} {plum.changing.name}
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1.5 text-xs">
+                  <div className="flex justify-between">
+                    <span className="text-[var(--text-secondary)]">体卦</span>
+                    <span>{getTrigramEmoji(plum.bodyTrigram.name)} {plum.bodyTrigram.name}（{plum.bodyTrigram.element}）</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[var(--text-secondary)]">用卦</span>
+                    <span>{getTrigramEmoji(plum.useTrigram.name)} {plum.useTrigram.name}（{plum.useTrigram.element}）</span>
+                  </div>
+                  <div className="flex justify-between pt-1 border-t border-[var(--border-color)]">
+                    <span className="text-[var(--text-secondary)]">体用</span>
+                    <span className={`font-medium ${
+                      plum.bodyUseRelation.includes('吉') ? 'text-green-400' :
+                      plum.bodyUseRelation.includes('凶') ? 'text-red-400' :
+                      'text-[var(--text-accent)]'
+                    }`}>{plum.bodyUseRelation}</span>
+                  </div>
+                  {plum.mutual && (
+                    <div className="flex justify-between">
+                      <span className="text-[var(--text-secondary)]">互卦</span>
+                      <span>{getTrigramEmoji(plum.mutual.upper.name)}{getTrigramEmoji(plum.mutual.lower.name)} {plum.mutual.name}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-[var(--text-secondary)]">动爻</span>
+                    <span>第{plum.movingLine}爻</span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -706,10 +848,166 @@ export default function FusionPage() {
               )}
             </div>
 
+            {/* ═══ 梅花易数详细 ═══ */}
+            <div className="card-jade p-5">
+              <h3 className="text-base font-bold mb-3 flex items-center gap-2">
+                <span>☯</span> 梅花易数详解
+              </h3>
+
+              {/* 三卦概览 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                {/* 本卦 */}
+                <div className="p-3 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-center">
+                  <div className="text-xs text-[var(--text-secondary)] mb-1">本卦</div>
+                  <div className="text-3xl mb-1">
+                    {getTrigramEmoji(plum.primary.upper.name)}{getTrigramEmoji(plum.primary.lower.name)}
+                  </div>
+                  <div className="text-sm font-bold gradient-text">{plum.primary.name}</div>
+                  <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+                    {plum.primary.upper.name}{getTrigramEmoji(plum.primary.upper.name)}（{plum.primary.upper.element}）
+                    · {plum.primary.lower.name}{getTrigramEmoji(plum.primary.lower.name)}（{plum.primary.lower.element}）
+                  </div>
+                </div>
+
+                {/* 变卦 */}
+                <div className="p-3 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-center">
+                  <div className="text-xs text-[var(--text-secondary)] mb-1">变卦（{plum.movingLine}爻动）</div>
+                  {plum.changing ? (
+                    <>
+                      <div className="text-3xl mb-1">
+                        {getTrigramEmoji(plum.changing.upper.name)}{getTrigramEmoji(plum.changing.lower.name)}
+                      </div>
+                      <div className="text-sm font-bold gradient-text">{plum.changing.name}</div>
+                      <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+                        {plum.changing.upper.name}{getTrigramEmoji(plum.changing.upper.name)}（{plum.changing.upper.element}）
+                        · {plum.changing.lower.name}{getTrigramEmoji(plum.changing.lower.name)}（{plum.changing.lower.element}）
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-sm text-[var(--text-secondary)]">无变爻</div>
+                  )}
+                </div>
+
+                {/* 互卦 */}
+                <div className="p-3 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-center">
+                  <div className="text-xs text-[var(--text-secondary)] mb-1">互卦</div>
+                  {plum.mutual ? (
+                    <>
+                      <div className="text-3xl mb-1">
+                        {getTrigramEmoji(plum.mutual.upper.name)}{getTrigramEmoji(plum.mutual.lower.name)}
+                      </div>
+                      <div className="text-sm font-bold gradient-text">{plum.mutual.name}</div>
+                      <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+                        {plum.mutual.upper.name}{getTrigramEmoji(plum.mutual.upper.name)}（{plum.mutual.upper.element}）
+                        · {plum.mutual.lower.name}{getTrigramEmoji(plum.mutual.lower.name)}（{plum.mutual.lower.element}）
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-sm text-[var(--text-secondary)]">—</div>
+                  )}
+                </div>
+              </div>
+
+              {/* 体用生克 */}
+              <div className="mb-4 p-3 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)]">
+                <div className="text-xs text-[var(--text-secondary)] mb-2 font-medium">体用生克</div>
+                <div className="flex items-center justify-center gap-4 text-sm">
+                  <div className="text-center">
+                    <div className="text-2xl">{getTrigramEmoji(plum.bodyTrigram.name)}</div>
+                    <div className="font-bold gradient-text">{plum.bodyTrigram.name}</div>
+                    <div className="text-[10px] text-[var(--text-secondary)]">体卦（{plum.bodyTrigram.element}）</div>
+                  </div>
+                  <div className="text-xl text-[var(--text-secondary)]">→</div>
+                  <div className="text-center">
+                    <div className="text-2xl">{getTrigramEmoji(plum.useTrigram.name)}</div>
+                    <div className="font-bold gradient-text">{plum.useTrigram.name}</div>
+                    <div className="text-[10px] text-[var(--text-secondary)]">用卦（{plum.useTrigram.element}）</div>
+                  </div>
+                  <div className="text-xl text-[var(--text-secondary)]">=</div>
+                  <div className={`text-center font-bold px-3 py-1.5 rounded-lg ${
+                    plum.bodyUseRelation.includes('吉') ? 'bg-green-500/15 text-green-400 border border-green-500/20' :
+                    plum.bodyUseRelation.includes('凶') ? 'bg-red-500/15 text-red-400 border border-red-500/20' :
+                    plum.bodyUseRelation.includes('泄气') ? 'bg-amber-500/15 text-amber-400 border border-amber-500/20' :
+                    'bg-blue-500/10 text-blue-300 border border-blue-500/15'
+                  }`}>
+                    {plum.bodyUseRelation}
+                  </div>
+                </div>
+              </div>
+
+              {/* 卦辞解读 */}
+              <div className="mb-4">
+                <div className="text-xs text-[var(--text-secondary)] mb-2 font-medium">卦辞</div>
+                <div className="text-sm italic text-[var(--text-accent)] border-l-2 border-[var(--text-accent)]/40 pl-3">
+                  “{plum.primary.judgment}”
+                </div>
+              </div>
+
+              {/* 综合解读 */}
+              <div className="mb-4">
+                <div className="text-xs text-[var(--text-secondary)] mb-2 font-medium">梅花易数综合解读</div>
+                <div className="text-sm leading-relaxed">{plum.interpretation}</div>
+              </div>
+
+              {/* 六亲/世应/纳甲 */}
+              <div>
+                <button
+                  onClick={() => toggleSection('plumDetails')}
+                  className="flex items-center gap-1 text-sm font-medium text-[var(--text-accent)] mb-1.5 cursor-pointer"
+                >
+                  <span>{expandedSections['plumDetails'] ? '▼' : '▶'} 六亲 · 世应 · 纳甲</span>
+                  <span className="text-[10px] text-[var(--text-secondary)] font-normal">（点击展开）</span>
+                </button>
+                {expandedSections['plumDetails'] && (
+                  <div className="space-y-3">
+                    {/* 六亲 */}
+                    <div className="p-3 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)]">
+                      <div className="text-xs text-[var(--text-secondary)] mb-1.5 font-medium">六亲</div>
+                      <div className="grid grid-cols-6 gap-1">
+                        {plum.sixRelations?.map((rel, i) => (
+                          <div key={i} className="text-center p-1.5 rounded bg-[var(--bg-color)] border border-[var(--border-color)]">
+                            <div className="text-[10px] text-[var(--text-secondary)]">{i + 1}爻</div>
+                            <div className="text-xs font-medium">{rel}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    {/* 世应 */}
+                    {plum.shiYing && (
+                      <div className="flex gap-4 text-sm">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-green-400" />
+                          <span>世爻：第{plum.shiYing.shi}爻</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-blue-400" />
+                          <span>应爻：第{plum.shiYing.ying}爻</span>
+                        </div>
+                      </div>
+                    )}
+                    {/* 纳甲 */}
+                    {plum.nayinStem && plum.nayinBranch && (
+                      <div className="p-3 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)]">
+                        <div className="text-xs text-[var(--text-secondary)] mb-1.5 font-medium">纳甲</div>
+                        <div className="grid grid-cols-6 gap-1">
+                          {plum.nayinStem.map((stem, i) => (
+                            <div key={i} className="text-center p-1.5 rounded bg-[var(--bg-color)] border border-[var(--border-color)]">
+                              <div className="text-[10px] text-[var(--text-secondary)]">{i + 1}爻</div>
+                              <div className="text-xs font-mono">{stem}{plum.nayinBranch[i]}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* ═══ 融合分析 ═══ */}
             <div className="card-jade p-5">
               <h3 className="text-base font-bold mb-3 flex items-center gap-2">
-                <span>🔗</span> 三系统融合分析
+                <span>🔗</span> 四系统融合分析
               </h3>
               {fusion ? (
                 <div className="text-sm leading-relaxed whitespace-pre-line space-y-1">
@@ -717,6 +1015,8 @@ export default function FusionPage() {
                     if (line.startsWith('【八字视角】')) return <p key={i} className="border-l-2 border-green-500/40 pl-3 py-1">{line}</p>;
                     if (line.startsWith('【人类图视角】')) return <p key={i} className="border-l-2 border-purple-500/40 pl-3 py-1">{line}</p>;
                     if (line.startsWith('【占星视角】')) return <p key={i} className="border-l-2 border-blue-500/40 pl-3 py-1">{line}</p>;
+                    if (line.startsWith('【梅花易数视角】')) return <p key={i} className="border-l-2 border-amber-500/40 pl-3 py-1">{line}</p>;
+                    if (line.startsWith('【八字×占星交叉】') || line.startsWith('【八字×梅花易数交叉】') || line.startsWith('【人类图×梅花易数交叉】') || line.startsWith('【占星×梅花易数交叉】')) return <p key={i} className="border-l-2 border-[var(--text-accent-gold)]/50 pl-3 py-1 font-medium">{line}</p>;
                     if (line.startsWith('【交叉分析】')) return <p key={i} className="border-l-2 border-[var(--text-accent-gold)]/50 pl-3 py-1 font-medium">{line}</p>;
                     if (!line.trim()) return <br key={i} />;
                     return <p key={i}>{line}</p>;
@@ -724,8 +1024,8 @@ export default function FusionPage() {
                 </div>
               ) : (
                 <div className="text-sm text-[var(--text-secondary)]">
-                  <p>八字日主{bazi.dayMaster}{bazi.dayMasterElement} → 人类图{hd.type}类型 → 太阳{astro.sunSign.label}</p>
-                  <p className="mt-2">三系统交叉印证中...</p>
+                  <p>八字日主{bazi.dayMaster}{bazi.dayMasterElement} → 人类图{hd.type}类型 → 太阳{astro.sunSign.label} → 梅花易数{plum.primary.name}</p>
+                  <p className="mt-2">四系统交叉印证中...</p>
                 </div>
               )}
             </div>
@@ -733,7 +1033,7 @@ export default function FusionPage() {
             {/* ═══ 操作按钮 ═══ */}
             <div className="flex flex-wrap justify-center gap-3 no-print pt-2">
               <button
-                onClick={() => { setBazi(null); setDayun(null); setHD(null); setAstro(null); setFusion(''); }}
+                onClick={() => { setBazi(null); setDayun(null); setHD(null); setAstro(null); setPlum(null); setFusion(''); }}
                 className="btn-jade max-w-xs inline-flex"
                 style={{ width: 'auto' }}
               >
@@ -749,7 +1049,7 @@ export default function FusionPage() {
 
             {/* ═══ 页脚信息（打印可见） ═══ */}
             <div className="hidden print-area text-center text-[10px]" style={{ color: '#999', marginTop: '20px' }}>
-              <p>报告由 灵魂解码（aisoulcode.cn）生成 · 融合八字·人类图·占星三系统</p>
+              <p>报告由 灵魂解码（aisoulcode.cn）生成 · 融合八字·人类图·占星·梅花易数四系统</p>
             </div>
           </div>
         )}
