@@ -124,23 +124,21 @@ function calculateBodygraph(dateStr, timeStr, tz, lat, lon) {
   PLANET_NAMES.forEach((name, i) => {
     const g = birthData.gates[i];
     const l = birthData.lines[i];
-    // Convert back to longitude: gate center + line offset
-    const baseLon = (g - 1) * 5.625 + (l - 1) * 0.9375 + 0.46875;
-    personality[name] = getActivation(baseLon);
+    // Use precomputed gate/line directly (no longitude round-trip)
+    personality[name] = { gate: g, line: l };
     
     const dg = designData.gates[i];
     const dl = designData.lines[i];
-    const dLon = (dg - 1) * 5.625 + (dl - 1) * 0.9375 + 0.46875;
-    designObj[name] = getActivation(dLon);
+    designObj[name] = { gate: dg, line: dl };
   });
   
-  // Earth = opposite of Sun
+  // Earth = opposite of Sun (add 32 gates, modulo 64)
   const sunG = birthData.gates[0]; const sunL = birthData.lines[0];
-  const earthLon = ((sunG - 1) * 5.625 + (sunL - 1) * 0.9375 + 0.46875 + 180) % 360;
-  personality.Earth = getActivation(earthLon);
+  const earthGate = ((sunG + 31) % 64) + 1;
+  personality.Earth = { gate: earthGate, line: sunL };
   const dsg = designData.gates[0]; const dsl = designData.lines[0];
-  const dEarthLon = ((dsg - 1) * 5.625 + (dsl - 1) * 0.9375 + 0.46875 + 180) % 360;
-  designObj.Earth = getActivation(dEarthLon);
+  const dEarthGate = ((dsg + 31) % 64) + 1;
+  designObj.Earth = { gate: dEarthGate, line: dsl };
   
   // Collect all gates
   const allGates = new Set();
