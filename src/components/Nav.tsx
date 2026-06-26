@@ -30,6 +30,7 @@ export default function Nav() {
     { href: '/human-design', label: '🧬 人类图' },
     { href: '/fusion', label: '🔮🧬 融合' },
     { href: '/health', label: '身心健康' },
+    { href: '/hand-diagnosis', label: '✋ 手诊' },
     { href: '/compatibility', label: '💞 关系合盘' },
     { href: '/mbti', label: 'MBTI性格' },
     { href: '/astrology', label: '星座占星' },
