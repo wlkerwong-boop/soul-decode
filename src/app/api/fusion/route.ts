@@ -154,17 +154,14 @@ export async function POST(request: NextRequest) {
 
     const [baziResult, hdResponse] = await Promise.all([
       calculateBaziLocal(y, m, d, h),
-      fetch('http://localhost:3000/api/human-design', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ year, month, day, hour: h, location }),
-      }).then(async (res) => {
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(`人类图 API 调用失败: ${res.status} ${text}`);
-        }
-        return res.json();
-      }),
+      // Use internal import instead of fetch — direct call to the engine
+      (async () => {
+        const hdMod = require('../../../lib/hd-engine-v5.cjs');
+        const ds = `${String(year).padStart(4,'0')}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const ts = `${String(h || '12').padStart(2,'0')}:00`;
+        const result = hdMod.calculateBodygraph(ds, ts, 'Asia/Shanghai', 39.9, 116.4);
+        return { bodygraph: result };
+      })(),
     ]);
 
     const bodygraph = hdResponse?.bodygraph || {};
