@@ -1,97 +1,95 @@
 /**
- * 人类图深度解读 API — 基于Ra Uru Hu原始体系
- * 参考来源：区分的科学、一本读懂人类图、图解人类图
+ * 人类图深度解读 API v2 — Kimi级别深度报告
+ * 调用DeepSeek AI生成个性化人类图深度报告
  */
 import { NextRequest } from 'next/server';
 
-const SYSTEM_PROMPT = `你是人类图（Human Design）解读师，严格基于Ra Uru Hu创立的体系。
+export const runtime = 'nodejs';
 
-请根据用户的人类图数据，生成深度解读报告。输出格式为中文，包含：
+function buildHDPrompt(hd: any): string {
+  return `你是一位资深的人类图（Human Design）导师，严格基于Ra Uru Hu创立的原始体系。请根据以下人类图数据，为来访者生成一份深度个性化解读报告。
 
-## 一、你的类型与策略
-解读能量类型和策略，说明如何实际运用。
+【人类图数据】
+类型：${hd.type || '未知'}
+策略：${hd.strategy || '未知'}
+内在权威：${hd.authority || '未知'}
+人生角色：${hd.profile || '未知'}
+定义：${hd.definition || '未知'}
+轮回交叉：${hd.incarnationCross || '未知'}
+签名：${hd.signature || '未知'}
+非自我主题：${hd.notSelfTheme || '未知'}
+定义中心：${(hd.definedCenters||[]).join('、') || '无'}
+开放中心：${(hd.undefinedCenters||[]).join('、') || '无'}
+激活通道：${(hd.channels||[]).join('、') || '无'}
 
-## 二、你的内在权威
-解读权威类型，说明做决定的正确方式。
+【报告要求】
+请用中文撰写，语气温暖、专业、深刻。篇幅约1500-2500字。
 
-## 三、你的人生角色
-解读Profile含义及人生显现方式。
+## 1. 类型深度解读
+- 解释${hd.type}类型的本质
+- 策略在实际生活中如何运用
+- 签名与非自我主题在生活中的表现
 
-## 四、九大能量中心
-列出定义和开放中心，解读天赋与学习之处。
+## 2. 决策指南
+- 如何运用${hd.authority}做出正确决策
+- 给出具体的决策场景示例
 
-## 五、闸门与通道
-解读最重要的激活闸门和通道。
+## 3. 能量中心分析
+- 定义中心（${(hd.definedCenters||[]).join('、')}）带来的稳定天赋
+- 开放中心（${(hd.undefinedCenters||[]).join('、')}）带来的易受影响领域
+- 如何在日常生活中运用这些认知
 
-## 六、轮回交叉
-解读人生使命主题。
+## 4. 人生角色${hd.profile}详解
+- 意识人格和设计人格的具体表现
+- 在不同人生阶段的变化
 
-要求：
--严格基于数据，不编造
--温暖实用直指人心
--每部分2-4句
--600-1000字中文`;
+## 5. 通道与天赋
+- 激活通道（${(hd.channels||[]).join('、')}）的具体天赋解读
+- 如何在工作和生活中运用
+
+## 6. 一句话核心建议
+
+直接以导师的口吻书写，不要使用"根据提供的数据"等套话。`;
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const { bodygraph } = await request.json();
-    if (!bodygraph) {
-      return new Response(JSON.stringify({ error: '缺少人类图数据' }), {
-        status: 400, headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    const { bodygraph: hd } = await request.json();
+    if (!hd || !hd.type) return Response.json({ error: '缺少人类图数据' }, { status: 400 });
 
+    const prompt = buildHDPrompt(hd);
     const apiKey = process.env.DEEPSEEK_API_KEY;
-    if (!apiKey) {
-      // Fallback: generate a template-based interpretation
-      const { type, strategy, authority, profile, signature, notSelfTheme } = bodygraph;
-      const interp = `## 一、你的类型与策略\n\n你是${type}。你的策略是「${strategy}」。\n\n## 二、你的内在权威\n\n你的内在权威是${authority}。\n\n## 三、你的人生角色\n\n你的人生角色是${profile}。\n\n## 四、九大能量中心\n\n定义的中心有：${bodygraph.definedCenters?.join('、') || '无'}。\n开放的中心有：${bodygraph.undefinedCenters?.join('、') || '无'}。\n\n## 五、闸门与通道\n\n激活的闸门：${bodygraph.activatedGates?.join('、') || '无'}。\n\n## 六、轮回交叉\n\n你的人生使命是：${bodygraph.incarnationCross || '等待探索'}。\n\n---
-*如需更深入的个性化解读，请配置DEEPSEEK_API_KEY环境变量。*`;
-      
-      return new Response(JSON.stringify({ interpretation: interp }), {
-        headers: { 'Content-Type': 'application/json' },
-      });
+    let interpretation = '';
+    let aiUsed = false;
+
+    if (apiKey) {
+      try {
+        const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+          body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: [
+              { role: 'system', content: '你是顶尖的人类图导师，严格基于Ra Uru Hu原始体系。你的解读温暖、精准、有深度，帮助来访者理解自己的能量设计并活出真实的自己。' },
+              { role: 'user', content: prompt }
+            ],
+            max_tokens: 4000,
+            temperature: 0.7,
+          }),
+        });
+        const data = await res.json();
+        interpretation = data.choices?.[0]?.message?.content || '';
+        aiUsed = true;
+      } catch {}
     }
 
-    // AI-powered interpretation
-    const userData = JSON.stringify({
-      type: bodygraph.type, strategy: bodygraph.strategy,
-      authority: bodygraph.authority, profile: bodygraph.profile,
-      definition: bodygraph.definition, incarnationCross: bodygraph.incarnationCross,
-      signature: bodygraph.signature, notSelfTheme: bodygraph.notSelfTheme,
-      definedCenters: bodygraph.definedCenters,
-      undefinedCenters: bodygraph.undefinedCenters,
-      activatedGates: bodygraph.activatedGates,
-      channels: bodygraph.channels,
-    }, null, 2);
+    if (!interpretation) {
+      // Fallback template
+      interpretation = `你的类型是${hd.type}，人生策略是「${hd.strategy}」，内在权威为${hd.authority}。你拥有${hd.definedCenters.length}个定义中心和${hd.undefinedCenters.length}个开放中心。激活了${hd.activatedGates.length}个闸门和${hd.channels.length}条通道。${hd.incarnationCross ? '你的轮回交叉是「'+hd.incarnationCross+'」' : ''}`;
+    }
 
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: `用户的人类图数据：\n${userData}` },
-        ],
-        temperature: 0.75, max_tokens: 3000,
-      }),
-    });
-
-    if (!response.ok) throw new Error('解读生成失败');
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || '';
-
-    return new Response(JSON.stringify({ interpretation: content }), {
-      headers: { 'Content-Type': 'application/json' },
-    });
-
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500, headers: { 'Content-Type': 'application/json' },
-    });
+    return Response.json({ interpretation, aiGenerated: aiUsed });
+  } catch {
+    return Response.json({ error: '解读生成失败' }, { status: 500 });
   }
 }
