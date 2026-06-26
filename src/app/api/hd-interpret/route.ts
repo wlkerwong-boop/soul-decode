@@ -59,16 +59,18 @@ export async function POST(request: NextRequest) {
 
     const prompt = buildHDPrompt(hd);
     const apiKey = process.env.DEEPSEEK_API_KEY;
+    const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
+    const model = process.env.AI_MODEL || 'deepseek-chat';
     let interpretation = '';
     let aiUsed = false;
 
     if (apiKey) {
       try {
-        const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        const res = await fetch(`${baseUrl}/chat/completions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
           body: JSON.stringify({
-            model: 'deepseek-chat',
+            model,
             messages: [
               { role: 'system', content: '你是顶尖的人类图导师，严格基于Ra Uru Hu原始体系。你的解读温暖、精准、有深度，帮助来访者理解自己的能量设计并活出真实的自己。' },
               { role: 'user', content: prompt }

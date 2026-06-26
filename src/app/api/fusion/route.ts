@@ -130,18 +130,20 @@ export async function POST(request: NextRequest) {
 
     // 调用DeepSeek
     const apiKey = process.env.DEEPSEEK_API_KEY;
+    const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
+    const model = process.env.AI_MODEL || 'deepseek-chat';
     let fusion = '';
     let aiUsed = false;
 
     if (apiKey) {
       try {
-        const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        const res = await fetch(`${baseUrl}/chat/completions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
           body: JSON.stringify({
-            model: 'deepseek-chat',
+            model,
             messages: [
-              { role: 'system', content: '你是顶级的三系统命理导师，融合八字、人类图、占星三大体系给出来访者的人生指导。你的语言温暖、精准、有深度，能够将不同系统的洞见融会贯通。' },
+              { role: 'system', content: '你是顶级的三系统命理导师，融合八字、人类图、占星三大体系给出来访者的人生指导。你的语言温暖、精准、有深度。' },
               { role: 'user', content: prompt }
             ],
             max_tokens: 4000,

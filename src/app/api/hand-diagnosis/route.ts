@@ -33,15 +33,16 @@ ${userDesc}
 请用中文回答，语气温和专业。篇幅500-1000字。`;
 
     const apiKey = process.env.DEEPSEEK_API_KEY;
-    if (!apiKey) {
-      return Response.json({ diagnosis: 'AI诊断功能暂不可用，请联系管理员配置API。' });
-    }
+    if (!apiKey) return Response.json({ diagnosis: 'AI诊断功能暂不可用' });
 
-    const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
+    const model = process.env.AI_MODEL || 'deepseek-chat';
+
+    const res = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model,
         messages: [
           { role: 'system', content: '你是资深中医手诊医师，精通望诊辨证，善于通过手部特征判断体质和脏腑状态。你的建议温和、实用、专业。' },
           { role: 'user', content: prompt }
