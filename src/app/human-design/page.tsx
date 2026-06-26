@@ -2,6 +2,39 @@
 
 import { useState, useCallback } from 'react';
 
+// 人类图问答组件
+function HDQA() {
+  const [q, setQ] = useState('');
+  const [a, setA] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const ask = useCallback(async () => {
+    if (!q.trim()) return;
+    setLoading(true); setA('');
+    try {
+      const r = await fetch('/api/hd-qa', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ query: q }),
+      });
+      const d = await r.json();
+      setA(d.answer || '未找到答案');
+    } catch { setA('查询失败'); }
+    finally { setLoading(false); }
+  }, [q]);
+
+  return (<div><h3 className="text-lg font-bold mb-4">💬 人类图知识问答</h3>
+    <p className="text-sm text-[var(--text-secondary)] mb-4">提问关于人类图的概念、类型、中心、通道等问题</p>
+    <div className="flex gap-2 mb-4">
+      <input className="input-jade flex-1" value={q} onChange={e => setQ(e.target.value)}
+        placeholder="例如：什么是投射者？荐骨权威怎么用？"
+        onKeyDown={e => e.key === 'Enter' && ask()} />
+      <button onClick={ask} disabled={loading} className="btn-jade" style={{width:'auto'}}>{loading ? '...' : '提问'}</button>
+    </div>
+    {loading && <p className="text-sm text-[var(--text-secondary)]">查询中...</p>}
+    {a && <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-sm leading-relaxed whitespace-pre-line">{a}</div>}
+  </div>);
+}
+
 interface HDBodygraph {
   type: string;
   strategy: string;
@@ -179,6 +212,7 @@ export default function HumanDesignPage() {
               { id: 'centers', label: '⚪ 能量中心' },
               { id: 'gates', label: '🚪 闸门' },
               { id: 'cross', label: '🎯 使命' },
+              { id: 'qa', label: '💬 问答' },
               { id: 'interpret', label: '📜 解读' },
             ].map(t => (
               <button key={t.id} onClick={() => setTab(t.id)}
@@ -256,6 +290,12 @@ export default function HumanDesignPage() {
               )}
               {interpLoading && <div className="text-center py-8"><div className="cosmic-loader mx-auto mb-4" style={{width:40,height:40}}><div className="cosmic-ring cosmic-ring-3" style={{width:'100%',height:'100%'}}/><div className="cosmic-center text-xs">📜</div></div><p className="text-sm text-[var(--text-secondary)]">正在解读...</p></div>}
               {interp && <div className="card-jade p-6"><div className="report-content leading-relaxed whitespace-pre-line">{interp}</div></div>}
+            </div>
+          )}
+
+          {tab === 'qa' && (
+            <div className="card-jade p-6">
+              <HDQA />
             </div>
           )}
 

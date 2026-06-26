@@ -1,0 +1,145 @@
+{
+  "centers": [
+    {
+      "id": "Head",
+      "name_cn": "顶轮·灵感中心",
+      "description": "灵感、压力、疑问的来源。当定义时，头脑持续产生思考和疑问；未定义时吸收他人的灵感，容易承担过多的精神压力。"
+    },
+    {
+      "id": "Ajna",
+      "name_cn": "眉心轮·概念中心",
+      "description": "将灵感转化为概念和想法。定义者有自己的思考方式和确定的理论；未定义者思维灵活，善于接受他人的观点。"
+    },
+    {
+      "id": "Throat",
+      "name_cn": "喉咙中心·表达中心",
+      "description": "沟通与行动的中心。定义者有明确的表达方式和行动力；未定义者说话和行动受周围环境影响。"
+    },
+    {
+      "id": "G",
+      "name_cn": "G中心·方向与爱",
+      "description": "人生方向、自我认同和爱的中心。定义者有稳定的自我认同和人生方向；未定义者善于适应和发现。"
+    },
+    {
+      "id": "Sacral",
+      "name_cn": "荐骨中心·生命力中心",
+      "description": "生命能量、创造力和性欲的源泉。定义者拥有持续稳定的工作能量，用\"嗯哼\"回应；未定义者容易过度消耗。仅Generator和Manifesting Generator有定义荐骨。"
+    },
+    {
+      "id": "Ego",
+      "name_cn": "意志力中心·自我中心",
+      "description": "意志力、自我价值、物质世界的中心。定义者拥有稳定的意志力和承诺能力；未定义者不需要证明自我价值。"
+    },
+    {
+      "id": "Solar Plexus",
+      "name_cn": "情绪中心·觉知中心",
+      "description": "情绪感受、情感体验和觉知的中心。定义者经历起伏的情绪波，需等待情绪清明再做决定；未定义者情绪开放容易感受他人。"
+    },
+    {
+      "id": "Spleen",
+      "name_cn": "脾脏中心·直觉中心",
+      "description": "直觉、生存本能和健康的中心。定义者有可靠的直觉和时机感；未定义者需要留意身体的警示信号。"
+    },
+    {
+      "id": "Root",
+      "name_cn": "根轮·压力中心",
+      "description": "肾上腺压力和驱动力的中心。定义者有自己的节奏和压力应对方式；未定义者容易吸收他人的压力和紧迫感。"
+    }
+  ],
+  "types": [
+    {
+      "name": "Manifestor",
+      "name_cn": "显示者",
+      "strategy": "告知他人",
+      "signature": "平静",
+      "notSelf": "愤怒",
+      "description": "天生发起者，占人口8%。行动前告知他人可以获得最小的阻力。"
+    },
+    {
+      "name": "Generator",
+      "name_cn": "建设者",
+      "strategy": "等待回应",
+      "signature": "满足",
+      "notSelf": "挫败",
+      "description": "生命能量源泉，占人口37%。用荐骨的\"嗯哼\"回应来决策，做热爱的事。"
+    },
+    {
+      "name": "Manifesting Generator",
+      "name_cn": "显示建设者",
+      "strategy": "等待回应，快速启动",
+      "signature": "满足",
+      "notSelf": "挫败",
+      "description": "快速行动的建设者，占人口33%。结合了荐骨能量和喉部连接，能多重任务。"
+    },
+    {
+      "name": "Projector",
+      "name_cn": "投射者",
+      "strategy": "等待被邀请",
+      "signature": "成功",
+      "notSelf": "苦涩",
+      "description": "天赋是看透他人的引导者，占人口20%。等待正确的认可和邀请才能绽放光芒。"
+    },
+    {
+      "name": "Reflector",
+      "name_cn": "反映者",
+      "strategy": "等待一个月亮周期",
+      "signature": "惊喜",
+      "notSelf": "失望",
+      "description": "最稀有的类型，占人口1%。像镜子一样反映周围环境，需要28天的决策周期。"
+    }
+  ],
+  "authorities": [
+    {"name": "Emotional Solar Plexus", "name_cn": "情绪型权威", "description": "等待情绪波达到清明再做决定，不要冲动决策。"},
+    {"name": "Sacral", "name_cn": "荐骨型权威", "description": "用身体发出的\"嗯哼\"（是）或\"嗯\"（否）回应。"},
+    {"name": "Splenic", "name_cn": "直觉型权威", "description": "瞬间的直觉知道，无法逻辑解释，但最准确。"},
+    {"name": "Ego", "name_cn": "意志力型权威", "description": "听从内心的渴望和承诺能力。"},
+    {"name": "Self Projected", "name_cn": "自我投射型权威", "description": "通过说出来听到自己的声音而知道答案。"},
+    {"name": "Outer Authority", "name_cn": "外在权威", "description": "需要咨询信任的人，通过对话来理清思路。"},
+    {"name": "Lunar", "name_cn": "月亮型权威", "description": "反映者专属，等待28天的月亮周期再做决定。"}
+  ],
+  "profiles": [
+    {"name": "1/3", "name_cn": "研究者/实验者", "description": "需要深入研究和亲身体验才能确信。"},
+    {"name": "1/4", "name_cn": "研究者/社交者", "description": "深入研究后通过社交网络分享所学。"},
+    {"name": "2/4", "name_cn": "隐士/社交者", "description": "天生有才华但不自知，需要被他人发现和邀请。"},
+    {"name": "2/5", "name_cn": "隐士/异端者", "description": "独特的天赋能力，被他人视为解决方案。"},
+    {"name": "3/4", "name_cn": "实验者/社交者", "description": "通过试错学习，影响力广泛。"},
+    {"name": "3/5", "name_cn": "实验者/异端者", "description": "通过犯错来发现真理，实用主义者。"},
+    {"name": "4/1", "name_cn": "社交者/研究者", "description": "通过人脉传播深入研究的内容。"},
+    {"name": "4/6", "name_cn": "社交者/人生典范", "description": "前期探索，中期成为他人的榜样。"},
+    {"name": "5/1", "name_cn": "异端者/研究者", "description": "实用问题解决者，知识为实践服务。"},
+    {"name": "5/2", "name_cn": "异端者/隐士", "description": "被召唤时展现超常能力。"},
+    {"name": "6/2", "name_cn": "人生典范/隐士", "description": "活在屋顶上的观察者，被邀请后展现智慧。"},
+    {"name": "6/3", "name_cn": "人生典范/实验者", "description": "通过丰富经历最终成为智者。"}
+  ],
+  "key_concepts": [
+    {"term": "定义中心", "definition": "有颜色的能量中心，代表你稳定的特质和固定的运作方式。他人100%可以依赖你的这一面。"},
+    {"term": "未定义中心", "definition": "白色的能量中心，代表你灵活开放的特质。你吸收和放大他人的能量。不是缺点，是天赋。"},
+    {"term": "闸门", "definition": "能量的具体入口和出口，共64个对应易经64卦。每个闸门代表一种特定的天赋或挑战。"},
+    {"term": "通道", "definition": "连接两个能量中心的完整能量路径，共36条。一条通道激活意味着这两个中心被定义。"},
+    {"term": "轮回交叉", "definition": "你的人生使命和方向。由太阳、地球、月亮、上升点的41号闸门等交叉决定。"},
+    {"term": "人生角色", "definition": "你如何与这个世界互动的方式。由性格太阳（意识）和设计太阳（潜意识）的爻线决定。"}
+  ],
+  "selected_gates": [
+    {"num":1,"name":"乾","center":"G","description":"创造力，做自己的艺术总监。"},
+    {"num":5,"name":"需","center":"Sacral","description":"等待自然节奏，有固定的生活模式。"},
+    {"num":10,"name":"履","center":"G Throat","description":"自我行为，活在当下。"},
+    {"num":11,"name":"泰","center":"Ajna","description":"思想的传播者，善于表达观点。"},
+    {"num":13,"name":"同人","center":"G","description":"倾听者，善于收集信息和故事。"},
+    {"num":14,"name":"大有","center":"Sacral","description":"丰盛能量的通道。"},
+    {"num":20,"name":"观","center":"Throat","description":"当下觉知，活在此时此刻。"},
+    {"num":24,"name":"复","center":"Ajna","description":"反复思考同一问题，直到想通为止。"},
+    {"num":30,"name":"离","center":"Solar Plexus","description":"渴望经历一切情感体验。"},
+    {"num":34,"name":"大壮","center":"Sacral","description":"强大的生命能量和创造力。"},
+    {"num":41,"name":"损","center":"Root","description":"对新体验的渴望和幻想。"},
+    {"num":57,"name":"巽","center":"Spleen","description":"敏锐的直觉，穿透表面看到本质。"},
+    {"num":61,"name":"中孚","center":"Head","description":"对神秘和超自然的好奇心。"}
+  ],
+  "channels": [
+    {"key":"24-61","centers":["Head","Ajna"],"name_cn":"思考的通道","description":"灵感和思考的通道，有独特的思想模式。"},
+    {"key":"34-57","centers":["Sacral","Spleen"],"name_cn":"力量的通道","description":"原始的生存力量和直觉的组合。"},
+    {"key":"35-36","centers":["Throat","Solar Plexus"],"name_cn":"无常的通道","description":"经历一切情感体验并表达出来。"},
+    {"key":"39-55","centers":["Root","Solar Plexus"],"name_cn":"情绪的通道","description":"深刻的情感波动和精神觉醒。"},
+    {"key":"37-40","centers":["Solar Plexus","Ego"],"name_cn":"社区联结的通道","description":"社群归属感和互助精神。"},
+    {"key":"18-58","centers":["Spleen","Root"],"name_cn":"修正的通道","description":"追求完美和不断改进的动力。"}
+  ]
+}
