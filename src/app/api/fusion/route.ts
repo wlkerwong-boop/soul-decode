@@ -8,6 +8,8 @@ import { Solar } from 'lunar-javascript';
 
 export const runtime = 'nodejs';
 
+import path from 'path';
+
 const GAN_ELEMENT: Record<string, string> = {
   '甲': '木', '乙': '木',
   '丙': '火', '丁': '火',
@@ -156,7 +158,7 @@ export async function POST(request: NextRequest) {
       calculateBaziLocal(y, m, d, h),
       // Use internal import instead of fetch — direct call to the engine
       (async () => {
-        const hdMod = require('../../../lib/hd-engine-v5.cjs');
+        const hdMod = require(path.join(process.cwd(), 'src/lib/hd-engine-v5.cjs'));
         const ds = `${String(year).padStart(4,'0')}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
         const ts = `${String(h || '12').padStart(2,'0')}:00`;
         const result = hdMod.calculateBodygraph(ds, ts, 'Asia/Shanghai', 39.9, 116.4);
