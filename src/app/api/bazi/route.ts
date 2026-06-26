@@ -26,8 +26,25 @@ export async function POST(request: NextRequest) {
     const y = parseInt(year, 10);
     const m = parseInt(month, 10);
     const d = parseInt(day, 10);
-    const h = hour !== undefined && hour !== null ? parseInt(hour, 10) : 12;
+    const h = hour !== undefined && hour !== null && hour !== '' ? parseInt(hour, 10) : 12;
     const mi = parseInt(minute, 10) || 0;
+
+    // 基本日期校验
+    if (isNaN(y) || isNaN(m) || isNaN(d) || y < 1900 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31) {
+      return NextResponse.json(
+        { error: '请填写有效的出生日期' },
+        { status: 400 }
+      );
+    }
+
+    // 检查日期是否真实存在（如2月30日）
+    const testDate = new Date(y, m - 1, d);
+    if (testDate.getFullYear() !== y || testDate.getMonth() !== m - 1 || testDate.getDate() !== d) {
+      return NextResponse.json(
+        { error: '请填写有效的出生日期（日期不存在）' },
+        { status: 400 }
+      );
+    }
 
     // 城市信息
     const cityInfo = location ? lookupCity(location) : null;
