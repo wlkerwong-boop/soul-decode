@@ -1,0 +1,27 @@
+任务：创建八字+人类图融合分析API
+
+【背景】灵魂解码网站需要一个新的API端点，把八字排盘和人类图结合起来做交叉分析。用户可以同时看到自己的八字信息和人类图信息，并得到AI生成的融合解读。
+
+【API规格】
+- 端点: /api/fusion
+- 方法: POST
+- 参数: {year, month, day, hour, location(省名)}
+- 返回: {bazi: {...}, humanDesign: {...}, fusion: "AI生成的融合解读文本"}
+
+【实现步骤】
+1. 调用八字API (当前已有): 用lunar-javascript的EightChar计算，获取八字四柱、十神、藏干、纳音
+2. 调用人类图API: 发送POST到/api/human-design获取人类图数据
+3. 生成融合解读: 组合八字和人类图数据，生成一段交叉分析文本
+4. 返回完整结果
+
+【测试】
+用curl测试: curl -X POST -H 'Content-Type: application/json' -d '{"year":"1982","month":"1","day":"27","hour":"2","location":"山东"}' https://soul-decode.vercel.app/api/fusion
+
+【文件位置】
+- 八字引擎: src/lib/bazi-enhanced.ts
+- 人类图引擎: src/lib/hd-engine-v5.cjs
+- 参考: src/app/api/bazi/route.ts, src/app/api/human-design/route.ts
+
+创建文件: src/app/api/fusion/route.ts
+
+注意：该API是纯后端，使用curl测试，不需要浏览器。

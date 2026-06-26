@@ -28,6 +28,7 @@ export default function Nav() {
   const navLinks = [
     { href: '/daily', label: '🌅 每日' },
     { href: '/human-design', label: '🧬 人类图' },
+    { href: '/fusion', label: '🔮🧬 融合' },
     { href: '/health', label: '身心健康' },
     { href: '/compatibility', label: '💞 关系合盘' },
     { href: '/mbti', label: 'MBTI性格' },
