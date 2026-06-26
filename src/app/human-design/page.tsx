@@ -106,9 +106,11 @@ export default function HumanDesignPage() {
                 {years.map(y => <option key={y} value={y}>{y}</option>)}
               </select>
               <select className="input-jade" value={form.month} onChange={e => setForm(p => ({...p, month: e.target.value}))} required>
+                <option value="">月</option>
                 {[...Array(12)].map((_, i) => <option key={i+1} value={String(i+1)}>{i+1}月</option>)}
               </select>
               <select className="input-jade" value={form.day} onChange={e => setForm(p => ({...p, day: e.target.value}))} required>
+                <option value="">日</option>
                 {[...Array(31)].map((_, i) => <option key={i+1} value={String(i+1)}>{i+1}日</option>)}
               </select>
             </div>
