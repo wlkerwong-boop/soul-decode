@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import BodygraphSVG from '@/components/BodygraphSVG';
 
 // 人类图问答组件
 function HDQA() {
@@ -320,7 +321,19 @@ export default function HumanDesignPage() {
             </div>
           </div>
 
-          {/* ===== S2: Quick Stats ===== */}
+          {/* ===== Bodygraph SVG ===== */}
+          <div id="hd-bodygraph" className="card-jade p-6">
+            <h3 className="text-lg font-bold gradient-text mb-2">📊 人体图</h3>
+            <p className="text-xs text-[var(--text-secondary)] mb-4">● 金色 = 定义中心  ○ 灰色 = 开放中心  |  金色连线 = 激活通道</p>
+            <BodygraphSVG
+              definedCenters={hd.definedCenters}
+              activatedGates={hd.activatedGates}
+              channels={hd.channels}
+              centerDefinition={hd.centerDefinition}
+            />
+          </div>
+
+          {/* ===== S3: Quick Stats ===== */}
           <div id="hd-s2" className="grid grid-cols-3 gap-4">
             <div className="card-jade p-4 text-center"><div className="text-2xl font-bold gradient-text">{hd.definedCenters.length}</div><div className="text-xs text-[var(--text-secondary)] mt-1">定义中心</div></div>
             <div className="card-jade p-4 text-center"><div className="text-2xl font-bold gradient-text">{hd.activatedGates.length}</div><div className="text-xs text-[var(--text-secondary)] mt-1">激活闸门</div></div>
