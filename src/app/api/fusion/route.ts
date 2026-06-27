@@ -29,15 +29,15 @@ function getZodiacSign(month: number, day: number): string {
   }
   return '未知';
 }
-
 function calculateBaziLocal(year: number, month: number, day: number, hour?: number) {
-  const solar = Solar.fromYmd(year, month, day);
+  // 用带小时的Solar创建，getTimeInGanZhi才能正确
+  const solar = (hour !== undefined ? (Solar as any).fromYmdHms(year, month, day, hour, 0, 0) : Solar.fromYmd(year, month, day)) as any;
   const lunar = solar.getLunar();
-  const hourStr = hour !== undefined ? String(hour) : undefined;
+
   const yearPillar = lunar.getYearInGanZhiExact();
   const monthPillar = lunar.getMonthInGanZhiExact();
   const dayPillar = lunar.getDayInGanZhiExact();
-  const timePillar = hourStr ? lunar.getTimeInGanZhi(hourStr) : '--';
+  const timePillar = hour !== undefined ? lunar.getTimeInGanZhi() : '--';
   const pillars = [yearPillar, monthPillar, dayPillar, timePillar];
   const dayMaster = lunar.getDayGan();
   const dayMasterElement = GAN_ELEMENT[dayMaster] || '—';
