@@ -54,7 +54,8 @@ function buildPrompt(
   y: number, m: number, d: number, h: number,
   bazi: ReturnType<typeof calculateBaziLocal>,
   hd: any,
-  zodiac: string
+  zodiac: string,
+  tz?: string
 ): string {
   const elements = Object.entries(bazi.elementDistribution).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}${v}`).join('，') || '未知';
   const now = new Date();
@@ -63,7 +64,7 @@ function buildPrompt(
   return `请为一位${age}岁的用户出具一份三系统融合人生指导报告。
 
     【用户数据】
-    - 出生：${y}年${m}月${d}日 ${String(h).padStart(2,'0')}时（当前日期：${now.getFullYear()}年${now.getMonth()+1}月，当前${age}岁）
+    - 出生：${y}年${m}月${d}日 ${String(h).padStart(2,'0')}时${tz && tz !== 'Asia/Shanghai' ? '（原出生地时区：'+tz+'，已转换为中国标准时间）' : ''}（当前日期：${now.getFullYear()}年${now.getMonth()+1}月，当前${age}岁）
     - 八字：${bazi.pillars.join(' ')}，日主${bazi.dayMaster}
     - 五行：${elements}
     - 人类图：${hd.type}（类型），人生角色${hd.profile}，内在权威${hd.authority}
@@ -113,17 +114,63 @@ export async function POST(request: NextRequest) {
     if (!year || !month || !day) return NextResponse.json({ error: '请填写完整的出生日期' }, { status: 400 });
 
     const y = parseInt(year), m = parseInt(month), d = parseInt(day), h = hour !== undefined ? parseInt(hour) : 12;
+    const tz = body.timezone || 'Asia/Shanghai';
 
-    // 并行计算八字 + 人类图
-    const bazi = calculateBaziLocal(y, m, d, h);
-    const zodiac = getZodiacSign(m, d);
+    // 时区转换：将当地时间转为中国时间（八字需用中国时间）
+    const offsetMap: Record<string, number> = {
+      'America/Los_Angeles': -7, 'America/New_York': -4,
+      'Europe/London': 0, 'Europe/Paris': 1,
+      'Australia/Sydney': 10, 'Asia/Tokyo': 9, 'Asia/Shanghai': 8,
+    };
+    const localOffset = offsetMap[tz] ?? 8;
+    const chinaOffset = 8;
+    const hourDiff = chinaOffset - localOffset;
+
+    let baziH = h;
+    let baziD = d;
+    let baziM = m;
+    let baziY = y;
+
+    // 如果小时差不为0，需要调整日期
+    if (hourDiff !== 0) {
+      baziH = h + hourDiff;
+      if (baziH >= 24) { baziH -= 24; baziD += 1; }
+      else if (baziH < 0) { baziH += 24; baziD -= 1; }
+      // 处理跨月跨年
+      if (baziD < 1) { baziM -= 1; if (baziM < 1) { baziM = 12; baziY -= 1; } baziD = new Date(baziY, baziM, 0).getDate(); }
+      else {
+        const maxD = new Date(baziY, baziM, 0).getDate();
+        if (baziD > maxD) { baziD = 1; baziM += 1; if (baziM > 12) { baziM = 1; baziY += 1; } }
+      }
+    }
+
+    // 八字用转换后的中国时间
+    const bazi = calculateBaziLocal(baziY, baziM, baziD, baziH);
+    const zodiac = getZodiacSign(m, d); // 星座用人原本地日期
+
+    // 坐标映射
+    const LOC_COORDS: Record<string, [number, number]> = {
+      '北京':[39.9,116.4],'山东':[36.4,116.6],'湖北':[30.6,114.3],'广东':[23.1,113.3],
+      '上海':[31.2,121.5],'天津':[39.1,117.2],'重庆':[29.6,106.6],'江苏':[32.1,118.8],
+      '浙江':[30.3,120.2],'安徽':[31.9,117.3],'福建':[26.1,119.3],'江西':[28.7,115.9],
+      '河南':[34.8,113.7],'湖南':[28.2,112.9],'广西':[22.8,108.4],'海南':[20.0,110.4],
+      '四川':[30.6,104.1],'贵州':[26.7,106.6],'云南':[25.0,102.7],'西藏':[29.7,91.1],
+      '陕西':[34.3,108.9],'甘肃':[36.1,103.8],'青海':[36.6,101.8],'宁夏':[38.5,106.3],
+      '新疆':[43.8,87.6],'香港':[22.3,114.2],'澳门':[22.2,113.5],'台湾':[25.0,121.5],
+    };
+    let lat = 39.9, lon = 116.4;
+    if (location) {
+      for (const [prov, coords] of Object.entries(LOC_COORDS)) {
+        if ((location as string).includes(prov)) { lat = coords[0]; lon = coords[1]; break; }
+      }
+    }
 
     const hdMod = require('../../../lib/hd-engine-v5.cjs');
     const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const ts = `${String(h).padStart(2,'0')}:00`;
-    const hdResult = hdMod.calculateBodygraph(ds, ts, 'Asia/Shanghai', 39.9, 116.4);
+    const hdResult = hdMod.calculateBodygraph(ds, ts, tz, lat, lon);
 
-    const prompt = buildPrompt(y, m, d, h, bazi, hdResult, zodiac);
+    const prompt = buildPrompt(baziY, baziM, baziD, baziH, bazi, hdResult, zodiac, tz);
 
     // 调用DeepSeek
     const apiKey = process.env.DEEPSEEK_API_KEY;
