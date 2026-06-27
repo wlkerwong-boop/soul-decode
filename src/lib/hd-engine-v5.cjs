@@ -9,14 +9,22 @@ let GATES_TABLE = {};
 try {
   // First try public dir, then fallback
   const fs = require('fs');
-  const p = path.join(process.cwd(), 'public/planet-gates.json');
-  if (fs.existsSync(p)) {
-    GATES_TABLE = JSON.parse(fs.readFileSync(p, 'utf-8'));
+  const paths = [
+    './public/planet-gates.json',
+    path.join(process.cwd(), 'public/planet-gates.json'),
+    path.join(__dirname, '..', '..', '..', 'public', 'planet-gates.json'),
+    path.join(__dirname, '..', 'public', 'planet-gates.json'),
+  ];
+  for (const p of paths) {
+    if (fs.existsSync(p)) {
+      GATES_TABLE = JSON.parse(fs.readFileSync(p, 'utf-8'));
+      break;
+    }
   }
-} catch (e) {}
-
-const PLANET_NAMES = ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','TrueNode','Chiron'];
-const PLANET_GATE_RANGES = [1,2,11,12,21,22,31,32,41,42,50,52]; // rough month=>gate for fallback
+} catch (e) {
+  // 星历文件加载失败，使用空表
+}
+const PLANET_NAMES = ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','TrueNode','Chiron'];const PLANET_GATE_RANGES = [1,2,11,12,21,22,31,32,41,42,50,52]; // rough month=>gate for fallback
 
 // ── 2. 通道→中心映射 ──
 const CHANNEL_CENTERS = {
