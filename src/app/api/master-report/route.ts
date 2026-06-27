@@ -168,12 +168,12 @@ ${liunianResult}
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
           body: JSON.stringify({
-            model: 'deepseek-v4-pro',
+            model: 'deepseek-v4-flash',
             messages: [
               { role: 'system', content: '你是修炼数十年的命理导师，精通八字命理、人类图(Human Design)、西方占星、紫微斗数、五运六气、流年运势、人生规划七大体系。你的报告要写成「人生传记」而非「算法报告」——每个数据点都要转化成具体的人生场景和可操作建议。语言要像长辈跟孩子谈心——温暖、直接、有力。总字数6000-8000字。禁止使用「让我们来看看」「首先」「其次」「值得一提的是」「总的来说」等AI套话。' },
               { role: 'user', content: prompt }
             ],
-            max_tokens: 4000,
+            max_tokens: 2500,
             temperature: 0.8,
           }),
         });
