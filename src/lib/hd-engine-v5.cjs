@@ -11,7 +11,7 @@ try {
   const fs = require('fs');
   const paths = [
     './public/planet-gates.json',
-    path.join(process.cwd(), 'public/planet-gates.json'),
+    path.join(typeof process !== 'undefined' && process.cwd ? process.cwd() : '/var/task', 'public/planet-gates.json'),
     path.join(__dirname, '..', '..', '..', 'public', 'planet-gates.json'),
     path.join(__dirname, '..', 'public', 'planet-gates.json'),
   ];
