@@ -51,63 +51,60 @@ function calculateBaziLocal(year: number, month: number, day: number, hour?: num
 }
 
 function buildPrompt(
-  year: number, month: number, day: number, hour: number,
+  y: number, m: number, d: number, h: number,
   bazi: ReturnType<typeof calculateBaziLocal>,
   hd: any,
   zodiac: string
 ): string {
-  const elements = Object.entries(bazi.elementDistribution)
-    .sort((a,b) => b[1]-a[1])
-    .map(([k,v]) => `${k}${v}`).join('，') || '未知';
+  const elements = Object.entries(bazi.elementDistribution).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}${v}`).join('，') || '未知';
+  const now = new Date();
+  const age = now.getFullYear() - y - (now.getMonth()+1 < m || (now.getMonth()+1 === m && now.getDate() < d) ? 1 : 0);
 
-  return `你是一位融合八字命理、人类图（Human Design）与西方占星学的三系统命理导师。请根据以下个人数据，为ta生成一份**完整的三系统融合人生指导报告**。
+  return `请为一位${age}岁的用户出具一份三系统融合人生指导报告。
 
-【用户数据】
-出生日期：${year}年${month}月${day}日 ${String(hour).padStart(2,'0')}时
-八字四柱：${bazi.pillars.join(' ')}
-日主：${bazi.dayMaster}
-五行分布：${elements}
-人类图类型：${hd.type || '未知'}
-策略：${hd.strategy || '未知'}
-内在权威：${hd.authority || '未知'}
-人生角色：${hd.profile || '未知'}
-定义中心：${(hd.definedCenters||[]).join('、') || '无'}
-开放中心：${(hd.undefinedCenters||[]).join('、') || '无'}
-激活通道：${(hd.channels||[]).join('、') || '无'}
-太阳星座：${zodiac}
+    【用户数据】
+    - 出生：${y}年${m}月${d}日 ${String(h).padStart(2,'0')}时（当前日期：${now.getFullYear()}年${now.getMonth()+1}月，当前${age}岁）
+    - 八字：${bazi.pillars.join(' ')}，日主${bazi.dayMaster}
+    - 五行：${elements}
+    - 人类图：${hd.type}（类型），人生角色${hd.profile}，内在权威${hd.authority}
+    - 策略：${hd.strategy} | 签名：${hd.signature} | 非自我：${hd.notSelfTheme}
+    - 定义中心：${(hd.definedCenters||[]).join('、') || '无'}
+    - 激活通道：${(hd.channels||[]).join('、') || '无'}
+    - 太阳星座：${zodiac}
 
-【报告要求】
-请用中文撰写，语气温暖、专业、有洞察力。篇幅约1500-3000字。内容结构如下：
+    【报告要求】
+    以三系统融合为框架，撰写涵盖以下维度的全方位指导报告（不少于2000字）：
 
-## 1. 核心命盘总览：三系统交叉定位
-- 八字：解读日主五行、四柱特质、五行喜忌
-- 人类图：类型本质、人生角色、权威类型如何影响决策
-- 占星：太阳星座的核心特质，与八字/人类图的能量关系
-- 三系统能量印证：找出八字五行、人类图类型、太阳星座之间的共通点和互补点
+    1. 三系统交叉定位（核心总览）
+       找出八字五行、人类图类型、太阳星座之间的共通点和互补点
+       一句话定性——这个人最核心的生命密码
 
-## 2. 工作事业
-- 结合人类图策略和八字五行，给出事业发展的核心建议
-- 指出天赋优势和潜在陷阱
+    2. 工作事业与学习成长
+       结合人类图策略和八字十神，给出发展建议
+       当前生命阶段的成长主题
 
-## 3. 决策指南
-- 如何运用内在权威做正确的人生决策
-- 结合八字喜用神和人类图策略给出具体建议
+    3. 人际关系
+       能量交换模式（人类图开放中心的影响）
+       合盘与社交建议
 
-## 4. 健康与能量管理
-- 五行平衡建议
-- 人类图能量中心定义的强弱项
-- 适合的生活节奏
+    4. 财富与健康
+       五行平衡与能量管理建议
+       适合的生活方式
 
-## 5. 成长路径
-- 当前所处的生命阶段（结合人类图人生角色+八字大运）
-- 下一阶段的发展方向
-- 需要规避的陷阱
+    5. 人生风险提示
+       非自我主题「${hd.notSelfTheme}」在哪些场景最容易出现
+       需要规避的关键陷阱
+       未来1-3年的重要决策节点
 
-## 6. 一句话核心建议
-用一句话总结这个人最应该记住的人生指导。
+    6. 一句话核心建议
+       用一句话总结最重要的生命指导
 
-不要使用"根据提供的数据"、"基于上述信息"等套话。直接以导师的口吻书写。`;
-}
+    【写作风格要求】
+    - 语气温暖专业有力，像智慧长者谈心
+    - 避免"根据提供的数据"等套话
+    - 每个维度都要有具体的可操作建议
+    - 三系统融合不是机械拼凑，要找到内在联系`;
+    }
 
 export async function POST(request: NextRequest) {
   try {
