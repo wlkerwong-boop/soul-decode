@@ -68,6 +68,27 @@ function calc(y, m, d, h, tz) {
   var gSet = new Set(Array.from(allSet));
   var chs = typeModule.getChannels(gSet) || [];
   var ctrSet = typeModule.getDefinedCenters(chs) || new Set();
+  
+  // Jovian Archive规则: 如果有2个以上闸门在同一个中心,该中心也算定义
+  var GATE_CENTER_MAP = {
+    1:'G',2:'G',3:'Sacral',4:'Ajna',5:'Sacral',6:'SolarPlexus',7:'G',8:'Throat',9:'Sacral',
+    10:'G',11:'Ajna',12:'Throat',13:'G',14:'Sacral',15:'G',16:'Throat',17:'Ajna',18:'Spleen',
+    19:'Root',20:'Throat',21:'Ego',22:'SolarPlexus',23:'Throat',24:'Ajna',25:'G',26:'Ego',
+    27:'Sacral',28:'Spleen',29:'Sacral',30:'SolarPlexus',31:'Throat',32:'Spleen',33:'Throat',
+    34:'Sacral',35:'Throat',36:'SolarPlexus',37:'SolarPlexus',38:'Root',39:'Root',40:'Ego',
+    41:'Root',42:'Sacral',43:'Ajna',44:'Spleen',45:'Throat',46:'G',47:'Ajna',48:'Spleen',
+    49:'SolarPlexus',50:'Spleen',51:'Ego',52:'Root',53:'Root',54:'Root',55:'SolarPlexus',
+    56:'Throat',57:'Spleen',58:'Root',59:'Sacral',60:'Root',61:'Head',62:'Throat',63:'Head',64:'Head',
+  };
+  var gateCounts = {};
+  allSet.forEach(function(g) {
+    var c = GATE_CENTER_MAP[g];
+    if (c) { gateCounts[c] = (gateCounts[c] || 0) + 1; }
+  });
+  Object.keys(gateCounts).forEach(function(c) {
+    if (gateCounts[c] >= 3) { ctrSet.add(c); }
+  });
+  
   var type = typeModule.getType(chs, ctrSet, gSet) || 'Reflector';
 
   var defCtrs = AC.filter(function(c) { return ctrSet.has(c); });
