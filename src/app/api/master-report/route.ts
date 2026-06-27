@@ -16,11 +16,16 @@ function calcBazi(y: number, m: number, d: number, h: number) {
 
 function calcHD(y: number, m: number, d: number, h: number, tz: string) {
   try {
-    const mod = require('../../../lib/hd-engine-v6.cjs');
+    // 使用v5引擎（无WASM依赖，Vercel上可靠运行）
+    const mod = require('../../../lib/hd-engine-v5.cjs');
     const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const ts = `${String(h).padStart(2,'0')}:00`;
-    return mod.calculateBodygraph(ds, ts, tz, 0, 0);
-  } catch { return null; }
+    const loc = tz === 'Asia/Shanghai' ? 39.9 : 0;
+    return mod.calculateBodygraph(ds, ts, tz, loc, loc);
+  } catch (e: any) {
+    console.error('HD calc failed:', e.message);
+    return null;
+  }
 }
 
 function calcZiwei(y: number, m: number, d: number, h: number, gender: string) {
@@ -97,40 +102,40 @@ export async function POST(req: NextRequest) {
     const liunianResult = calcLiuNian(y, now.getFullYear());
 
     // 构建完整提示词
-    const prompt = `你是一位修行数十年的命理导师，精通八字命理、人类图（Human Design）、西方占星、紫微斗数、五运六气五大体系。你的报告以温暖、接地气、有洞察力著称。
+    const prompt = `你是一位修炼数十年的命理导师，精通八字命理、人类图(HumanDesign)、西方占星、紫微斗数、五运六气、流年运势、人生规划七大体系。
 
-请为一位${age}岁的${g}性用户出具一份**七系统融合人生总览报告**。
+【核心要求】
+- 你写的是「人生传记」而非「算法报告」——每个数据点都要转化成具体的人生场景和可操作建议
+- 七系统必须交叉印证，找到内在联系，不能分段罗列
+- 语言要像长辈跟孩子谈心——温暖、直接、有力，绝不回避尖锐话题
 
-【要求】
-分析维度包括但不限于：天性禀赋、事业天赋、财富格局、人际关系、情感婚姻、健康体质、学习成长、人生风险提示、人生关键节点、当前流年运势、年度健康与运势建议。
+【输出规范】
+- 总字数：5000-8000字
+- 每个分析维度不能少于400字
+- 每个维度结尾必须有一句可以立即执行的具体建议
+- 最后必须有「一句话点睛」
 
-- 用温暖接地气的语气，像修行多年的老师在跟朋友谈心
-- 不要用任何AI模板套话
-- 七系统要真正交叉融合，找到内在联系，而不是分段罗列
-- 每部分给出具体的、可操作的建议
-- 最后给出一句非常点睛的话
+【铁律】
+1. 禁止使用：「让我们来看看」「首先」「其次」「在当今这个时代」「值得一提的是」「总的来说」「综上所述」
+2. 每个数据必须对应具体人生场景
+3. 必须对数据不足的部分标注「基于现有信息」
 
-【用户数据】
-- 出生：${y}年${m}月${d}日 ${String(h).padStart(2,'0')}时 ${tz!=='Asia/Shanghai'?'（原出生地：'+tz+'）':''}
-- 当前：${now.getFullYear()}年${now.getMonth()+1}月，${age}岁
+请为一位${age}岁的${g}性撰人生总览报告。
 
 【一、八字命盘】
 四柱：${baziResult.pillars.join(' ')}
 日主：${baziResult.dayMaster}
 
 ${hdResult ? `【二、人类图】
-类型：${hdResult.type}
-人生角色：${hdResult.profile}
+类型：${hdResult.type} | 人生角色：${hdResult.profile}
 内在权威：${hdResult.authority}
-策略：${hdResult.strategy}
-签名：${hdResult.signature}
-非自我主题：${hdResult.notSelfTheme}
-定义中心：${(hdResult.definedCenters||[]).join('、')||'无'}
-未定义中心：${(hdResult.undefinedCenters||[]).join('、')||'无'}
-通道：${(hdResult.channels||[]).join('、')||'无'}` : ''}
+策略：${hdResult.strategy} | 签名：${hdResult.signature} | 非自我：${hdResult.notSelfTheme}
+定义中心：${(hdResult.definedCenters||[]).join('、')||'无'} | 未定义：${(hdResult.undefinedCenters||[]).join('、')||'无'}
+通道：${(hdResult.channels||[]).join('、')||'无'}
+激活闸门：${(hdResult.activatedGates||[]).join('、')||'无'}` : '【二、人类图】数据暂缺'}
 
 ${ziweiResult ? `【三、紫微斗数】
-${ziweiResult.palaces.map((p:any)=>`${p.name}宫：${p.stars.slice(0,5).join('、')||'无主星'}`).join('\n')}` : ''}
+${ziweiResult.palaces.map((p:any)=>`${p.name}宫：${p.stars.slice(0,5).join('、')||'无主星'}`).join('\n')}` : '【三、紫微斗数】数据暂缺'}
 
 【四、西方占星】
 太阳星座：${zodiacResult.zodiac}
@@ -141,8 +146,16 @@ ${wuyunResult.description}
 【六、流年运势】
 ${liunianResult}
 
-【七、人生规划建议】
-结合以上全部信息，给出5年内的人生关键节点提示与建议。`;
+【七、报告结构要求】
+请按以下七个维度撰写，每个维度不少于400字，要有具体数据和场景：
+1. 天性禀赋与人格底色（八字日主+人类图类型+星座的交叉印证）
+2. 事业天赋与财富格局
+3. 人际关系与情感模式
+4. 学习成长与灵性发展
+5. 健康体质与五运六气
+6. 人生关键节点与风险提示（结合流年大运）
+7. 给${age}岁${g}性的终极建议
+`;
 
     // 调用DeepSeek V4 Pro
     const apiKey = process.env.DEEPSEEK_API_KEY;
@@ -157,11 +170,11 @@ ${liunianResult}
           body: JSON.stringify({
             model: 'deepseek-v4-pro',
             messages: [
-              { role: 'system', content: '你是一位修行数十年的命理导师，精通八字、人类图、西方占星、紫微斗数、五运六气五大体系。你的报告温暖、精准、有深度，像长辈谈心一样自然。从不使用AI套话。' },
+              { role: 'system', content: '你是修炼数十年的命理导师，精通八字命理、人类图(Human Design)、西方占星、紫微斗数、五运六气、流年运势、人生规划七大体系。你的报告要写成「人生传记」而非「算法报告」——每个数据点都要转化成具体的人生场景和可操作建议。语言要像长辈跟孩子谈心——温暖、直接、有力。总字数6000-8000字。禁止使用「让我们来看看」「首先」「其次」「值得一提的是」「总的来说」等AI套话。' },
               { role: 'user', content: prompt }
             ],
-            max_tokens: 6000,
-            temperature: 0.7,
+            max_tokens: 12000,
+            temperature: 0.8,
           }),
         });
         const data = await res.json();
