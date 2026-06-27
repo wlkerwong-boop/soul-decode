@@ -24,9 +24,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Dynamic require CJS engine
-    const mod = require('../../../lib/hd-engine-v5.cjs');
-    const tz = body.timezone || 'Asia/Shanghai';
-    // 位置→经纬度映射
     const LOC_COORDS: Record<string, [number, number]> = {
       '北京':[39.9,116.4],'上海':[31.2,121.5],'天津':[39.1,117.2],'重庆':[29.6,106.6],
       '河北':[38.0,114.5],'山西':[37.9,112.5],'内蒙古':[40.8,111.8],'辽宁':[41.8,123.4],
@@ -43,6 +40,8 @@ export async function POST(request: NextRequest) {
     const loc = body.location || '北京';
     const coords = LOC_COORDS[loc] || LOC_COORDS['北京'];
     const [lat, lon] = coords;
+    const mod = require('../../../lib/hd-engine-v6.cjs');
+    const tz = body.timezone || 'Asia/Shanghai';
     const result = mod.calculateBodygraph(
       `${String(body.year).padStart(4,'0')}-${String(body.month).padStart(2,'0')}-${String(body.day).padStart(2,'0')}`,
       `${String(body.hour || '12').padStart(2,'0')}:00`,
