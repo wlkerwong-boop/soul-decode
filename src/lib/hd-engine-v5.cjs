@@ -67,15 +67,15 @@ function getPlanetGates(year, month, day) {
   const packed = GATES_TABLE[key];
   if (packed) {
     if (typeof packed === 'object' && packed.length >= 18) {
-      // New format: just gates
-      const gates = packed.slice(0, 10);
-      return { gates, lines: gates.map(() => 1) };
-    }
-    if (typeof packed === 'object' && packed.length >= 20) {
-      // Old format: [g1,l1,g2,l2,...]
+      // Full format: [g1,l1,g2,l2,...,g10,l10] (10 planets)
       const gates = []; const lines = [];
       for (let i = 0; i < 10; i++) { gates.push(packed[i*2]); lines.push(packed[i*2+1]); }
       return { gates, lines };
+    }
+    if (typeof packed === 'object' && packed.length >= 10) {
+      // Legacy: just gates, no lines
+      const gates = packed.slice(0, 10);
+      return { gates, lines: gates.map(() => 1) };
     }
   }
   // Fallback
