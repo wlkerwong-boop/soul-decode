@@ -26,9 +26,9 @@ export default function Nav() {
   const displayName = user?.nickname || (user?.phone ? user.phone.slice(0, 3) + '****' + user.phone.slice(-4) : '');
 
   const navLinks = [
+    { href: '/master-report', label: '✦ 人生总览' },
     { href: '/ziwei', label: '🔮 紫微斗数' },
     { href: '/human-design', label: '🧬 人类图' },
-    { href: '/fusion', label: '🔮 融合分析' },
     { href: '/astrology', label: '🔮 八字排盘' },
     { href: '/daily', label: '🌅 每日' },
   ];
