@@ -26,17 +26,17 @@ export default function Nav() {
   const displayName = user?.nickname || (user?.phone ? user.phone.slice(0, 3) + '****' + user.phone.slice(-4) : '');
 
   const navLinks = [
-    { href: '/daily', label: '🌅 每日' },
     { href: '/human-design', label: '🧬 人类图' },
-    { href: '/fusion', label: '🔮🧬 融合' },
+    { href: '/fusion', label: '🔮 融合分析' },
+    { href: '/astrology', label: '🔮 八字排盘' },
+    { href: '/daily', label: '🌅 每日' },
+  ];
+
+  const extraLinks = [
+    { href: '/hand-diagnosis', label: '✋ 中医手诊' },
     { href: '/health', label: '身心健康' },
-    { href: '/hand-diagnosis', label: '✋ 手诊' },
     { href: '/compatibility', label: '💞 关系合盘' },
-    { href: '/mbti', label: 'MBTI性格' },
-    { href: '/astrology', label: '星座占星' },
-    { href: '/tcm', label: '中医通鉴' },
-    { href: '/dharma', label: '☸ 法藏' },
-    { href: '/tools', label: '🧰 亲子工具' },
+    { href: '/tools', label: '🧰 工具' },
     { href: '/payment', label: '💎 会员' },
   ];
 
