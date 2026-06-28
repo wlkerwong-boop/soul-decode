@@ -98,6 +98,11 @@ export default function BodygraphSVG({ definedCenters, activatedGates, channels,
   const gateSet = new Set(activatedGates);
   const chSet = new Set(channels);
   const defSet = new Set(definedCenters);
+  const NAMES: Record<string,string> = {
+    Head:'顶轮·灵感',Ajna:'眉心轮·思考',Throat:'喉咙·表达',
+    G:'G中心·方向',Ego:'意志力·自我',Sacral:'荐骨·生命力',
+    'Solar Plexus':'情绪·觉知',Spleen:'脾脏·直觉',Root:'根轮·压力'
+  } as const;
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg" className="w-full max-w-md mx-auto" style={{background:'transparent'}}>
@@ -140,11 +145,6 @@ export default function BodygraphSVG({ definedCenters, activatedGates, channels,
       })}
 
       {/* 中心名称（中文） */}
-      const NAMES: Record<string,string> = {
-        Head:'顶轮·灵感',Ajna:'眉心轮·思考',Throat:'喉咙·表达',
-        G:'G中心·方向',Ego:'意志力·自我',Sacral:'荐骨·生命力',
-        'Solar Plexus':'情绪·觉知',Spleen:'脾脏·直觉',Root:'根轮·压力'
-      };
       {Object.entries(C).map(([n,p]) => {
         const d = defSet.has(n);
         return <text key={'lb-'+n} x={p.x} y={p.y+(p.h||40)/2+3} textAnchor="middle" fill={d?'#c9a84c':'rgba(255,255,255,0.3)'} fontSize="8" fontWeight={d?'bold':'normal'}>{NAMES[n]||n}</text>;
