@@ -27,19 +27,19 @@ export default function Nav() {
 
   const navLinks = [
     { href: '/master-report', label: '✦ 人生总览' },
-    { href: '/ziwei', label: '🔮 紫微斗数' },
-    { href: '/human-design', label: '🧬 人类图' },
+    { href: '/human-design', label: '🧬 自助排盘' },
+    { href: '/daily', label: '📖 命理百科' },
+  ];
+
+  const moreLinks = [
     { href: '/astrology', label: '🔮 八字排盘' },
-    { href: '/daily', label: '🌅 每日' },
+    { href: '/ziwei', label: '⭐ 紫微斗数' },
   ];
 
   const extraLinks = [
+    { href: '/daily', label: '🌅 每日运势' },
     { href: '/hand-diagnosis', label: '✋ 中医手诊' },
-    { href: '/health', label: '身心健康' },
     { href: '/compatibility', label: '💞 关系合盘' },
-    { href: '/tools', label: '🧰 工具' },
-    { href: '/payment', label: '💎 会员' },
-  ];
 
   return (
     <nav className="glass-nav sticky top-0 z-50 px-4 md:px-6 py-3 md:py-4">
