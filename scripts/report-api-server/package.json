@@ -1,0 +1,11 @@
+{
+  "name": "report-api-server",
+  "version": "1.0.0",
+  "dependencies": {
+    "express": "^4.18.2",
+    "lunar-javascript": "^1.7.7",
+    "@fusionstrings/swisseph-wasm": "^0.1.5",
+    "@it-healer/human-design-calculator": "^1.0.2",
+    "iztro": "^2.5.8"
+  }
+}

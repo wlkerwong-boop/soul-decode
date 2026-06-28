@@ -162,7 +162,25 @@ ${liunianResult}
     const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
     let report = '';
 
-    if (apiKey) {
+    // 优先使用阿里云API（无超时限制）
+    const aliyunUrl = 'http://47.102.142.225/api/master-report';
+    try {
+      const aliRes = await fetch(aliyunUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ year, month, day, hour, gender }),
+        signal: AbortSignal.timeout(120000), // 120s超时
+      });
+      const aliData = await aliRes.json();
+      if (aliData.success && aliData.report) {
+        report = aliData.report;
+      }
+    } catch (e) {
+      console.log('Aliyun API unavailable, falling back to local:', (e as Error).message);
+    }
+
+    // 阿里云API不可用时退回到DeepSeek直连
+    if (!report && apiKey) {
       try {
         const res = await fetch(`${baseUrl}/chat/completions`, {
           method: 'POST',
