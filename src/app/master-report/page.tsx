@@ -171,7 +171,23 @@ export default function MasterPage() {
           <div className="card-jade p-6 md:p-8 mb-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-xl font-bold">📜 人生总览报告</h2>
-              <VoiceReader text={report} title="🔊 听报告" />
+              <div className="flex gap-2">
+                <VoiceReader text={report} title="🔊 听报告" />
+                <button onClick={()=>window.print()}
+                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                  📥 下载PDF
+                </button>
+                <button onClick={()=>{
+                  const b=new Blob([report],{type:'text/plain;charset=utf-8'});
+                  const a=document.createElement('a');
+                  a.href=URL.createObjectURL(b);
+                  a.download=`人生总览_${year||''}.txt`;
+                  a.click();
+                }}
+                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                  📄 下载TXT
+                </button>
+              </div>
             </div>
             <div className="prose prose-sm md:prose-base prose-invert whitespace-pre-wrap leading-relaxed">
               {report.split('\n').map((line, i) => (<p key={i} className="mb-3">{line || '\u00A0'}</p>))}
