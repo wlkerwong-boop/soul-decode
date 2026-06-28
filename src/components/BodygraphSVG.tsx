@@ -10,7 +10,7 @@ interface BodygraphSVGProps {
 }
 
 // 9中心位置（Ra Uru Hu标准布局）
-const C = {
+const C: Record<string, {x:number, y:number, shape:string, w:number, h:number}> = {
   'Head':        {x:200, y:15,  shape:'triangle-down', w:60, h:35},
   'Ajna':        {x:200, y:70,  shape:'diamond', w:60, h:40},
   'Throat':      {x:200, y:135, shape:'triangle', w:80, h:40},
@@ -75,12 +75,12 @@ const CH: Record<string, [string,string]> = {
   '59-6':['Sacral','Solar Plexus'],
 };
 
-function cx(p: {x:number,y:number,shape:string,w?:number,h?:number}): {x:number,y:number} {
+function cx(p: {x:number,y:number,shape:string,w:number,h:number}): {x:number,y:number} {
   const h = p.h || p.w || 40;
   return {x:p.x, y:p.y + h/2};
 }
 
-function renderShape(p: {x:number,y:number,shape:string,w?:number,h?:number}, def: boolean) {
+function renderShape(p: {x:number, y:number, shape:string, w:number, h:number}, def: boolean) {
   const w = p.w||40, h = p.h||w;
   const fill = def ? 'rgba(201,168,76,0.18)' : 'rgba(255,255,255,0.03)';
   const str = def ? '#c9a84c' : 'rgba(255,255,255,0.12)';
