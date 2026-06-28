@@ -31,16 +31,6 @@ export default function Nav() {
     { href: '/daily', label: '📖 命理百科' },
   ];
 
-  const moreLinks = [
-    { href: '/astrology', label: '🔮 八字排盘' },
-    { href: '/ziwei', label: '⭐ 紫微斗数' },
-  ];
-
-  const extraLinks = [
-    { href: '/daily', label: '🌅 每日运势' },
-    { href: '/hand-diagnosis', label: '✋ 中医手诊' },
-    { href: '/compatibility', label: '💞 关系合盘' },
-
   return (
     <nav className="glass-nav sticky top-0 z-50 px-4 md:px-6 py-3 md:py-4">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -52,16 +42,12 @@ export default function Nav() {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-4 lg:gap-6 text-sm text-[var(--text-secondary)] overflow-x-auto scrollbar-hide whitespace-nowrap">
           {navLinks.map(link => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="hover:text-[var(--text-accent)] transition-colors"
-            >
+            <a key={link.href} href={link.href} className="hover:text-[var(--text-accent)] transition-colors">
               {link.label}
             </a>
           ))}
           <span className="opacity-30">·</span>
-          <span className="text-xs opacity-50 hidden lg:inline">八字排盘 · AI深度解读</span>
+          <span className="text-xs opacity-50 hidden lg:inline">八字·人类图·紫微·AI</span>
 
           {/* User Section */}
           {isLoggedIn ? (
@@ -75,38 +61,18 @@ export default function Nav() {
               </button>
               {menuOpen && (
                 <div className="absolute right-0 mt-2 w-44 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-xl py-2 z-50">
-                  <a
-                    href="/my"
-                    className="block px-4 py-2 text-sm hover:bg-[var(--bg-highlight)] transition-colors"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    📁 我的档案
-                  </a>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-[var(--bg-highlight)] transition-colors"
-                  >
-                    退出登录
-                  </button>
+                  <a href="/my" className="block px-4 py-2 text-sm hover:bg-[var(--bg-highlight)] transition-colors" onClick={() => setMenuOpen(false)}>📁 我的档案</a>
+                  <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-[var(--bg-highlight)] transition-colors">退出登录</button>
                 </div>
               )}
             </div>
           ) : (
-            <a
-              href="/auth/login"
-              className="px-4 py-1.5 rounded-lg bg-[var(--text-accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity"
-            >
-              登录
-            </a>
+            <a href="/auth/login" className="px-4 py-1.5 rounded-lg bg-[var(--text-accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity">登录</a>
           )}
         </div>
 
         {/* Mobile Menu Button */}
-        <button
-          onClick={() => setMobileNavOpen(!mobileNavOpen)}
-          className="md:hidden text-2xl text-[var(--text-secondary)] p-1"
-          aria-label="菜单"
-        >
+        <button onClick={() => setMobileNavOpen(!mobileNavOpen)} className="md:hidden text-2xl text-[var(--text-secondary)] p-1" aria-label="菜单">
           {mobileNavOpen ? '✕' : '☰'}
         </button>
       </div>
@@ -116,43 +82,16 @@ export default function Nav() {
         <div className="md:hidden mt-3 pb-4 border-t border-[var(--border-color)] pt-3">
           <div className="flex flex-col gap-2 px-2">
             {navLinks.map(link => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="px-3 py-2 rounded-lg text-sm hover:bg-[var(--bg-highlight)] transition-colors"
-                onClick={() => setMobileNavOpen(false)}
-              >
-                {link.label}
-              </a>
+              <a key={link.href} href={link.href} className="px-3 py-2 rounded-lg text-sm hover:bg-[var(--bg-highlight)] transition-colors" onClick={() => setMobileNavOpen(false)}>{link.label}</a>
             ))}
             <div className="border-t border-[var(--border-color)] my-2" />
             {isLoggedIn ? (
-              <>
-                <div className="px-3 py-2 text-sm text-[var(--text-accent)] font-medium">
-                  {displayName}
-                </div>
-                <a
-                  href="/my"
-                  className="px-3 py-2 rounded-lg text-sm hover:bg-[var(--bg-highlight)]"
-                  onClick={() => setMobileNavOpen(false)}
-                >
-                  📁 我的档案
-                </a>
-                <button
-                  onClick={handleLogout}
-                  className="px-3 py-2 rounded-lg text-sm text-red-500 text-left hover:bg-[var(--bg-highlight)]"
-                >
-                  退出登录
-                </button>
+              <><div className="px-3 py-2 text-sm text-[var(--text-accent)] font-medium">{displayName}</div>
+                <a href="/my" className="px-3 py-2 rounded-lg text-sm hover:bg-[var(--bg-highlight)]" onClick={() => setMobileNavOpen(false)}>📁 我的档案</a>
+                <button onClick={handleLogout} className="px-3 py-2 rounded-lg text-sm text-red-500 text-left hover:bg-[var(--bg-highlight)]">退出登录</button>
               </>
             ) : (
-              <a
-                href="/auth/login"
-                className="px-4 py-2 rounded-lg bg-[var(--text-accent)] text-white text-sm font-medium text-center"
-                onClick={() => setMobileNavOpen(false)}
-              >
-                登录
-              </a>
+              <a href="/auth/login" className="px-4 py-2 rounded-lg bg-[var(--text-accent)] text-white text-sm font-medium text-center" onClick={() => setMobileNavOpen(false)}>登录</a>
             )}
           </div>
         </div>
