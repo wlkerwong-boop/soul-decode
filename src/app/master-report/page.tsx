@@ -167,7 +167,8 @@ export default function MasterPage() {
 
         {/* Report */}
         {report && (
-          <div className="card-jade p-6 md:p-8">
+          <>
+          <div className="card-jade p-6 md:p-8 mb-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-xl font-bold">📜 人生总览报告</h2>
               <VoiceReader text={report} title="🔊 听报告" />
@@ -176,6 +177,28 @@ export default function MasterPage() {
               {report.split('\n').map((line, i) => (<p key={i} className="mb-3">{line || '\u00A0'}</p>))}
             </div>
           </div>
+
+          {/* Compatibility Suggestion */}
+          <div className="card-jade p-6 md:p-8 text-center">
+            <div className="text-3xl mb-3">💞</div>
+            <h3 className="text-lg font-bold mb-2">想了解你与他人的关系？</h3>
+            <p className="text-sm text-[var(--text-secondary)] mb-4 max-w-lg mx-auto">
+              两个人的相遇不是偶然。八字合婚、人类图合盘、占星比较盘——<br/>
+              看看你们在哪些方面天生契合，哪些领域需要经营。
+            </p>
+            <div className="flex flex-wrap justify-center gap-3 text-sm">
+              <a href="/compatibility" className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[var(--accent)] to-emerald-500 text-white font-medium hover:shadow-lg transition-all">
+                💑 情侣合盘
+              </a>
+              <a href="/compatibility" className="px-5 py-2.5 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                👨‍👩‍👧‍👦 家庭合盘
+              </a>
+              <a href="/compatibility" className="px-5 py-2.5 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                🤝 朋友合盘
+              </a>
+            </div>
+          </div>
+          </>
         )}
       </div>
     </div>
