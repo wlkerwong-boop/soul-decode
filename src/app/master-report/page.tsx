@@ -28,6 +28,7 @@ export default function MasterPage() {
   const [year, setYear] = useState(''); const [month, setMonth] = useState('');
   const [day, setDay] = useState(''); const [hour, setHour] = useState('');
   const [location, setLocation] = useState(''); const [gender, setGender] = useState('男');
+  const [timezone, setTimezone] = useState('Asia/Shanghai');
   const [report, setReport] = useState(''); const [loading, setLoading] = useState(false);
   const [error, setError] = useState(''); const [data, setData] = useState<any>(null);
 
@@ -37,7 +38,7 @@ export default function MasterPage() {
       const r = await fetch('/api/master-report', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({year, month, day, hour, location, gender}),
+        body: JSON.stringify({year, month, day, hour, location, gender, timezone}),
       });
       const d = await r.json();
       if (!d.success) { setError(d.error||'生成失败'); return; }
@@ -107,6 +108,29 @@ export default function MasterPage() {
                 )}
                 <option value="other">其他（联系客服）</option>
               </select>
+            </div>
+
+            {/* Timezone */}
+            <div>
+              <label className="block text-base font-bold mb-2 text-[var(--text-secondary)]">时区</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  {v:'Asia/Shanghai',l:'🇨🇳 北京时间'},
+                  {v:'America/Los_Angeles',l:'🇺🇸 洛杉矶'},
+                  {v:'America/New_York',l:'🇺🇸 纽约'},
+                  {v:'Europe/London',l:'🇬🇧 伦敦'},
+                  {v:'Asia/Tokyo',l:'🇯🇵 东京'},
+                  {v:'Australia/Sydney',l:'🇦🇺 悉尼'},
+                ].map(tz=>
+                  <button key={tz.v} onClick={()=>setTimezone(tz.v)}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all text-left ${timezone===tz.v ? 'bg-[var(--accent)] text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)]'}`}>
+                    {tz.l}
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-[var(--text-secondary)] mt-1 opacity-60">
+                海外出生：人类图用当地时间，八字紫微用北京时间
+              </p>
             </div>
 
             {/* Gender */}
