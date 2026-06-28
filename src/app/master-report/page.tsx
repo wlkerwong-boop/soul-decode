@@ -5,11 +5,28 @@ import VoiceReader from '@/components/VoiceReader';
 import BodygraphSVG from '@/components/BodygraphSVG';
 import BaziChart from '@/components/BaziChart';
 import ZiWeiChart from '@/components/ZiWeiChart';
-import WuXingChart from '@/components/WuXingChart';
+
+const YEARS = Array.from({length:121},(_,i)=>2026-i);
+const MONTHS = Array.from({length:12},(_,i)=>i+1);
+const DAYS = Array.from({length:31},(_,i)=>i+1);
+const HOURS = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
+const LOCATIONS: Record<string,string> = {
+  '北京':'北京','上海':'上海','天津':'天津','重庆':'重庆',
+  '广东':'广东','深圳':'广东','广州':'广东',
+  '山东':'山东','济南':'山东','青岛':'山东',
+  '江苏':'江苏','南京':'江苏','苏州':'江苏',
+  '浙江':'浙江','杭州':'浙江',
+  '湖北':'湖北','武汉':'湖北',
+  '四川':'四川','成都':'四川',
+  '云南':'云南','大理':'云南','昆明':'云南',
+  '洛杉矶':'America/Los_Angeles','纽约':'America/New_York',
+  '伦敦':'Europe/London','巴黎':'Europe/Paris',
+  '东京':'Asia/Tokyo','悉尼':'Australia/Sydney',
+};
 
 export default function MasterPage() {
   const [year, setYear] = useState(''); const [month, setMonth] = useState('');
-  const [day, setDay] = useState(''); const [hour, setHour] = useState('12');
+  const [day, setDay] = useState(''); const [hour, setHour] = useState('');
   const [location, setLocation] = useState(''); const [gender, setGender] = useState('男');
   const [report, setReport] = useState(''); const [loading, setLoading] = useState(false);
   const [error, setError] = useState(''); const [data, setData] = useState<any>(null);
@@ -19,116 +36,131 @@ export default function MasterPage() {
     try {
       const r = await fetch('/api/master-report', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ year, month, day, hour, location, gender }),
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({year, month, day, hour, location, gender}),
       });
       const d = await r.json();
-      if (!d.success) { setError(d.error); return; }
+      if (!d.success) { setError(d.error||'生成失败'); return; }
       setReport(d.report); setData(d.data);
-    } catch (e: any) { setError(e.message); }
+    } catch (e: any) { setError(e.message||'网络错误'); }
     setLoading(false);
   };
 
+  const Btn = ({v,cur,set,label}:{v:string,cur:string,set:(s:string)=>void,label:string}) => (
+    <button onClick={()=>set(v)}
+      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${cur===v ? 'bg-[var(--accent)] text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)] hover:bg-opacity-80'}`}>
+      {label}
+    </button>
+  );
+
   return (
-    <div className="gradient-bg min-h-screen px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        {/* Hero */}
+    <div className="gradient-bg min-h-screen px-4 py-6 md:py-10">
+      <div className="max-w-4xl mx-auto">
+
+        {/* Hero - Big */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight leading-tight">
             ✦ <span className="gradient-text">人生总览</span>
           </h1>
-          <p className="text-[var(--text-secondary)] text-sm max-w-lg mx-auto">
-            一次输入 · 七系统交叉融合<br />
-            八字 · 人类图 · 占星 · 紫微斗数 · 五运六气 · 流年 · 人生规划<br />
-            <span className="text-xs opacity-60">DeepSeek V4 Pro · 温暖深度解读</span>
+          <p className="text-base md:text-lg text-[var(--text-secondary)]">
+            一次输入 · 七大系统交叉融合
+          </p>
+          <p className="text-sm text-[var(--text-secondary)] opacity-70">
+            八字 · 人类图 · 占星 · 紫微斗数 · 五运六气 · 流年 · 人生规划
           </p>
         </div>
 
-        {/* Form */}
-        <div className="card-jade p-6 mb-6">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
-            <input placeholder="出生年" value={year} onChange={e=>setYear(e.target.value)} className="input-jade" type="number" />
-            <input placeholder="月" value={month} onChange={e=>setMonth(e.target.value)} className="input-jade" type="number" min={1} max={12} />
-            <input placeholder="日" value={day} onChange={e=>setDay(e.target.value)} className="input-jade" type="number" min={1} max={31} />
-            <input placeholder="时(0-23)" value={hour} onChange={e=>setHour(e.target.value)} className="input-jade" type="number" min={0} max={23} />
-            <input placeholder="出生地" value={location} onChange={e=>setLocation(e.target.value)} className="input-jade" />
-          </div>
-          <div className="flex gap-3 items-center">
-            <select value={gender} onChange={e=>setGender(e.target.value)} className="input-jade w-20">
-              <option>男</option><option>女</option>
-            </select>
-            <button onClick={submit} disabled={loading}
-              className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-[var(--accent)] to-purple-500 text-white font-semibold text-sm hover:shadow-lg transition-all disabled:opacity-50">
-              {loading ? '⌛ 生成中...' : '✦ 生成人生总览'}
+        {/* Form - Big */}
+        <div className="card-jade p-6 md:p-8 mb-8">
+          <div className="space-y-5">
+
+            {/* Date Row */}
+            <div>
+              <label className="block text-base font-bold mb-2 text-[var(--text-secondary)]">出生日期</label>
+              <div className="grid grid-cols-4 gap-3">
+                <select value={year} onChange={e=>setYear(e.target.value)} className="input-jade text-lg py-3 font-medium">
+                  <option value="">年份</option>
+                  {YEARS.map(y=><option key={y} value={y}>{y}年</option>)}
+                </select>
+                <select value={month} onChange={e=>setMonth(e.target.value)} className="input-jade text-lg py-3 font-medium">
+                  <option value="">月份</option>
+                  {MONTHS.map(m=><option key={m} value={m}>{m}月</option>)}
+                </select>
+                <select value={day} onChange={e=>setDay(e.target.value)} className="input-jade text-lg py-3 font-medium">
+                  <option value="">日期</option>
+                  {DAYS.map(d=><option key={d} value={d}>{d}日</option>)}
+                </select>
+                <select value={hour} onChange={e=>setHour(e.target.value)} className="input-jade text-lg py-3 font-medium">
+                  <option value="">时辰</option>
+                  {HOURS.map(h=><option key={h} value={h}>{h}时</option>)}
+                </select>
+              </div>
+            </div>
+
+            {/* Location */}
+            <div>
+              <label className="block text-base font-bold mb-2 text-[var(--text-secondary)]">出生地</label>
+              <select value={location} onChange={e=>setLocation(e.target.value)} className="input-jade text-lg py-3 font-medium w-full">
+                <option value="">选择出生地</option>
+                {Object.entries(LOCATIONS).filter(([k])=>k.length<=4||LOCATIONS[k]===k).map(([k,v])=>
+                  <option key={k} value={v}>{k}</option>
+                )}
+                <option value="other">其他（联系客服）</option>
+              </select>
+            </div>
+
+            {/* Gender */}
+            <div>
+              <label className="block text-base font-bold mb-2 text-[var(--text-secondary)]">性别</label>
+              <div className="flex gap-3">
+                <Btn v="男" cur={gender} set={setGender} label="👨 男" />
+                <Btn v="女" cur={gender} set={setGender} label="👩 女" />
+              </div>
+            </div>
+
+            {/* Submit */}
+            <button onClick={submit} disabled={loading||!year||!month||!day}
+              className="w-full py-4 rounded-xl bg-gradient-to-r from-[var(--accent)] to-emerald-500 text-white font-bold text-lg hover:shadow-xl transition-all disabled:opacity-40">
+              {loading ? '⌛ 正在为您解读...' : '✦ 生成人生总览报告'}
             </button>
+            {error && <p className="text-red-400 text-sm mt-2 text-center">{error}</p>}
           </div>
-          {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
         </div>
 
-        {/* Data Summary */}
+        {/* Charts */}
         {data && (
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-6 text-xs">
-            <div className="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)] text-center">
-              <div className="font-bold text-[var(--accent)]">八字</div>
-              <div className="text-[var(--text-secondary)]">{data.bazi?.pillars?.join(' ')}</div>
-            </div>
-            <div className="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)] text-center">
-              <div className="font-bold text-[var(--accent)]">人类图</div>
-              <div className="text-[var(--text-secondary)]">{data.hd?.type} {data.hd?.profile}</div>
-            </div>
-            <div className="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)] text-center">
-              <div className="font-bold text-[var(--accent)]">占星</div>
-              <div className="text-[var(--text-secondary)]">{data.zodiac?.zodiac}</div>
-            </div>
-            <div className="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)] text-center">
-              <div className="font-bold text-[var(--accent)]">五运六气</div>
-              <div className="text-[var(--text-secondary)]">{data.wuyun?.wuyun}</div>
-            </div>
-            <div className="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)] text-center">
-              <div className="font-bold text-[var(--accent)]">流年</div>
-              <div className="text-[var(--text-secondary)]">{data.liunian?.split('|')[1]?.trim()}</div>
-            </div>
-          </div>
-        )}
-
-        {/* Charts Section */}
-        {data && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {data.hd && (
-              <div className="card-jade p-4">
-                <h3 className="text-sm font-bold text-[var(--accent)] mb-2">🧬 人类图·身体图</h3>
+              <div className="card-jade p-5">
+                <h3 className="text-base font-bold text-[var(--accent)] mb-3">🧬 人类图</h3>
                 <BodygraphSVG
                   definedCenters={data.hd.definedCenters||[]}
                   activatedGates={data.hd.activatedGates||[]}
                   channels={data.hd.channels||[]}
                   centerDefinition={{}}
                 />
-                <p className="text-xs text-[var(--text-secondary)] mt-2 text-center">
-                  {data.hd.type} · {data.hd.profile} · {data.hd.authority}
-                </p>
+                <p className="text-sm text-[var(--text-secondary)] mt-3 text-center">{data.hd.type} · {data.hd.profile} · {data.hd.authority}</p>
               </div>
             )}
             {data.bazi && (
-              <div className="card-jade p-4">
-                <h3 className="text-sm font-bold text-[var(--accent)] mb-2">🀄 八字四柱</h3>
+              <div className="card-jade p-5">
+                <h3 className="text-base font-bold text-[var(--accent)] mb-3">🀄 八字四柱</h3>
                 <BaziChart pillars={data.bazi.pillars||[]} dayMaster={data.bazi.dayMaster||''} elements={['金','金','金','火']}/>
-                <p className="text-xs text-[var(--text-secondary)] mt-2 text-center">
-                  {data.bazi.pillars?.join(' · ')}
-                </p>
               </div>
             )}
             {data.ziwei && (
-              <div className="card-jade p-4">
-                <h3 className="text-sm font-bold text-[var(--accent)] mb-2">⭐ 紫微斗数·十二宫</h3>
+              <div className="card-jade p-5">
+                <h3 className="text-base font-bold text-[var(--accent)] mb-3">⭐ 紫微斗数</h3>
                 <ZiWeiChart palaces={data.ziwei.palaces||[]} />
               </div>
             )}
             {data.wuyun && (
-              <div className="card-jade p-4">
-                <h3 className="text-sm font-bold text-[var(--accent)] mb-2">🌊 五运六气</h3>
-                <div className="text-xs text-[var(--text-secondary)] space-y-1">
-                  <p>{data.wuyun.stem}年 → {data.wuyun.wuyun}</p>
-                  <p>{data.wuyun.branch}年 → {data.wuyun.liuqi}</p>
+              <div className="card-jade p-5">
+                <h3 className="text-base font-bold text-[var(--accent)] mb-3">🌊 五运六气</h3>
+                <div className="text-sm text-[var(--text-secondary)] space-y-2">
+                  <p>出生年运：{data.wuyun.stem}年 → {data.wuyun.wuyun}</p>
+                  <p>出生气化：{data.wuyun.branch}年 → {data.wuyun.liuqi}</p>
+                  <p className="text-xs opacity-60">当前流年：2026丙午年 · 火运太过 · 太阳寒水司天</p>
                 </div>
               </div>
             )}
@@ -137,14 +169,14 @@ export default function MasterPage() {
 
         {/* Report */}
         {report && (
-          <div className="card-jade p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold">📜 人生总览报告</h2>
-              <VoiceReader text={report} title="听报告" />
+          <div className="card-jade p-6 md:p-8">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-bold">📜 人生总览报告</h2>
+              <VoiceReader text={report} title="🔊 听报告" />
             </div>
-            <div className="prose prose-sm prose-invert whitespace-pre-wrap text-sm leading-relaxed">
+            <div className="prose prose-sm md:prose-base prose-invert whitespace-pre-wrap leading-relaxed">
               {report.split('\n').map((line, i) => (
-                <p key={i} className="mb-2">{line || '\u00A0'}</p>
+                <p key={i} className="mb-3">{line || '\u00A0'}</p>
               ))}
             </div>
           </div>
