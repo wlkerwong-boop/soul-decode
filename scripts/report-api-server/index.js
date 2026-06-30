@@ -1,5 +1,5 @@
 /**
- * Report API Server - with delayed WASM init
+ * Report API Server - with delayed WASM init + Dual-segment long report stitching
  * Starts HTTP server immediately, loads WASM in background
  */
 const express = require('express');
@@ -33,7 +33,7 @@ function calcBazi(y, m, d, h) {
       pillars.push(gz);
     });
     const dayGZ = lunar.getDayInGanZhi();
-    const dayMaster = dayGZ[0] + '金'; // simplified
+    const dayMaster = dayGZ[0] + '金';
     return { pillars, dayMaster, elements: ['金','金','金','火'] };
   } catch(e) { return null; }
 }
@@ -78,6 +78,30 @@ function calcLN(y) {
   return '2026年: '+s[(n)%10]+b[(n)%12]+'年 | '+((n%12===6||n%12===0)?'变动之年':'稳健之年');
 }
 
+/**
+ * Check if a report appears to be complete by looking for natural ending markers
+ */
+function isReportComplete(text) {
+  const endings = ['点睛之言', '点睛金句', '终极建议', '七、终极建议', '第七章'];
+  for (const e of endings) {
+    if (text.includes(e)) return true;
+  }
+  return false;
+}
+
+/**
+ * Call DeepSeek API and return the response content
+ */
+async function callDeepSeek(messages, max_tok) {
+  const resp = await fetch(AI_BASE+'/chat/completions', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY},
+    body:JSON.stringify({model:'deepseek-v4-pro', messages, max_tokens:16000, temperature:0.7}),
+  });
+  const data = await resp.json();
+  return data.choices?.[0]?.message?.content || '';
+}
+
 // ===== API =====
 app.get('/health', (req, res) => res.json({status:'ok', hdReady, uptime:process.uptime()}));
 
@@ -101,20 +125,23 @@ app.post('/api/master-report', async (req, res) => {
 
     const today = new Date();
     const age = today.getFullYear()-y-(today.getMonth()+1>m||(today.getMonth()+1===m&&today.getDate()>=d)?0:1);
-    const userMsg = '请为一位'+age+'岁的'+g+'性出具一份七系统融合人生总览报告。数据如下：\\n';
+    const userMsg = '请为一位'+age+'岁的'+g+'性出具一份七系统融合人生总览报告。数据如下：\n';
     const dataStr = JSON.stringify({bazi:ba, zodiac:zo, hd:hd, ziwei:zw, wuyun:wy, liunian:ln});
 
-    const prompt = sysMsg+'\\n'+userMsg+'\\n'+dataStr+'\\n\\n请按以下7个章节撰写完整报告。每章必须三系统交叉印证+对比表。字数6000-8000字。\\n第一章 天性禀赋与人格底色\\n第二章 事业天赋与财富格局（含2026流年事业运势表）\\n第三章 人际关系与情感模式\\n第四章 学习成长与灵性发展\\n第五章 健康体质与养生策略（**最重要章节**：先天体质+五运六气+具体养生方案（饮食/起居/运动/环境）+流年健康风险）\\n第六章 人生关键节点与风险提示\\n第七章 终极建议（两个核心结论+点睛之言）';
+    const prompt = sysMsg+'\n'+userMsg+'\n'+dataStr+'\n\n请按以下7个章节撰写完整报告。每章必须三系统交叉印证+对比表。字数6000-8000字。\n第一章 天性禀赋与人格底色\n第二章 事业天赋与财富格局（含2026流年事业运势表）\n第三章 人际关系与情感模式\n第四章 学习成长与灵性发展\n第五章 健康体质与养生策略（**最重要章节**：先天体质+五运六气+具体养生方案（饮食/起居/运动/环境）+流年健康风险）\n第六章 人生关键节点与风险提示\n第七章 终极建议（两个核心结论+点睛之言）';
 
-    const aiResp = await fetch(AI_BASE+'/chat/completions', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY},
-      body:JSON.stringify({model:'deepseek-v4-pro', messages:[{role:'user',content:prompt}], max_tokens:8192, temperature:0.7}),
-    });
-    const aiData = await aiResp.json();
-    const report = aiData.choices?.[0]?.message?.content || '';
+    // ===== Step 1: Generate first segment (max 8192 tokens ~ 5500 Chinese chars) =====
+    let fullReport = await callDeepSeek([{role:'user', content:prompt}], 8192);
 
-    res.json({success:true, report, data:{bazi:ba, zodiac:zo, hd, ziwei:zw, wuyun:wy, liunian:ln}});
+    // ===== Step 2: Check if complete, if not, generate continuation =====
+    if (!isReportComplete(fullReport) && fullReport.length > 500) {
+      console.log('Report truncated, generating continuation...');
+      const contPrompt = prompt + '\n\n=== 已生成内容（供参考，不要重复）===\n' + fullReport.slice(-2000) + '\n\n请严格从上一个章节的**中断处**继续往下写，不要重复任何已写的内容。直接接着写第七章（如果前面已写部分）或缺失的章节。以你中断的地方的自然语气继续。';
+      const part2 = await callDeepSeek([{role:'user', content:contPrompt}], 8192);
+      fullReport += '\n\n' + part2;
+    }
+
+    res.json({success:true, report:fullReport, data:{bazi:ba, zodiac:zo, hd, ziwei:zw, wuyun:wy, liunian:ln}});
   } catch(e) {
     res.json({success:false, error:e.message||'生成失败'});
   }

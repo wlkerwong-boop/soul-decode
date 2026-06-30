@@ -28,7 +28,7 @@ export default function Nav() {
   const navLinks = [
     { href: '/master-report', label: '✦ 人生总览' },
     { href: '/human-design', label: '🧬 自助排盘' },
-    { href: '/daily', label: '📖 命理百科' },
+    { href: '/daily', label: '🌅 每日运势' },
   ];
 
   return (

@@ -198,7 +198,7 @@ ${liunianResult}
               { role: 'system', content: '你是修炼数十年的命理导师，精通八字命理、人类图、西方占星、紫微斗数、五运六气、流年运势、人生规划七大体系。你的报告要写成「人生传记」而非「算法报告」。语言温暖、直接、有力。总字数5000-8000字。禁止AI套话。**必须完整生成所有章节，不得截断。**' },
               { role: 'user', content: prompt }
             ],
-            max_tokens: 8192,
+            max_tokens: 16000,
             temperature: 0.7,
           }),
           signal: AbortSignal.timeout(180000),
