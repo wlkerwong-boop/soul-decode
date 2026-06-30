@@ -7,26 +7,25 @@ export default function Footer() {
             <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">灵魂解码</h4>
             <ul className="space-y-1.5 text-xs text-[var(--text-secondary)]">
               <li><a href="/" className="hover:text-[var(--text-accent)] transition-colors">首页</a></li>
-              <li><a href="/mbti" className="hover:text-[var(--text-accent)] transition-colors">MBTI性格</a></li>
-              <li><a href="/astrology" className="hover:text-[var(--text-accent)] transition-colors">星座占星</a></li>
-              <li><a href="/health" className="hover:text-[var(--text-accent)] transition-colors">身心健康</a></li>
-              <li><a href="/tcm" className="hover:text-[var(--text-accent)] transition-colors">中医通鉴</a></li>
+              <li><a href="/master-report" className="hover:text-[var(--text-accent)] transition-colors">人生总览</a></li>
+              <li><a href="/human-design" className="hover:text-[var(--text-accent)] transition-colors">人类图排盘</a></li>
+              <li><a href="/daily" className="hover:text-[var(--text-accent)] transition-colors">每日运势</a></li>
             </ul>
           </div>
           <div>
             <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">深度探索</h4>
             <ul className="space-y-1.5 text-xs text-[var(--text-secondary)]">
-              <li><a href="/dharma" className="hover:text-[var(--text-accent)] transition-colors">☸ 法藏文库</a></li>
-              <li><a href="/tools" className="hover:text-[var(--text-accent)] transition-colors">🧰 亲子工具</a></li>
-              <li><a href="/admin" className="hover:text-[var(--text-accent)] transition-colors">梅花易数</a></li>
-              <li><a href="/payment" className="hover:text-[var(--text-accent)] transition-colors">💎 会员中心</a></li>
+              <li><a href="/compatibility" className="hover:text-[var(--text-accent)] transition-colors">❤️ 关系合盘</a></li>
+              <li><a href="/mbti" className="hover:text-[var(--text-accent)] transition-colors">MBTI性格</a></li>
+              <li><a href="/admin" className="hover:text-[var(--text-accent)] transition-colors">管理后台</a></li>
             </ul>
           </div>
           <div>
             <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">关于我们</h4>
             <ul className="space-y-1.5 text-xs text-[var(--text-secondary)]">
-              <li>AI深度解读 + 真实八字排盘</li>
-              <li>融合心理学与东方智慧</li>
+              <li>八字 + 人类图 + 占星 + 紫微 + 五运六气</li>
+              <li>七系统AI深度融合解读</li>
+              <li>Jovian Archive认证HD引擎</li>
               <li>大理 · 银桥</li>
             </ul>
           </div>
