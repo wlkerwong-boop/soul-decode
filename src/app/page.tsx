@@ -5,16 +5,14 @@ import BirthInputForm from '@/components/BirthInputForm';
 import Link from 'next/link';
 
 const coreProducts = [
-  { icon: '🔮', title: '八字命盘', desc: '四柱八字排盘，五行喜忌分析，大运流年推演', href: '/astrology', color: '#f59e0b' },
+  { icon: '🌟', title: '人生总览', desc: '八字+人类图+占星+紫微+五运六气·七系统AI深度交叉解读', href: '/master-report', color: '#06b6d4', featured: true },
   { icon: '🧬', title: '人类图', desc: '能量中心·闸门·通道·类型权威·人生角色全解析', href: '/human-design', color: '#8b5cf6' },
-  { icon: '🔄', title: '三系统融合', desc: '八字+人类图+占星·AI深度交叉解读', href: '/fusion', color: '#06b6d4', featured: true },
 ];
 
 const features = [
-  { icon: '✋', title: '中医手诊', desc: 'AI辅助掌色/掌形辨证', href: '/hand-diagnosis' },
   { icon: '🌅', title: '每日运势', desc: '每日能量指引', href: '/daily' },
-  { icon: '❤️', title: '关系合盘', desc: '双人能量匹配', href: '/matching' },
-  { icon: '💰', title: '财富密码', desc: '财星格局分析', href: '/wealth' },
+  { icon: '❤️', title: '关系合盘', desc: '双人能量匹配', href: '/compatibility' },
+  { icon: '💰', title: '财富密码', desc: '财星格局分析', href: '/master-report' },
 ];
 
 export default function Home() {
@@ -35,8 +33,8 @@ export default function Home() {
             <br />一次看清
           </h1>
           <p className="text-[var(--text-secondary)] text-lg mb-8 max-w-xl mx-auto">
-            八字 + 人类图 + 占星 · 三系统融合AI报告<br />
-            从三个维度精准定位你的天赋、挑战与人生节奏
+            八字 · 人类图 · 占星 · 紫微 · 五运六气<br />
+            七系统AI融合报告 · 精准定位天赋、挑战与人生节奏
           </p>
           <button onClick={() => setShowForm(!showForm)}
             className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-[var(--accent)] to-purple-500 text-white font-semibold text-lg hover:shadow-lg hover:shadow-[var(--accent)]/25 transition-all">
