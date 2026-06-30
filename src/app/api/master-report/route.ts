@@ -47,11 +47,17 @@ function calcZiwei(y: number, m: number, d: number, h: number, gender: string) {
 }
 
 function calcZodiac(y: number, m: number, d: number) {
-  const signs = ['摩羯','水瓶','双鱼','白羊','金牛','双子','巨蟹','狮子','处女','天秤','天蝎','射手'];
-  const dayOfYear = Math.floor((Date.UTC(y,m-1,d) - Date.UTC(y,0,0)) / 86400000);
-  const idx = Math.floor((dayOfYear - (y%4===0&&(y%100!==0||y%400===0)?79:80)) / 30.44);
-  const sunSign = idx >= 0 && idx < 12 ? signs[idx] : '未知';
-  return { sunSign, zodiac: `${sunSign}座` };
+  const signs: [number, number, string][] = [
+    [1,20,'水瓶'],[2,19,'双鱼'],[3,21,'白羊'],[4,20,'金牛'],
+    [5,21,'双子'],[6,21,'巨蟹'],[7,23,'狮子'],[8,23,'处女'],
+    [9,23,'天秤'],[10,23,'天蝎'],[11,22,'射手'],[12,22,'摩羯'],
+  ];
+  for (let i = signs.length - 1; i >= 0; i--) {
+    if (m > signs[i][0] || (m === signs[i][0] && d >= signs[i][1])) {
+      return { sunSign: signs[i][2], zodiac: signs[i][2] + '座' };
+    }
+  }
+  return { sunSign: '摩羯', zodiac: '摩羯座' };
 }
 
 function calcWuyunLiuqi(y: number) {
