@@ -58,7 +58,7 @@ export default function MasterPage() {
   };
 
   const Btn = ({v,cur,set,label}:{v:string,cur:string,set:(s:string)=>void,label:string}) => (
-    <button onClick={()=>set(v)} className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${cur===v ? 'bg-[var(--accent)] text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)] hover:bg-opacity-80'}`}>{label}</button>
+    <button onClick={()=>set(v)} className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${cur===v ? 'bg-[var(--text-accent)] text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)] hover:bg-opacity-80'}`}>{label}</button>
   );
 
   const Sel = ({v,set,opts,placeholder}:{v:string,set:(s:string)=>void,opts:any[],placeholder:string}) => (
@@ -131,7 +131,7 @@ export default function MasterPage() {
             </div>
 
             <button onClick={submit} disabled={loading||!year||!month||!day||!hour||!city}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-[var(--accent)] to-emerald-500 text-white font-bold text-lg hover:shadow-xl transition-all disabled:opacity-40">
+              className="w-full py-4 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-bold text-lg hover:shadow-xl transition-all disabled:opacity-40">
               {loading ? '⌛ 正在为您解读...' : '✦ 生成人生总览报告'}
             </button>
             {error && <p className="text-red-400 text-sm mt-2 text-center">{error}</p>}
@@ -143,26 +143,26 @@ export default function MasterPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {data.hd && (
               <div className="card-jade p-5">
-                <h3 className="text-base font-bold text-[var(--accent)] mb-3">🧬 人类图</h3>
+                <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">🧬 人类图</h3>
                 <BodygraphSVG definedCenters={data.hd.definedCenters||[]} activatedGates={data.hd.activatedGates||[]} channels={data.hd.channels||[]} centerDefinition={{}} />
                 <p className="text-sm text-[var(--text-secondary)] mt-3 text-center">{data.hd.type} · {data.hd.profile} · {data.hd.authority}</p>
               </div>
             )}
             {data.bazi && (
               <div className="card-jade p-5">
-                <h3 className="text-base font-bold text-[var(--accent)] mb-3">🀄 八字四柱</h3>
+                <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">🀄 八字四柱</h3>
                 <BaziChart pillars={data.bazi.pillars||[]} dayMaster={data.bazi.dayMaster||''} elements={['金','金','金','火']}/>
               </div>
             )}
             {data.ziwei && (
               <div className="card-jade p-5">
-                <h3 className="text-base font-bold text-[var(--accent)] mb-3">⭐ 紫微斗数</h3>
+                <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">⭐ 紫微斗数</h3>
                 <ZiWeiChart palaces={data.ziwei.palaces||[]} />
               </div>
             )}
             {data.wuyun && (
               <div className="card-jade p-5">
-                <h3 className="text-base font-bold text-[var(--accent)] mb-3">🌊 五运六气</h3>
+                <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">🌊 五运六气</h3>
                 <div className="text-sm text-[var(--text-secondary)] space-y-2">
                   <p>出生年运：{data.wuyun.stem}年 → {data.wuyun.wuyun}</p>
                   <p>出生气化：{data.wuyun.branch}年 → {data.wuyun.liuqi}</p>
@@ -210,7 +210,7 @@ export default function MasterPage() {
               看看你们在哪些方面天生契合，哪些领域需要经营。
             </p>
             <div className="flex flex-wrap justify-center gap-3 text-sm">
-              <a href="/compatibility" className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[var(--accent)] to-emerald-500 text-white font-medium hover:shadow-lg transition-all">
+              <a href="/compatibility" className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-medium hover:shadow-lg transition-all">
                 💑 情侣合盘
               </a>
               <a href="/compatibility" className="px-5 py-2.5 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">

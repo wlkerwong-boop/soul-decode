@@ -39,8 +39,11 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <head>
+        {/* Google Fonts: Inter (English) + Noto Sans SC (Chinese) */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#4a7c6f" />
+        <meta name="theme-color" content="#1a1a2e" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body className="antialiased">

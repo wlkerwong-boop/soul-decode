@@ -52,12 +52,12 @@ export default function VoiceReader({ text, title }: VoiceReaderProps) {
   const stop = () => { synthRef.current?.cancel(); setPlaying(false); setPaused(false); };
 
   return (
-    <div className="voice-reader p-4 rounded-xl bg-[var(--card)] border border-[var(--border)]">
+    <div className="voice-reader p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)]">
       {title && <div className="text-sm font-medium mb-3 opacity-70">{title}</div>}
       
       <div className="flex items-center gap-2 mb-3 flex-wrap">
         <button onClick={playing ? (paused ? resume : pause) : speak}
-          className="w-10 h-10 rounded-full bg-[var(--accent)] text-white flex items-center justify-center hover:opacity-80 transition-opacity">
+          className="w-10 h-10 rounded-full bg-[var(--text-accent)] text-white flex items-center justify-center hover:opacity-80 transition-opacity">
           {!playing ? '▶' : paused ? '▶' : '⏸'}
         </button>
         {playing && (
@@ -68,7 +68,7 @@ export default function VoiceReader({ text, title }: VoiceReaderProps) {
         )}
         
         <select value={selectedVoice} onChange={e => setSelectedVoice(e.target.value)}
-          className="ml-auto px-2 py-1 rounded bg-[var(--bg-highlight)] border border-[var(--border)] text-xs max-w-[160px]">
+          className="ml-auto px-2 py-1 rounded bg-[var(--bg-highlight)] border border-[var(--border-color)] text-xs max-w-[160px]">
           {voices.map(v => (
             <option key={v.name} value={v.name}>{v.name.slice(0, 20)}</option>
           ))}
@@ -78,7 +78,7 @@ export default function VoiceReader({ text, title }: VoiceReaderProps) {
           <span>慢</span>
           <input type="range" min="0.5" max="1.5" step="0.1" value={rate}
             onChange={e => setRate(parseFloat(e.target.value))}
-            className="w-20 accent-[var(--accent)]" />
+            className="w-20 accent-[var(--text-accent)]" />
           <span>快</span>
         </div>
       </div>

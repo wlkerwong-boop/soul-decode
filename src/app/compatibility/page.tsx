@@ -41,7 +41,7 @@ function PersonForm({ label, pfx, data, setData }: {
 
   return (
     <div className="space-y-3 p-4 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-color)]">
-      <h3 className="text-sm font-bold text-[var(--accent)]">{label}</h3>
+      <h3 className="text-sm font-bold text-[var(--text-accent)]">{label}</h3>
       <div className="grid grid-cols-5 gap-1.5">
         <Sel value={data[pfx+'_year']} set={v=>setData(pfx+'_year',v)} opts={YEARS} ph="年份" />
         <Sel value={data[pfx+'_month']} set={v=>setData(pfx+'_month',v)} opts={MONTHS} ph="月" />
@@ -58,7 +58,7 @@ function PersonForm({ label, pfx, data, setData }: {
       <div className="flex gap-2">
         {['男','女'].map(g => (
           <button key={g} onClick={()=>setData(pfx+'_gender',g)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${gender===g ? 'bg-[var(--accent)] text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)] hover:bg-opacity-80'}`}>
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${gender===g ? 'bg-[var(--text-accent)] text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)] hover:bg-opacity-80'}`}>
             {g==='男'?'👨 男':'👩 女'}
           </button>
         ))}
@@ -129,7 +129,7 @@ export default function HepanPage() {
             {v:'friend',l:'🤝 朋友合盘'},
           ].map(t=>(
             <button key={t.v} onClick={()=>setType(t.v)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${type===t.v ? 'bg-gradient-to-r from-[var(--accent)] to-emerald-500 text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)] border border-[var(--border-color)]'}`}>
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${type===t.v ? 'bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)] border border-[var(--border-color)]'}`}>
               {t.l}
             </button>
           ))}
@@ -153,7 +153,7 @@ export default function HepanPage() {
           )}
 
           <button onClick={submit} disabled={loading||!(canSubmit('a')||canSubmit('m'))}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-[var(--accent)] to-emerald-500 text-white font-bold text-base hover:shadow-lg transition-all disabled:opacity-40">
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-bold text-base hover:shadow-lg transition-all disabled:opacity-40">
             {loading ? '⌛ 正在合盘...' : '✦ 生成合盘报告'}
           </button>
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
