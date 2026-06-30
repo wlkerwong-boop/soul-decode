@@ -168,8 +168,8 @@ ${liunianResult}
       const aliRes = await fetch(aliyunUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ year, month, day, hour, gender }),
-        signal: AbortSignal.timeout(120000), // 120s超时
+        body: JSON.stringify({ year, month, day, hour, minute: body.minute || '0', gender, timezone: tz, location }),
+        signal: AbortSignal.timeout(180000), // 180s超时
       });
       const aliData = await aliRes.json();
       if (aliData.success && aliData.report) {
@@ -182,18 +182,20 @@ ${liunianResult}
     // 阿里云API不可用时退回到DeepSeek直连
     if (!report && apiKey) {
       try {
+        const modelName = process.env.AI_MODEL || 'deepseek-chat';
         const res = await fetch(`${baseUrl}/chat/completions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
           body: JSON.stringify({
-            model: 'deepseek-chat',
+            model: modelName,
             messages: [
-              { role: 'system', content: '你是修炼数十年的命理导师，精通八字命理、人类图、西方占星、紫微斗数、五运六气、流年运势、人生规划七大体系。你的报告要写成「人生传记」而非「算法报告」。语言温暖、直接、有力。总字数3000-5000字。禁止AI套话。' },
+              { role: 'system', content: '你是修炼数十年的命理导师，精通八字命理、人类图、西方占星、紫微斗数、五运六气、流年运势、人生规划七大体系。你的报告要写成「人生传记」而非「算法报告」。语言温暖、直接、有力。总字数5000-8000字。禁止AI套话。**必须完整生成所有章节，不得截断。**' },
               { role: 'user', content: prompt }
             ],
-            max_tokens: 2000,
-            temperature: 0.8,
+            max_tokens: 8192,
+            temperature: 0.7,
           }),
+          signal: AbortSignal.timeout(180000),
         });
         const data = await res.json();
         report = data.choices?.[0]?.message?.content || '';
