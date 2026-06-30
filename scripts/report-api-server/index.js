@@ -96,7 +96,7 @@ async function callDeepSeek(messages, max_tok) {
   const resp = await fetch(AI_BASE+'/chat/completions', {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY},
-    body:JSON.stringify({model:'deepseek-v4-pro', messages, max_tokens:16000, temperature:0.7}),
+    body:JSON.stringify({model:'deepseek-v4-pro', messages, max_tokens:24000, temperature:0.7}),
   });
   const data = await resp.json();
   return data.choices?.[0]?.message?.content || '';
@@ -121,7 +121,7 @@ app.post('/api/master-report', async (req, res) => {
     let hd = calcHD(y,m,d,h,mi,timezone||'Asia/Shanghai');
     if (!hd) { hd = {type:'计算中',profile:'HD引擎加载中', centers:[], gates:[], channels:[]}; }
 
-    const sysMsg = '你是修炼数十年的命理导师，精通八字、人类图、占星、紫微斗数、五运六气、流年、人生规划七大体系。你的报告像长辈跟孩子谈心——温暖、直接、有力。每个数据点转化为具体人生场景。交叉印证。禁止AI套话。字数6000-8000字。**必须完整生成所有章节，不得截断。**';
+    const sysMsg = '你是修炼数十年的命理导师，精通八字、人类图、占星、紫微斗数、五运六气、流年、人生规划七大体系。你的报告像长辈跟孩子谈心——温暖、直接、有力。每个数据点转化为具体人生场景。交叉印证。禁止AI套话。字数8000-10000字。**必须完整生成所有章节，不得截断。**\n\n【报告格式要求】\n- 开头段：直接称呼用户，简述核心命盘，自然引入\n- 每个系统数据需配表格：八字四柱表（天干/地支/十神/藏干/纳音）、人类图数据表（类型/角色/权威/通道/闸门）、紫微宫位表\n- 通道描述要详细，包含Gate名称+功能说明+引用来源\n- 七系统交叉印证：必须有一个Markdown表格，横轴为八字/人类图/占星/紫微，纵轴为核心本质/能量模式/人际/事业/挑战/优势\n- 流年运势：Markdown表格（维度/影响/建议）\n- 财富配置：Markdown表格（五行/资产/配置/依据）\n- 健康养生：Markdown表格（调理维度/具体建议）\n- 关键风险提示：编号列表，每项包含风险说明+应对建议\n- 字体风格：段落之间空行，表格对齐，重点加粗\n- 占星部分引用专业术语如"优雅的君主"等经典组合描述\n- 紫微部分如有数据修正需标注[修正：此前误写为xxx，实际xxx]\n- 最后必须有一句「点睛金句」作为收尾';
 
     const today = new Date();
     const age = today.getFullYear()-y-(today.getMonth()+1>m||(today.getMonth()+1===m&&today.getDate()>=d)?0:1);
