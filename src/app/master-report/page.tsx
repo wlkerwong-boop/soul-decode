@@ -16,21 +16,24 @@ const MINUTES = [0,15,30,45];
 export default function MasterPage() {
   const [year, setYear] = useState(''); const [month, setMonth] = useState('');
   const [day, setDay] = useState(''); const [hour, setHour] = useState(''); const [minute, setMinute] = useState('0');
-  const [country, setCountry] = useState(''); const [province, setProvince] = useState('');
-  const [city, setCity] = useState(''); const [gender, setGender] = useState('男');
+  const [continent, setContinent] = useState(''); const [country, setCountry] = useState('');
+  const [province, setProvince] = useState(''); const [city, setCity] = useState('');
+  const [gender, setGender] = useState('男');
   const [report, setReport] = useState(''); const [loading, setLoading] = useState(false);
   const [error, setError] = useState(''); const [data, setData] = useState<any>(null);
 
-  // Cascading city data
-  const countries = useMemo(() => ['中国', ...Object.keys(INTERNATIONAL_CITIES)], []);
-  const provinces = useMemo(() => country === '中国' ? Object.keys(CHINA_CITIES) : [], [country]);
-  const intlContinent = useMemo(() => country !== '中国' && country ? INTERNATIONAL_CITIES[country]||{} : {}, [country]);
-  const intlCountries = useMemo(() => Object.keys(intlContinent), [intlContinent]);
+  // Cascading location: continent → country → province(China only) → city
+  const continents = useMemo(() => Object.keys(INTERNATIONAL_CITIES), []);
+  const continentCountries = useMemo(() =>
+    continent ? Object.keys(INTERNATIONAL_CITIES[continent]||{}) : [], [continent]);
+  const isChina = country === '中国';
+  const provinces = useMemo(() => isChina ? Object.keys(CHINA_CITIES) : [], [isChina]);
   const cities = useMemo(() => {
-    if (country === '中国' && province) return CHINA_CITIES[province]||[];
-    if (country !== '中国' && province) return intlContinent[province]||[];
+    if (!country) return [];
+    if (isChina && province) return CHINA_CITIES[province]||[];
+    if (!isChina && continent && country) return INTERNATIONAL_CITIES[continent]?.[country]||[];
     return [];
-  }, [country, province, intlContinent]);
+  }, [country, continent, isChina, province]);
 
   // Auto-detect timezone from city
   const detectedTz = useMemo(() => {
@@ -40,7 +43,7 @@ export default function MasterPage() {
 
   const submit = async () => {
     setLoading(true); setError(''); setReport(''); setData(null);
-    const loc = country === '中国' ? province : `${country}-${province}`;
+    const loc = isChina ? province : country;
     try {
       const r = await fetch('/api/master-report', {
         method: 'POST',
@@ -90,18 +93,22 @@ export default function MasterPage() {
               </div>
             </div>
 
-            {/* Location - Cascading */}
+            {/* Location - Cascading: 大洲 → 国家 → 省份(仅中国) → 城市 */}
             <div>
               <label className="block text-base font-bold mb-2 text-[var(--text-secondary)]">出生地</label>
-              <div className="grid grid-cols-3 gap-2">
-                <Sel v={country} set={(s:string)=>{setCountry(s);setProvince('');setCity('');}} opts={countries} placeholder="国家/地区" />
-                {country === '中国' ? (
-                  <Sel v={province} set={(s:string)=>{setProvince(s);setCity('');}} opts={provinces} placeholder="省份" />
-                ) : country ? (
-                  <Sel v={province} set={(s:string)=>{setProvince(s);setCity('');}} opts={intlCountries} placeholder="国家" />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <Sel v={continent} set={(s:string)=>{setContinent(s);setCountry('');setProvince('');setCity('');}} opts={continents} placeholder="大洲" />
+                {continent ? (
+                  <Sel v={country} set={(s:string)=>{setCountry(s);setProvince('');setCity('');}} opts={continentCountries} placeholder="国家" />
                 ) : <div />}
-                {province && <Sel v={city} set={setCity} opts={cities} placeholder="城市" />}
-                {province && !city && <div />}
+                {isChina && country ? (
+                  <Sel v={province} set={(s:string)=>{setProvince(s);setCity('');}} opts={provinces} placeholder="省份" />
+                ) : country && !isChina ? (
+                  <Sel v={city} set={setCity} opts={cities} placeholder="城市" />
+                ) : <div />}
+                {isChina && province ? (
+                  <Sel v={city} set={setCity} opts={cities} placeholder="城市" />
+                ) : <div />}
               </div>
             </div>
 

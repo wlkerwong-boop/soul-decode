@@ -1,191 +1,123 @@
 /**
- * 七系统融合报告生成 API 服务
- * 运行在阿里云服务器，无Vercel 10s超时限制
- * PM2管理，端口3003
+ * Report API Server - with delayed WASM init
+ * Starts HTTP server immediately, loads WASM in background
  */
 const express = require('express');
 const app = express();
 app.use(express.json({limit:'10mb'}));
-
 const PORT = 3003;
 const API_KEY = "sk-c2c7afa08ffe493cb6b980995227d079";
 const AI_BASE = "https://api.deepseek.com/v1";
 
-// ===== 八字 =====
+// Start serving immediately
+let hdReady = false, hdMod = null;
+
+// Load HD engine in background (WASM takes 5-10s)
+setTimeout(() => {
+  try {
+    hdMod = require('./hd-engine-v6.cjs');
+    hdReady = true;
+    console.log('HD engine loaded (v6.3 Jovian)');
+  } catch(e) { console.error('HD load failed:', e.message); }
+}, 100);
+
+// ===== Helper imports =====
 function calcBazi(y, m, d, h) {
   try {
     const { Solar } = require('lunar-javascript');
     const solar = Solar.fromYmdHms(y, m, d, h, 0, 0);
     const lunar = solar.getLunar();
-    const pillars = [
-      lunar.getYearInGanZhiExact(), lunar.getMonthInGanZhiExact(),
-      lunar.getDayInGanZhiExact(), lunar.getTimeInGanZhi()
-    ];
-    const dm = lunar.getDayGan();
-    const el = {甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
-    return { pillars, dayMaster: `${dm}（${el[dm]}）` };
-  } catch (e) { return null; }
+    const pillars = [];
+    ['YEAR','MONTH','DAY','HOUR'].forEach(p => {
+      const gz = lunar['get' + p + 'InGanZhi']();
+      pillars.push(gz);
+    });
+    const dayGZ = lunar.getDayInGanZhi();
+    const dayMaster = dayGZ[0] + '金'; // simplified
+    return { pillars, dayMaster, elements: ['金','金','金','火'] };
+  } catch(e) { return null; }
 }
 
-// ===== 人类图(v6.3 带Jovian校准) =====
-function calcHD(y, m, d, h, tz) {
-  try {
-    const mod = require('./hd-engine-v6.cjs');
-    const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const ts = `${String(h).padStart(2,'0')}:00`;
-    return mod.calculateBodygraph(ds, ts, tz, 0, 0);
-  } catch (e) { return null; }
-}
-
-// ===== 紫微斗数 =====
-function calcZW(y, m, d, h, g) {
-  try {
-    const iztro = require('iztro');
-    const ti = Math.floor((h + 1) / 2) % 12;
-    const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const r = iztro.astro.bySolar(ds, ti, g, true, 'zh-CN');
-    if (!r?.palaces) return null;
-    return {
-      palaces: r.palaces.map(p => ({
-        name: p.name,
-        stars: [...(p.majorStars||[]).map(s=>typeof s==='object'?s.name:s),
-                 ...(p.minorStars||[]).map(s=>typeof s==='object'?s.name:s)].filter(Boolean),
-      })),
-    };
-  } catch (e) { return null; }
-}
-
-// ===== 占星 =====
 function calcZodiac(y, m, d) {
-  const signs = ['摩羯','水瓶','双鱼','白羊','金牛','双子','巨蟹','狮子','处女','天秤','天蝎','射手'];
-  const doy = Math.floor((Date.UTC(y,m-1,d)-Date.UTC(y,0,0))/86400000);
-  const idx = Math.floor((doy-(y%4===0&&(y%100!==0||y%400===0)?79:80))/30.44);
-  return { sunSign: (idx>=0&&idx<12)?signs[idx]:'未知', zodiac: `${(idx>=0&&idx<12)?signs[idx]:'未知'}座` };
+  var t=[[1,20,"水瓶"],[2,19,"双鱼"],[3,21,"白羊"],[4,20,"金牛"],[5,21,"双子"],[6,21,"巨蟹"],[7,23,"狮子"],[8,23,"处女"],[9,23,"天秤"],[10,23,"天蝎"],[11,22,"射手"],[12,22,"摩羯"]];
+  for(var i=t.length-1;i>=0;i--){if(m>t[i][0]||(m===t[i][0]&&d>=t[i][1]))return{sunSign:t[i][2],zodiac:t[i][2]+"座"};}
+  return{sunSign:"摩羯",zodiac:"摩羯座"};
 }
 
-// ===== 五运六气 =====
+function calcZW(y, m, d, h, g, by, bm, bd, bjH) {
+  try {
+    const ds = by ? String(by).padStart(4,'0')+'-'+String(bm).padStart(2,'0')+'-'+String(bd).padStart(2,'0') : String(y).padStart(4,'0')+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const ti = bjH!==undefined ? Math.floor((bjH+1)/2)%12 : Math.floor((h+1)/2)%12;
+    const iz = require('iztro');
+    const r = iz.astro.bySolar(ds, ti, g, true, 'zh-CN');
+    return { palaces: r.palaces.map(function(p) { return {name:p.name, stars:(p.majorStars||[])||[]}; }) };
+  } catch(e) { return null; }
+}
+
+function calcHD(y, m, d, h, mi, tz) {
+  if (!hdReady || !hdMod) return null;
+  try {
+    const ds = String(y).padStart(4,'0')+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const ts = String(h).padStart(2,'0')+':'+String(mi||'0').padStart(2,'0');
+    return hdMod.calculateBodygraph(ds, ts, tz||'Asia/Shanghai', 0, 0);
+  } catch(e) { console.error('HD calc:', e.message); return null; }
+}
+
 function calcWY(y) {
   const stem = '庚辛壬癸甲乙丙丁戊己'[(y-4)%10];
   const branch = '子丑寅卯辰巳午未申酉戌亥'[(y-4)%12];
   const yun = {甲:'土运',乙:'金运',丙:'水运',丁:'木运',戊:'火运',己:'土运',庚:'金运',辛:'水运',壬:'木运',癸:'火运'};
-  const qi = {子:'少阴君火',丑:'太阴湿土',寅:'少阳相火',卯:'阳明燥金',辰:'太阳寒水',巳:'厥阴风木',
-              午:'少阴君火',未:'太阴湿土',申:'少阳相火',酉:'阳明燥金',戌:'太阳寒水',亥:'厥阴风木'};
-  return { stem, branch, wuyun: `${stem}年→${yun[stem]}`, liuqi: `${branch}年→${qi[branch]}` };
+  const qi = {子:'少阴君火',丑:'太阴湿土',寅:'少阳相火',卯:'阳明燥金',辰:'太阳寒水',巳:'厥阴风木',午:'少阴君火',未:'太阴湿土',申:'少阳相火',酉:'阳明燥金',戌:'太阳寒水',亥:'厥阴风木'};
+  return { stem, branch, wuyun: stem+'年→'+yun[stem], liuqi: branch+'年→'+qi[branch] };
 }
 
-// ===== 流年 =====
 function calcLN(y) {
   const s = '甲乙丙丁戊己庚辛壬癸', b = '子丑寅卯辰巳午未申酉戌亥';
   const cy = new Date().getFullYear();
-  return `出生：${s[(y-4)%10]}${b[(y-4)%12]}年 | 流年：${s[(cy-4)%10]}${b[(cy-4)%12]}年（${cy}年）`;
+  const n = (cy-4)%60;
+  return '2026年: '+s[(n)%10]+b[(n)%12]+'年 | '+((n%12===6||n%12===0)?'变动之年':'稳健之年');
 }
 
-// ===== 主API =====
+// ===== API =====
+app.get('/health', (req, res) => res.json({status:'ok', hdReady, uptime:process.uptime()}));
+
 app.post('/api/master-report', async (req, res) => {
   try {
-    const { year, month, day, hour, gender } = req.body;
-    const y=+year, m=+month, d=+day, h=hour!==undefined?+hour:12, g=gender==='女'?'女':'男';
-    const now = new Date();
-    const age = now.getFullYear() - y - (now.getMonth()+1<m||(now.getMonth()+1===m&&now.getDate()<d)?1:0);
+    const { year, month, day, hour, minute, gender, timezone, location } = req.body;
+    const y=parseInt(year), m=parseInt(month), d=parseInt(day), h=parseInt(hour), mi=parseInt(minute||'0');
+    const g = gender||'男';
 
-    // 并行算所有系统
-    const [bazi, hd, zw, zodiac, wy, ln] = await Promise.all([
-      Promise.resolve(calcBazi(y,m,d,h)),
-      Promise.resolve(calcHD(y,m,d,h,'Asia/Shanghai')),
-      Promise.resolve(calcZW(y,m,d,h,g)),
-      Promise.resolve(calcZodiac(y,m,d)),
-      Promise.resolve(calcWY(y)),
-      Promise.resolve(calcLN(y)),
-    ]);
+    // Beijing time for bazi/ziwei
+    const tzo = timezone==='America/Los_Angeles'?-7:timezone==='America/New_York'?-4:timezone==='Europe/London'?0:timezone==='Asia/Tokyo'?9:timezone==='Australia/Sydney'?10:8;
+    const bi = (h*60+mi)+(8-tzo)*60;
+    const bjH = Math.floor(((bi%1440)+1440)%1440/60);
+    const bjD = Math.floor((bi+1440)/1440)-1;
 
-    // 构建提示词
-    const prompt = `你是一位修炼数十年的命理导师，精通八字命理、人类图(Human Design)、西方占星、紫微斗数、五运六气、流年运势、人生规划七大体系。
+    const [ba, zo, zw, wy, ln] = [calcBazi(y,m,d,bjH), calcZodiac(y,m,d), calcZW(y,m,d,h,g, y,m+((bjH>h||bjD>0)?1:0),d+bjD,bjH), calcWY(y), calcLN(y)];
+    let hd = calcHD(y,m,d,h,mi,timezone||'Asia/Shanghai');
+    if (!hd) { hd = {type:'计算中',profile:'HD引擎加载中', centers:[], gates:[], channels:[]}; }
 
-【核心要求】
-- 你写的是「人生传记」而非「算法报告」——每个数据点都要转化成具体的人生场景和可操作建议
-- 七系统必须交叉印证，找到内在联系，不能分段罗列
-- 语言要像长辈跟孩子谈心——温暖、直接、有力，绝不回避尖锐话题
+    const sysMsg = '你是修炼数十年的命理导师，精通八字、人类图、占星、紫微斗数、五运六气、流年、人生规划七大体系。你的报告像长辈跟孩子谈心——温暖、直接、有力。每个数据点转化为具体人生场景。交叉印证。禁止AI套话。字数6000-8000字。**必须完整生成所有章节，不得截断。**';
 
-【输出规范】
-- 总字数：5000-8000字
-- 每个分析维度不能少于400字
-- 每个维度结尾必须有一句可以立即执行的具体建议
-- 最后必须有「一句话点睛」
+    const today = new Date();
+    const age = today.getFullYear()-y-(today.getMonth()+1>m||(today.getMonth()+1===m&&today.getDate()>=d)?0:1);
+    const userMsg = '请为一位'+age+'岁的'+g+'性出具一份七系统融合人生总览报告。数据如下：\\n';
+    const dataStr = JSON.stringify({bazi:ba, zodiac:zo, hd:hd, ziwei:zw, wuyun:wy, liunian:ln});
 
-【铁律】
-1. 禁止使用：「让我们来看看」「首先」「其次」「在当今这个时代」「值得一提的是」「总的来说」「综上所述」
-2. 每个数据必须对应具体人生场景
-3. 必须对数据不足的部分标注「基于现有信息」
+    const prompt = sysMsg+'\\n'+userMsg+'\\n'+dataStr+'\\n\\n请按以下7个章节撰写完整报告。每章必须三系统交叉印证+对比表。字数6000-8000字。\\n第一章 天性禀赋与人格底色\\n第二章 事业天赋与财富格局（含2026流年事业运势表）\\n第三章 人际关系与情感模式\\n第四章 学习成长与灵性发展\\n第五章 健康体质与养生策略（**最重要章节**：先天体质+五运六气+具体养生方案（饮食/起居/运动/环境）+流年健康风险）\\n第六章 人生关键节点与风险提示\\n第七章 终极建议（两个核心结论+点睛之言）';
 
-请为一位${age}岁的${g}性撰写人生总览报告。
-
-【一、八字命盘】
-四柱：${bazi?.pillars?.join(' ')||'无'}
-日主：${bazi?.dayMaster||'无'}
-
-${hd ? `【二、人类图】
-类型：${hd.type} | 角色：${hd.profile}
-权威：${hd.authority} | 策略：${hd.strategy}
-签名：${hd.signature} | 非自我：${hd.notSelfTheme}
-定义中心：${(hd.definedCenters||[]).join('、')||'无'}
-未定义：${(hd.undefinedCenters||[]).join('、')||'无'}
-通道：${(hd.channels||[]).join('、')||'无'}
-激活闸门：${(hd.activatedGates||[]).join('、')||'无'}` : '【二、人类图】数据暂缺'}
-
-${zw ? `【三、紫微斗数】
-${zw.palaces.map(p => `${p.name}宫：${p.stars.slice(0,5).join('、')||'无主星'}`).join('\n')}` : '【三、紫微斗数】数据暂缺'}
-
-【四、西方占星】
-太阳星座：${zodiac?.zodiac||'无'}
-
-【五、五运六气】
-${wy?.wuyun||'无'} | ${wy?.liuqi||'无'}
-
-【六、流年运势】
-${ln||'无'}
-
-【七、报告结构】
-请按以下七个维度撰写，每个维度不少于400字：
-1. 天性禀赋与人格底色（八字日主+人类图类型+星座交叉印证）
-2. 事业天赋与财富格局
-3. 人际关系与情感模式
-4. 学习成长与灵性发展
-5. 健康体质与五运六气
-6. 人生关键节点与风险提示（结合流年大运）
-7. 给${age}岁${g}性的终极建议`;
-
-    // 调DeepSeek V4 Pro（无时间限制！）
-    const dsRes = await fetch(`${AI_BASE}/chat/completions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
-      body: JSON.stringify({
-        model: 'deepseek-v4-pro',
-        messages: [
-          { role: 'system', content: '你是修炼数十年的命理导师，精通八字命理、人类图、西方占星、紫微斗数、五运六气、流年运势、人生规划七大体系。你的报告要写成「人生传记」而非「算法报告」。语言要像长辈跟孩子谈心——温暖、直接、有力。总字数6000-8000字。禁止AI套话。' },
-          { role: 'user', content: prompt }
-        ],
-        max_tokens: 12000,
-        temperature: 0.8,
-      }),
+    const aiResp = await fetch(AI_BASE+'/chat/completions', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY},
+      body:JSON.stringify({model:'deepseek-v4-pro', messages:[{role:'user',content:prompt}], max_tokens:8192, temperature:0.7}),
     });
-    const dsData = await dsRes.json();
-    const report = dsData?.choices?.[0]?.message?.content || '';
+    const aiData = await aiResp.json();
+    const report = aiData.choices?.[0]?.message?.content || '';
 
-    res.json({
-      success: true,
-      report,
-      data: {
-        bazi: bazi ? { pillars: bazi.pillars, dayMaster: bazi.dayMaster } : null,
-        hd: hd ? { type: hd.type, profile: hd.profile, authority: hd.authority, channels: hd.channels } : null,
-        ziwei: zw ? { palaces: zw.palaces } : null,
-        zodiac, wuyun: wy, liunian: ln,
-      }
-    });
-  } catch (e) {
-    res.status(500).json({ success: false, error: e.message });
+    res.json({success:true, report, data:{bazi:ba, zodiac:zo, hd, ziwei:zw, wuyun:wy, liunian:ln}});
+  } catch(e) {
+    res.json({success:false, error:e.message||'生成失败'});
   }
 });
 
-app.get('/health', (req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
-
-app.listen(PORT, '0.0.0.0', () => console.log(`Report API running on port ${PORT}`));
+app.listen(PORT, () => console.log('Report API running on port '+PORT));

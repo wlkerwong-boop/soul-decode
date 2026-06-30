@@ -36,6 +36,7 @@ export const CHINA_CITIES: Record<string, string[]> = {
 // 海外主要城市
 export const INTERNATIONAL_CITIES: Record<string, Record<string, string[]>> = {
   '亚洲': {
+    '中国': Object.keys(CHINA_CITIES),  // 省份列表，具体城市在 CHINA_CITIES 中
     '日本': ['东京','大阪','京都','横滨','名古屋','札幌','福冈','神户','奈良','仙台'],
     '韩国': ['首尔','釜山','仁川','大邱','光州','蔚山','济州'],
     '新加坡': ['新加坡'],
