@@ -434,7 +434,7 @@ export default function BirthInputForm() {
 
   const handleShareText = useCallback(() => {
     if (!baziData) return;
-    const text = `🔮 灵魂解码 · 我的命盘已开启\n\n八字：${baziData.pillars.filter(p => p !== '--').join(' ')}\n日主：${baziData.dayMaster}（${baziData.dayMasterElement}）\n生肖：${baziData.zodiac}\n${lifeEnergyData ? `能量均值：${lifeEnergyData.averageEnergy}` : ''}\n\n你的呢？输入出生信息，即刻解码 → https://soul-decode.vercel.app`;
+    const text = `🔮 灵魂解码 · 我的命盘已开启\n\n八字：${baziData.pillars.filter(p => p !== '--').join(' ')}\n日主：${baziData.dayMaster}（${baziData.dayMasterElement}）\n生肖：${baziData.zodiac}\n${lifeEnergyData ? `能量均值：${lifeEnergyData.averageEnergy}` : ''}\n\n您的呢？输入出生信息，即刻解码 → https://soul-decode.vercel.app`;
 
     if (navigator.share) {
       navigator.share({ title: '灵魂解码', text }).catch(() => {
@@ -576,7 +576,7 @@ export default function BirthInputForm() {
           </button>
 
           <p className="text-xs text-[var(--text-secondary)] text-center mt-4">
-            你的出生信息仅用于生成本次报告，不会被存储
+            您的出生信息仅用于生成本次报告，不会被存储
           </p>
         </form>
       )}
@@ -724,7 +724,7 @@ export default function BirthInputForm() {
             {/* 封面（只用于打印） */}
             <div className="report-cover">
               <div className="cover-title">✦ 灵魂解码</div>
-              <div className="cover-subtitle">你的人生使命解读报告</div>
+              <div className="cover-subtitle">您的人生使命解读报告</div>
               <div className="cover-divider" />
               <div className="cover-meta">
                 <div>出生信息：{inputSummary}</div>
@@ -868,7 +868,7 @@ export default function BirthInputForm() {
                     <div className="cosmic-ring cosmic-ring-3" style={{ width: '100%', height: '100%' }} />
                     <div className="cosmic-center text-xs">✦</div>
                   </div>
-                  <p className="text-[var(--text-secondary)] text-sm">正在生成你的专属成长方案...</p>
+                  <p className="text-[var(--text-secondary)] text-sm">正在生成您的专属成长方案...</p>
                 </div>
               )}
             </div>

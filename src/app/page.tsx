@@ -1,90 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import BirthInputForm from '@/components/BirthInputForm';
 import BodygraphSVG from '@/components/BodygraphSVG';
 import Link from 'next/link';
 
-/* ── 示例人类图数据（装饰用） ── */
 const DEMO_HUMAN_DESIGN = {
   definedCenters: ['Head', 'Ajna', 'Throat', 'G', 'Ego', 'Sacral', 'Root'],
-  activatedGates: [1, 2, 3, 5, 7, 8, 10, 11, 13, 14, 15, 16, 17, 20, 21, 23, 24, 25, 26, 27, 28, 29, 31, 33, 34, 35, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64],
-  channels: ['1-8', '2-14', '3-60', '5-15', '7-31', '10-20', '11-56', '13-33', '16-48', '17-62', '20-34', '21-45', '23-43', '24-61', '25-51', '26-44', '27-50', '28-38', '29-46', '30-41', '31-7', '32-54', '33-13', '34-20', '35-36', '37-40', '39-55', '41-30', '42-53', '43-23', '44-26', '45-21', '46-29', '47-64', '48-16', '50-27', '51-25', '52-9', '53-42', '54-32', '55-39', '56-11', '57-34', '58-18', '59-6', '60-3', '61-24', '62-17', '63-4', '64-47'],
+  activatedGates: [1,2,3,5,7,8,10,11,13,14,15,16,17,20,21,23,24,25,26,27,28,29,31,33,34,35,39,40,41,42,43,44,45,46,47,48,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64],
+  channels: ['1-8','2-14','3-60','5-15','7-31','10-20','11-56','13-33','16-48','17-62','20-34','21-45','23-43','24-61','25-51','26-44','27-50','28-38','29-46','30-41','31-7','32-54','33-13','34-20','35-36','37-40','39-55','41-30','42-53','43-23','44-26','45-21','46-29','47-64','48-16','50-27','51-25','52-9','53-42','54-32','55-39','56-11','57-34','58-18','59-6','60-3','61-24','62-17','63-4','64-47'],
   centerDefinition: {},
 };
-
-const products = [
-  {
-    icon: '🌟',
-    title: '人生总览',
-    subtitle: 'Master Report',
-    desc: '八字 · 人类图 · 占星 · 紫微 · 五运六气\n七系统AI深度交叉解读 · 一次性看清你的生命全貌',
-    href: '/master-report',
-    gradient: 'from-emerald-500/20 to-cyan-500/20',
-    accent: 'emerald',
-    features: ['7系统融合', 'AI深度交叉', '人生节奏图谱'],
-  },
-  {
-    icon: '🧬',
-    title: '人类图',
-    subtitle: 'Human Design',
-    desc: '能量中心 · 闸门通道 · 类型权威 · 人生角色\n基于Jovian Archive认证引擎 · 区分的科学标准',
-    href: '/human-design',
-    gradient: 'from-violet-500/20 to-purple-500/20',
-    accent: 'violet',
-    features: ['Jovian认证', '完整bodygraph', '即时生成'],
-  },
-];
-
-const trustStats = [
-  { value: '50,000+', label: '已生成报告', sub: '用户信赖选择' },
-  { value: '7', label: '命理系统融合', sub: '八字·人类图·占星·紫微·五运六气·梅花·MBTI' },
-  { value: '★', label: 'Jovian Archive', sub: '认证引擎对齐' },
-  { value: '∞', label: 'AI深度解读', sub: '个性化生命报告' },
-];
-
-const quickTools = [
-  { icon: '🌅', title: '每日运势', desc: '每日能量指引', href: '/daily' },
-  { icon: '❤️', title: '关系合盘', desc: '双人能量匹配', href: '/compatibility' },
-  { icon: '💰', title: '财富密码', desc: '财星格局分析', href: '/master-report' },
-  { icon: '☯️', title: '梅花易数', desc: '卦象即时占卜', href: '/tools/divination' },
-];
-
-/* ── 数字动画计数器 ── */
-function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const counted = useRef(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !counted.current) {
-          counted.current = true;
-          const duration = 1500;
-          const steps = 60;
-          const increment = target / steps;
-          let current = 0;
-          const timer = setInterval(() => {
-            current += increment;
-            if (current >= target) {
-              setCount(target);
-              clearInterval(timer);
-            } else {
-              setCount(Math.floor(current));
-            }
-          }, duration / steps);
-        }
-      },
-      { threshold: 0.3 }
-    );
-
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [target]);
-
-  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
-}
 
 export default function Home() {
   const [showForm, setShowForm] = useState(false);
@@ -94,23 +20,19 @@ export default function Home() {
     setShowForm(true);
     setTimeout(() => {
       formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Focus the first input after a brief delay
       setTimeout(() => {
         const firstInput = formSectionRef.current?.querySelector('input, select');
         if (firstInput && 'focus' in firstInput) (firstInput as HTMLElement).focus();
-      }, 400);
+      }, 300);
     }, 100);
   };
 
   return (
-    <div>
-      {/* ════════════════════════════════════════════════
-          HERO
-          ════════════════════════════════════════════════ */}
-      <section className="hero-premium px-4 md:px-6">
-        {/* ── 装饰性背景Bodygraph ── */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.06] dark:opacity-[0.04]">
-          <div className="w-full max-w-2xl animate-float-bodygraph">
+    <div className="gradient-bg min-h-screen">
+      {/* ── Hero ── */}
+      <section className="hero-premium relative pt-20 pb-16 px-4 text-center overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] opacity-[0.04]">
             <BodygraphSVG
               definedCenters={DEMO_HUMAN_DESIGN.definedCenters}
               activatedGates={DEMO_HUMAN_DESIGN.activatedGates}
@@ -118,317 +40,196 @@ export default function Home() {
               centerDefinition={DEMO_HUMAN_DESIGN.centerDefinition}
             />
           </div>
+          <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[var(--color-primary)]/10 blur-[120px] animate-glow-pulse" />
         </div>
-
-        {/* ── 光晕装饰 ── */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[var(--glow-green)] animate-glow-pulse pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] rounded-full bg-[var(--glow-gold)] opacity-30 blur-[100px] animate-float-slow pointer-events-none" />
-
-        {/* ── 内容 ── */}
-        <div className="relative z-10 max-w-5xl mx-auto w-full py-24 md:py-32">
-          <div className="max-w-3xl">
-            {/* 认证徽章 */}
-            <div className="animate-slide-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--text-accent)]/8 text-[var(--text-accent)] text-xs mb-6 border border-[var(--text-accent)]/15 shadow-sm">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-              </span>
-              Jovian Archive™ 认证引擎 · 区分的科学标准
-            </div>
-
-            {/* 主标题 */}
-            <h1 className="animate-slide-up-1 text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
-              你的
-              <span className="gradient-text">生命蓝图</span>
-              <br />
-              <span className="text-[var(--text-primary)]">一次看清</span>
-            </h1>
-
-            {/* 副标题 */}
-            <p className="animate-slide-up-2 text-lg md:text-xl text-[var(--text-secondary)] leading-relaxed max-w-xl mb-10">
-              七系统AI融合报告 · 精准定位你的天赋、挑战与人生节奏
-              <br />
-              <span className="text-sm opacity-70">八字 · 人类图 · 占星 · 紫微 · 五运六气 · 梅花易数 · MBTI</span>
-            </p>
-
-            {/* CTA按钮组 */}
-            <div className="animate-slide-up-3 flex flex-col sm:flex-row gap-4 items-start">
-              <button
-                onClick={scrollToForm}
-                className="btn-premium group"
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  开始解码
-                  <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </span>
-              </button>
-              <Link
-                href="/master-report"
-                className="animate-slide-up-4 inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/60 backdrop-blur-sm text-[var(--text-primary)] font-medium hover:border-[var(--text-accent)]/30 hover:bg-[var(--bg-card)] transition-all"
-              >
-                了解七系统
-                <span className="text-[var(--text-secondary)]">→</span>
-              </Link>
-            </div>
-
-            {/* 微型信任指示 */}
-            <div className="animate-slide-up-5 mt-12 flex items-center gap-6 text-xs text-[var(--text-secondary)]">
-              <div className="flex items-center gap-1.5">
-                <span className="text-green-500">✓</span>
-                Swiss Ephemeris WASM
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-green-500">✓</span>
-                Jovian Archive对齐
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-green-500">✓</span>
-                AI深度解读
-              </div>
-            </div>
+        <div className="relative max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs mb-6 border border-[var(--color-primary)]/20">
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            Jovian Archive认证引擎 · 区分的科学标准
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 tracking-tight leading-tight animate-slide-up-1">
+            您的<span className="gradient-text">生命蓝图</span>
+            <br />一次看清
+          </h1>
+          <p className="text-[var(--text-secondary)] text-lg mb-8 max-w-2xl mx-auto animate-slide-up-2">
+            八字 · 人类图 · 占星 · 紫微 · 五运六气<br />
+            七系统AI融合报告 · 精准定位您的天赋、挑战与人生节奏
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up-3">
+            <button onClick={scrollToForm}
+              className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-emerald-600 text-white font-semibold text-lg hover:shadow-lg hover:shadow-[var(--color-primary)]/25 hover:-translate-y-0.5 transition-all">
+              开始排盘 →
+            </button>
+            <Link href="/daily"
+              className="px-8 py-3.5 rounded-xl border border-[var(--border-color)] text-[var(--text-primary)] font-medium text-lg hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5 transition-all">
+              🌅 每日运势 ·
+            </Link>
+          </div>
+          <div className="flex items-center justify-center gap-6 mt-8 text-sm text-[var(--text-tertiary)] animate-slide-up-4">
+            <span className="flex items-center gap-1.5"><span className="text-green-400">✓</span> 真实排盘</span>
+            <span className="flex items-center gap-1.5"><span className="text-green-400">✓</span> AI深度解读</span>
+            <span className="flex items-center gap-1.5"><span className="text-green-400">✓</span> 7系统融合</span>
           </div>
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════
-          FORM SECTION
-          ════════════════════════════════════════════════ */}
-      <section className="px-4 md:px-6 pb-16 md:pb-24" ref={formSectionRef}>
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">
-              {showForm ? '📜 输入出生信息' : '👋 准备开始？'}
-            </h2>
-            <p className="text-[var(--text-secondary)] max-w-lg mx-auto">
-              {showForm
-                ? '填写完整信息，即刻生成你的专属生命蓝图报告'
-                : '输入你的出生日期，解锁七系统融合的深度解读'}
-            </p>
-          </div>
-
-          {!showForm ? (
-            <div className="flex justify-center animate-scale-in">
-              <button
-                onClick={scrollToForm}
-                className="btn-premium group px-12 py-4"
-              >
-                <span className="relative z-10 flex items-center gap-3 text-lg">
-                  🔮 开始排盘
-                  <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </span>
-              </button>
+      {/* ── Quick Form ── */}
+      {showForm && (
+        <section ref={formSectionRef} className="px-4 pb-12 max-w-lg mx-auto">
+          <div className="glass-card p-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/80">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-[var(--text-primary)]">输入您的出生信息</h2>
+              <button onClick={() => setShowForm(false)} className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors">收起 ✕</button>
             </div>
-          ) : (
-            <div className="animate-scale-in">
-              <div className="glass-card p-6 md:p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-lg font-bold">出生信息</h3>
-                    <p className="text-sm text-[var(--text-secondary)]">所有数据仅用于计算，不会存储</p>
-                  </div>
-                  <button
-                    onClick={() => setShowForm(false)}
-                    className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors px-3 py-1.5 rounded-lg border border-[var(--border-color)]"
-                  >
-                    收起 ✕
-                  </button>
+            <BirthInputForm />
+          </div>
+        </section>
+      )}
+
+      {/* ── 核心产品 ── */}
+      <section className="px-4 pb-16 max-w-5xl mx-auto">
+        <div className="text-center mb-10 animate-slide-up-2">
+          <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] mb-3">核心产品</h2>
+          <p className="text-[var(--text-secondary)] text-sm">基于您的出生信息，提供深度个性化解读</p>
+        </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* 人生总览 */}
+          <div className="glass-card group relative rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 hover:shadow-lg transition-all animate-slide-up-3">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-t-xl" />
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform icon-ring">🌟</div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">人生总览</h3>
+                  <span className="px-2 py-0.5 text-[10px] rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-medium">旗舰</span>
                 </div>
-                <BirthInputForm />
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════
-          CORE PRODUCTS
-          ════════════════════════════════════════════════ */}
-      <section className="px-4 md:px-6 pb-20 md:pb-28">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">核心产品</h2>
-            <p className="text-[var(--text-secondary)] max-w-lg mx-auto">
-              从七个维度，重新认识你自己
-            </p>
-            <div className="divider-premium max-w-[200px] mt-6" />
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 md:gap-8">
-            {products.map((p, i) => (
-              <Link key={i} href={p.href} className="group">
-                <div className="glass-card p-8 h-full">
-                  {/* 顶部渐变装饰条 */}
-                  <div className={`absolute top-0 left-6 right-6 h-0.5 bg-gradient-to-r ${p.gradient} rounded-full opacity-0 group-hover:opacity-100 transition-opacity`} />
-
-                  {/* 头部 */}
-                  <div className="flex items-start gap-5 mb-6">
-                    <div className="icon-ring text-2xl">{p.icon}</div>
-                    <div>
-                      <h3 className="text-xl font-bold mb-0.5 group-hover:text-[var(--text-accent)] transition-colors">{p.title}</h3>
-                      <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wider">{p.subtitle}</p>
-                    </div>
-                    {i === 0 && (
-                      <span className="ml-auto px-3 py-1 text-xs font-medium rounded-full bg-[var(--text-accent)]/10 text-[var(--text-accent)] border border-[var(--text-accent)]/20 animate-border-glow">
-                        推荐
-                      </span>
-                    )}
-                  </div>
-
-                  {/* 描述 */}
-                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6 whitespace-pre-line">{p.desc}</p>
-
-                  {/* 特性标签 */}
-                  <div className="flex flex-wrap gap-2">
-                    {p.features.map((f, fi) => (
-                      <span key={fi} className="tag-pill text-xs">{f}</span>
-                    ))}
-                  </div>
-
-                  {/* 互动指示 */}
-                  <div className="mt-6 flex items-center gap-1 text-sm text-[var(--text-accent)] opacity-0 group-hover:opacity-100 transition-all translate-x-[-8px] group-hover:translate-x-0">
-                    探索 {p.title}
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════
-          QUICK TOOLS
-          ════════════════════════════════════════════════ */}
-      <section className="px-4 md:px-6 pb-20 md:pb-28">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-2">更多工具</h2>
-            <p className="text-sm text-[var(--text-secondary)]">即用即走，轻量体验</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {quickTools.map((t, i) => (
-              <Link key={i} href={t.href} className="group">
-                <div className="glass-card p-5 text-center h-full flex flex-col items-center justify-center">
-                  <div className="text-3xl mb-3 transition-transform group-hover:scale-110 duration-300">{t.icon}</div>
-                  <h4 className="font-semibold text-sm mb-1 group-hover:text-[var(--text-accent)] transition-colors">{t.title}</h4>
-                  <p className="text-xs text-[var(--text-secondary)]">{t.desc}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════
-          TRUST / STATS
-          ════════════════════════════════════════════════ */}
-      <section className="px-4 md:px-6 pb-20 md:pb-28">
-        <div className="max-w-5xl mx-auto">
-          <div className="founder-card p-10 md:p-14">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">用数据说话</h2>
-              <p className="text-sm text-[var(--text-secondary)]">真实用户 · 权威引擎 · 深度AI</p>
-              <div className="divider-premium max-w-[160px] mt-5" />
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-              {trustStats.map((s, i) => (
-                <div key={i} className="text-center">
-                  <div className="stat-value">
-                    {s.value.includes('+') ? (
-                      <><AnimatedCounter target={parseInt(s.value.replace(/[,+]/g, ''))} />+</>
-                    ) : s.value === '7' ? (
-                      <AnimatedCounter target={7} />
-                    ) : (
-                      s.value
-                    )}
-                  </div>
-                  <div className="text-sm font-semibold mt-2">{s.label}</div>
-                  <div className="text-xs text-[var(--text-secondary)] mt-1">{s.sub}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════
-          FOUNDER STORY
-          ════════════════════════════════════════════════ */}
-      <section className="px-4 md:px-6 pb-20 md:pb-28">
-        <div className="max-w-4xl mx-auto">
-          <div className="founder-card p-8 md:p-12">
-            <div className="flex flex-col md:flex-row gap-8 items-start">
-              {/* 头像装饰 */}
-              <div className="shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-[var(--text-accent)] to-[var(--text-accent-gold)] flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-                ☸
-              </div>
-
-              <div>
-                <h3 className="text-xl font-bold mb-1">光明喜舍 · 创始故事</h3>
-                <p className="text-xs text-[var(--text-accent)] mb-4 font-medium">大理 · 银桥 · 用AI点亮觉知</p>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                  我们相信，每个人的生命都是一幅独一无二的天命蓝图。融合东方七大门派的智慧——
-                  八字、人类图、占星、紫微、五运六气、梅花易数、MBTI——借助AI的力量，为你绘制
-                  一幅清晰完整的生命图谱。不再迷茫，不再困惑，看见真实的自己。
+                <p className="text-xs text-[var(--text-tertiary)] mb-3">八字 · 人类图 · 占星 · 紫微 · 五运六气 · 流年 · 人生规划</p>
+                <p className="text-sm text-[var(--text-secondary)] mb-4 leading-relaxed">
+                  七系统AI深度融合解读，一次性看清您的生命全貌——天性禀赋、事业天赋、财富格局、情感模式、成长路径、健康体质、人生关键节点。
                 </p>
-                <div className="mt-5 flex flex-wrap gap-4 text-xs text-[var(--text-secondary)]">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-1 h-1 rounded-full bg-[var(--text-accent)]" />
-                    基于《区分的科学》标准
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-1 h-1 rounded-full bg-[var(--text-accent)]" />
-                    Swiss Ephemeris WASM
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-1 h-1 rounded-full bg-[var(--text-accent)]" />
-                    Ra Uru Hu 原始体系
-                  </span>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="px-2.5 py-1 text-[11px] rounded-full bg-[var(--color-primary)]/8 text-[var(--color-primary)] border border-[var(--color-primary)]/15">7系统融合</span>
+                  <span className="px-2.5 py-1 text-[11px] rounded-full bg-[var(--color-primary)]/8 text-[var(--color-primary)] border border-[var(--color-primary)]/15">AI深度交叉</span>
+                  <span className="px-2.5 py-1 text-[11px] rounded-full bg-[var(--color-primary)]/8 text-[var(--color-primary)] border border-[var(--color-primary)]/15">人生节奏图谱</span>
                 </div>
+                <Link href="/master-report"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary)] hover:underline">
+                  立即生成 →<span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* 每日运势 */}
+          <div className="glass-card group relative rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 hover:shadow-lg transition-all animate-slide-up-4">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-t-xl" />
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform icon-ring">🌅</div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">每日运势</h3>
+                  <span className="px-2 py-0.5 text-[10px] rounded-full bg-amber-500/10 text-amber-600 font-medium">个性化</span>
+                </div>
+                <p className="text-xs text-[var(--text-tertiary)] mb-3">Daily Personalized Fortune</p>
+                <p className="text-sm text-[var(--text-secondary)] mb-4 leading-relaxed">
+                  基于您的八字五行和人类图能量中心状态，每天生成属于您个人的专属运势指引——不止是生肖星座，而是真正与您命盘匹配的每日能量指南。
+                </p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="px-2.5 py-1 text-[11px] rounded-full bg-amber-500/8 text-amber-600 border border-amber-500/15">八字匹配</span>
+                  <span className="px-2.5 py-1 text-[11px] rounded-full bg-amber-500/8 text-amber-600 border border-amber-500/15">HD能量追踪</span>
+                  <span className="px-2.5 py-1 text-[11px] rounded-full bg-amber-500/8 text-amber-600 border border-amber-500/15">每日更新</span>
+                </div>
+                <Link href="/daily"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-amber-600 hover:underline">
+                  查看今日运势 →<span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                </Link>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════
-          BOTTOM CTA
-          ════════════════════════════════════════════════ */}
-      <section className="px-4 md:px-6 pb-20 md:pb-28">
-        <div className="max-w-4xl mx-auto">
-          <div className="cta-section p-10 md:p-14 text-center relative">
-            <div className="relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold mb-3">
-                准备好解码你的<span className="gradient-text">生命蓝图</span>了吗？
-              </h2>
-              <p className="text-[var(--text-secondary)] max-w-md mx-auto mb-8">
-                只需一次出生信息，解锁七系统AI融合报告
-                <br />
-                看见你的天赋、使命与人生节奏
-              </p>
-              <button
-                onClick={scrollToForm}
-                className="btn-premium group text-lg"
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  开始解码 →
-                  <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </span>
-              </button>
-              <p className="text-xs text-[var(--text-secondary)] mt-4 opacity-60">
-                免费体验 · 无需注册 · 数据仅用于计算，不存储
-              </p>
+      {/* ── 深度探索 ── */}
+      <section className="px-4 pb-16 max-w-5xl mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] mb-3">深度探索</h2>
+          <p className="text-[var(--text-secondary)] text-sm">在人生总览的基础上，深入探索每一个维度</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <Link href="/human-design" className="group flex flex-col items-center p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/50 hover:border-[var(--color-primary)]/30 hover:bg-[var(--bg-card)] transition-all">
+            <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">🧬</span>
+            <span className="text-sm font-semibold text-[var(--text-primary)]">人类图排盘</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] mt-1">类型·中心·通道·闸门</span>
+          </Link>
+          <Link href="/master-report" className="group flex flex-col items-center p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/50 hover:border-[var(--color-primary)]/30 hover:bg-[var(--bg-card)] transition-all">
+            <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">🔮</span>
+            <span className="text-sm font-semibold text-[var(--text-primary)]">八字排盘</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] mt-1">四柱·五行·十神·大运</span>
+          </Link>
+          <Link href="/master-report" className="group flex flex-col items-center p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/50 hover:border-[var(--color-primary)]/30 hover:bg-[var(--bg-card)] transition-all">
+            <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">📐</span>
+            <span className="text-sm font-semibold text-[var(--text-primary)]">紫微斗数</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] mt-1">12宫·主星·辅星·四化</span>
+          </Link>
+          <Link href="/compatibility" className="group flex flex-col items-center p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/50 hover:border-[var(--color-primary)]/30 hover:bg-[var(--bg-card)] transition-all">
+            <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">❤️</span>
+            <span className="text-sm font-semibold text-[var(--text-primary)]">关系合盘</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] mt-1">双人·家庭·朋友</span>
+          </Link>
+          <Link href="/mbti" className="group flex flex-col items-center p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/50 hover:border-[var(--color-primary)]/30 hover:bg-[var(--bg-card)] transition-all">
+            <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">🧠</span>
+            <span className="text-sm font-semibold text-[var(--text-primary)]">MBTI性格</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] mt-1">16型人格·深度解析</span>
+          </Link>
+          <Link href="/tools" className="group flex flex-col items-center p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/50 hover:border-[var(--color-primary)]/30 hover:bg-[var(--bg-card)] transition-all">
+            <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">📿</span>
+            <span className="text-sm font-semibold text-[var(--text-primary)]">法藏文库</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] mt-1">佛法·道法·亲子智慧</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* ── 信任数据 ── */}
+      <section className="px-4 pb-16 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[
+            { value: '50,000+', label: '已生成报告', sub: '用户信赖选择' },
+            { value: '7', label: '命理系统融合', sub: '八字·人类图·占星·紫微·五运六气·流年·规划' },
+            { value: '★', label: 'Jovian Archive', sub: '认证引擎对齐' },
+            { value: '∞', label: 'AI深度解读', sub: '个性化生命报告' },
+          ].map((s, i) => (
+            <div key={i} className="text-center p-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/30 animate-slide-up-3" style={{ animationDelay: `${i * 0.1}s` }}>
+              <div className="stat-value text-2xl md:text-3xl font-bold gradient-text mb-1">{s.value}</div>
+              <div className="text-sm font-semibold text-[var(--text-primary)]">{s.label}</div>
+              <div className="text-[11px] text-[var(--text-tertiary)] mt-1">{s.sub}</div>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── 创始人故事 ── */}
+      <section className="px-4 pb-16 max-w-3xl mx-auto">
+        <div className="founder-card p-8 md:p-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/5 to-transparent border border-[var(--border-color)]">
+          <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4">关于光明喜舍</h2>
+          <div className="space-y-3 text-sm text-[var(--text-secondary)] leading-relaxed">
+            <p>2016年起深入研习东方命理（八字·梅花易数·紫微斗数）与西方人类图体系。</p>
+            <p>七系统融合并非简单堆叠——八字为根、人类图为干、占星为花、紫微为果、五运六气为气候、流年为季节、规划为耕作者的日程表。七个维度交叉印证，才是一份真正完整的生命报告。</p>
+            <p>目前在大理·银桥持续深耕，致力于将东方智慧与现代AI技术结合，让每个人都能看清自己的生命蓝图。</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="cta-section px-4 pb-20 max-w-2xl mx-auto text-center">
+        <div className="relative p-10 rounded-2xl border border-[var(--border-color)] bg-gradient-to-b from-[var(--color-primary)]/8 to-transparent overflow-hidden">
+          <div className="absolute top-[-50%] left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-[var(--color-primary)]/5 blur-[100px]" />
+          <div className="relative">
+            <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-3">准备好探索您的生命蓝图了吗？</h2>
+            <p className="text-sm text-[var(--text-secondary)] mb-6">只需输入您的出生信息，即可获得一份专属于您的七系统融合报告</p>
+            <button onClick={scrollToForm}
+              className="btn-premium px-8 py-3.5 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-emerald-600 text-white font-semibold text-lg hover:shadow-lg hover:shadow-[var(--color-primary)]/25 transition-all">
+              开始排盘 →
+            </button>
           </div>
         </div>
       </section>
