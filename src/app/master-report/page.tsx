@@ -22,20 +22,31 @@ export default function MasterPage() {
   const [gender, setGender] = useState('男');
   const [report, setReport] = useState(''); const [loading, setLoading] = useState(false);
   const [error, setError] = useState(''); const [data, setData] = useState<any>(null);
+  const [savedReports, setSavedReports] = useState<any[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [reportName, setReportName] = useState('');
 
-  // Restore last report from localStorage on mount (survives refresh)
+  // Load saved reports on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('master_report_history');
+      if (saved) setSavedReports(JSON.parse(saved));
+    } catch {}
+  }, []);
+
+  // Restore last report on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem('last_master_report');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.report && parsed.data) {
-          setReport(parsed.report);
-          setData(parsed.data);
-        }
-      }
+      if (saved) { const p=JSON.parse(saved); if(p.report){setReport(p.report);setData(p.data);} }
     } catch {}
   }, []);
+
+  // Extract name from report for auto-labeling
+  const extractName = (r: string) => {
+    const m = r.match(/^.{0,20}(?:你|您)(?:今年)?(\d+)岁/);
+    return m ? `${m[1]}岁·${gender}` : gender;
+  };
 
   const continents = useMemo(() => Object.keys(INTERNATIONAL_CITIES), []);
   const continentCountries = useMemo(() =>
@@ -66,8 +77,19 @@ export default function MasterPage() {
       const d = await r.json();
       if (!d.success) { setError(d.error||'生成失败'); return; }
       setReport(d.report); setData(d.data);
-      // Persist report data so refresh doesn't lose it
-      try { localStorage.setItem('last_master_report', JSON.stringify({report:d.report, data:d.data, year, month, day, hour, minute, continent, country, province, city, gender})); } catch {}
+      // Auto-save to history
+      const entry = {
+        id: Date.now().toString(36),
+        name: extractName(d.report) || reportName || `${year}年${month}月${day}日·${gender}`,
+        report: d.report, data: d.data,
+        year, month, day, hour, minute, continent, country, province, city, gender,
+        createdAt: new Date().toISOString()
+      };
+      const history = [entry, ...savedReports.filter((r:any) => r.report !== d.report)].slice(0, 10);
+      setSavedReports(history);
+      try { localStorage.setItem('master_report_history', JSON.stringify(history)); } catch {}
+      // Persist last report for quick restore
+      try { localStorage.setItem('last_master_report', JSON.stringify({report:d.report, data:d.data})); } catch {}
     } catch (e: any) { setError(e.message||'网络错误'); }
     finally { setLoading(false); }
   };
@@ -176,6 +198,42 @@ export default function MasterPage() {
           {error && <p className="text-red-400 text-xs mt-2 text-center">{error}</p>}
         </div>
 
+        {/* ── 我的报告（历史记录） ── */}
+        {savedReports.length > 0 && (
+          <div className="card-jade p-4 md:p-5 mb-8 max-w-lg mx-auto">
+            <button onClick={() => setShowHistory(!showHistory)}
+              className="w-full flex items-center justify-between text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-colors">
+              <span>📋 我的报告 ({savedReports.length})</span>
+              <span className="text-xs opacity-60">{showHistory ? '▲ 收起' : '▼ 展开'}</span>
+            </button>
+            {showHistory && (
+              <div className="mt-3 space-y-2 max-h-80 overflow-y-auto">
+                {savedReports.map((r: any) => (
+                  <div key={r.id}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-highlight)] hover:bg-[var(--bg-card)] transition-colors cursor-pointer group"
+                    onClick={() => { setReport(r.report); setData(r.data); setShowHistory(false); }}>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-[var(--text-primary)] truncate">{r.name}</div>
+                      <div className="text-xs text-[var(--text-tertiary)] mt-0.5">
+                        {r.year}年{r.month}月{r.day}日 · {new Date(r.createdAt).toLocaleDateString('zh-CN')}
+                      </div>
+                    </div>
+                    <button onClick={(e) => {
+                      e.stopPropagation();
+                      const updated = savedReports.filter((x: any) => x.id !== r.id);
+                      setSavedReports(updated);
+                      try { localStorage.setItem('master_report_history', JSON.stringify(updated)); } catch {}
+                    }}
+                      className="opacity-0 group-hover:opacity-100 text-xs text-red-400 hover:text-red-300 px-2 py-1 rounded transition-all">
+                      ✕ 删除
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Charts */}
         {data && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -189,7 +247,7 @@ export default function MasterPage() {
             {data.bazi && (
               <div className="card-jade p-5">
                 <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">🀄 八字四柱</h3>
-                <BaziChart pillars={data.bazi.pillars||[]} dayMaster={data.bazi.dayMaster||''} elements={['金','金','金','火']}/>
+                <BaziChart pillars={data.bazi.pillars||[]} dayMaster={data.bazi.dayMaster||''} elements={data.bazi.elements||data.bazi.pillars?.map((p:string)=>'?')||['?','?','?','?']}/>
               </div>
             )}
             {data.ziwei && (
