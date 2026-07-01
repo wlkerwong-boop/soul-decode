@@ -932,6 +932,7 @@ section {
     font-family: "STHeiti", "SimSun", "Noto Sans SC", serif !important;
   }
   nav, footer, .btn-jade, .btn-gold, .btn, button,
+  select, .print-hidden,
   .cosmic-loader, .spinner, .gold-divider,
   [class*="paywall"], [class*="Paywall"],
   [class*="AIChat"], [class*="DailyFortune"],
@@ -939,6 +940,7 @@ section {
   .feedback-form, .prompt-templates {
     display: none !important;
   }
+  .report-form { display: none !important; }
   .gradient-bg { background: white !important; }
   .report-content, .report-content p, .report-content li {
     color: #1a1a1a !important; font-size: 10.5pt !important;
@@ -1027,7 +1029,8 @@ section {
   .print-only { display: none !important; }
 }
 @media print {
-  .print-hidden { display: none !important; }
+  .print-hidden, select, button { display: none !important; }
   .card-jade { break-inside: avoid; }
+  .report-form { display: none !important; }
   nav, footer { display: none !important; }
 }

@@ -5,6 +5,7 @@ import VoiceReader from '@/components/VoiceReader';
 import BodygraphSVG from '@/components/BodygraphSVG';
 import BaziChart from '@/components/BaziChart';
 import ZiWeiChart from '@/components/ZiWeiChart';
+import { marked } from 'marked';
 import { CHINA_CITIES, INTERNATIONAL_CITIES, CITY_TZ } from '@/data/cities';
 
 const YEARS = Array.from({length:121},(_,i)=>2026-i);
@@ -73,6 +74,12 @@ export default function MasterPage() {
 
   const allFilled = year && month && day && continent && country && city;
 
+  const reportHtml = useMemo(() => {
+    if (!report) return '';
+    try { return marked(report, { breaks: true, gfm: true }) as string; }
+    catch { return report; }
+  }, [report]);
+
   return (
     <div className="gradient-bg min-h-screen px-4 py-6 md:py-10">
       <div className="max-w-4xl mx-auto">
@@ -83,8 +90,8 @@ export default function MasterPage() {
           <p className="text-sm text-[var(--text-secondary)] opacity-70">八字·人类图·占星·紫微斗数·五运六气·流年·人生规划</p>
         </div>
 
-        {/* ── 简洁表单 — 参考人生解码风格 ── */}
-        <div className="card-jade p-5 md:p-6 mb-8 max-w-lg mx-auto">
+        {/* ── 简洁表单 — 参考人生解码风格（打印时隐藏） ── */}
+        <div className="card-jade p-5 md:p-6 mb-8 max-w-lg mx-auto report-form">
           {/* 性别选择 */}
           <div className="flex gap-2 mb-4">
             {['男','女'].map(g => (
@@ -227,9 +234,8 @@ export default function MasterPage() {
                 </button>
               </div>
             </div>
-            <div className="prose prose-sm md:prose-base prose-invert whitespace-pre-wrap leading-relaxed">
-              {report.split('\n').map((line, i) => (<p key={i} className="mb-3">{line || '\u00A0'}</p>))}
-            </div>
+            <div className="report-content prose prose-sm md:prose-base max-w-none leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: reportHtml }} />
           </div>
 
           {/* Compatibility Suggestion */}
