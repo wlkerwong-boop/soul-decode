@@ -156,10 +156,10 @@ export default function Home() {
             <span className="text-sm font-semibold text-[var(--text-primary)]">MBTI性格</span>
             <span className="text-[10px] text-[var(--text-tertiary)] mt-1">16型人格·深度解析</span>
           </Link>
-          <Link href="/tools" className="group flex flex-col items-center p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/50 hover:border-[var(--color-primary)]/30 hover:bg-[var(--bg-card)] transition-all">
+          <Link href="/dharma" className="group flex flex-col items-center p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/50 hover:border-[var(--color-primary)]/30 hover:bg-[var(--bg-card)] transition-all">
             <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">📿</span>
             <span className="text-sm font-semibold text-[var(--text-primary)]">法藏文库</span>
-            <span className="text-[10px] text-[var(--text-tertiary)] mt-1">佛法·道法·亲子智慧</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] mt-1">寂如师·金刚老师·中医</span>
           </Link>
         </div>
       </section>

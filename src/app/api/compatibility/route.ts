@@ -38,23 +38,53 @@ function getConfig() {
   return configs[provider] || configs.deepseek;
 }
 
-function buildPrompt(a: any, b: any): string {
+function buildPrompt(baziList: any[], type: string): string {
   const CY = new Date().getFullYear();
-  return `请对以下两个人的关系进行深度合盘分析。
-
-## 用户A
-- 八字：${a.pillars.filter((p: string) => p !== '--').join(' ')}
-- 日主：${a.dayMaster}（${a.dayMasterElement}）
-- 生肖：${a.zodiac}
-- 五行分布：${JSON.stringify(a.elementDistribution)}
-- 命局简评：${a.summary}
-
-## 用户B
+  const labels = type === 'family' 
+    ? ['本人', '伴侣', ...Array.from({length: baziList.length - 2}, (_, i) => `孩子${i+1}`)]
+    : baziList.map((_, i) => i === 0 ? '用户A' : `用户${String.fromCharCode(65 + i)}`);
+  
+  const sections = baziList.map((b, i) => 
+    `## ${labels[i] || '成员'+(i+1)}
 - 八字：${b.pillars.filter((p: string) => p !== '--').join(' ')}
 - 日主：${b.dayMaster}（${b.dayMasterElement}）
 - 生肖：${b.zodiac}
 - 五行分布：${JSON.stringify(b.elementDistribution)}
-- 命局简评：${b.summary}
+- 命局简评：${b.summary}`
+  ).join('\n\n');
+
+  if (type === 'family') {
+    return `请对这个${baziList.length}人家庭进行深度合盘分析。
+
+${sections}
+
+请严格按照以下6个模块输出，每个模块不少于200字：
+
+## 一、家庭缘分解读
+一句总括这个家庭的关系本质（用强有力的隐喻），然后展开解释。
+
+## 二、五行互补度
+分析家庭成员五行分布是否互补。谁补谁，哪方面最需要补，哪方面有冲突。孩子从父母那里获得了什么五行能量。
+
+## 三、性格相容性
+基于日主五行和命局，分析家庭成员的互动模式。谁主外谁主内，亲子关系中可能碰撞和契合之处。
+
+## 四、优势互补
+家庭成员的天赋如何形成合力。孩子在哪些方面继承了父母的优势。
+
+## 五、冲突预警
+家庭最容易产生矛盾的3个方面。每个冲突点给出具体触发场景和化解建议。
+
+## 六、家庭成长指南
+给这个家庭一个整体建议。当前为${CY}年，给出今年的家庭关系关键点。每个孩子的教育和发展重点。
+
+---
+⚠️ 诚实第一：该说合就说合，该说不合就说不合，不要为了讨好用户而说好话。`;
+  }
+
+  return `请对以下两个人的关系进行深度合盘分析。
+
+${sections}
 
 请严格按照以下6个模块输出，每个模块不少于200字：
 
@@ -83,23 +113,31 @@ function buildPrompt(a: any, b: any): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { personA, personB } = body;
+    const { persons, type } = body;
 
-    if (!personA?.year || !personB?.year) {
-      return new Response(JSON.stringify({ error: '需要两个人的出生信息' }), {
+    // Support both old format (personA/personB) and new format (persons[])
+    let personList: any[];
+    if (persons && Array.isArray(persons)) {
+      personList = persons;
+    } else if (body.personA && body.personB) {
+      personList = [body.personA, body.personB];
+    } else {
+      return new Response(JSON.stringify({ error: '需要至少两个人的出生信息' }), {
         status: 400, headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // 计算双方八字
-    const a = calculateBazi(
-      parseInt(personA.year), parseInt(personA.month), parseInt(personA.day),
-      personA.hour ? parseInt(personA.hour) : undefined,
-    );
-    const b = calculateBazi(
-      parseInt(personB.year), parseInt(personB.month), parseInt(personB.day),
-      personB.hour ? parseInt(personB.hour) : undefined,
-    );
+    if (personList.length < 2) {
+      return new Response(JSON.stringify({ error: '需要至少两个人的出生信息' }), {
+        status: 400, headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // 计算所有人八字
+    const baziList = personList.map((p: any) => calculateBazi(
+      parseInt(p.year), parseInt(p.month), parseInt(p.day),
+      p.hour ? parseInt(p.hour) : undefined,
+    ));
 
     const config = getConfig();
     if (!config.apiKey) {
@@ -108,7 +146,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const prompt = buildPrompt(a, b);
+    const prompt = buildPrompt(baziList, type || 'couple');
 
     const response = await fetch(`${config.baseUrl}/chat/completions`, {
       method: 'POST',

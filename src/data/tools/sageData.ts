@@ -1049,6 +1049,30 @@ export const sageFigures: SageFigure[] = [
     slogan: '人不可有傲气，但不可无傲骨',
     imageHint: '徐悲鸿照片/奔马图',
   },
+  {
+    id: 125, name: '孔子', stars: 3, dynasty: '春秋',
+    camp: '文脉传声',
+    description: '至圣先师，万世师表，儒家学派创始人',
+    keywords: ['有智慧', '有恒心', '善于思考', '有爱心', '有领导力', '乐于助人'],
+    slogan: '己所不欲，勿施于人',
+    imageHint: '孔子画像/唐代吴道子先师像',
+  },
+  {
+    id: 126, name: '王阳明', stars: 4, dynasty: '明代',
+    camp: '风骨守志',
+    description: '心学集大成者，知行合一，文武双全的思想家与军事家',
+    keywords: ['有智慧', '有勇气', '有恒心', '善于思考', '知行合一', '有领导力'],
+    slogan: '知行合一，此心光明亦复何言',
+    imageHint: '明代官服画像/王阳明真容像',
+  },
+  {
+    id: 127, name: '曾国藩', stars: 4, dynasty: '清代',
+    camp: '风骨守志',
+    description: '晚清中兴名臣，以拙诚自守，修身齐家治国平天下',
+    keywords: ['有毅力', '有恒心', '有责任感', '善于自省', '有大局观', '踏实'],
+    slogan: '天下古今之庸人，皆以一惰字致败',
+    imageHint: '曾国藩照片/清代官服画像',
+  },
 ];
 
 // 匹配用的辅助函数
@@ -1075,10 +1099,10 @@ export const camps = [
   { id: 'camp3', name: '大国国防科技脊梁', count: 4, icon: '🚀' },
   { id: 'camp4', name: '民生济世安邦', count: 1, icon: '🌾' },
   { id: 'camp5', name: '云南乡土楷模', count: 2, icon: '🏔️' },
-  { id: 'camp6a', name: '文脉传声', count: 8, icon: '📖' },
+  { id: 'camp6a', name: '文脉传声', count: 9, icon: '📖' },
   { id: 'camp6b', name: '格物求真', count: 9, icon: '🔬' },
   { id: 'camp6c', name: '山河立心', count: 8, icon: '🗺️' },
   { id: 'camp6d', name: '仁心济世', count: 7, icon: '💊' },
-  { id: 'camp6e', name: '风骨守志', count: 7, icon: '🎋' },
+  { id: 'camp6e', name: '风骨守志', count: 9, icon: '🎋' },
   { id: 'camp6f', name: '匠心造物', count: 7, icon: '🔨' },
 ];

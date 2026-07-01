@@ -73,6 +73,7 @@ export default function HepanPage() {
   const [report, setReport] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [childrenCount, setChildrenCount] = useState(0); // 0-5 children
 
   const setData = (k: string, v: string) => setForm(prev => ({...prev, [k]: v}));
 
@@ -80,17 +81,33 @@ export default function HepanPage() {
 
   const submit = async () => {
     setLoading(true); setError(''); setReport('');
-    const persons = type === 'couple' ? ['a','b'] : type === 'friend' ? ['a','b'] : ['m','p'];
-    const data = persons.map(pfx => ({
-      year: form[pfx+'_year'], month: form[pfx+'_month'], day: form[pfx+'_day'],
-      hour: form[pfx+'_hour']||'12', minute: form[pfx+'_minute']||'0',
-      gender: form[pfx+'_gender']||'男',
-    }));
+    const persons: any[] = [];
+    
+    if (type === 'couple') {
+      persons.push(prefixData('a'), prefixData('b'));
+    } else if (type === 'friend') {
+      persons.push(prefixData('a'), prefixData('b'));
+    } else if (type === 'family') {
+      persons.push(prefixData('m'));
+      persons.push(prefixData('p'));
+      for (let i = 0; i < childrenCount; i++) {
+        persons.push(prefixData('c'+i));
+      }
+    }
+    
+    function prefixData(pfx: string) {
+      return {
+        year: form[pfx+'_year'], month: form[pfx+'_month'], day: form[pfx+'_day'],
+        hour: form[pfx+'_hour']||'12', minute: form[pfx+'_minute']||'0',
+        gender: form[pfx+'_gender']||'男',
+      };
+    }
+
     try {
       const r = await fetch('/api/compatibility', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ personA: data[0], personB: data[1] }),
+        body: JSON.stringify({ persons, type }),
       });
       if (!r.ok) { setError('生成失败 ('+r.status+')'); return; }
       const reader = r.body?.getReader();
@@ -143,8 +160,24 @@ export default function HepanPage() {
             <div className="space-y-3">
               <PersonForm label="本人" pfx="m" data={form} setData={setData} />
               <PersonForm label="伴侣" pfx="p" data={form} setData={setData} />
-              <div className="p-4 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-color)] border-dashed text-center text-sm text-[var(--text-secondary)]">
-                + 添加孩子（最多5人）
+              {Array.from({length: childrenCount}).map((_, i) => (
+                <PersonForm key={i} label={`孩子 ${i+1}`} pfx={`c${i}`} data={form} setData={setData} />
+              ))}
+              <div className="flex items-center justify-between">
+                {childrenCount < 5 ? (
+                  <button onClick={() => setChildrenCount(c => c+1)}
+                    className="px-4 py-2 rounded-xl border border-dashed border-[var(--text-accent)]/40 text-sm text-[var(--text-accent)] hover:bg-[var(--text-accent)]/5 transition-all">
+                    ＋ 添加孩子 ({childrenCount}/5)
+                  </button>
+                ) : (
+                  <span className="text-xs text-[var(--text-secondary)]">已添加 5 个孩子（上限）</span>
+                )}
+                {childrenCount > 0 && (
+                  <button onClick={() => setChildrenCount(c => c-1)}
+                    className="px-3 py-1.5 text-xs text-red-400 hover:text-red-300 transition-colors">
+                    移除最后一个
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -153,6 +186,7 @@ export default function HepanPage() {
           )}
 
           <button onClick={submit} disabled={loading||!(canSubmit('a')||canSubmit('m'))}
+            title={type==='family'&&childrenCount===0?'请先添加至少一个孩子':undefined}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-bold text-base hover:shadow-lg transition-all disabled:opacity-40">
             {loading ? '⌛ 正在合盘...' : '✦ 生成合盘报告'}
           </button>
