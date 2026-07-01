@@ -1,7 +1,5 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import BirthInputForm from '@/components/BirthInputForm';
 import BodygraphSVG from '@/components/BodygraphSVG';
 import Link from 'next/link';
 
@@ -13,18 +11,8 @@ const DEMO_HUMAN_DESIGN = {
 };
 
 export default function Home() {
-  const [showForm, setShowForm] = useState(false);
-  const formSectionRef = useRef<HTMLDivElement>(null);
-
   const scrollToForm = () => {
-    setShowForm(true);
-    setTimeout(() => {
-      formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => {
-        const firstInput = formSectionRef.current?.querySelector('input, select');
-        if (firstInput && 'focus' in firstInput) (firstInput as HTMLElement).focus();
-      }, 300);
-    }, 100);
+    window.location.href = '/master-report';
   };
 
   return (
@@ -72,19 +60,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* ── Quick Form ── */}
-      {showForm && (
-        <section ref={formSectionRef} className="px-4 pb-12 max-w-lg mx-auto">
-          <div className="glass-card p-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/80">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-[var(--text-primary)]">输入您的出生信息</h2>
-              <button onClick={() => setShowForm(false)} className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors">收起 ✕</button>
-            </div>
-            <BirthInputForm />
-          </div>
-        </section>
-      )}
 
       {/* ── 核心产品 ── */}
       <section className="px-4 pb-16 max-w-5xl mx-auto">

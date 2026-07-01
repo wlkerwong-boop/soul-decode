@@ -133,17 +133,15 @@ export default function MasterPage() {
             )}
           </div>
 
-          {/* 分钟+时区信息 */}
-          {city && (
-            <div className="flex items-center gap-2 text-xs text-[var(--text-tertiary)] mb-4">
-              <span>分钟：</span>
-              <select value={minute} onChange={e=>setMinute(e.target.value)}
-                className="input-jade text-xs py-2 px-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)]">
-                {MINUTES.map(m=><option key={m} value={m}>{m}分</option>)}
-              </select>
-              <span className="ml-auto">时区：{detectedTz}</span>
-            </div>
-          )}
+          {/* 分钟+时区信息 — 始终显示 */}
+          <div className="flex items-center gap-2 text-xs text-[var(--text-tertiary)] mb-4">
+            <span>分钟：</span>
+            <select value={minute} onChange={e=>setMinute(e.target.value)}
+              className="input-jade text-xs py-2 px-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)]">
+              {MINUTES.map(m=><option key={m} value={m}>{m}分</option>)}
+            </select>
+            <span className="ml-auto">时区：{city ? detectedTz : '选择城市后自动匹配'}</span>
+          </div>
 
           {/* 提交按钮 */}
           <button onClick={submit} disabled={!allFilled||loading}
