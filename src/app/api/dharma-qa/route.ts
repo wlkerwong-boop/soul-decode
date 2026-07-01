@@ -12,20 +12,22 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 let cachedIndex: any = null;
+let cachedYangshan: any = null;
 
 function loadIndex() {
   if (cachedIndex) return cachedIndex;
   const indexPath = join(process.cwd(), 'src/data/dharma/dharma-index.json');
-  if (!existsSync(indexPath)) {
-    return null;
-  }
-  try {
-    const raw = readFileSync(indexPath, 'utf-8');
-    cachedIndex = JSON.parse(raw);
-    return cachedIndex;
-  } catch {
-    return null;
-  }
+  if (!existsSync(indexPath)) return null;
+  try { cachedIndex = JSON.parse(readFileSync(indexPath, 'utf-8')); return cachedIndex; }
+  catch { return null; }
+}
+
+function loadYangshan() {
+  if (cachedYangshan) return cachedYangshan;
+  const path = join(process.cwd(), 'src/data/dharma/yangshan-index.json');
+  if (!existsSync(path)) return null;
+  try { cachedYangshan = JSON.parse(readFileSync(path, 'utf-8')); return cachedYangshan; }
+  catch { return null; }
 }
 
 function searchChunks(query: string, index: any, maxResults = 5) {
@@ -104,21 +106,50 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Load index and search
+    // Load index and search both sources
     const index = loadIndex();
+    const yangshan = loadYangshan();
     let context = '';
     let sourceInfo = '';
     let resultCount = 0;
 
+    // Search main dharma index
     if (index) {
-      const results = searchChunks(question, index, 5);
-      resultCount = results.length;
+      const results = searchChunks(question, index, 4);
+      resultCount += results.length;
       if (results.length > 0) {
-        context = results.map((c: any, i: number) =>
-          `[参考资料 ${i + 1}]\n来自：${c.title}\n内容：${c.text.slice(0, 800)}`
+        context += results.map((c: any, i: number) =>
+          `[开示${i + 1}] 来自：${c.title}\n${c.text.slice(0, 800)}`
         ).join('\n\n');
+        sourceInfo += results.map((c: any) => `《${c.title}》`).join('、');
+      }
+    }
 
-        sourceInfo = `\n\n引用来源：${results.map((c: any) => `《${c.title}》`).join('、')}`;
+    // Search 阳山书院 supplementary articles
+    if (yangshan) {
+      const ysResults = searchChunks(question, yangshan, 3);
+      if (ysResults.length > 0) {
+        if (context) context += '\n\n---\n\n';
+        context += '【阳山书院最新开示】\n' + ysResults.map((c: any, i: number) =>
+          `[阳山${i + 1}] ${c.title}\n${c.text.slice(0, 800)}`
+        ).join('\n\n');
+        if (sourceInfo) sourceInfo += '、';
+        sourceInfo += ysResults.map((c: any) => `阳山·《${c.title}》`).join('、');
+        resultCount += ysResults.length;
+      }
+    }
+
+    if (!context) {
+      // Fallback: try direct text search in yangshan
+      if (yangshan) {
+        const direct = yangshan.chunks.filter((c: any) =>
+          c.text.includes(question) || c.title.includes(question)
+        ).slice(0, 3);
+        if (direct.length > 0) {
+          context = '【阳山书院】\n' + direct.map((c: any) => c.text.slice(0, 1000)).join('\n\n');
+          sourceInfo = direct.map((c: any) => `阳山·《${c.title}》`).join('、');
+          resultCount = direct.length;
+        }
       }
     }
 
@@ -154,7 +185,7 @@ export async function POST(request: NextRequest) {
     const content = data.choices?.[0]?.message?.content || '';
 
     return new Response(JSON.stringify({
-      answer: content + sourceInfo,
+      answer: content + (sourceInfo ? `\n\n📖 引用来源：${sourceInfo}` : ''),
       question,
       hasContext: !!context,
       sources: context ? resultCount : 0,
