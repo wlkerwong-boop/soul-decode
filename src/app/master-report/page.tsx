@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import VoiceReader from '@/components/VoiceReader';
 import BodygraphSVG from '@/components/BodygraphSVG';
 import BaziChart from '@/components/BaziChart';
@@ -21,6 +21,20 @@ export default function MasterPage() {
   const [gender, setGender] = useState('男');
   const [report, setReport] = useState(''); const [loading, setLoading] = useState(false);
   const [error, setError] = useState(''); const [data, setData] = useState<any>(null);
+
+  // Restore last report from localStorage on mount (survives refresh)
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('last_master_report');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.report && parsed.data) {
+          setReport(parsed.report);
+          setData(parsed.data);
+        }
+      }
+    } catch {}
+  }, []);
 
   const continents = useMemo(() => Object.keys(INTERNATIONAL_CITIES), []);
   const continentCountries = useMemo(() =>
@@ -51,8 +65,10 @@ export default function MasterPage() {
       const d = await r.json();
       if (!d.success) { setError(d.error||'生成失败'); return; }
       setReport(d.report); setData(d.data);
+      // Persist report data so refresh doesn't lose it
+      try { localStorage.setItem('last_master_report', JSON.stringify({report:d.report, data:d.data, year, month, day, hour, minute, continent, country, province, city, gender})); } catch {}
     } catch (e: any) { setError(e.message||'网络错误'); }
-    setLoading(false);
+    finally { setLoading(false); }
   };
 
   const allFilled = year && month && day && continent && country && city;
@@ -79,8 +95,8 @@ export default function MasterPage() {
             ))}
           </div>
 
-          {/* 出生日期 — 紧凑网格 */}
-          <div className="grid grid-cols-5 gap-1.5 mb-4">
+          {/* 出生日期 — 响应式网格 */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-4">
             <select value={year} onChange={e=>setYear(e.target.value)}
               className="col-span-2 input-jade text-sm py-3 px-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
               <option value="">年份</option>

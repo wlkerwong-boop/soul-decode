@@ -22,12 +22,12 @@ const C: Record<string, {x:number,y:number,shape:string,w:number,h:number}> = {
 
 const GC: Record<number,string> = {
   61:'Head',63:'Head',64:'Head',
-  11:'Ajna',17:'Ajna',24:'Ajna',43:'Ajna',47:'Ajna',
+  4:'Ajna',11:'Ajna',17:'Ajna',24:'Ajna',43:'Ajna',47:'Ajna',
   8:'Throat',12:'Throat',16:'Throat',20:'Throat',23:'Throat',31:'Throat',
   33:'Throat',35:'Throat',45:'Throat',56:'Throat',62:'Throat',
   1:'G',2:'G',7:'G',10:'G',13:'G',15:'G',25:'G',46:'G',
   21:'Ego',26:'Ego',40:'Ego',51:'Ego',
-  3:'Sacral',4:'Sacral',5:'Sacral',6:'Sacral',9:'Sacral',14:'Sacral',
+  3:'Sacral',5:'Sacral',6:'Sacral',9:'Sacral',14:'Sacral',
   27:'Sacral',29:'Sacral',34:'Sacral',42:'Sacral',59:'Sacral',
   19:'Solar Plexus',22:'Solar Plexus',30:'Solar Plexus',36:'Solar Plexus',
   37:'Solar Plexus',49:'Solar Plexus',55:'Solar Plexus',
