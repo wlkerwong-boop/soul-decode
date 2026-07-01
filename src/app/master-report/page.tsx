@@ -22,7 +22,6 @@ export default function MasterPage() {
   const [report, setReport] = useState(''); const [loading, setLoading] = useState(false);
   const [error, setError] = useState(''); const [data, setData] = useState<any>(null);
 
-  // Cascading location: continent → country → province(China only) → city
   const continents = useMemo(() => Object.keys(INTERNATIONAL_CITIES), []);
   const continentCountries = useMemo(() =>
     continent ? Object.keys(INTERNATIONAL_CITIES[continent]||{}) : [], [continent]);
@@ -35,7 +34,6 @@ export default function MasterPage() {
     return [];
   }, [country, continent, isChina, province]);
 
-  // Auto-detect timezone from city
   const detectedTz = useMemo(() => {
     if (city && CITY_TZ[city]) return CITY_TZ[city];
     return 'Asia/Shanghai';
@@ -57,16 +55,7 @@ export default function MasterPage() {
     setLoading(false);
   };
 
-  const Btn = ({v,cur,set,label}:{v:string,cur:string,set:(s:string)=>void,label:string}) => (
-    <button onClick={()=>set(v)} className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${cur===v ? 'bg-[var(--text-accent)] text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)] hover:bg-opacity-80'}`}>{label}</button>
-  );
-
-  const Sel = ({v,set,opts,placeholder}:{v:string,set:(s:string)=>void,opts:any[],placeholder:string}) => (
-    <select value={v} onChange={e=>set(e.target.value)} className="input-jade text-lg py-3 font-medium">
-      <option value="">{placeholder}</option>
-      {opts.map(o=><option key={o} value={o}>{o}</option>)}
-    </select>
-  );
+  const allFilled = year && month && day && continent && country && city;
 
   return (
     <div className="gradient-bg min-h-screen px-4 py-6 md:py-10">
@@ -78,64 +67,92 @@ export default function MasterPage() {
           <p className="text-sm text-[var(--text-secondary)] opacity-70">八字·人类图·占星·紫微斗数·五运六气·流年·人生规划</p>
         </div>
 
-        <div className="card-jade p-6 md:p-8 mb-8">
-          <div className="space-y-5">
-
-            {/* Date */}
-            <div>
-              <label className="block text-base font-bold mb-2 text-[var(--text-secondary)]">出生日期</label>
-              <div className="grid grid-cols-5 gap-2">
-                <Sel v={year} set={setYear} opts={YEARS} placeholder="年份" />
-                <Sel v={month} set={setMonth} opts={MONTHS} placeholder="月份" />
-                <Sel v={day} set={setDay} opts={DAYS} placeholder="日期" />
-                <Sel v={hour} set={setHour} opts={HOURS} placeholder="时" />
-                <Sel v={minute} set={setMinute} opts={MINUTES} placeholder="分" />
-              </div>
-            </div>
-
-            {/* Location - Cascading: 大洲 → 国家 → 省份(仅中国) → 城市 */}
-            <div>
-              <label className="block text-base font-bold mb-2 text-[var(--text-secondary)]">出生地</label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <Sel v={continent} set={(s:string)=>{setContinent(s);setCountry('');setProvince('');setCity('');}} opts={continents} placeholder="大洲" />
-                {continent ? (
-                  <Sel v={country} set={(s:string)=>{setCountry(s);setProvince('');setCity('');}} opts={continentCountries} placeholder="国家" />
-                ) : <div />}
-                {isChina && country ? (
-                  <Sel v={province} set={(s:string)=>{setProvince(s);setCity('');}} opts={provinces} placeholder="省份" />
-                ) : country && !isChina ? (
-                  <Sel v={city} set={setCity} opts={cities} placeholder="城市" />
-                ) : <div />}
-                {isChina && province ? (
-                  <Sel v={city} set={setCity} opts={cities} placeholder="城市" />
-                ) : <div />}
-              </div>
-            </div>
-
-            {/* Timezone - auto detected */}
-            <div>
-              <label className="block text-base font-bold mb-2 text-[var(--text-secondary)]">时区</label>
-              <div className="px-3 py-2 rounded-lg bg-[var(--bg-highlight)] text-sm text-[var(--text-secondary)]">
-                {city ? `自动检测：${detectedTz}` : '选择城市后自动匹配'}
-              </div>
-              <p className="text-xs text-[var(--text-secondary)] mt-1 opacity-60">海外出生：人类图用当地时间，八字/紫微自动换算北京时间</p>
-            </div>
-
-            {/* Gender */}
-            <div>
-              <label className="block text-base font-bold mb-2 text-[var(--text-secondary)]">性别</label>
-              <div className="flex gap-3">
-                <Btn v="男" cur={gender} set={setGender} label="👨 男" />
-                <Btn v="女" cur={gender} set={setGender} label="👩 女" />
-              </div>
-            </div>
-
-            <button onClick={submit} disabled={loading||!year||!month||!day||!hour||!city}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-bold text-lg hover:shadow-xl transition-all disabled:opacity-40">
-              {loading ? '⌛ 正在为您解读...' : '✦ 生成人生总览报告'}
-            </button>
-            {error && <p className="text-red-400 text-sm mt-2 text-center">{error}</p>}
+        {/* ── 简洁表单 — 参考人生解码风格 ── */}
+        <div className="card-jade p-5 md:p-6 mb-8 max-w-lg mx-auto">
+          {/* 性别选择 */}
+          <div className="flex gap-2 mb-4">
+            {['男','女'].map(g => (
+              <button key={g} onClick={()=>setGender(g)}
+                className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all ${
+                  gender===g ? 'bg-[var(--text-accent)] text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)]'
+                }`}>{g}</button>
+            ))}
           </div>
+
+          {/* 出生日期 — 紧凑网格 */}
+          <div className="grid grid-cols-5 gap-1.5 mb-4">
+            <select value={year} onChange={e=>setYear(e.target.value)}
+              className="col-span-2 input-jade text-sm py-3 px-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+              <option value="">年份</option>
+              {YEARS.map(y=><option key={y} value={y}>{y}</option>)}
+            </select>
+            <select value={month} onChange={e=>setMonth(e.target.value)}
+              className="input-jade text-sm py-3 px-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+              <option value="">月</option>
+              {MONTHS.map(m=><option key={m} value={m}>{m}</option>)}
+            </select>
+            <select value={day} onChange={e=>setDay(e.target.value)}
+              className="input-jade text-sm py-3 px-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+              <option value="">日</option>
+              {DAYS.map(d=><option key={d} value={d}>{d}</option>)}
+            </select>
+            <select value={hour} onChange={e=>setHour(e.target.value)}
+              className="input-jade text-sm py-3 px-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+              <option value="">时</option>
+              {HOURS.map(h=><option key={h} value={h}>{h}</option>)}
+            </select>
+          </div>
+
+          {/* 出生地 — 逐级级联 */}
+          <div className="space-y-2 mb-4">
+            <select value={continent} onChange={e=>{setContinent(e.target.value);setCountry('');setProvince('');setCity('');}}
+              className="w-full input-jade text-sm py-3 px-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+              <option value="">选择大洲</option>
+              {continents.map(c=><option key={c} value={c}>{c}</option>)}
+            </select>
+            {continent && (
+              <select value={country} onChange={e=>{setCountry(e.target.value);setProvince('');setCity('');}}
+                className="w-full input-jade text-sm py-3 px-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+                <option value="">选择国家</option>
+                {continentCountries.map(c=><option key={c} value={c}>{c}</option>)}
+              </select>
+            )}
+            {isChina && country && (
+              <select value={province} onChange={e=>{setProvince(e.target.value);setCity('');}}
+                className="w-full input-jade text-sm py-3 px-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+                <option value="">选择省份</option>
+                {provinces.map(p=><option key={p} value={p}>{p}</option>)}
+              </select>
+            )}
+            {country && cities.length > 0 && (
+              <select value={city} onChange={e=>setCity(e.target.value)}
+                className="w-full input-jade text-sm py-3 px-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+                <option value="">选择城市</option>
+                {cities.map(c=><option key={c} value={c}>{c}</option>)}
+              </select>
+            )}
+          </div>
+
+          {/* 分钟+时区信息 */}
+          {city && (
+            <div className="flex items-center gap-2 text-xs text-[var(--text-tertiary)] mb-4">
+              <span>分钟：</span>
+              <select value={minute} onChange={e=>setMinute(e.target.value)}
+                className="input-jade text-xs py-2 px-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)]">
+                {MINUTES.map(m=><option key={m} value={m}>{m}分</option>)}
+              </select>
+              <span className="ml-auto">时区：{detectedTz}</span>
+            </div>
+          )}
+
+          {/* 提交按钮 */}
+          <button onClick={submit} disabled={!allFilled||loading}
+            className={`w-full py-3.5 rounded-xl font-semibold text-sm transition-all ${
+              allFilled&&!loading ? 'bg-[var(--text-accent)] text-white hover:shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-tertiary)] cursor-not-allowed'
+            }`}>
+            {loading ? '⌛ 生成报告中...' : '✦ 生成人生总览报告'}
+          </button>
+          {error && <p className="text-red-400 text-xs mt-2 text-center">{error}</p>}
         </div>
 
         {/* Charts */}
