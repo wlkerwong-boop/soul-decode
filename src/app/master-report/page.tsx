@@ -48,6 +48,21 @@ export default function MasterPage() {
     return m ? `${m[1]}岁·${gender}` : gender;
   };
 
+  // Save report to history
+  const saveToHistory = (reportText: string, reportData: any) => {
+    const entry = {
+      id: Date.now().toString(36),
+      name: extractName(reportText) || `${year}年${month}月${day}日·${gender}`,
+      report: reportText, data: reportData,
+      year, month, day, hour, minute, continent, country, province, city, gender,
+      createdAt: new Date().toISOString()
+    };
+    const history = [entry, ...savedReports.filter((r:any) => r.report !== reportText)].slice(0, 10);
+    setSavedReports(history);
+    try { localStorage.setItem('master_report_history', JSON.stringify(history)); } catch {}
+    try { localStorage.setItem('last_master_report', JSON.stringify({report: reportText, data: reportData})); } catch {}
+  };
+
   const continents = useMemo(() => Object.keys(INTERNATIONAL_CITIES), []);
   const continentCountries = useMemo(() =>
     continent ? Object.keys(INTERNATIONAL_CITIES[continent]||{}) : [], [continent]);
@@ -69,29 +84,52 @@ export default function MasterPage() {
     setLoading(true); setError(''); setReport(''); setData(null);
     const loc = isChina ? province : country;
     try {
-      const r = await fetch('/api/master-report', {
+      // 使用流式 API，边生成边显示
+      const r = await fetch('/api/master-report/stream', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({year, month, day, hour, minute, location:loc, gender, timezone:detectedTz}),
       });
-      const d = await r.json();
-      if (!d.success) { setError(d.error||'生成失败'); return; }
-      setReport(d.report); setData(d.data);
-      // Auto-save to history
-      const entry = {
-        id: Date.now().toString(36),
-        name: extractName(d.report) || reportName || `${year}年${month}月${day}日·${gender}`,
-        report: d.report, data: d.data,
-        year, month, day, hour, minute, continent, country, province, city, gender,
-        createdAt: new Date().toISOString()
-      };
-      const history = [entry, ...savedReports.filter((r:any) => r.report !== d.report)].slice(0, 10);
-      setSavedReports(history);
-      try { localStorage.setItem('master_report_history', JSON.stringify(history)); } catch {}
-      // Persist last report for quick restore
-      try { localStorage.setItem('last_master_report', JSON.stringify({report:d.report, data:d.data})); } catch {}
-    } catch (e: any) { setError(e.message||'网络错误'); }
-    finally { setLoading(false); }
+      if (!r.ok) { setError('API错误: ' + r.status); setLoading(false); return; }
+
+      const reader = r.body?.getReader();
+      if (!reader) { setError('不支持流式读取'); setLoading(false); return; }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullReport = '';
+      let isFirstChunk = true;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const msg = JSON.parse(line.slice(6));
+              if (msg.error) { setError(msg.error); setLoading(false); return; }
+              if (msg.done) {
+                // 最终数据
+                setData({ bazi: msg.bazi, hd: msg.hd, ziwei: msg.ziwei, zodiac: msg.zodiac, wuyun: msg.wuyun, liunian: msg.liunian });
+                setReport(fullReport);
+                setLoading(false);
+                // 保存到历史
+                saveToHistory(fullReport, { bazi: msg.bazi, hd: msg.hd, ziwei: msg.ziwei, zodiac: msg.zodiac, wuyun: msg.wuyun, liunian: msg.liunian });
+              } else if (msg.content) {
+                fullReport += msg.content;
+                setReport(fullReport);
+                if (isFirstChunk) { setLoading(false); isFirstChunk = false; }
+              }
+            } catch {}
+          }
+        }
+      }
+    } catch (e: any) { setError(e.message||'网络错误'); setLoading(false); }
   };
 
   const allFilled = year && month && day && continent && country && city;
