@@ -143,7 +143,7 @@ export default function HumanDesignPage() {
     setLoading(true); setError(''); setHd(null); setInterp('');
     try {
       const payload = { ...form, timezone: form.timezone || 'Asia/Shanghai' };
-      const res = await fetch('/api/human-design', {
+      const res = await fetch('https://bell.aisoulcode.cn/api/human-design', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
