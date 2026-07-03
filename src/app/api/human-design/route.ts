@@ -6,7 +6,7 @@ import { NextRequest } from 'next/server';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const ALIYUN_API = 'http://47.102.142.225:3003/api/human-design';
+const ALIYUN_API = 'https://bell.aisoulcode.cn/api/human-design';
 
 export async function POST(request: NextRequest) {
   try {
