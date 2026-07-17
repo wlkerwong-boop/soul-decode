@@ -6,7 +6,7 @@ const express = require('express');
 const app = express();
 app.use(express.json({limit:'10mb'}));
 const PORT = 3003;
-const API_KEY = "sk-c2c7afa08ffe493cb6b980995227d079";
+const API_KEY = "sk-f..."
 const AI_BASE = "https://api.deepseek.com/v1";
 
 // Start serving immediately
@@ -128,7 +128,7 @@ app.post('/api/master-report', async (req, res) => {
     const userMsg = '请为一位'+age+'岁的'+g+'性出具一份七系统融合人生总览报告。数据如下：\n';
     const dataStr = JSON.stringify({bazi:ba, zodiac:zo, hd:hd, ziwei:zw, wuyun:wy, liunian:ln});
 
-    const prompt = sysMsg+'\n'+userMsg+'\n'+dataStr+'\n\n请按以下7个章节撰写完整报告。每章必须三系统交叉印证+对比表。字数6000-8000字。\n第一章 天性禀赋与人格底色\n第二章 事业天赋与财富格局（含2026流年事业运势表）\n第三章 人际关系与情感模式\n第四章 学习成长与灵性发展\n第五章 健康体质与养生策略（**最重要章节**：先天体质+五运六气+具体养生方案（饮食/起居/运动/环境）+流年健康风险）\n第六章 人生关键节点与风险提示\n第七章 终极建议（两个核心结论+点睛之言）';
+    const prompt = sysMsg+'\n'+userMsg+'\n'+dataStr+'\n\n请按以下7个章节撰写完整报告。每章必须三系统交叉印证+对比表。字数10000-20000字。不要截断。\n第一章 天性禀赋与人格底色\n第二章 事业天赋与财富格局（含2026流年事业运势表）\n第三章 人际关系与情感模式\n第四章 学习成长与灵性发展\n第五章 健康体质与养生策略（**最重要章节**：先天体质+五运六气+具体养生方案（饮食/起居/运动/环境）+流年健康风险）\n第六章 人生关键节点与风险提示\n第七章 终极建议（两个核心结论+点睛之言）';
 
     // ===== Step 1: Generate first segment (max 8192 tokens ~ 5500 Chinese chars) =====
     let fullReport = await callDeepSeek([{role:'user', content:prompt}], 8192);

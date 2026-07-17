@@ -6,8 +6,8 @@ function calcBazi(y: number, m: number, d: number, h: number) {
   const solar = Solar.fromYmdHms(y, m, d, h, 0, 0);
   const lunar = solar.getLunar();
   const pillars = [
-    lunar.getYearInGanZhiExact(), lunar.getMonthInGanZhiExact(),
-    lunar.getDayInGanZhiExact(), lunar.getTimeInGanZhi()
+    lunar.getYearInGanZhi(), lunar.getMonthInGanZhi(),
+    lunar.getDayInGanZhi(), lunar.getTimeInGanZhi()
   ];
   const dayMaster = lunar.getDayGan();
   const elMap: Record<string, string> = {甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
