@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 
-export const DEV_VERIFY_CODE = '888888';
+export const DEV_VERIFY_CODE = process.env.NEXT_PUBLIC_VERIFY_CODE || 'DISABLED_' + Math.random().toString(36).slice(2);
 export const USER_STORAGE_KEY = 'soul_decode_user';
 
 export interface User {
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { ok: false, message: '请输入有效的11位手机号' };
     }
     if (code !== DEV_VERIFY_CODE) {
-      return { ok: false, message: '验证码错误，开发期固定为 888888' };
+      return { ok: false, message: '验证码错误' };
     }
 
     // Auto-register if not found (seamless UX)
@@ -105,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { ok: false, message: '请输入有效的11位手机号' };
     }
     if (code !== DEV_VERIFY_CODE) {
-      return { ok: false, message: '验证码错误，开发期固定为 888888' };
+      return { ok: false, message: '验证码错误' };
     }
     if (!trimmedNickname || trimmedNickname.length < 2 || trimmedNickname.length > 20) {
       return { ok: false, message: '昵称长度需在 2-20 个字符之间' };

@@ -44,7 +44,7 @@ export default function Footer() {
             基于真实八字算法排盘 · 信息仅用于生成本报告 · 不存储
           </p>
           <p className="text-xs text-[var(--text-secondary)] mt-2 opacity-40">
-            © 2026 光明喜舍 · 滇ICP备号-1
+            © 2026 光明喜舍
           </p>
         </div>
       </div>
