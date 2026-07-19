@@ -6,13 +6,46 @@ const express = require('express');
 const app = express();
 app.use(express.json({limit:'10mb'}));
 const PORT = 3003;
-const API_KEY = "sk-f..."
+const API_KEY = "sk-f...";
 const AI_BASE = "https://api.deepseek.com/v1";
 
+// ===== Input validation =====
+function validateYear(y) {
+  const n = parseInt(y);
+  if (isNaN(n) || n < 1900 || n > 2100) return null;
+  return n;
+}
+function validateMonth(m) {
+  const n = parseInt(m);
+  if (isNaN(n) || n < 1 || n > 12) return null;
+  return n;
+}
+function validateDay(d) {
+  const n = parseInt(d);
+  if (isNaN(n) || n < 1 || n > 31) return null;
+  return n;
+}
+function validateHour(h) {
+  const n = parseInt(h);
+  if (isNaN(n) || n < 0 || n > 23) return null;
+  return n;
+}
+
 // Start serving immediately
-let hdReady = false, hdMod = null;
+// ===== Restart counter (for PM2 alerting) =====
+const fs = require('fs');
+const RESTART_FILE = '/tmp/report-api-restarts.txt';
+let restartCount = 0;
+try { restartCount = parseInt(fs.readFileSync(RESTART_FILE,'utf8'))||0; } catch(e) {}
+restartCount++;
+fs.writeFileSync(RESTART_FILE, String(restartCount));
+console.log('Report API starting (restart #'+restartCount+')');
+if (restartCount > 3) {
+  console.error('ALERT: report-api restarted '+restartCount+' times — check /root/.pm2/logs/report-api-error.log');
+}
 
 // Load HD engine in background (WASM takes 5-10s)
+let hdReady = false, hdMod = null;
 setTimeout(() => {
   try {
     hdMod = require('./hd-engine-v6.cjs');
@@ -64,11 +97,14 @@ function calcHD(y, m, d, h, mi, tz) {
 }
 
 function calcWY(y) {
-  const stem = '庚辛壬癸甲乙丙丁戊己'[(y-4)%10];
-  const branch = '子丑寅卯辰巳午未申酉戌亥'[(y-4)%12];
+  const stem = '庚辛壬癸甲乙丙丁戊己';
+  const branch = '子丑寅卯辰巳午未申酉戌亥';
   const yun = {甲:'土运',乙:'金运',丙:'水运',丁:'木运',戊:'火运',己:'土运',庚:'金运',辛:'水运',壬:'木运',癸:'火运'};
   const qi = {子:'少阴君火',丑:'太阴湿土',寅:'少阳相火',卯:'阳明燥金',辰:'太阳寒水',巳:'厥阴风木',午:'少阴君火',未:'太阴湿土',申:'少阳相火',酉:'阳明燥金',戌:'太阳寒水',亥:'厥阴风木'};
-  return { stem, branch, wuyun: stem+'年→'+yun[stem], liuqi: branch+'年→'+qi[branch] };
+  const idx = ((y||0)-4)%10;
+  const s = stem[idx] || '?';
+  const b = branch[idx] || '?';
+  return { stem:s, branch:b, wuyun: s+'年→'+(yun[s]||'?'), liuqi: b+'年→'+(qi[b]||'?') };
 }
 
 function calcLN(y) {
@@ -108,7 +144,10 @@ app.get('/health', (req, res) => res.json({status:'ok', hdReady, uptime:process.
 app.post('/api/master-report', async (req, res) => {
   try {
     const { year, month, day, hour, minute, gender, timezone, location } = req.body;
-    const y=parseInt(year), m=parseInt(month), d=parseInt(day), h=parseInt(hour), mi=parseInt(minute||'0');
+    const y=validateYear(year), m=validateMonth(month), d=validateDay(day), h=validateHour(hour), mi=parseInt(minute||'0')||0;
+    if (y===null||m===null||d===null||h===null) {
+      return res.json({success:false, error:'无效的出生日期：year='+year+' month='+month+' day='+day+' hour='+hour});
+    }
     const g = gender||'男';
 
     // Beijing time for bazi/ziwei
