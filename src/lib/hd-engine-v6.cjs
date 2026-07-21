@@ -1,19 +1,35 @@
 /**
- * HD引擎v6.2 — 88°太阳弧精确设计日计算
+ * HD引擎v6.4 — 88°太阳弧精确设计日计算 + 分钟级精度 + Intl 时区换算（含历史夏令时）
  */
 const sw = require('@fusionstrings/swisseph-wasm');
 const activation = require('@it-healer/human-design-calculator/src/activation');
 const typeModule = require('@it-healer/human-design-calculator/src/type');
 
-const TZ_OFFSET = {
-  'America/Los_Angeles':-7,'America/New_York':-4,'Europe/London':0,
-  'Europe/Paris':1,'Australia/Sydney':10,'Asia/Tokyo':9,'Asia/Shanghai':8,
-};
 const PN = ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','NorthNode'];
 const PI = [0,1,2,3,4,5,6,7,8,9,11];
 const SIG = {'Generator':'满足','Manifesting Generator':'满足','Projector':'成功','Manifestor':'平静','Reflector':'惊喜'};
 const NS = {'Generator':'挫败','Manifesting Generator':'挫败','Projector':'苦涩','Manifestor':'愤怒','Reflector':'失望'};
 const AC = ['Head','Ajna','Throat','G','Ego','Sacral','Solar Plexus','Spleen','Root'];
+
+// 当地时间 → UTC Date。用 Node 内置 Intl 求目标时刻的时区偏移（含历史夏令时），
+// 替换原 TZ_OFFSET 固定表（固定表对历史日期会错，如 LA 冬令时为 -8 而非 -7）。
+function localToUtc(y, m, d, h, mi, tz) {
+  var zone = tz || 'Asia/Shanghai';
+  var guessUtc = Date.UTC(y, m - 1, d, h, mi || 0);
+  try {
+    var fmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: zone, year: 'numeric', month: 'numeric', day: 'numeric',
+      hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false,
+    });
+    var parts = {};
+    fmt.formatToParts(new Date(guessUtc)).forEach(function (p) { parts[p.type] = parseInt(p.value, 10); });
+    var asIfUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour % 24, parts.minute, parts.second);
+    return new Date(guessUtc - (asIfUtc - guessUtc));
+  } catch (e) {
+    // 非法时区名兜底北京时间（UTC+8，无夏令时）
+    return new Date(guessUtc - 8 * 3600000);
+  }
+}
 
 function sunLonAt(jd) { return sw.swe_calc_ut(jd, 0, 4).longitude; }
 
@@ -46,16 +62,11 @@ function getGates(jd) {
   return gates;
 }
 
-function calc(y, m, d, h, tz) {
-  var offset = TZ_OFFSET[tz] || 8;
-  var utcH = h - offset;
-  var utcY=y, utcM=m, utcD=d;
-  if (utcH < 0) { utcH += 24; utcD -= 1;
-    if (utcD < 1) { utcM -= 1; if (utcM < 1) { utcM=12; utcY-=1; }
-      var dim=[31,28,31,30,31,30,31,31,30,31,30,31]; utcD=dim[utcM-1]; } }
-  if (utcH >= 24) { utcH -= 24; utcD += 1;
-    if (utcD > 31) { utcM += 1; utcD=1; if (utcM>12) { utcM=1; utcY+=1; } } }
-  var jd = sw.swe_julday(utcY, utcM, utcD, utcH, 1);
+function calc(y, m, d, h, mi, tz) {
+  var utc = localToUtc(y, m, d, h, mi, tz);
+  // 浮点小时：分钟参与行星位置计算（分钟级精度）
+  var utcH = utc.getUTCHours() + utc.getUTCMinutes() / 60 + utc.getUTCSeconds() / 3600;
+  var jd = sw.swe_julday(utc.getUTCFullYear(), utc.getUTCMonth() + 1, utc.getUTCDate(), utcH, 1);
   
   var pG = getGates(jd);
   var designJd = findDesignJD(jd);
@@ -125,6 +136,10 @@ function getAuthority(dc, cnt) {
 module.exports = {
   calculateBodygraph: function(ds, ts, tz, lat, lon) {
     var p=ds.split(/[-T]/), tp=ts.split(':');
-    return calc(parseInt(p[0],10),parseInt(p[1],10),parseInt(p[2],10),tp.length>=1?parseInt(tp[0],10):12,tz);
-  }
+    var h = tp.length>=1?parseInt(tp[0],10):12;
+    var mi = tp.length>=2?parseInt(tp[1],10)||0:0;
+    return calc(parseInt(p[0],10),parseInt(p[1],10),parseInt(p[2],10),h,mi,tz);
+  },
+  // 仅供测试：当地时间→UTC 换算（Intl，含历史夏令时）
+  _localToUtc: localToUtc,
 };

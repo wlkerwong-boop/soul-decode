@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Solar } from 'lunar-javascript';
 import { getBirthCoords } from '@/data/cities';
+import { calculateBodygraph } from '@/lib/hd';
 
 export const runtime = 'nodejs';
 
@@ -164,10 +165,9 @@ export async function POST(request: NextRequest) {
     const mi = parseInt(body.minute) || 0;
     const { lat, lon } = getBirthCoords(body.city, location);
 
-    const hdMod = require('../../../lib/hd-engine-v5.cjs');
     const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
-    const hdResult = hdMod.calculateBodygraph(ds, ts, tz, lat, lon);
+    const hdResult = await calculateBodygraph(ds, ts, tz, lat, lon);
 
     const prompt = buildPrompt(baziY, baziM, baziD, baziH, bazi, hdResult, zodiac, tz);
 

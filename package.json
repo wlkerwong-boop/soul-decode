@@ -10,8 +10,6 @@
     "index:dharma": "python3 scripts/build-dharma-index.py"
   },
   "dependencies": {
-    "@fusionstrings/swisseph-wasm": "^0.1.5",
-    "@it-healer/human-design-calculator": "^1.0.2",
     "@next/swc-wasm-nodejs": "^16.2.6",
     "echarts": "^6.1.0",
     "echarts-for-react": "^3.0.6",

@@ -1,6 +1,7 @@
 // 七系统融合报告 API — 人生总览
 import { NextRequest, NextResponse } from 'next/server';
 import { getBirthCoords } from '@/data/cities';
+import { calculateBodygraph } from '@/lib/hd';
 
 function calcBazi(y: number, m: number, d: number, h: number) {
   const { Solar } = require('lunar-javascript');
@@ -15,13 +16,11 @@ function calcBazi(y: number, m: number, d: number, h: number) {
   return { pillars, dayMaster: `${dayMaster}（${elMap[dayMaster]}）` };
 }
 
-function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
+async function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
   try {
-    // 使用v5引擎（无WASM依赖，Vercel上可靠运行）
-    const mod = require('../../../lib/hd-engine-v5.cjs');
     const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
-    return mod.calculateBodygraph(ds, ts, tz, lat, lon);
+    return await calculateBodygraph(ds, ts, tz, lat, lon);
   } catch (e: any) {
     console.error('HD calc failed:', e.message);
     return null;

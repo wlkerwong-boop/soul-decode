@@ -1,6 +1,7 @@
 // 流式七系统报告 API — 边生成边返回
 import { NextRequest } from 'next/server';
 import { getBirthCoords } from '@/data/cities';
+import { calculateBodygraph } from '@/lib/hd';
 
 function calcBazi(y: number, m: number, d: number, h: number) {
   const { Solar } = require('lunar-javascript');
@@ -15,12 +16,11 @@ function calcBazi(y: number, m: number, d: number, h: number) {
   return { pillars, dayMaster: `${dayMaster}（${elMap[dayMaster]}）` };
 }
 
-function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
+async function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
   try {
-    const mod = require('../../../lib/hd-engine-v5.cjs');
     const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
-    return mod.calculateBodygraph(ds, ts, tz, lat, lon);
+    return await calculateBodygraph(ds, ts, tz, lat, lon);
   } catch { return null; }
 }
 
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 
   // 计算所有数据
   const baziResult = calcBazi(y, m, d, h);
-  const hdResult = calcHD(y, m, d, h, mi, tz, lat, lon);
+  const hdResult = await calcHD(y, m, d, h, mi, tz, lat, lon);
   const ziweiResult = calcZiwei(y, m, d, h, g);
   const zodiacResult = calcZodiac(y, m, d);
   const wuyunResult = calcWuyunLiuqi(y);
