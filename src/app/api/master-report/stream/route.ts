@@ -1,5 +1,6 @@
 // 流式七系统报告 API — 边生成边返回
 import { NextRequest } from 'next/server';
+import { getBirthCoords } from '@/data/cities';
 
 function calcBazi(y: number, m: number, d: number, h: number) {
   const { Solar } = require('lunar-javascript');
@@ -14,13 +15,12 @@ function calcBazi(y: number, m: number, d: number, h: number) {
   return { pillars, dayMaster: `${dayMaster}（${elMap[dayMaster]}）` };
 }
 
-function calcHD(y: number, m: number, d: number, h: number, tz: string) {
+function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
   try {
     const mod = require('../../../lib/hd-engine-v5.cjs');
     const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const ts = `${String(h).padStart(2,'0')}:00`;
-    const loc = tz === 'Asia/Shanghai' ? 39.9 : 0;
-    return mod.calculateBodygraph(ds, ts, tz, loc, loc);
+    const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
+    return mod.calculateBodygraph(ds, ts, tz, lat, lon);
   } catch { return null; }
 }
 
@@ -54,7 +54,7 @@ function calcZodiac(y: number, m: number, d: number) {
 }
 
 function calcWuyunLiuqi(y: number) {
-  const stem = ['庚','辛','壬','癸','甲','乙','丙','丁','戊','己'][(y-4) % 10];
+  const stem = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'][(y-4) % 10];
   const branch = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'][(y-4) % 12];
   const yun: Record<string, string> = {甲:'土运',乙:'金运',丙:'水运',丁:'木运',戊:'火运',己:'土运',庚:'金运',辛:'水运',壬:'木运',癸:'火运'};
   const qi: Record<string, string> = {子:'少阴君火',丑:'太阴湿土',寅:'少阳相火',卯:'阳明燥金',辰:'太阳寒水',巳:'厥阴风木',午:'少阴君火',未:'太阴湿土',申:'少阳相火',酉:'阳明燥金',戌:'太阳寒水',亥:'厥阴风木'};
@@ -72,13 +72,15 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { year, month, day, hour, location, gender, timezone } = body;
   const y = parseInt(year), m = parseInt(month), d = parseInt(day), h = parseInt(hour) || 12;
+  const mi = parseInt(body.minute) || 0;
   const tz = timezone || 'Asia/Shanghai';
+  const { lat, lon } = getBirthCoords(body.city, location);
   const g = gender === '女' ? '女' : '男';
   const age = new Date().getFullYear() - y;
 
   // 计算所有数据
   const baziResult = calcBazi(y, m, d, h);
-  const hdResult = calcHD(y, m, d, h, tz);
+  const hdResult = calcHD(y, m, d, h, mi, tz, lat, lon);
   const ziweiResult = calcZiwei(y, m, d, h, g);
   const zodiacResult = calcZodiac(y, m, d);
   const wuyunResult = calcWuyunLiuqi(y);

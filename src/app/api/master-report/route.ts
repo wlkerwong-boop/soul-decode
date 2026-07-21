@@ -1,5 +1,6 @@
 // 七系统融合报告 API — 人生总览
 import { NextRequest, NextResponse } from 'next/server';
+import { getBirthCoords } from '@/data/cities';
 
 function calcBazi(y: number, m: number, d: number, h: number) {
   const { Solar } = require('lunar-javascript');
@@ -14,14 +15,13 @@ function calcBazi(y: number, m: number, d: number, h: number) {
   return { pillars, dayMaster: `${dayMaster}（${elMap[dayMaster]}）` };
 }
 
-function calcHD(y: number, m: number, d: number, h: number, tz: string) {
+function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
   try {
     // 使用v5引擎（无WASM依赖，Vercel上可靠运行）
     const mod = require('../../../lib/hd-engine-v5.cjs');
     const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const ts = `${String(h).padStart(2,'0')}:00`;
-    const loc = tz === 'Asia/Shanghai' ? 39.9 : 0;
-    return mod.calculateBodygraph(ds, ts, tz, loc, loc);
+    const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
+    return mod.calculateBodygraph(ds, ts, tz, lat, lon);
   } catch (e: any) {
     console.error('HD calc failed:', e.message);
     return null;
@@ -62,7 +62,7 @@ function calcZodiac(y: number, m: number, d: number) {
 
 function calcWuyunLiuqi(y: number) {
   // 五运：天干化运
-  const stem = ['庚','辛','壬','癸','甲','乙','丙','丁','戊','己'][(y-4) % 10];
+  const stem = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'][(y-4) % 10];
   const stemYun: Record<string, string> = {甲:'土运',乙:'金运',丙:'水运',丁:'木运',戊:'火运',己:'土运',庚:'金运',辛:'水运',壬:'木运',癸:'火运'};
   // 六气：地支化气
   const branch = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'][(y-4) % 12];
@@ -91,7 +91,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { year, month, day, hour, location, gender, timezone } = body;
     const y=parseInt(year), m=parseInt(month), d=parseInt(day), h=hour!==undefined?parseInt(hour):12;
+    const mi = parseInt(body.minute) || 0;
     const tz = timezone || 'Asia/Shanghai';
+    const { lat, lon } = getBirthCoords(body.city, location);
     const g = gender === '女' ? '女' : '男';
     const now = new Date();
     const age = now.getFullYear() - y - (now.getMonth()+1<m||(now.getMonth()+1===m&&now.getDate()<d)?1:0);
@@ -99,7 +101,7 @@ export async function POST(req: NextRequest) {
     // 并行计算全部7个系统
     const [baziResult, hdResult, ziweiResult, zodiacResult] = await Promise.all([
       Promise.resolve(calcBazi(y, m, d, h)),
-      Promise.resolve(calcHD(y, m, d, h, tz)),
+      Promise.resolve(calcHD(y, m, d, h, mi, tz, lat, lon)),
       Promise.resolve(calcZiwei(y, m, d, h, g)),
       Promise.resolve(calcZodiac(y, m, d)),
     ]);
@@ -176,7 +178,7 @@ ${liunianResult}
       const aliRes = await fetch(aliyunUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ year, month, day, hour, minute: body.minute || '0', gender, timezone: tz, location }),
+        body: JSON.stringify({ year, month, day, hour, minute: body.minute || '0', gender, timezone: tz, location, city: body.city, lat, lon }),
         signal: AbortSignal.timeout(180000), // 180s超时
       });
       const aliData = await aliRes.json();

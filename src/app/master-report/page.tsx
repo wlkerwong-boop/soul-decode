@@ -12,7 +12,7 @@ const YEARS = Array.from({length:121},(_,i)=>2026-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
 const DAYS = Array.from({length:31},(_,i)=>i+1);
 const HOURS = Array.from({length:24},(_,i)=>i);
-const MINUTES = [0,15,30,45];
+const MINUTES = Array.from({length:60},(_,i)=>i);
 
 export default function MasterPage() {
   const [year, setYear] = useState(''); const [month, setMonth] = useState('');
@@ -88,7 +88,7 @@ export default function MasterPage() {
       const r = await fetch('/api/master-report/stream', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({year, month, day, hour, minute, location:loc, gender, timezone:detectedTz}),
+        body: JSON.stringify({year, month, day, hour, minute, location:loc, city, gender, timezone:detectedTz}),
       });
       if (!r.ok) { setError('API错误: ' + r.status); setLoading(false); return; }
 

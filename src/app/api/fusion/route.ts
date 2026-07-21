@@ -5,6 +5,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { Solar } from 'lunar-javascript';
+import { getBirthCoords } from '@/data/cities';
 
 export const runtime = 'nodejs';
 
@@ -159,26 +160,13 @@ export async function POST(request: NextRequest) {
     const bazi = calculateBaziLocal(baziY, baziM, baziD, baziH);
     const zodiac = getZodiacSign(m, d); // 星座用人原本地日期
 
-    // 坐标映射
-    const LOC_COORDS: Record<string, [number, number]> = {
-      '北京':[39.9,116.4],'山东':[36.4,116.6],'湖北':[30.6,114.3],'广东':[23.1,113.3],
-      '上海':[31.2,121.5],'天津':[39.1,117.2],'重庆':[29.6,106.6],'江苏':[32.1,118.8],
-      '浙江':[30.3,120.2],'安徽':[31.9,117.3],'福建':[26.1,119.3],'江西':[28.7,115.9],
-      '河南':[34.8,113.7],'湖南':[28.2,112.9],'广西':[22.8,108.4],'海南':[20.0,110.4],
-      '四川':[30.6,104.1],'贵州':[26.7,106.6],'云南':[25.0,102.7],'西藏':[29.7,91.1],
-      '陕西':[34.3,108.9],'甘肃':[36.1,103.8],'青海':[36.6,101.8],'宁夏':[38.5,106.3],
-      '新疆':[43.8,87.6],'香港':[22.3,114.2],'澳门':[22.2,113.5],'台湾':[25.0,121.5],
-    };
-    let lat = 39.9, lon = 116.4;
-    if (location) {
-      for (const [prov, coords] of Object.entries(LOC_COORDS)) {
-        if ((location as string).includes(prov)) { lat = coords[0]; lon = coords[1]; break; }
-      }
-    }
+    // 坐标：城市精确值 → 省/国兜底（共享表，见 src/data/cities.ts）
+    const mi = parseInt(body.minute) || 0;
+    const { lat, lon } = getBirthCoords(body.city, location);
 
     const hdMod = require('../../../lib/hd-engine-v5.cjs');
     const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const ts = `${String(h).padStart(2,'0')}:00`;
+    const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
     const hdResult = hdMod.calculateBodygraph(ds, ts, tz, lat, lon);
 
     const prompt = buildPrompt(baziY, baziM, baziD, baziH, bazi, hdResult, zodiac, tz);
