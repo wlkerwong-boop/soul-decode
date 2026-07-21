@@ -15,6 +15,41 @@ const GOLDEN = [
     input: ['2015-01-15', '12:00', 'America/Los_Angeles', 34.05, -118.24],
     expected: null,
   },
+  // ── 全家回归基准（K3 于本地 v6.4 同款引擎实测，2026-07-21 锁死防漂移）──
+  // disputed=true：与旧金标准有分歧，待 mybodygraph 官方复核后才转"金标准断言"；
+  // 当前作为回归基准断言（锁死 v6.4 现有输出）。
+  {
+    label: '一斐 2010-12-04 19:20 上海时区（⚠️ 待复核：旧金标准 profile 1/3，角色差一爻）',
+    disputed: true,
+    input: ['2010-12-04', '19:20', 'Asia/Shanghai', 25.60, 100.23],
+    expected: { type: 'Projector', profile: '1/4', authority: '情绪型权威',
+      definedCenters: ['Ego', 'Solar Plexus', 'Spleen', 'Root'], channels: ['18-58', '28-38', '37-40'] },
+  },
+  {
+    label: '一然 2015-06-04 19:45 洛杉矶（旧金标准 Manifestor，或源自88天近似工具）',
+    input: ['2015-06-04', '19:45', 'America/Los_Angeles', 34.05, -118.24],
+    expected: { type: 'Projector', profile: '3/6', authority: '直觉型权威',
+      definedCenters: ['Throat', 'G', 'Spleen'], channels: ['16-48', '7-31'] },
+  },
+  {
+    label: '一如 2017-07-23 15:10 上海时区（旧金标准 profile 1/3）',
+    input: ['2017-07-23', '15:10', 'Asia/Shanghai', 25.60, 100.23],
+    expected: { type: 'Generator', profile: '5/1', authority: '荐骨权威',
+      definedCenters: ['Head', 'Ajna', 'Throat', 'Sacral', 'Spleen'], channels: ['11-56', '20-57', '4-63'] },
+  },
+  {
+    label: '爸爸 1982-01-27 02:15 上海时区（⚠️ 待复核：旧金标准 Projector 6/1 直觉，34-57 三重稳健属结构性分歧）',
+    disputed: true,
+    input: ['1982-01-27', '02:15', 'Asia/Shanghai', 25.60, 100.23],
+    expected: { type: 'Generator', profile: '5/1', authority: '荐骨权威',
+      definedCenters: ['Sacral', 'Spleen'], channels: ['34-57'] },
+  },
+  {
+    label: '妈妈 1982-10-28 13:30 上海时区（旧金标准 MG 3/5——Throat 无定义通道）',
+    input: ['1982-10-28', '13:30', 'Asia/Shanghai', 25.60, 100.23],
+    expected: { type: 'Generator', profile: '3/5', authority: '荐骨权威',
+      definedCenters: ['Sacral', 'Spleen', 'Root'], channels: ['34-57'] },
+  },
 ];
 
 const FIELDS = ['type', 'profile', 'authority', 'definedCenters', 'channels'];
@@ -36,6 +71,7 @@ for (const g of GOLDEN) {
     !!r.type && !!r.profile && !!r.authority && Array.isArray(r.definedCenters) && Array.isArray(r.channels),
     '');
   if (g.expected) {
+    if (g.disputed) console.log('  ⚠️ 回归基准（与旧金标准分歧，待 mybodygraph 复核后转金标准断言）');
     for (const f of FIELDS) {
       const exp = JSON.stringify(g.expected[f]);
       const act = JSON.stringify(r[f]);
