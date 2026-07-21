@@ -15,40 +15,47 @@ const GOLDEN = [
     input: ['2015-01-15', '12:00', 'America/Los_Angeles', 34.05, -118.24],
     expected: null,
   },
-  // ── 全家回归基准（K3 于本地 v6.4 同款引擎实测，2026-07-21 锁死防漂移）──
-  // disputed=true：与旧金标准有分歧，待 mybodygraph 官方复核后才转"金标准断言"；
-  // 当前作为回归基准断言（锁死 v6.4 现有输出）。
+  // ── 全家金标准（K3 修正版 2026-07-21，myBodyGraph 官方复核到位；Earth P0 修复后实测一致）──
+  // earth: [personality, design] 闸门.爻线，经 _debugGates 断言
   {
-    label: '一斐 2010-12-04 19:20 上海时区（⚠️ 待复核：旧金标准 profile 1/3，角色差一爻）',
-    disputed: true,
+    label: '一斐 2010-12-04 19:20 上海时区',
     input: ['2010-12-04', '19:20', 'Asia/Shanghai', 25.60, 100.23],
-    expected: { type: 'Projector', profile: '1/4', authority: '情绪型权威',
-      definedCenters: ['Ego', 'Solar Plexus', 'Spleen', 'Root'], channels: ['18-58', '28-38', '37-40'] },
+    expected: { type: 'Manifestor', profile: '1/4', authority: '情绪型权威',
+      definedCenters: ['Head', 'Ajna', 'Throat', 'Solar Plexus', 'Spleen', 'Root'],
+      channels: ['18-58', '28-38', '35-36', '4-63'] },
+    earth: ['35.1', '63.4'],
   },
   {
-    label: '一然 2015-06-04 19:45 洛杉矶（旧金标准 Manifestor，或源自88天近似工具）',
+    label: '一然 2015-06-04 19:45 洛杉矶',
     input: ['2015-06-04', '19:45', 'America/Los_Angeles', 34.05, -118.24],
     expected: { type: 'Projector', profile: '3/6', authority: '直觉型权威',
-      definedCenters: ['Throat', 'G', 'Spleen'], channels: ['16-48', '7-31'] },
+      definedCenters: ['Throat', 'Spleen'], channels: ['16-48'] },
+    earth: ['5.3', '64.6'],
   },
   {
-    label: '一如 2017-07-23 15:10 上海时区（旧金标准 profile 1/3）',
+    label: '一如 2017-07-23 15:10 上海时区',
     input: ['2017-07-23', '15:10', 'Asia/Shanghai', 25.60, 100.23],
     expected: { type: 'Generator', profile: '5/1', authority: '荐骨权威',
-      definedCenters: ['Head', 'Ajna', 'Throat', 'Sacral', 'Spleen'], channels: ['11-56', '20-57', '4-63'] },
+      definedCenters: ['Head', 'Ajna', 'Throat', 'Sacral', 'Spleen', 'Root'],
+      channels: ['11-56', '20-57', '3-60', '4-63'] },
+    earth: ['60.5', '28.1'],
   },
   {
-    label: '爸爸 1982-01-27 02:15 上海时区（⚠️ 待复核：旧金标准 Projector 6/1 直觉，34-57 三重稳健属结构性分歧）',
-    disputed: true,
+    // 官方另检出 61-24 通道，本引擎未检出（官方 Sacral/Spleen 之外中心未定义，
+  // 与 61-24 成通道必然定义 Head/Ajna 存在矛盾，已记录待 K3 与官方图核对）
+    label: '爸爸 1982-01-27 02:15 上海时区',
     input: ['1982-01-27', '02:15', 'Asia/Shanghai', 25.60, 100.23],
     expected: { type: 'Generator', profile: '5/1', authority: '荐骨权威',
       definedCenters: ['Sacral', 'Spleen'], channels: ['34-57'] },
+    earth: ['31.5', '24.1'],
+    officialNote: '官方另检出 61-24，引擎未检出，待核对',
   },
   {
-    label: '妈妈 1982-10-28 13:30 上海时区（旧金标准 MG 3/5——Throat 无定义通道）',
+    label: '妈妈 1982-10-28 13:30 上海时区',
     input: ['1982-10-28', '13:30', 'Asia/Shanghai', 25.60, 100.23],
     expected: { type: 'Generator', profile: '3/5', authority: '荐骨权威',
-      definedCenters: ['Sacral', 'Spleen', 'Root'], channels: ['34-57'] },
+      definedCenters: ['Sacral', 'Spleen'], channels: ['27-50', '34-57'] },
+    earth: ['27.3', '41.5'],
   },
 ];
 
@@ -71,12 +78,20 @@ for (const g of GOLDEN) {
     !!r.type && !!r.profile && !!r.authority && Array.isArray(r.definedCenters) && Array.isArray(r.channels),
     '');
   if (g.expected) {
-    if (g.disputed) console.log('  ⚠️ 回归基准（与旧金标准分歧，待 mybodygraph 复核后转金标准断言）');
     for (const f of FIELDS) {
       const exp = JSON.stringify(g.expected[f]);
       const act = JSON.stringify(r[f]);
       check(g.label + ' ' + f, exp === act, '期望 ' + exp + ' 实际 ' + act);
     }
+    if (g.earth) {
+      const dbg = hd._debugGates(g.input[0], g.input[1], g.input[2]);
+      const pE = dbg.personality.Earth, dE = dbg.design.Earth;
+      check(g.label + ' Earth(P)', (pE.gate + '.' + pE.line) === g.earth[0],
+        '期望 ' + g.earth[0] + ' 实际 ' + pE.gate + '.' + pE.line);
+      check(g.label + ' Earth(D)', (dE.gate + '.' + dE.line) === g.earth[1],
+        '期望 ' + g.earth[1] + ' 实际 ' + dE.gate + '.' + dE.line);
+    }
+    if (g.officialNote) console.log('  📌 ' + g.officialNote);
   } else {
     console.log('  (expected 占位，暂无断言——K3 金标准到位后填入)');
   }

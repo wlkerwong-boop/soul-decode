@@ -1,5 +1,5 @@
 /**
- * HD引擎v6.4 — 88°太阳弧精确设计日计算 + 分钟级精度 + Intl 时区换算（含历史夏令时）
+ * HD引擎v6.5 — 88°太阳弧精确设计日 + 分钟级精度 + Intl时区 + Earth黄经对点（P0修复）
  */
 const sw = require('@fusionstrings/swisseph-wasm');
 const activation = require('@it-healer/human-design-calculator/src/activation');
@@ -51,26 +51,35 @@ function findDesignJD(pJd) {
 
 function getGates(jd) {
   var gates = {};
+  var sunLon = null;
   PI.forEach(function(pid, i) {
     try {
       var r = sw.swe_calc_ut(jd, pid, 4);
+      if (pid === 0) sunLon = r.longitude;
       var act = activation.getActivation(r.longitude);
       gates[PN[i]] = {gate: act.gate, line: act.line};
     } catch(e) { gates[PN[i]] = {gate: 1, line: 1}; }
   });
-  gates['Earth'] = {gate: ((gates['Sun'].gate + 31) % 64) + 1, line: gates['Sun'].line};
+  // Earth = 太阳黄经对点（+180°）。闸门编号非黄经顺序，不能用 gate+32 推算（P0 修复）
+  if (sunLon !== null) {
+    var eAct = activation.getActivation((sunLon + 180) % 360);
+    gates['Earth'] = {gate: eAct.gate, line: eAct.line};
+  } else {
+    gates['Earth'] = {gate: 1, line: 1};
+  }
   return gates;
 }
 
-function calc(y, m, d, h, mi, tz) {
+function calc(y, m, d, h, mi, tz, dbg) {
   var utc = localToUtc(y, m, d, h, mi, tz);
   // 浮点小时：分钟参与行星位置计算（分钟级精度）
   var utcH = utc.getUTCHours() + utc.getUTCMinutes() / 60 + utc.getUTCSeconds() / 3600;
   var jd = sw.swe_julday(utc.getUTCFullYear(), utc.getUTCMonth() + 1, utc.getUTCDate(), utcH, 1);
-  
+
   var pG = getGates(jd);
   var designJd = findDesignJD(jd);
   var dG = getGates(designJd);
+  if (dbg) { dbg.personality = pG; dbg.design = dG; }
 
   var allSet = new Set();
   Object.keys(pG).forEach(function(k) { allSet.add(pG[k].gate); });
@@ -79,27 +88,7 @@ function calc(y, m, d, h, mi, tz) {
   var gSet = new Set(Array.from(allSet));
   var chs = typeModule.getChannels(gSet) || [];
   var ctrSet = typeModule.getDefinedCenters(chs) || new Set();
-  
-  // Jovian Archive规则: 如果有2个以上闸门在同一个中心,该中心也算定义
-  var GATE_CENTER_MAP = {
-    1:'G',2:'G',3:'Sacral',4:'Ajna',5:'Sacral',6:'SolarPlexus',7:'G',8:'Throat',9:'Sacral',
-    10:'G',11:'Ajna',12:'Throat',13:'G',14:'Sacral',15:'G',16:'Throat',17:'Ajna',18:'Spleen',
-    19:'Root',20:'Throat',21:'Ego',22:'SolarPlexus',23:'Throat',24:'Ajna',25:'G',26:'Ego',
-    27:'Sacral',28:'Spleen',29:'Sacral',30:'SolarPlexus',31:'Throat',32:'Spleen',33:'Throat',
-    34:'Sacral',35:'Throat',36:'SolarPlexus',37:'SolarPlexus',38:'Root',39:'Root',40:'Ego',
-    41:'Root',42:'Sacral',43:'Ajna',44:'Spleen',45:'Throat',46:'G',47:'Ajna',48:'Spleen',
-    49:'SolarPlexus',50:'Spleen',51:'Ego',52:'Root',53:'Root',54:'Root',55:'SolarPlexus',
-    56:'Throat',57:'Spleen',58:'Root',59:'Sacral',60:'Root',61:'Head',62:'Throat',63:'Head',64:'Head',
-  };
-  var gateCounts = {};
-  allSet.forEach(function(g) {
-    var c = GATE_CENTER_MAP[g];
-    if (c) { gateCounts[c] = (gateCounts[c] || 0) + 1; }
-  });
-  Object.keys(gateCounts).forEach(function(c) {
-    if (gateCounts[c] >= 3) { ctrSet.add(c); }
-  });
-  
+
   var type = typeModule.getType(chs, ctrSet, gSet) || 'Reflector';
 
   var defCtrs = AC.filter(function(c) { return ctrSet.has(c); });
@@ -142,4 +131,13 @@ module.exports = {
   },
   // 仅供测试：当地时间→UTC 换算（Intl，含历史夏令时）
   _localToUtc: localToUtc,
+  // 仅供测试：返回 personality/design 全行星闸门（含金标准 Earth 爻线断言用）
+  _debugGates: function(ds, ts, tz) {
+    var p=ds.split(/[-T]/), tp=ts.split(':');
+    var h = tp.length>=1?parseInt(tp[0],10):12;
+    var mi = tp.length>=2?parseInt(tp[1],10)||0:0;
+    var dbg = {};
+    calc(parseInt(p[0],10),parseInt(p[1],10),parseInt(p[2],10),h,mi,tz,dbg);
+    return dbg;
+  },
 };
