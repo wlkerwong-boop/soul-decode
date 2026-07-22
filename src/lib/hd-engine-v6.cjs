@@ -1,5 +1,5 @@
 /**
- * HD引擎v6.5 — 88°太阳弧精确设计日 + 分钟级精度 + Intl时区 + Earth黄经对点（P0修复）
+ * HD引擎v6.6 — 88°太阳弧 + 分钟级 + Intl时区 + Earth/SouthNode黄经对点（myBodyGraph官方五人认证）
  */
 const sw = require('@fusionstrings/swisseph-wasm');
 const activation = require('@it-healer/human-design-calculator/src/activation');
@@ -51,11 +51,12 @@ function findDesignJD(pJd) {
 
 function getGates(jd) {
   var gates = {};
-  var sunLon = null;
+  var sunLon = null, nnLon = null;
   PI.forEach(function(pid, i) {
     try {
       var r = sw.swe_calc_ut(jd, pid, 4);
       if (pid === 0) sunLon = r.longitude;
+      if (pid === 11) nnLon = r.longitude;
       var act = activation.getActivation(r.longitude);
       gates[PN[i]] = {gate: act.gate, line: act.line};
     } catch(e) { gates[PN[i]] = {gate: 1, line: 1}; }
@@ -66,6 +67,13 @@ function getGates(jd) {
     gates['Earth'] = {gate: eAct.gate, line: eAct.line};
   } else {
     gates['Earth'] = {gate: 1, line: 1};
+  }
+  // SouthNode = 北交黄经对点（+180°）。缺南交会漏通道（如一斐 5-15 由南交 15.5 补全）
+  if (nnLon !== null) {
+    var snAct = activation.getActivation((nnLon + 180) % 360);
+    gates['SouthNode'] = {gate: snAct.gate, line: snAct.line};
+  } else {
+    gates['SouthNode'] = {gate: 1, line: 1};
   }
   return gates;
 }

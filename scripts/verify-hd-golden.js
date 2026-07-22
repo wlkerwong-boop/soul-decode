@@ -15,14 +15,15 @@ const GOLDEN = [
     input: ['2015-01-15', '12:00', 'America/Los_Angeles', 34.05, -118.24],
     expected: null,
   },
-  // ── 全家金标准（K3 修正版 2026-07-21，myBodyGraph 官方复核到位；Earth P0 修复后实测一致）──
+  // ── 全家金标准（K3 最终版 2026-07-21：爸爸/一然/一斐经 myBodyGraph 官方图逐字认证）──
+  // 引擎 v6.6（+南交）被动匹配本基准；禁止改基准迁就引擎
   // earth: [personality, design] 闸门.爻线，经 _debugGates 断言
   {
     label: '一斐 2010-12-04 19:20 上海时区',
     input: ['2010-12-04', '19:20', 'Asia/Shanghai', 25.60, 100.23],
-    expected: { type: 'Manifestor', profile: '1/4', authority: '情绪型权威',
-      definedCenters: ['Head', 'Ajna', 'Throat', 'Solar Plexus', 'Spleen', 'Root'],
-      channels: ['18-58', '28-38', '35-36', '4-63'] },
+    expected: { type: 'Manifesting Generator', profile: '1/4', authority: '情绪型权威',
+      definedCenters: ['Head', 'Ajna', 'Throat', 'G', 'Sacral', 'Solar Plexus', 'Spleen', 'Root'],
+      channels: ['18-58', '28-38', '35-36', '4-63', '5-15'] },
     earth: ['35.1', '63.4'],
   },
   {
@@ -41,20 +42,17 @@ const GOLDEN = [
     earth: ['60.5', '28.1'],
   },
   {
-    // 官方另检出 61-24 通道，本引擎未检出（官方 Sacral/Spleen 之外中心未定义，
-  // 与 61-24 成通道必然定义 Head/Ajna 存在矛盾，已记录待 K3 与官方图核对）
     label: '爸爸 1982-01-27 02:15 上海时区',
     input: ['1982-01-27', '02:15', 'Asia/Shanghai', 25.60, 100.23],
     expected: { type: 'Generator', profile: '5/1', authority: '荐骨权威',
-      definedCenters: ['Sacral', 'Spleen'], channels: ['34-57'] },
+      definedCenters: ['Head', 'Ajna', 'Sacral', 'Spleen'], channels: ['24-61', '34-57'] },
     earth: ['31.5', '24.1'],
-    officialNote: '官方另检出 61-24，引擎未检出，待核对',
   },
   {
     label: '妈妈 1982-10-28 13:30 上海时区',
     input: ['1982-10-28', '13:30', 'Asia/Shanghai', 25.60, 100.23],
     expected: { type: 'Generator', profile: '3/5', authority: '荐骨权威',
-      definedCenters: ['Sacral', 'Spleen'], channels: ['27-50', '34-57'] },
+      definedCenters: ['Sacral', 'Spleen', 'Root'], channels: ['27-50', '28-38', '34-57'] },
     earth: ['27.3', '41.5'],
   },
 ];
