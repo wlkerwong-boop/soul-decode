@@ -1,4 +1,6 @@
-// 星座与占星模块
+// 星座与占星模块 — swisseph-wasm 精确版
+
+import { getBirthCoords } from '@/data/cities';
 
 export interface ZodiacInfo {
   name: string;
@@ -10,6 +12,13 @@ export interface ZodiacInfo {
   symbol: string;
   traits: string[];
   description: string;
+}
+
+export interface PlanetPosition {
+  name: string;
+  sign: string;
+  degree: number;
+  retrograde: boolean;
 }
 
 export const zodiacSigns: ZodiacInfo[] = [
@@ -48,25 +57,77 @@ export const zodiacSigns: ZodiacInfo[] = [
     description: '水瓶座是时代的前瞻者和变革的推动者。你的思维超前，总能看到别人看不到的可能性。你的独立和叛逆让你不受传统束缚。你的博爱让你关心全人类的命运。但你的理性有时让你显得疏离——别忘了情感的温度。' },
   { name: '双鱼座', englishName: 'Pisces', dateRange: '2月19日-3月20日', element: '水', quality: '变动', rulingPlanet: '海王星/木星', symbol: '♓',
     traits: ['有同情心', '直觉强', '有艺术天赋', '敏感', '逃避倾向'],
-    description: '双鱼座是梦想家和疗愈者。你拥有十二星座中最丰富的想象力和最深的同理心。你的直觉让你能感知到他人无法感知的微妙能量。你的艺术天赋让你成为天生的创作者。但你的逃避倾向是最需要克服的课题——直面现实比沉浸在幻想中更有力量。' },
+    description: '双鱼座是梦想家和疗愈者。你拥有十二星座中最丰富的想象力和最深的同理心。你的直觉让你能感知到他人无法感知的微妙能量。你的艺术天赋让你成为天生的创作着。但你的逃避倾向是最需要克服的课题——直面现实比沉浸在幻想中更有力量。' },
 ];
 
+const SIGN_NAMES = ['白羊', '金牛', '双子', '巨蟹', '狮子', '处女', '天秤', '天蝎', '射手', '摩羯', '水瓶', '双鱼'];
+
+/** 查表法获取太阳星座（作为 swisseph 失败时的后备） */
 export function getZodiacByDate(month: number, day: number): ZodiacInfo | undefined {
-  const m = month;
-  const d = day;
-  if ((m === 3 && d >= 21) || (m === 4 && d <= 19)) return zodiacSigns[0];  // 白羊
-  if ((m === 4 && d >= 20) || (m === 5 && d <= 20)) return zodiacSigns[1];  // 金牛
-  if ((m === 5 && d >= 21) || (m === 6 && d <= 20)) return zodiacSigns[2];  // 双子
-  if ((m === 6 && d >= 21) || (m === 7 && d <= 22)) return zodiacSigns[3];  // 巨蟹
-  if ((m === 7 && d >= 23) || (m === 8 && d <= 22)) return zodiacSigns[4];  // 狮子
-  if ((m === 8 && d >= 23) || (m === 9 && d <= 22)) return zodiacSigns[5];  // 处女
-  if ((m === 9 && d >= 23) || (m === 10 && d <= 22)) return zodiacSigns[6]; // 天秤
-  if ((m === 10 && d >= 23) || (m === 11 && d <= 21)) return zodiacSigns[7]; // 天蝎
-  if ((m === 11 && d >= 22) || (m === 12 && d <= 21)) return zodiacSigns[8]; // 射手
-  if ((m === 12 && d >= 22) || (m === 1 && d <= 19)) return zodiacSigns[9];  // 摩羯
-  if ((m === 1 && d >= 20) || (m === 2 && d <= 18)) return zodiacSigns[10];  // 水瓶
-  if ((m === 2 && d >= 19) || (m === 3 && d <= 20)) return zodiacSigns[11];  // 双鱼
+  const m = month, d = day;
+  if ((m === 3 && d >= 21) || (m === 4 && d <= 19)) return zodiacSigns[0];
+  if ((m === 4 && d >= 20) || (m === 5 && d <= 20)) return zodiacSigns[1];
+  if ((m === 5 && d >= 21) || (m === 6 && d <= 20)) return zodiacSigns[2];
+  if ((m === 6 && d >= 21) || (m === 7 && d <= 22)) return zodiacSigns[3];
+  if ((m === 7 && d >= 23) || (m === 8 && d <= 22)) return zodiacSigns[4];
+  if ((m === 8 && d >= 23) || (m === 9 && d <= 22)) return zodiacSigns[5];
+  if ((m === 9 && d >= 23) || (m === 10 && d <= 22)) return zodiacSigns[6];
+  if ((m === 10 && d >= 23) || (m === 11 && d <= 21)) return zodiacSigns[7];
+  if ((m === 11 && d >= 22) || (m === 12 && d <= 21)) return zodiacSigns[8];
+  if ((m === 12 && d >= 22) || (m === 1 && d <= 19)) return zodiacSigns[9];
+  if ((m === 1 && d >= 20) || (m === 2 && d <= 18)) return zodiacSigns[10];
+  if ((m === 2 && d >= 19) || (m === 3 && d <= 20)) return zodiacSigns[11];
   return undefined;
+}
+
+function signFromLongitude(lon: number): { sign: string; degree: number } {
+  const idx = Math.floor(lon / 30) % 12;
+  return { sign: SIGN_NAMES[idx], degree: Math.round((lon % 30) * 10) / 10 };
+}
+
+/**
+ * 使用 swisseph-wasm 精确计算行星位置
+ * 返回太阳/月亮/水星/金星/火星的星座和度数
+ */
+export async function calcPlanetPositions(
+  year: number, month: number, day: number,
+  hour: number, minute: number,
+  lat: number, lon: number
+): Promise<{ planets: PlanetPosition[]; zodiac: string }> {
+  const fallbackSign = getZodiacByDate(month, day)?.name || '双子';
+
+  try {
+    const swisseph = await import('@fusionstrings/swisseph-wasm');
+    // swisseph-wasm 不需要显式初始化，直接调用即可
+
+    // 计算儒略日（UTC）
+    const jd = swisseph.swe_julday(year, month, day, hour + minute / 60, 1);
+
+    const planetIds: [number, string][] = [
+      [0, '太阳'], [1, '月亮'], [2, '水星'], [3, '金星'], [4, '火星']
+    ];
+
+    const planets: PlanetPosition[] = [];
+    for (const [pid, name] of planetIds) {
+      const result = swisseph.swe_calc_ut(jd, pid, 2); // SEFLG_SPEED for retrograde
+      const lon = result.longitude;
+      const retrograde = (result.longitudeSpeed || 0) < 0;
+      const { sign, degree } = signFromLongitude(lon);
+      planets.push({ name, sign, degree, retrograde });
+    }
+
+    return {
+      planets,
+      zodiac: planets[0].sign + '座'
+    };
+  } catch (e) {
+    // swisseph 失败时退回查表法
+    console.warn('swisseph failed, fallback to lookup table:', e);
+    return {
+      planets: [{ name: '太阳', sign: fallbackSign, degree: 0, retrograde: false }],
+      zodiac: fallbackSign + '座'
+    };
+  }
 }
 
 export function getChineseZodiac(year: number): string {

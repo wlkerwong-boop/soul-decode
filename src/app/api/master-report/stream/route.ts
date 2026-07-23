@@ -2,6 +2,7 @@
 import { NextRequest } from 'next/server';
 import { getBirthCoords } from '@/data/cities';
 import { calculateBodygraph } from '@/lib/hd';
+import { calcPlanetPositions } from '@/lib/astrology';
 
 function calcBazi(y: number, m: number, d: number, h: number) {
   const { Solar } = require('lunar-javascript');
@@ -31,13 +32,28 @@ function calcZiwei(y: number, m: number, d: number, h: number, gender: string) {
     const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const r = iztro.astro.bySolar(ds, ti, gender, true, 'zh-CN');
     if (!r?.palaces) return null;
+
+    // Collect 四化 (stars with mutagen: 禄/权/科/忌)
+    const sihua: { star: string; mutagen: string; palace: string }[] = [];
+    for (const p of r.palaces) {
+      for (const s of [...(p.majorStars||[]), ...(p.minorStars||[]), ...(p.adjectiveStars||[])]) {
+        if (s.mutagen) sihua.push({ star: s.name, mutagen: s.mutagen, palace: p.name });
+      }
+    }
+
     return {
       palaces: r.palaces.map((p: any) => ({
         name: p.name,
         stars: [...((p.majorStars||[]).map((s:any) => typeof s==='object'?s.name:s)),
-                 ...((p.minorStars||[]).map((s:any) => typeof s==='object'?s.name:s))].filter(Boolean),
+                 ...((p.minorStars||[]).map((s:any) => typeof s==='object'?s.name:s)),
+                 ...((p.adjectiveStars||[]).map((s:any) => typeof s==='object'?s.name:s))].filter(Boolean),
       })),
-      horoscope: r.horoscope ? { mingZhu: r.horoscope.mingZhu, shenZhu: r.horoscope.shenZhu, wuXing: r.horoscope.wuXing } : null,
+      horoscope: {
+        mingZhu: r.soul || null,
+        shenZhu: r.body || null,
+        wuXing: r.fiveElementsClass || null,
+      },
+      sihua,
     };
   } catch { return null; }
 }
@@ -83,19 +99,20 @@ export async function POST(req: NextRequest) {
   const baziResult = calcBazi(y, m, d, h);
   const hdResult = await calcHD(y, m, d, h, mi, tz, lat, lon);
   const ziweiResult = calcZiwei(y, m, d, h, g);
-  const zodiacResult = calcZodiac(y, m, d);
+  const astrologyResult = await calcPlanetPositions(y, m, d, h, mi, lat, lon);
   const wuyunResult = calcWuyunLiuqi(y);
   const liunianResult = calcLiuNian(y);
 
-  // 构建提示词（精简版，流式不需完整格式约束——交给 system message）
+  // 构建提示词
+  const planetSummary = astrologyResult.planets.map((p: any) => `${p.name}${p.sign}座${p.degree}°${p.retrograde ? '（逆行）' : ''}`).join('，');
   const userPrompt = `请为一位${age}岁的${g}性出具一份七系统融合人生总览报告。用户未提供姓名，报告中称呼统一用"你"直接对话，禁止编造任何名字（如"星月""小明"等）。
 
 数据：
 八字四柱：${baziResult.pillars.join(' ')}
 日主：${baziResult.dayMaster}
 ${hdResult ? `人类图：${hdResult.type} ${hdResult.profile}，${hdResult.authority}，策略：${hdResult.strategy}，定义中心：${(hdResult.definedCenters||[]).join('、')}，通道：${(hdResult.channels||[]).join('、')}` : '人类图：数据暂缺'}
-${ziweiResult ? `紫微斗数：${ziweiResult.palaces.map((p:any)=>`${p.name}宫${p.stars.slice(0,4).join('、')}`).join('，')}` : '紫微：数据暂缺'}
-星座：${zodiacResult.zodiac}
+${ziweiResult ? `紫微斗数：${ziweiResult.palaces.map((p:any)=>`${p.name}宫${p.stars.slice(0,4).join('、')}`).join('，')}。四化：${(ziweiResult.sihua||[]).map((s:any)=>`${s.star}化${s.mutagen}（${s.palace}宫）`).join('、')}` : '紫微：数据暂缺'}
+星座：${astrologyResult.zodiac}（${planetSummary}）
 ${wuyunResult.description}
 流年：${liunianResult}`;
 
@@ -104,12 +121,20 @@ ${wuyunResult.description}
 【核心原则】
 八字四柱、人类图、紫微斗数的基础数据已由前端图表展示，你不需重复输出基础数据表格。你的价值在于**分析、洞察、交叉印证**，而非搬运数据。
 
+【措辞规范 — 必须遵守】
+1. 人类图类型与角色必须区分：类型是类型（如投射者/显示者/生产者），角色是人生角色（如3/6爻），禁止说"类型是3/6爻"。
+2. 投射者核心需求："被认出/被看见"是第一需求，比"等待被邀请"更根本。投射者是别人的镜子，天生为别人看清方向。
+3. Splenic（脾脏直觉）权威特性：直觉"只响一次、不说第二遍"，转瞬即逝，解读时须强调这一特性。
+4. 3/6爻人生角色：约30岁前是"3爻试验期"（试错、碰壁、从中学习），约30岁后转入"6爻引路期"（超然、客观、成为典范）。
+5. 禁止编造无依据的精确数字断言（如"三次蜕变期分别在20岁、32岁、44岁"），改用大运/流年有据可依的表述。
+6. 职业建议禁止列通用职业列表（"医生、律师、金融分析师..."），应紧扣类型×通道给出坐标式表述。
+
 【报告结构】
-开头段：直接称呼用户，融合核心命盘简述，200字以内自然引入
+开头段：直接称呼"你"，融合核心命盘简述，200字以内自然引入。用户未提供姓名，禁止编造名字。
 
 以下7章，每章300-600字。禁止分段罗列，必须交叉印证：
 第一章 天性禀赋与人格底色（八字日主+人类图类型+星座交叉印证）
-第二章 事业天赋与财富格局（含2026流年运势要点）
+第二章 事业天赋与财富格局（含当年流年运势要点）
 第三章 人际关系与情感模式
 第四章 学习成长与灵性发展
 第五章 健康体质与养生策略（先天体质+五运六气+具体养生方案）
@@ -122,7 +147,7 @@ ${wuyunResult.description}
 3. 健康养生表：调理维度/具体建议两列
 
 收尾：点睛金句（加粗）
-末尾标注：*本报告基于八字（lunar-javascript）、人类图（Jovian认证v6引擎）、占星（查表法）、紫微斗数（iztro引擎）、五运六气（天干化运/地支化气）七系统融合分析生成。*`;
+末尾标注：*本报告基于八字（lunar-javascript）、人类图（Jovian认证v6引擎）、占星（swisseph精算）、紫微斗数（iztro引擎）、五运六气（天干化运/地支化气）七系统融合分析生成。*`;
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
   const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
@@ -197,8 +222,8 @@ ${wuyunResult.description}
           done: true,
           bazi: baziResult,
           hd: hdResult ? { type: hdResult.type, profile: hdResult.profile, authority: hdResult.authority, definedCenters: hdResult.definedCenters, channels: hdResult.channels, activatedGates: hdResult.activatedGates } : null,
-          ziwei: ziweiResult ? { palaces: ziweiResult.palaces, horoscope: ziweiResult.horoscope } : null,
-          zodiac: zodiacResult,
+          ziwei: ziweiResult ? { palaces: ziweiResult.palaces, horoscope: ziweiResult.horoscope, sihua: ziweiResult.sihua } : null,
+          zodiac: astrologyResult,
           wuyun: wuyunResult,
           liunian: liunianResult,
         })}\n\n`));
