@@ -77,7 +77,7 @@ function buildPrompt(
 - 最后给出一句非常点睛的话，让人读完后反复回味
 
 【用户数据】
-- 出生：${y}年${m}月${d}日 ${String(h).padStart(2,'0')}时${tz && tz !== 'Asia/Shanghai' ? '（原出生地时区：'+tz+'，已转换为中国标准时间）' : ''}（当前日期：${now.getFullYear()}年${now.getMonth()+1}月，当前${age}岁）
+- 出生：${y}年${m}月${d}日 ${String(h).padStart(2,'0')}时${tz && tz !== 'Asia/Shanghai' ? '（出生地当地时间，时区：'+tz+'）' : ''}（当前日期：${now.getFullYear()}年${now.getMonth()+1}月，当前${age}岁）
 - 八字：${bazi.pillars.join(' ')}，日主${bazi.dayMaster}
 - 五行：${elements}
     - 人类图：${hd.type}（类型），人生角色${hd.profile}，内在权威${hd.authority}
@@ -129,36 +129,9 @@ export async function POST(request: NextRequest) {
     const y = parseInt(year), m = parseInt(month), d = parseInt(day), h = hour !== undefined ? parseInt(hour) : 12;
     const tz = body.timezone || 'Asia/Shanghai';
 
-    // 时区转换：将当地时间转为中国时间（八字需用中国时间）
-    const offsetMap: Record<string, number> = {
-      'America/Los_Angeles': -7, 'America/New_York': -4,
-      'Europe/London': 0, 'Europe/Paris': 1,
-      'Australia/Sydney': 10, 'Asia/Tokyo': 9, 'Asia/Shanghai': 8,
-    };
-    const localOffset = offsetMap[tz] ?? 8;
-    const chinaOffset = 8;
-    const hourDiff = chinaOffset - localOffset;
-
-    let baziH = h;
-    let baziD = d;
-    let baziM = m;
-    let baziY = y;
-
-    // 如果小时差不为0，需要调整日期
-    if (hourDiff !== 0) {
-      baziH = h + hourDiff;
-      if (baziH >= 24) { baziH -= 24; baziD += 1; }
-      else if (baziH < 0) { baziH += 24; baziD -= 1; }
-      // 处理跨月跨年
-      if (baziD < 1) { baziM -= 1; if (baziM < 1) { baziM = 12; baziY -= 1; } baziD = new Date(baziY, baziM, 0).getDate(); }
-      else {
-        const maxD = new Date(baziY, baziM, 0).getDate();
-        if (baziD > maxD) { baziD = 1; baziM += 1; if (baziM > 12) { baziM = 1; baziY += 1; } }
-      }
-    }
-
-    // 八字用转换后的中国时间
-    const bazi = calculateBaziLocal(baziY, baziM, baziD, baziH);
+    // 八字与 stream 路由统一口径：出生地当地时间直排，不再转北京时间
+    // （金标准：一然 洛杉矶 19:45 当地时间 → 戌时，日柱不换日 → 乙未/辛巳/辛亥/戊戌）
+    const bazi = calculateBaziLocal(y, m, d, h);
     const zodiac = getZodiacSign(m, d); // 星座用人原本地日期
 
     // 坐标：城市精确值 → 省/国兜底（共享表，见 src/data/cities.ts）
@@ -171,7 +144,7 @@ export async function POST(request: NextRequest) {
     // HD 引擎失败时降级：提示词用占位对象、响应 humanDesign 置 null，不再 500
     const hdSafe = hdResult || { type: '数据暂缺', profile: '—', authority: '—', strategy: '—', signature: '—', notSelfTheme: '—', definedCenters: [], channels: [] };
 
-    const prompt = buildPrompt(baziY, baziM, baziD, baziH, bazi, hdSafe, zodiac, tz);
+    const prompt = buildPrompt(y, m, d, h, bazi, hdSafe, zodiac, tz);
 
     // 调用DeepSeek
     const apiKey = process.env.DEEPSEEK_API_KEY;
@@ -195,12 +168,20 @@ export async function POST(request: NextRequest) {
             temperature: 0.7,
           }),
         });
-        const data = await res.json();
-        fusion = data.choices?.[0]?.message?.content || '';
-        aiUsed = true;
+        // 与 stream 路由对齐：非 2xx 显式报错并记日志，不再静默吞掉变成"暂不可用"
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error(`DeepSeek API error: ${res.status} ${errText.slice(0, 300)}`);
+        } else {
+          const data = await res.json();
+          fusion = data.choices?.[0]?.message?.content || '';
+          aiUsed = true;
+        }
       } catch (e: any) {
         console.error('DeepSeek call failed:', e.message);
       }
+    } else {
+      console.error('fusion 路由：DEEPSEEK_API_KEY 未配置（需与 stream 路由同一份 .env）');
     }
 
     return NextResponse.json({
