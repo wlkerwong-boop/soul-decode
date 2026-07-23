@@ -34,12 +34,27 @@ function calcZiwei(y: number, m: number, d: number, h: number, gender: string) {
     const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const r = iztro.astro.bySolar(ds, ti, gender, true, 'zh-CN');
     if (!r?.palaces) return null;
+
+    // 重排 palaces 为命宫/兄弟/... 标准顺序
+    const STD_ORDER = ['命宫','兄弟','夫妻','子女','财帛','疾厄','迁移','交友','官禄','田宅','福德','父母'];
+    const map = new Map<string, any>();
+    for (const p of r.palaces) {
+      // iztro 部分版本宫名以"宫"结尾（如"命宫宫"），标准化
+      const key = p.name === '命宫宫' ? '命宫' : p.name;
+      map.set(key, p);
+    }
+    if (!map.has('交友') && map.has('仆役')) map.set('交友', map.get('仆役'));
+
     return {
-      palaces: r.palaces.map((p: any) => ({
-        name: p.name,
-        stars: [...((p.majorStars||[]).map((s:any) => typeof s==='object'?s.name:s)),
-                 ...((p.minorStars||[]).map((s:any) => typeof s==='object'?s.name:s))].filter(Boolean),
-      })),
+      palaces: STD_ORDER.map(name => {
+        const p = map.get(name);
+        if (!p) return { name, stars: [] };
+        return {
+          name,
+          stars: [...((p.majorStars||[]).map((s:any) => typeof s==='object'?s.name:s)),
+                  ...((p.minorStars||[]).map((s:any) => typeof s==='object'?s.name:s))].filter(Boolean),
+        };
+      }),
       horoscope: r.horoscope || null,
     };
   } catch { return null; }

@@ -33,6 +33,29 @@ function calcZiwei(y: number, m: number, d: number, h: number, gender: string) {
     const r = iztro.astro.bySolar(ds, ti, gender, true, 'zh-CN');
     if (!r?.palaces) return null;
 
+    // iztro 返回的 palaces 不以命宫为起点，需按标准顺序重排
+    const STD_ORDER = ['命宫','兄弟','夫妻','子女','财帛','疾厄','迁移','交友','官禄','田宅','福德','父母'];
+    function reorderPalaces(rawPalaces: any[]) {
+      const map = new Map<string, any>();
+      for (const p of rawPalaces) {
+        // iztro 部分版本宫名以"宫"结尾（如"命宫宫"），标准化去重
+        const key = p.name === '命宫宫' ? '命宫' : p.name;
+        map.set(key, p);
+      }
+      // "仆役"是 iztro 对"交友"的命名，做映射
+      if (!map.has('交友') && map.has('仆役')) map.set('交友', map.get('仆役'));
+      return STD_ORDER.map(name => {
+        const p = map.get(name);
+        if (!p) return { name, stars: [] };
+        return {
+          name,
+          stars: [...((p.majorStars||[]).map((s:any) => typeof s==='object'?s.name:s)),
+                  ...((p.minorStars||[]).map((s:any) => typeof s==='object'?s.name:s)),
+                  ...((p.adjectiveStars||[]).map((s:any) => typeof s==='object'?s.name:s))].filter(Boolean),
+        };
+      });
+    }
+
     // Collect 四化 (stars with mutagen: 禄/权/科/忌)
     const sihua: { star: string; mutagen: string; palace: string }[] = [];
     for (const p of r.palaces) {
@@ -42,12 +65,7 @@ function calcZiwei(y: number, m: number, d: number, h: number, gender: string) {
     }
 
     return {
-      palaces: r.palaces.map((p: any) => ({
-        name: p.name,
-        stars: [...((p.majorStars||[]).map((s:any) => typeof s==='object'?s.name:s)),
-                 ...((p.minorStars||[]).map((s:any) => typeof s==='object'?s.name:s)),
-                 ...((p.adjectiveStars||[]).map((s:any) => typeof s==='object'?s.name:s))].filter(Boolean),
-      })),
+      palaces: reorderPalaces(r.palaces),
       horoscope: {
         mingZhu: r.soul || null,
         shenZhu: r.body || null,
