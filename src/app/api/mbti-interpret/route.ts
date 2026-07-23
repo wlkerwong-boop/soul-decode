@@ -68,6 +68,7 @@ export async function POST(req: NextRequest) {
     };
 
     if (!config.apiKey) {
+      console.error('mbti-interpret: DEEPSEEK_API_KEY 未配置');
       return NextResponse.json({ error: 'API key 未配置' }, { status: 500 });
     }
 
@@ -90,6 +91,7 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const error = await response.text();
+      console.error(`DeepSeek API error: ${response.status} ${error.slice(0, 300)}`);
       return NextResponse.json({ error: `AI API 错误: ${error}` }, { status: 502 });
     }
 

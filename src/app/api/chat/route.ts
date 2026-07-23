@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
 
     const config = getConfig();
     if (!config.apiKey) {
+      console.error('chat: DEEPSEEK_API_KEY 未配置');
       return new Response(JSON.stringify({ error: 'API key 未配置' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
@@ -92,6 +93,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => 'Unknown error');
+      console.error(`DeepSeek API error: ${response.status} ${errorText.slice(0, 300)}`);
       return new Response(JSON.stringify({ error: `AI API 错误 (${response.status})` }), {
         status: 502,
         headers: { 'Content-Type': 'application/json' },

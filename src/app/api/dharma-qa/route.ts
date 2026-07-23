@@ -100,6 +100,7 @@ export async function POST(request: NextRequest) {
 
     const config = getConfig();
     if (!config.apiKey) {
+      console.error('dharma-qa: DEEPSEEK_API_KEY 未配置');
       return new Response(JSON.stringify({ error: 'API key 未配置' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
@@ -175,6 +176,8 @@ export async function POST(request: NextRequest) {
     });
 
     if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      console.error(`DeepSeek API error: ${response.status} ${errText.slice(0, 300)}`);
       return new Response(JSON.stringify({ error: '回答生成失败' }), {
         status: 502,
         headers: { 'Content-Type': 'application/json' },

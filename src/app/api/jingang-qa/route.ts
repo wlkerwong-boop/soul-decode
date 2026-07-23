@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
 
     const config = getConfig();
     if (!config.apiKey) {
+      console.error('jingang-qa: DEEPSEEK_API_KEY 未配置');
       return Response.json({ error: 'API key 未配置' }, { status: 500 });
     }
 
@@ -109,6 +110,8 @@ export async function POST(request: NextRequest) {
     });
 
     if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      console.error(`DeepSeek API error: ${response.status} ${errText.slice(0, 300)}`);
       return Response.json({ error: '回答生成失败' }, { status: 502 });
     }
 

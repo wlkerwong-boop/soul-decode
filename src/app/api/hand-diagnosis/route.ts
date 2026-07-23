@@ -33,7 +33,10 @@ ${userDesc}
 请用中文回答，语气温和专业。篇幅500-1000字。`;
 
     const apiKey = process.env.DEEPSEEK_API_KEY;
-    if (!apiKey) return Response.json({ diagnosis: 'AI诊断功能暂不可用' });
+    if (!apiKey) {
+      console.error('hand-diagnosis: DEEPSEEK_API_KEY 未配置');
+      return Response.json({ diagnosis: 'AI诊断功能暂不可用' });
+    }
 
     const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
     const model = process.env.AI_MODEL || 'deepseek-chat';
@@ -51,6 +54,12 @@ ${userDesc}
         temperature: 0.5,
       }),
     });
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '');
+      console.error(`DeepSeek API error: ${res.status} ${errText.slice(0, 300)}`);
+      return Response.json({ diagnosis: 'AI诊断功能暂不可用' });
+    }
 
     const data = await res.json();
     const diagnosis = data.choices?.[0]?.message?.content || '分析生成失败';

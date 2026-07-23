@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
 
 要求：温暖、有用、不恐吓，结合属相特点。总字数200-300字。`;
 
+    if (!config.apiKey) console.error('daily-zodiac: DEEPSEEK_API_KEY 未配置');
     const response = await fetch(`${config.baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
@@ -58,6 +59,8 @@ export async function POST(request: NextRequest) {
     });
 
     if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      console.error(`DeepSeek API error: ${response.status} ${errText.slice(0, 300)}`);
       return new Response(JSON.stringify({ error: '运势生成失败' }), {
         status: 502,
         headers: { 'Content-Type': 'application/json' },

@@ -79,10 +79,17 @@ export async function POST(request: NextRequest) {
             temperature: 0.7,
           }),
         });
-        const data = await res.json();
-        interpretation = data.choices?.[0]?.message?.content || '';
-        aiUsed = true;
+        if (!res.ok) {
+          const errText = await res.text().catch(() => '');
+          console.error(`DeepSeek API error: ${res.status} ${errText.slice(0, 300)}`);
+        } else {
+          const data = await res.json();
+          interpretation = data.choices?.[0]?.message?.content || '';
+          aiUsed = true;
+        }
       } catch {}
+    } else {
+      console.error('hd-interpret: DEEPSEEK_API_KEY 未配置');
     }
 
     if (!interpretation) {

@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
 
     const config = getConfig();
     if (!config.apiKey) {
+      console.error('compatibility-decoded: DEEPSEEK_API_KEY 未配置');
       return new Response(JSON.stringify({ error: 'API key 未配置' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
@@ -101,6 +102,8 @@ ${person2.pillars ? `八字四柱：${person2.pillars.filter((p: string) => p !=
     });
 
     if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      console.error(`DeepSeek API error: ${response.status} ${errText.slice(0, 300)}`);
       return new Response(JSON.stringify({ error: '合盘分析失败' }), {
         status: 502,
         headers: { 'Content-Type': 'application/json' },
