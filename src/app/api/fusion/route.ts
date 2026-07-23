@@ -168,8 +168,10 @@ export async function POST(request: NextRequest) {
     const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
     const hdResult = await calculateBodygraph(ds, ts, tz, lat, lon);
+    // HD 引擎失败时降级：提示词用占位对象、响应 humanDesign 置 null，不再 500
+    const hdSafe = hdResult || { type: '数据暂缺', profile: '—', authority: '—', strategy: '—', signature: '—', notSelfTheme: '—', definedCenters: [], channels: [] };
 
-    const prompt = buildPrompt(baziY, baziM, baziD, baziH, bazi, hdResult, zodiac, tz);
+    const prompt = buildPrompt(baziY, baziM, baziD, baziH, bazi, hdSafe, zodiac, tz);
 
     // 调用DeepSeek
     const apiKey = process.env.DEEPSEEK_API_KEY;
@@ -204,13 +206,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       bazi,
-      humanDesign: {
+      humanDesign: hdResult ? {
         type: hdResult.type,
         profile: hdResult.profile,
         authority: hdResult.authority,
         definedCenters: hdResult.definedCenters,
         channels: hdResult.channels,
-      },
+      } : null,
       zodiac,
       fusion: fusion || '（AI报告生成暂不可用，请稍后再试或联系管理员配置DeepSeek API Key）',
       aiGenerated: aiUsed,
