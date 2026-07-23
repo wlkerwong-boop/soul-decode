@@ -1003,6 +1003,30 @@ section {
     height: auto !important;
     page-break-inside: avoid;
   }
+  /* SVG 打印适配：深色背景→浅色 */
+  .report-content svg rect[rx] {
+    fill: #fafafa !important;
+    stroke: #ccc !important;
+  }
+  .report-content svg text {
+    fill: #333 !important;
+  }
+  .report-content svg text[fill*="rgba"] {
+    fill: #555 !important;
+  }
+  /* 保留金色强调 */
+  .report-content svg text[fill="#c9a84c"],
+  .report-content svg text[fill="#d4a84c"] {
+    fill: #8b6914 !important;
+  }
+  .report-content svg path[stroke="#c9a84c"],
+  .report-content svg path[stroke="#d4a84c"] {
+    stroke: #8b6914 !important;
+  }
+  .report-content svg path[fill*="rgba(201,168,76"] {
+    fill: #f5e6c8 !important;
+    stroke: #8b6914 !important;
+  }
   .report-content section {
     page-break-inside: avoid;
   }

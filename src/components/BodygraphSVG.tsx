@@ -6,6 +6,7 @@ interface BodygraphSVGProps {
   activatedGates: number[];
   channels: string[];
   centerDefinition: Record<string, boolean>;
+  print?: boolean;
 }
 
 const C: Record<string, {x:number,y:number,shape:string,w:number,h:number}> = {
@@ -85,36 +86,66 @@ function curve(x1:number,y1:number,x2:number,y2:number,act:boolean) {
   return `M${x1},${y1} C${x1+mx},${y1-my} ${x2-mx},${y2+my} ${x2},${y2}`;
 }
 
-export default function BodygraphSVG({definedCenters,activatedGates,channels}:BodygraphSVGProps) {
+export default function BodygraphSVG({definedCenters,activatedGates,channels,print}:BodygraphSVGProps) {
   const defSet=new Set(definedCenters), chSet=new Set(channels);
+  const isPrint = print || false;
+
+  // Print mode colors: myBodyGraph classic style (white bg, black outlines, brown fills)
+  const colors = isPrint ? {
+    bg: 'white',
+    inactiveChannel: 'rgba(0,0,0,0.08)',
+    activeChannelGlow: '#333',
+    activeChannelLine: '#555',
+    definedCenterFill: '#e8d5b0',
+    definedCenterStroke: '#333',
+    undefinedCenterFill: '#f5f5f5',
+    undefinedCenterStroke: '#999',
+    gateText: '#333',
+    centerNameDefined: '#222',
+    centerNameUndefined: '#888',
+  } : {
+    bg: 'rgba(0,0,0,0)',
+    inactiveChannel: 'rgba(255,255,255,0.04)',
+    activeChannelGlow: '#c9a84c',
+    activeChannelLine: 'rgba(201,168,76,0.5)',
+    definedCenterFill: 'rgba(201,168,76,0.25)',
+    definedCenterStroke: '#d4a84c',
+    undefinedCenterFill: 'rgba(255,255,255,0.05)',
+    undefinedCenterStroke: 'rgba(255,255,255,0.12)',
+    gateText: '#d4a84c',
+    centerNameDefined: '#c9a84c',
+    centerNameUndefined: 'rgba(255,255,255,0.3)',
+  };
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg" className="w-full max-w-md mx-auto">
+      {isPrint ? null : (
       <defs>
         <filter id="g"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         <radialGradient id="bg"><stop offset="0%" stopColor="rgba(201,168,76,0.04)"/><stop offset="100%" stopColor="rgba(0,0,0,0)"/></radialGradient>
         <radialGradient id="dg"><stop offset="0%" stopColor="rgba(201,168,76,0.35)"/><stop offset="100%" stopColor="rgba(201,168,76,0.15)"/></radialGradient>
       </defs>
-      <circle cx={W/2} cy={H/2} r={160} fill="url(#bg)"/>
+      )}
+      <circle cx={W/2} cy={H/2} r={160} fill={isPrint ? 'none' : 'url(#bg)'}/>
 
       {/* Inactive channels */}
       {Object.entries(CH).map(([k,[c1,c2]])=>chSet.has(k)?null:(
-        <path key={'ic-'+k} d={curve(cc(C[c1]).x,cc(C[c1]).y,cc(C[c2]).x,cc(C[c2]).y,false)} fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="4,4" strokeLinecap="round"/>
+        <path key={'ic-'+k} d={curve(cc(C[c1]).x,cc(C[c1]).y,cc(C[c2]).x,cc(C[c2]).y,false)} fill="none" stroke={colors.inactiveChannel} strokeWidth="1" strokeDasharray="4,4" strokeLinecap="round"/>
       ))}
 
       {/* Active channels - glow + line */}
       {channels.map(k=>{const e=CH[k];if(!e)return null;const p=cc(C[e[0]]),q=cc(C[e[1]]);return(
-        <path key={'ac-'+k} d={curve(p.x,p.y,q.x,q.y,true)} fill="none" stroke="#c9a84c" strokeWidth="3" filter="url(#g)" strokeLinecap="round"/>
+        <path key={'ac-'+k} d={curve(p.x,p.y,q.x,q.y,true)} fill="none" stroke={colors.activeChannelGlow} strokeWidth="3" filter={isPrint?undefined:"url(#g)"} strokeLinecap="round"/>
       )})}
       {channels.map(k=>{const e=CH[k];if(!e)return null;const p=cc(C[e[0]]),q=cc(C[e[1]]);return(
-        <path key={'acl-'+k} d={curve(p.x,p.y,q.x,q.y,true)} fill="none" stroke="rgba(201,168,76,0.5)" strokeWidth="1.5" strokeLinecap="round"/>
+        <path key={'acl-'+k} d={curve(p.x,p.y,q.x,q.y,true)} fill="none" stroke={colors.activeChannelLine} strokeWidth="1.5" strokeLinecap="round"/>
       )})}
 
       {/* Center shapes */}
       {Object.entries(C).map(([n,p])=>{
         const def=defSet.has(n);
-        const fill=def?'rgba(201,168,76,0.25)':'rgba(255,255,255,0.05)';
-        const str=def?'#d4a84c':'rgba(255,255,255,0.12)';
+        const fill=def?colors.definedCenterFill:colors.undefinedCenterFill;
+        const str=def?colors.definedCenterStroke:colors.undefinedCenterStroke;
         const sw=def?2.5:1;
         let d='';
         if(p.shape==='triangle') d=`M${p.x},${p.y+p.h}L${p.x-p.w/2},${p.y}L${p.x+p.w/2},${p.y}Z`;
@@ -126,12 +157,12 @@ export default function BodygraphSVG({definedCenters,activatedGates,channels}:Bo
 
       {/* Gate numbers */}
       {activatedGates.map(g=>{const ct=GC[g],cp=C[ct],gp=GP[g];if(!ct||!cp||!gp)return null;return(
-        <text key={'g'+g} x={cp.x+gp.dx} y={cp.y+cp.h/2+gp.dy} textAnchor="middle" fill="#d4a84c" fontSize="10" fontWeight="bold" fontFamily="sans-serif">{g}</text>
+        <text key={'g'+g} x={cp.x+gp.dx} y={cp.y+cp.h/2+gp.dy} textAnchor="middle" fill={colors.gateText} fontSize="10" fontWeight="bold" fontFamily="sans-serif">{g}</text>
       )})}
 
       {/* Center names */}
       {Object.entries(C).map(([n,p])=>(
-        <text key={'lb-'+n} x={p.x} y={p.y+p.h/2+3} textAnchor="middle" fill={defSet.has(n)?'#c9a84c':'rgba(255,255,255,0.3)'} fontSize="9" fontWeight={defSet.has(n)?'bold':'normal'} fontFamily="sans-serif">{NAMES[n]||n}</text>
+        <text key={'lb-'+n} x={p.x} y={p.y+p.h/2+3} textAnchor="middle" fill={defSet.has(n)?colors.centerNameDefined:colors.centerNameUndefined} fontSize="9" fontWeight={defSet.has(n)?'bold':'normal'} fontFamily="sans-serif">{NAMES[n]||n}</text>
       ))}
     </svg>
   );

@@ -9,6 +9,7 @@ interface Palace {
 
 interface ZiWeiChartProps {
   palaces: Palace[];
+  horoscope?: { mingZhu?: string; shenZhu?: string; wuXing?: string } | null;
 }
 
 // 紫微斗数十二宫位（顺时针排列，从命宫开始）
@@ -34,7 +35,7 @@ const GRID: { row: number; col: number }[] = [
   { row: 2, col: 3 }, // 父母
 ];
 
-export default function ZiWeiChart({ palaces }: ZiWeiChartProps) {
+export default function ZiWeiChart({ palaces, horoscope }: ZiWeiChartProps) {
   const W = 400, H = 340;
   const cellW = W / 4, cellH = H / 4;
   const pad = 3;
@@ -56,9 +57,34 @@ export default function ZiWeiChart({ palaces }: ZiWeiChartProps) {
 
       <rect x="0" y="0" width={W} height={H} rx="8" fill="rgba(20,20,25,0.6)"/>
 
-      {/* 中间装饰文字 */}
-      <text x={W/2} y={H/2 - 8} textAnchor="middle" fill="rgba(201,168,76,0.15)" fontSize="18" fontWeight="bold" fontFamily="'Noto Serif SC',serif">紫微斗数</text>
-      <text x={W/2} y={H/2 + 10} textAnchor="middle" fill="rgba(255,255,255,0.08)" fontSize="10" fontFamily="'Noto Serif SC',serif">Zi Wei Dou Shu</text>
+      {/* 中间信息区 — 命主/身主/五行局 */}
+      {horoscope ? (
+        <>
+          <text x={W/2} y={H/2 - 14} textAnchor="middle" fill="#c9a84c" fontSize="12" fontWeight="bold" fontFamily="'Noto Serif SC',serif">
+            {horoscope.mingZhu || horoscope.shenZhu || horoscope.wuXing ? '命盘信息' : ''}
+          </text>
+          {horoscope.mingZhu && (
+            <text x={W/2} y={H/2 + 2} textAnchor="middle" fill="rgba(255,255,255,0.6)" fontSize="9" fontFamily="'Noto Serif SC',serif">
+              命主：{horoscope.mingZhu}
+            </text>
+          )}
+          {horoscope.shenZhu && (
+            <text x={W/2} y={H/2 + 14} textAnchor="middle" fill="rgba(255,255,255,0.6)" fontSize="9" fontFamily="'Noto Serif SC',serif">
+              身主：{horoscope.shenZhu}
+            </text>
+          )}
+          {horoscope.wuXing && (
+            <text x={W/2} y={H/2 + 26} textAnchor="middle" fill="rgba(255,255,255,0.6)" fontSize="9" fontFamily="'Noto Serif SC',serif">
+              五行局：{horoscope.wuXing}
+            </text>
+          )}
+        </>
+      ) : (
+        <>
+          <text x={W/2} y={H/2 - 8} textAnchor="middle" fill="rgba(201,168,76,0.15)" fontSize="18" fontWeight="bold" fontFamily="'Noto Serif SC',serif">紫微斗数</text>
+          <text x={W/2} y={H/2 + 10} textAnchor="middle" fill="rgba(255,255,255,0.08)" fontSize="10" fontFamily="'Noto Serif SC',serif">Zi Wei Dou Shu</text>
+        </>
+      )}
 
       {/* 宫位网格 */}
       {data.map((p, i) => {

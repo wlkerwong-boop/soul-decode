@@ -37,6 +37,7 @@ function calcZiwei(y: number, m: number, d: number, h: number, gender: string) {
         stars: [...((p.majorStars||[]).map((s:any) => typeof s==='object'?s.name:s)),
                  ...((p.minorStars||[]).map((s:any) => typeof s==='object'?s.name:s))].filter(Boolean),
       })),
+      horoscope: r.horoscope ? { mingZhu: r.horoscope.mingZhu, shenZhu: r.horoscope.shenZhu, wuXing: r.horoscope.wuXing } : null,
     };
   } catch { return null; }
 }
@@ -87,7 +88,7 @@ export async function POST(req: NextRequest) {
   const liunianResult = calcLiuNian(y);
 
   // 构建提示词（精简版，流式不需完整格式约束——交给 system message）
-  const userPrompt = `请为一位${age}岁的${g}性出具一份七系统融合人生总览报告。
+  const userPrompt = `请为一位${age}岁的${g}性出具一份七系统融合人生总览报告。用户未提供姓名，报告中称呼统一用"你"直接对话，禁止编造任何名字（如"星月""小明"等）。
 
 数据：
 八字四柱：${baziResult.pillars.join(' ')}
@@ -196,7 +197,7 @@ ${wuyunResult.description}
           done: true,
           bazi: baziResult,
           hd: hdResult ? { type: hdResult.type, profile: hdResult.profile, authority: hdResult.authority, definedCenters: hdResult.definedCenters, channels: hdResult.channels, activatedGates: hdResult.activatedGates } : null,
-          ziwei: ziweiResult ? { palaces: ziweiResult.palaces } : null,
+          ziwei: ziweiResult ? { palaces: ziweiResult.palaces, horoscope: ziweiResult.horoscope } : null,
           zodiac: zodiacResult,
           wuyun: wuyunResult,
           liunian: liunianResult,

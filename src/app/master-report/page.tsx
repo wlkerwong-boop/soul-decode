@@ -278,7 +278,14 @@ export default function MasterPage() {
             {data.hd && (
               <div className="card-jade p-5">
                 <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">🧬 人类图</h3>
-                <BodygraphSVG definedCenters={data.hd.definedCenters||[]} activatedGates={data.hd.activatedGates||[]} channels={data.hd.channels||[]} centerDefinition={{}} />
+                {/* Screen version */}
+                <div className="print-hidden">
+                  <BodygraphSVG definedCenters={data.hd.definedCenters||[]} activatedGates={data.hd.activatedGates||[]} channels={data.hd.channels||[]} centerDefinition={{}} />
+                </div>
+                {/* Print version: myBodyGraph classic style */}
+                <div className="print-only">
+                  <BodygraphSVG print={true} definedCenters={data.hd.definedCenters||[]} activatedGates={data.hd.activatedGates||[]} channels={data.hd.channels||[]} centerDefinition={{}} />
+                </div>
                 <p className="text-sm text-[var(--text-secondary)] mt-3 text-center">{data.hd.type} · {data.hd.profile} · {data.hd.authority}</p>
               </div>
             )}
@@ -291,7 +298,7 @@ export default function MasterPage() {
             {data.ziwei && (
               <div className="card-jade p-5">
                 <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">⭐ 紫微斗数</h3>
-                <ZiWeiChart palaces={data.ziwei.palaces||[]} />
+                <ZiWeiChart palaces={data.ziwei.palaces||[]} horoscope={data.ziwei.horoscope||null} />
               </div>
             )}
             {data.wuyun && (

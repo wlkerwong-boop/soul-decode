@@ -49,10 +49,15 @@ export default function BaziChart({ pillars, dayMaster, elements }: BaziChartPro
 
       {/* 底部五行分布 */}
       <text x={W/2} y={H - 12} textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="9">
-        五行：{Object.entries(COLORS).map(([el,cl]) => {
-          const count = elements.filter((e: string) => e === el).length;
-          return count > 0 ? `${el}${count} ` : '';
-        }).join('')}
+        五行：{(() => {
+          const counts = Object.entries(COLORS).map(([el]) => {
+            const count = (elements || []).filter((e: string) => e === el).length;
+            return { el, count };
+          }).filter(c => c.count > 0);
+          return counts.length > 0 
+            ? counts.map(c => `${c.el}${c.count}`).join(' ') 
+            : '(数据暂缺)';
+        })()}
       </text>
     </svg>
   );
