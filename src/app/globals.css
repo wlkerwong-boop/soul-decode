@@ -7,9 +7,6 @@
    Kimi (minimalist elegance)
    ═══════════════════════════════════════════════════ */
 
-/* ── Font Face: Inter (Latin) + Noto Sans SC (CJK) ── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap');
-
 /* ── Design Tokens ── */
 :root {
   /* Colors — Deep Dark Primary Palette */
