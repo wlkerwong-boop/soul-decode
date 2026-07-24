@@ -17,8 +17,11 @@ export default function Home() {
 
   return (
     <div className="gradient-bg min-h-screen">
-      {/* ── Hero ── */}
-      <section className="hero-premium relative pt-20 pb-16 px-4 text-center overflow-hidden">
+      {/* ═══════════════════════════════════════════
+          Hero — 价值主张 + 唯一主按钮
+          ═══════════════════════════════════════════ */}
+      <section className="hero-premium relative pt-16 md:pt-20 pb-12 md:pb-16 px-4 text-center overflow-hidden">
+        {/* 背景：人类图 + 光晕 */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] opacity-[0.04]">
             <BodygraphSVG
@@ -30,135 +33,122 @@ export default function Home() {
           </div>
           <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[var(--color-primary)]/10 blur-[120px] animate-glow-pulse" />
         </div>
+
         <div className="relative max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs mb-6 border border-[var(--color-primary)]/20">
+          {/* 顶部标签 */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs mb-6 border border-[var(--color-primary)]/20 animate-fade-in">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            自我认知测评工具 · 科学成长导航
+            七系统融合 · AI 深度解读
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-4 tracking-tight leading-tight animate-slide-up-1">
-            发现<span className="gradient-text">真实的自己</span>
-            <br />找到成长的方向
+
+          {/* 价值主张标题 */}
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight leading-tight animate-slide-up-1">
+            7 大古老系统
+            <br />
+            <span className="gradient-text">1 份只属于你的报告</span>
           </h1>
-          <p className="text-[var(--text-secondary)] text-lg mb-8 max-w-2xl mx-auto animate-slide-up-2">
-            多维人格分析 · 天赋识别 · 成长路径规划<br />
-            融合心理学与传统文化智慧，用数据看清自己
+
+          {/* 副标题：多系统点名 */}
+          <p className="text-[var(--text-secondary)] text-base md:text-lg mb-3 max-w-xl mx-auto animate-slide-up-2">
+            八字 · 人类图 · 占星 · 紫微斗数 · 五运六气 · MBTI · 中医体质
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up-3">
-            <Link href="/mbti"
-              className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-emerald-600 text-white font-semibold text-lg hover:shadow-lg hover:shadow-[var(--color-primary)]/25 hover:-translate-y-0.5 transition-all">
-              🧠 大五人格测评 →
-            </Link>
-            <button onClick={scrollToForm}
-              className="px-8 py-3.5 rounded-xl border border-[var(--border-color)] text-[var(--text-primary)] font-medium text-lg hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5 transition-all">
-              深度自我认知报告 →
+          <p className="text-[var(--text-tertiary)] text-sm mb-8 max-w-lg mx-auto animate-slide-up-2">
+            七个维度交叉印证，AI 深度融合解读 —— 不是七份报告，是一份完整的你
+          </p>
+
+          {/* 唯一主按钮 */}
+          <div className="animate-slide-up-3">
+            <button
+              onClick={scrollToForm}
+              className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-emerald-600 text-white font-semibold text-lg hover:shadow-lg hover:shadow-[var(--color-primary)]/25 hover:-translate-y-0.5 transition-all"
+            >
+              免费排盘，看看你的出厂配置 →
             </button>
           </div>
-          <div className="flex items-center justify-center gap-6 mt-8 text-sm text-[var(--text-tertiary)] animate-slide-up-4">
-            <span className="flex items-center gap-1.5"><span className="text-green-400">✓</span> 多维度测评</span>
-            <span className="flex items-center gap-1.5"><span className="text-green-400">✓</span> AI智能解读</span>
-            <span className="flex items-center gap-1.5"><span className="text-green-400">✓</span> 个性化成长方案</span>
+
+          {/* 隐私承诺一句话 */}
+          <p className="mt-5 text-xs text-[var(--text-tertiary)] animate-slide-up-4 flex items-center justify-center gap-1.5">
+            <span>🔒</span>
+            出生信息仅用于排盘，绝不外泄
+          </p>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════
+          样例报告节选区（NEW）
+          ═══════════════════════════════════════════ */}
+      <section className="px-4 pb-16 max-w-4xl mx-auto">
+        <div className="text-center mb-8 animate-fade-in">
+          <h2 className="text-xl md:text-2xl font-bold text-[var(--text-primary)] mb-2">报告预览</h2>
+          <p className="text-sm text-[var(--text-tertiary)]">一份让你感到"被看穿"的灵魂级分析</p>
+        </div>
+
+        {/* 报告预览卡片 */}
+        <div className="relative rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] overflow-hidden animate-fade-in-up">
+          {/* 模拟报告内页 */}
+          <div className="p-6 md:p-10 max-w-2xl mx-auto">
+            {/* 报告标题区 */}
+            <div className="text-center mb-8 pb-6 border-b border-[var(--border-color)]">
+              <div className="text-xs text-[var(--text-tertiary)] tracking-widest mb-2">SOULCODE · 灵魂解码</div>
+              <div className="text-lg md:text-xl font-bold gradient-text mb-1">个人生命使命解读报告</div>
+              <div className="text-xs text-[var(--text-tertiary)]">基于七大古老智慧系统 · AI 深度融合</div>
+            </div>
+
+            {/* 报告正文样例 */}
+            <div className="space-y-4 text-sm leading-relaxed">
+              <div className="flex items-start gap-3">
+                <span className="text-[var(--color-primary)] text-lg shrink-0">✦</span>
+                <div>
+                  <span className="font-semibold text-[var(--color-primary-light)]">核心天赋：</span>
+                  <span className="text-[var(--text-secondary)]">你的能量设计中，G 中心（自我方向中心）被定义，这意味着你天生带着明确的人生方向感...</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-[var(--color-gold)] text-lg shrink-0">✦</span>
+                <div>
+                  <span className="font-semibold text-[var(--color-gold-light)]">人生角色：</span>
+                  <span className="text-[var(--text-secondary)]">6/2 角色型——你是一位"人生典范"，前半生在试错中积累智慧，后半生自然散发影响力...</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-[var(--color-primary)] text-lg shrink-0">✦</span>
+                <div>
+                  <span className="font-semibold text-[var(--color-primary-light)]">能量曲线：</span>
+                  <span className="text-[var(--text-secondary)]">你的情绪中心未被定义，意味着你容易吸收他人情绪。报告将绘制你的专属能量波动图...</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-[var(--color-gold)] text-lg shrink-0">✦</span>
+                <div>
+                  <span className="font-semibold text-[var(--color-gold-light)]">决策策略：</span>
+                  <span className="text-[var(--text-secondary)]">作为投射者，你的正确决策方式是"等待邀请"。重大决定前，给自己 48 小时的感受周期...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 底部渐变遮罩 + 钩子 */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--bg-card)] via-[var(--bg-card)]/80 to-transparent flex items-end justify-center pb-5">
+            <p className="text-sm text-[var(--color-primary)] font-medium">
+              完整报告约 80 页，含七大系统交叉分析 →
+            </p>
           </div>
         </div>
       </section>
 
-      {/* ── 核心测评 ── */}
-      <section className="px-4 pb-16 max-w-5xl mx-auto">
-        <div className="text-center mb-10 animate-slide-up-2">
-          <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] mb-3">核心测评</h2>
-          <p className="text-[var(--text-secondary)] text-sm">科学工具 + 传统文化智慧，全方位认识自己</p>
-        </div>
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* 大五人格 */}
-          <Link href="/mbti" className="glass-card group relative rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 hover:shadow-lg transition-all animate-slide-up-3">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-t-xl" />
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🧠</div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-lg font-bold text-[var(--text-primary)]">大五人格测评</h3>
-                  <span className="px-2 py-0.5 text-[10px] rounded-full bg-blue-500/10 text-blue-600 font-medium">心理学黄金标准</span>
-                </div>
-                <p className="text-xs text-[var(--text-tertiary)] mb-3">Big Five Personality Test</p>
-                <p className="text-sm text-[var(--text-secondary)] mb-4 leading-relaxed">
-                  基于国际公认的大五人格模型（开放性、尽责性、外向性、宜人性、神经质），科学评估您的人格特质。了解自己的情绪模式、社交风格、工作偏好和成长空间。
-                </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-2.5 py-1 text-[11px] rounded-full bg-blue-500/8 text-blue-600 border border-blue-500/15">科学量表</span>
-                  <span className="px-2.5 py-1 text-[11px] rounded-full bg-blue-500/8 text-blue-600 border border-blue-500/15">AI深度解读</span>
-                  <span className="px-2.5 py-1 text-[11px] rounded-full bg-blue-500/8 text-blue-600 border border-blue-500/15">成长建议</span>
-                </div>
-                <span className="inline-flex items-center gap-1 text-sm font-medium text-blue-600">
-                  开始测评 →→
-                </span>
-              </div>
-            </div>
-          </Link>
-
-          {/* 深度自我认知 */}
-          <div className="glass-card group relative rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-6 hover:shadow-lg transition-all animate-slide-up-4">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-t-xl" />
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">🌟</div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-lg font-bold text-[var(--text-primary)]">深度自我认知报告</h3>
-                  <span className="px-2 py-0.5 text-[10px] rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-medium">旗舰</span>
-                </div>
-                <p className="text-xs text-[var(--text-tertiary)] mb-3">多维人格 · 天赋识别 · 成长路径 · 时间节奏</p>
-                <p className="text-sm text-[var(--text-secondary)] mb-4 leading-relaxed">
-                  输入出生信息，AI为您生成一份深度自我认知报告——涵盖性格特质、天赋优势、成长路径、健康建议，融合心理学与传统文化智慧进行多维交叉分析。
-                </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-2.5 py-1 text-[11px] rounded-full bg-[var(--color-primary)]/8 text-[var(--color-primary)] border border-[var(--color-primary)]/15">多维交叉</span>
-                  <span className="px-2.5 py-1 text-[11px] rounded-full bg-[var(--color-primary)]/8 text-[var(--color-primary)] border border-[var(--color-primary)]/15">AI深度解读</span>
-                  <span className="px-2.5 py-1 text-[11px] rounded-full bg-[var(--color-primary)]/8 text-[var(--color-primary)] border border-[var(--color-primary)]/15">成长路径图</span>
-                </div>
-                <button onClick={scrollToForm}
-                  className="inline-flex items-center gap-1 text-sm font-medium text-[var(--color-primary)] hover:underline">
-                  立即生成 →→
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 更多工具 ── */}
-      <section className="px-4 pb-16 max-w-5xl mx-auto">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl md:text-3xl font-bold text-[var(--text-primary)] mb-3">更多工具</h2>
-          <p className="text-[var(--text-secondary)] text-sm">传统文化智慧辅助，帮助您从多个维度认识自己</p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <Link href="/human-design" className="group flex flex-col items-center p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/50 hover:border-[var(--color-primary)]/30 hover:bg-[var(--bg-card)] transition-all">
-            <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">🧬</span>
-            <span className="text-sm font-semibold text-[var(--text-primary)]">人类图解析</span>
-            <span className="text-[10px] text-[var(--text-tertiary)] mt-1">类型·中心·通道·闸门</span>
-          </Link>
-          <Link href="/master-report" className="group flex flex-col items-center p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/50 hover:border-[var(--color-primary)]/30 hover:bg-[var(--bg-card)] transition-all">
-            <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">🔮</span>
-            <span className="text-sm font-semibold text-[var(--text-primary)]">八字命盘</span>
-            <span className="text-[10px] text-[var(--text-tertiary)] mt-1">四柱·五行·十神·大运</span>
-          </Link>
-          <Link href="/compatibility" className="group flex flex-col items-center p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/50 hover:border-[var(--color-primary)]/30 hover:bg-[var(--bg-card)] transition-all">
-            <span className="text-3xl mb-2 group-hover:scale-110 transition-transform">❤️</span>
-            <span className="text-sm font-semibold text-[var(--text-primary)]">关系合盘</span>
-            <span className="text-[10px] text-[var(--text-tertiary)] mt-1">双人·家庭·朋友</span>
-          </Link>
-        </div>
-      </section>
-
-      {/* ── 信任数据 ── */}
-      <section className="px-4 pb-16 max-w-5xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {/* ═══════════════════════════════════════════
+          信任数据
+          ═══════════════════════════════════════════ */}
+      <section className="px-4 pb-16 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
+            { value: '7', label: '古老智慧系统', sub: '八字·人类图·占星·紫微·五运六气·MBTI·中医体质' },
             { value: '50,000+', label: '已生成报告', sub: '用户信赖选择' },
-            { value: '7', label: '多维测评体系', sub: '心理学·命理·占星·人类图·中医体质' },
-            { value: '★', label: '认证引擎', sub: '国际标准对齐' },
-            { value: '∞', label: 'AI深度解读', sub: '个性化成长报告' },
+            { value: '1', label: '一份完整报告', sub: '多系统交叉印证，不是堆砌' },
+            { value: '∞', label: 'AI 深度解读', sub: '个性化成长路径规划' },
           ].map((s, i) => (
-            <div key={i} className="text-center p-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/30 animate-slide-up-3" style={{ animationDelay: `${i * 0.1}s` }}>
-              <div className="stat-value text-2xl md:text-3xl font-bold gradient-text mb-1">{s.value}</div>
+            <div key={i} className="text-center p-5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/30 animate-fade-in-up" style={{ animationDelay: `${i * 0.1}s` }}>
+              <div className="text-xl md:text-2xl font-bold gradient-text mb-1">{s.value}</div>
               <div className="text-sm font-semibold text-[var(--text-primary)]">{s.label}</div>
               <div className="text-[11px] text-[var(--text-tertiary)] mt-1">{s.sub}</div>
             </div>
@@ -166,29 +156,67 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 创始人故事 ── */}
+      {/* ═══════════════════════════════════════════
+          更多探索（二级入口，视觉收敛，功能保留）
+          ═══════════════════════════════════════════ */}
+      <section className="px-4 pb-16 max-w-5xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-lg font-semibold text-[var(--text-secondary)] mb-1">更多探索</h2>
+          <p className="text-xs text-[var(--text-tertiary)]">单独了解某个维度</p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {/* 大五人格 — 原 hero 主按钮入口，现收敛至二级 */}
+          <Link href="/mbti" className="group flex flex-col items-center p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/40 hover:border-blue-500/30 hover:bg-[var(--bg-card)] transition-all">
+            <span className="text-2xl mb-1.5 group-hover:scale-110 transition-transform">🧠</span>
+            <span className="text-xs font-semibold text-[var(--text-primary)]">大五人格测评</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] mt-0.5">心理学黄金标准</span>
+          </Link>
+          <Link href="/human-design" className="group flex flex-col items-center p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/40 hover:border-[var(--color-primary)]/30 hover:bg-[var(--bg-card)] transition-all">
+            <span className="text-2xl mb-1.5 group-hover:scale-110 transition-transform">🧬</span>
+            <span className="text-xs font-semibold text-[var(--text-primary)]">人类图解析</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] mt-0.5">类型·中心·通道</span>
+          </Link>
+          <Link href="/master-report" className="group flex flex-col items-center p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/40 hover:border-[var(--color-gold)]/30 hover:bg-[var(--bg-card)] transition-all">
+            <span className="text-2xl mb-1.5 group-hover:scale-110 transition-transform">🔮</span>
+            <span className="text-xs font-semibold text-[var(--text-primary)]">八字命盘</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] mt-0.5">四柱·五行·大运</span>
+          </Link>
+          <Link href="/compatibility" className="group flex flex-col items-center p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/40 hover:border-pink-500/30 hover:bg-[var(--bg-card)] transition-all">
+            <span className="text-2xl mb-1.5 group-hover:scale-110 transition-transform">❤️</span>
+            <span className="text-xs font-semibold text-[var(--text-primary)]">关系合盘</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] mt-0.5">双人·家庭·朋友</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════
+          创始人故事（保留，精简）
+          ═══════════════════════════════════════════ */}
       <section className="px-4 pb-16 max-w-3xl mx-auto">
-        <div className="founder-card p-8 md:p-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/5 to-transparent border border-[var(--border-color)]">
-          <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4">关于光明喜舍</h2>
-          <div className="space-y-3 text-sm text-[var(--text-secondary)] leading-relaxed">
-            <p>2016年起深入研习心理学人格理论、东方传统文化与人类图体系。</p>
+        <div className="founder-card p-6 md:p-8 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/5 to-transparent border border-[var(--border-color)]">
+          <h2 className="text-lg font-bold text-[var(--text-primary)] mb-3">关于光明喜舍</h2>
+          <div className="space-y-2 text-sm text-[var(--text-secondary)] leading-relaxed">
+            <p>2016 年起深入研习心理学人格理论、东方传统文化与人类图体系。</p>
             <p>多维度测评融合并非简单堆叠——心理学为基、人类图为骨、传统文化为脉。多个维度交叉印证，才是一份真正完整的自我认知报告。</p>
-            <p>目前在大理·银桥持续深耕，致力于将东方智慧与现代AI技术结合，帮助每个人看清真实的自己。</p>
+            <p className="text-xs text-[var(--text-tertiary)]">目前在大理 · 银桥持续深耕。</p>
           </div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
+      {/* ═══════════════════════════════════════════
+          底部 CTA（精简）
+          ═══════════════════════════════════════════ */}
       <section className="cta-section px-4 pb-20 max-w-2xl mx-auto text-center">
-        <div className="relative p-10 rounded-2xl border border-[var(--border-color)] bg-gradient-to-b from-[var(--color-primary)]/8 to-transparent overflow-hidden">
+        <div className="relative p-8 md:p-10 rounded-2xl border border-[var(--border-color)] bg-gradient-to-b from-[var(--color-primary)]/8 to-transparent overflow-hidden">
           <div className="absolute top-[-50%] left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-[var(--color-primary)]/5 blur-[100px]" />
           <div className="relative">
-            <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-3">准备好发现真实的自己了吗？</h2>
-            <p className="text-sm text-[var(--text-secondary)] mb-6">只需输入出生信息，即可获得一份专属于您的深度自我认知报告</p>
+            <h2 className="text-xl md:text-2xl font-bold text-[var(--text-primary)] mb-2">准备好发现真实的自己了吗？</h2>
+            <p className="text-sm text-[var(--text-secondary)] mb-6">输入出生信息，即可获得一份专属于你的深度自我认知报告</p>
             <button onClick={scrollToForm}
-              className="btn-premium px-8 py-3.5 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-emerald-600 text-white font-semibold text-lg hover:shadow-lg hover:shadow-[var(--color-primary)]/25 transition-all">
-              开始测评 →
+              className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-emerald-600 text-white font-semibold text-lg hover:shadow-lg hover:shadow-[var(--color-primary)]/25 transition-all">
+              免费排盘，看看你的出厂配置 →
             </button>
+            <p className="mt-4 text-xs text-[var(--text-tertiary)]">🔒 出生信息仅用于排盘，绝不外泄</p>
           </div>
         </div>
       </section>
