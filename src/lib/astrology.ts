@@ -1,6 +1,19 @@
 // 星座与占星模块 — swisseph-wasm 精确版
 
 import { getBirthCoords } from '@/data/cities';
+import path from 'path';
+import { createRequire } from 'node:module';
+
+// swisseph-wasm 加载（与 hd.ts 同款）：createRequire + 变量调用对 Turbopack 不透明，
+// 避免被改写成带哈希的虚拟外部模块（线上 ERR_MODULE_NOT_FOUND 的根因）。单例缓存。
+let swCache: any = null;
+function getSwisseph() {
+  if (!swCache) {
+    const nodeRequire = createRequire(path.join(process.cwd(), 'noop.js'));
+    swCache = nodeRequire('@fusionstrings/swisseph-wasm');
+  }
+  return swCache;
+}
 
 export interface ZodiacInfo {
   name: string;
@@ -97,8 +110,7 @@ export async function calcPlanetPositions(
   const fallbackSign = getZodiacByDate(month, day)?.name || '双子';
 
   try {
-    const swisseph = await import('@fusionstrings/swisseph-wasm');
-    // swisseph-wasm 不需要显式初始化，直接调用即可
+    const swisseph = getSwisseph();
 
     // 计算儒略日（UTC）
     const jd = swisseph.swe_julday(year, month, day, hour + minute / 60, 1);
