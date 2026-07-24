@@ -25,7 +25,7 @@ export default function Footer() {
             <ul className="space-y-1.5 text-xs text-[var(--text-secondary)]">
               <li>八字 + 人类图 + 占星 + 紫微 + 五运六气</li>
               <li>七系统AI深度融合解读</li>
-              <li>Jovian Archive认证HD引擎</li>
+              <li>HD 排盘结果与 Jovian 认证版一致</li>
               <li>大理 · 银桥</li>
             </ul>
           </div>
