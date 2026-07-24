@@ -137,13 +137,14 @@ export default function Home() {
       </section>
 
       {/* ═══════════════════════════════════════════
-          信任数据
+          信任数据（K3 验收修正：删除虚构的"50,000+ 已生成报告"，
+          替换为真实可验证指标）
           ═══════════════════════════════════════════ */}
       <section className="px-4 pb-16 max-w-4xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { value: '7', label: '古老智慧系统', sub: '八字·人类图·占星·紫微·五运六气·MBTI·中医体质' },
-            { value: '50,000+', label: '已生成报告', sub: '用户信赖选择' },
+            { value: '80', label: '页深度报告', sub: '七系统交叉分析，篇幅真实可查' },
             { value: '1', label: '一份完整报告', sub: '多系统交叉印证，不是堆砌' },
             { value: '∞', label: 'AI 深度解读', sub: '个性化成长路径规划' },
           ].map((s, i) => (
