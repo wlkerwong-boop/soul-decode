@@ -43,6 +43,10 @@ export default function Footer() {
           <p className="text-xs text-[var(--text-secondary)] mt-1 opacity-60">
             基于真实八字算法排盘 · 信息仅用于生成本报告 · 不存储
           </p>
+          {/* 备案号占位：下证后取消 hidden 类即可显示 */}
+          <p className="text-xs text-[var(--text-tertiary)] mt-1 hidden">
+            ICP备案号：待下证后填入
+          </p>
           <p className="text-xs text-[var(--text-secondary)] mt-2 opacity-40">
             © 2026 光明喜舍
           </p>
