@@ -301,7 +301,8 @@ export function calcFull(name:string,year:number,month:number,day:number):Jiugon
   const years = Array.from({length:90},(_,i)=>{
     const a=i+1;
     // 四格气场对外象
-    const qiNum=((mainNum-zong)%9+9)%9;
+    const yearMainNum = dsum((year+i)-1111);
+    const qiNum=((yearMainNum-zong)%9+9)%9;
     const qi=XIANG[qiNum]?.name||'名望';
     // 10年大运能量：总格个位→冠带，虚岁偏移
     const zongDigit=zong%10;
