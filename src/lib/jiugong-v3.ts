@@ -267,9 +267,8 @@ export function calcFull(name:string,year:number,month:number,day:number):Jiugon
   
   // 四格气场+能量+卦象
   function qiEnergy(n:number,grid:number,isTian:boolean):{qi:string;energy:string;gua:string;strategy:Record<string,string>}{
-    const qiNum=((mainNum-grid)%9+9)%9; // 不够减加9 ≡ mod
-    const qiNum1=qiNum||9; // 0→9
-    const qi=XIANG[qiNum1]?.name||'名望';
+    const qiNum = ((mainNum-grid)%9+9)%9; // 0-8
+    const qi = XIANG[qiNum]?.name||'名望';
     // 能量(§9:总笔画个位数→冠带，虚岁%10对应)
     const yunIdx=isTian?((xuAge-grid%10+10)%10):((xuAge-grid%10+10+8)%10);
     const energy=YUN[(yunIdx)%10];
