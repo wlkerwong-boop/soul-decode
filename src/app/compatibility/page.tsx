@@ -201,6 +201,20 @@ export default function HepanPage() {
             </div>
           </div>
         )}
+
+        {/* ── R4: 下一步 CTA（合盘页→见己学园占位）── */}
+        {report && (
+          <div className="card-jade p-6 mt-6 text-center">
+            <div className="text-3xl mb-3">🏫</div>
+            <h3 className="text-lg font-bold mb-2">见己学园 · 家庭成长助手</h3>
+            <p className="text-sm text-[var(--text-secondary)] mb-4 max-w-lg mx-auto">
+              即将上线：个性化学习方案、成长图谱追踪、家长课程匹配。三站联动，从看清孩子到陪好孩子。
+            </p>
+            <span className="inline-flex px-6 py-3 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-color)] text-[var(--text-tertiary)] text-sm cursor-default">
+              📩 即将上线，敬请期待
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

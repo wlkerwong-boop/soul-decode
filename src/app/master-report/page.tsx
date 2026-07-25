@@ -44,7 +44,26 @@ export default function MasterPage() {
     '正在交叉融合七系统，生成深度解读……',
   ];
 
-  // R3: 模拟进度——真实报告流式到达时进度跳到100%
+  // ── R4: 下一步CTA配置（集中管理，R6支付接入后只改此处）──
+  const NEXT_STEPS = {
+    // 完整报告末尾：推亲子合盘
+    fullReport: {
+      emoji: '👨‍👩‍👧‍👦',
+      title: '想为孩子也解码一份？',
+      desc: '每个孩子的出厂配置都独一无二。看看孩子的天赋、学习风格和成长路径，让教育不再盲人摸象。',
+      btn: '🔮 亲子合盘 · 两份报告交叉解读 →',
+      href: '/compatibility',
+    },
+    // 合盘页末尾：推见己学园占位
+    compatibility: {
+      emoji: '🏫',
+      title: '见己学园 · 家庭成长助手',
+      desc: '即将上线：个性化学习方案、成长图谱追踪、家长课程匹配。三站联动，从看清孩子到陪好孩子。',
+      btn: '📩 关注公众号，第一时间获取上线通知',
+      href: '#',
+      placeholder: true,
+    },
+  };
   useEffect(() => {
     if (!loading) { setProgressStep(0); setCarouselIdx(0); return; }
     const timer = setInterval(() => {
@@ -443,25 +462,17 @@ export default function MasterPage() {
                   dangerouslySetInnerHTML={{ __html: reportHtml }} />
               </div>
 
-              {/* Compatibility Suggestion */}
+              {/* ── R4: 下一步 CTA（单一主推，可配置）── */}
               <div className="card-jade p-6 md:p-8 text-center">
-                <div className="text-3xl mb-3">💞</div>
-                <h3 className="text-lg font-bold mb-2">想了解你与他人的关系？</h3>
+                <div className="text-3xl mb-3">{NEXT_STEPS.fullReport.emoji}</div>
+                <h3 className="text-lg font-bold mb-2">{NEXT_STEPS.fullReport.title}</h3>
                 <p className="text-sm text-[var(--text-secondary)] mb-4 max-w-lg mx-auto">
-                  两个人的相遇不是偶然。八字合婚、人类图合盘、占星比较盘——<br/>
-                  看看你们在哪些方面天生契合，哪些领域需要经营。
+                  {NEXT_STEPS.fullReport.desc}
                 </p>
-                <div className="flex flex-wrap justify-center gap-3 text-sm">
-                  <a href="/compatibility" className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-medium hover:shadow-lg transition-all">
-                    💑 情侣合盘
-                  </a>
-                  <a href="/compatibility" className="px-5 py-2.5 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
-                    👨‍👩‍👧‍👦 家庭合盘
-                  </a>
-                  <a href="/compatibility" className="px-5 py-2.5 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
-                    🤝 朋友合盘
-                  </a>
-                </div>
+                <a href={NEXT_STEPS.fullReport.href}
+                  className="inline-flex px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-medium text-sm hover:shadow-lg transition-all">
+                  {NEXT_STEPS.fullReport.btn}
+                </a>
               </div>
               </>
             )}
