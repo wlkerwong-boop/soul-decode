@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, DEV_VERIFY_CODE } from '@/components/AuthContext';
+import { useAuth } from '@/components/AuthContext';
 
 interface PhoneAuthFormProps {
   mode: 'login' | 'register';
@@ -38,10 +38,7 @@ export default function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
     }
     setError('');
     setCountdown(60);
-    // 开发期直接提示固定验证码
-    setTimeout(() => {
-      setCode(DEV_VERIFY_CODE);
-    }, 400);
+    // 开发期：验证码需向管理员获取（不自动填充）
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -152,7 +149,7 @@ export default function PhoneAuthForm({ mode }: PhoneAuthFormProps) {
             </button>
           </div>
           <p className="text-xs text-[var(--text-secondary)] opacity-70 mt-2">
-            开发期验证码固定为：<span className="font-mono font-bold text-[var(--text-accent)]">{DEV_VERIFY_CODE}</span>
+            开发期验证码请咨询管理员获取
           </p>
         </div>
 
