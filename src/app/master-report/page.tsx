@@ -30,6 +30,38 @@ export default function MasterPage() {
   const [showQuickInput, setShowQuickInput] = useState(true); // 默认显示极简输入
   const [showFullReport, setShowFullReport] = useState(false);
 
+  // ── R3: 等待页 ──
+  const [progressStep, setProgressStep] = useState(0);
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  const SYSTEMS = ['八字四柱','人类图','紫微斗数','占星星盘','五运六气','MBTI人格','中医体质'];
+  const CAROUSEL_TEXTS = [
+    '排定八字四柱，解读先天五行格局……',
+    '绘制你的专属人类图，分析能量类型与权威……',
+    '排定紫微十二宫，解析命宫主星……',
+    '计算行星位置，解读星座与相位……',
+    '推算五运六气，分析先天体质偏向……',
+    '结合MBTI与大五人格，交叉验证性格特质……',
+    '正在交叉融合七系统，生成深度解读……',
+  ];
+
+  // R3: 模拟进度——真实报告流式到达时进度跳到100%
+  useEffect(() => {
+    if (!loading) { setProgressStep(0); setCarouselIdx(0); return; }
+    const timer = setInterval(() => {
+      setProgressStep(p => {
+        if (p >= 7) return 7;
+        return p + 1;
+      });
+      setCarouselIdx(c => (c + 1) % CAROUSEL_TEXTS.length);
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [loading]);
+
+  // 当报告开始流式到达，立刻跳到100%
+  useEffect(() => {
+    if (report && loading) { setProgressStep(7); setLoading(false); }
+  }, [report, loading]);
+
   // Load saved reports on mount
   useEffect(() => {
     try {
@@ -154,6 +186,60 @@ export default function MasterPage() {
           <p className="text-base md:text-lg text-[var(--text-secondary)]">一次输入 · 七大系统交叉融合</p>
           <p className="text-sm text-[var(--text-secondary)] opacity-70">八字·人类图·占星·紫微斗数·五运六气·流年·人生规划</p>
         </div>
+
+        {/* ── R3: 等待页覆盖 ── */}
+        {loading && (
+          <div className="max-w-lg mx-auto mb-8">
+            <div className="card-jade p-8 text-center">
+              {/* 进度条 */}
+              <div className="mb-6">
+                <div className="flex justify-between mb-2">
+                  {SYSTEMS.map((sys, i) => (
+                    <span key={sys} className={`text-xs transition-all duration-500 ${i < progressStep ? 'text-[var(--text-accent)] font-semibold' : 'text-[var(--text-tertiary)]'}`}>
+                      {i < progressStep ? '●' : '○'} {sys.slice(0,2)}
+                    </span>
+                  ))}
+                </div>
+                <div className="h-2 bg-[var(--bg-highlight)] rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-[var(--text-accent)] to-emerald-400 rounded-full transition-all duration-1000 ease-out"
+                    style={{width: `${(progressStep/7)*100}%`}} />
+                </div>
+                <p className="text-sm text-[var(--text-secondary)] mt-3">
+                  {(progressStep/7*100).toFixed(0)}% · {progressStep < 7 ? '正在生成你的专属报告' : '报告即将呈现'}
+                </p>
+              </div>
+
+              {/* 系统轮播 */}
+              <div className="py-4 mb-4">
+                <p className="text-sm text-[var(--text-secondary)] animate-pulse">
+                  {CAROUSEL_TEXTS[carouselIdx]}
+                </p>
+              </div>
+
+              {/* 报告目录预览 */}
+              <div className="text-left bg-[var(--bg-highlight)] rounded-xl p-4 text-xs text-[var(--text-tertiary)] space-y-1.5">
+                <p className="text-[var(--text-secondary)] font-semibold mb-2">📑 报告包含</p>
+                <p>第一章 · 你的出厂配置（八字+人类图总览）</p>
+                <p>第二章 · 思维引擎（MBTI×大五人格）</p>
+                <p>第三章 · 情绪与关系（占星×合盘）</p>
+                <p>第四章 · 身体与健康（五运六气×中医体质）</p>
+                <p>第五章 · 天赋与方向（七系统交叉解读）</p>
+                <p className="text-[var(--text-accent)]">……共约 80 页</p>
+              </div>
+            </div>
+
+            {/* 错误提示 */}
+            {error && (
+              <div className="card-jade p-5 mt-4 text-center border-red-400/30">
+                <p className="text-red-400 text-sm mb-3">❌ {error}</p>
+                <button onClick={submit}
+                  className="px-6 py-2 rounded-xl bg-red-500/20 text-red-300 text-sm hover:bg-red-500/30 transition-all">
+                  🔄 重新生成
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ── R2: 免费排盘极简输入（4 字段）── */}
         {showQuickInput && (
