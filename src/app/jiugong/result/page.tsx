@@ -128,9 +128,7 @@ function SuiZhiCard({ suizhi }: { suizhi: JiugongResult['suizhi'] }) {
    90 年运势卷轴
    ═══════════════════════════════════════════ */
 function LifeScroll({ name, year }: { name: string; year: number }) {
-  const scroll = calcLifeScroll(name, year);
-  const [hoveredAge, setHoveredAge] = useState<number | null>(null);
-
+  
   // 按十年分段
   const decades: { start: number; items: typeof scroll }[] = [];
   for (let i = 0; i < 9; i++) {
