@@ -296,13 +296,21 @@ export function calcFull(name:string,year:number,month:number,day:number):Jiugon
   const groupOutput=reorderedGroups.map((g,i)=>({name:g.name,ages:ages[i],count:9}));
   
   // 逐年运势
-  const years=Array.from({length:90},(_,i)=>{
+  const SCROLL_LUT = ALL_GROUPS.flatMap(g=>g.years.map(y=>({chance:y.chance, yun:y.yun, gua:y.gua, koujue:y.koujue, jiedu:y.jiedu})));
+  // 90年运程卷轴：每年独立算象+能量，再查表
+  const years = Array.from({length:90},(_,i)=>{
     const a=i+1;
-    const gIdx=(5+Math.floor((a-1)/9))%10;
-    const pos=(a-1)%9;
-    const g=ALL_GROUPS[gIdx];
-    const y=g.years[pos];
-    return{age:a,year:year+i,group:g.name,yun:y.yun,chance:y.chance,gua:y.gua,koujue:y.koujue,jiedu:y.jiedu};
+    // 四格气场对外象
+    const qiNum=((mainNum-zong)%9+9)%9;
+    const qi=XIANG[qiNum]?.name||'名望';
+    // 10年大运能量：总格个位→冠带，虚岁偏移
+    const zongDigit=zong%10;
+    const ageTail=a%10;
+    const yunIdx=(ageTail-zongDigit+10)%10;
+    const energy=YUN[yunIdx];
+    // 查表
+    const row=SCROLL_LUT.find(r=>r.chance===qi&&r.yun===energy)||SCROLL_LUT[0];
+    return{age:a,year:year+i,group:'',yun:row.yun,chance:row.chance,gua:row.gua,koujue:row.koujue,jiedu:row.jiedu};
   });
   
   return{name,year,month,day,total,tian,ren,di,zong,wai,tianWx:tw,renWx:rw,diWx:dw,xuAge,
