@@ -3,6 +3,13 @@
 import { useState, useEffect } from 'react';
 import { calcFull, loadKangxi, type JiugongFull } from '@/lib/jiugong-v3';
 
+const QI_DESC: Record<string,string> = {
+  '晦暗':'隐藏·危机·暗财·低调','享成':'天助·贵人·懒散·回报','争夺':'竞争·起伏·官司·团结',
+  '付出':'耕耘·奉献·只出不进·置产','名望':'光芒·知名度·新事物·上层贵人',
+  '入库':'财气·收成·劫财·守成','升格':'成长·提升·官司·承接',
+  '开拓':'新方向·压力·假象·突破','转变':'转型·扭转·变动·调整'
+};
+
 export default function JiugongPage() {
   const [name, setName] = useState('');
   const [year, setYear] = useState('');
@@ -148,7 +155,7 @@ export default function JiugongPage() {
                 {[{l:'上层',v:d.upperQi},{l:'自我',v:d.selfQi},{l:'下层',v:d.lowerQi},{l:'对外',v:d.outerQi}].map((q,i)=>(
                   <div key={i} className="bg-[var(--bg-highlight)] rounded-xl p-3 border-l-4 border-[var(--text-accent)]">
                     <div className="text-xs text-[var(--text-tertiary)]">{q.l}</div>
-                    <div className="font-bold text-sm">{q.v} · {d.qiDesc[q.v]||''}</div>
+                    <div className="font-bold text-sm">{q.v} · {QI_DESC[q.v]||''}</div>
                   </div>
                 ))}
               </div>
