@@ -4,11 +4,7 @@
 // ═══════════════════════════════════════════════════════
 
 // ── 康熙字典笔画库 ──
-// 优先从外部 JSON 加载(含完整康熙字典数据)，
-// 失败时使用内嵌常用字兜底
-
-// 本地最小兜底(仅部首用,其他从 jiugong.ts 的 STROKE_MAP 导入)
-import { getStroke as getStrokeV1 } from './jiugong';
+// 优先从外部 JSON 加载, 失败时使用内嵌常用字兜底
 
 let kangxi: Map<string,number> | null = null;
 export async function loadKangxi(): Promise<void> {
@@ -17,7 +13,15 @@ export async function loadKangxi(): Promise<void> {
     const r = await fetch('/data/kangxi-strokes.json');
     if (r.ok) { kangxi = new Map(Object.entries(await r.json())); return; }
   } catch {}
-  // 无需额外 fallback — getStrokeV1 覆盖常用字
+}
+
+function fallbackStroke(char: string): number {
+  // 部首特殊字直接映射
+  const DIRECT: Record<string,number> = {'氵':4,'扌':4,'忄':4,'犭':4,'王':5,'礻':5,'衤':6,'月':6,'艹':6,'辶':7,'阝':7};
+  if (DIRECT[char]) return DIRECT[char];
+  const code = char.charCodeAt(0);
+  if (code >= 0x4e00 && code <= 0x9fff) return 10; // 中文字默认10画
+  return 1;
 }
 
 // ── 复姓列表 ──
@@ -49,8 +53,7 @@ export function getStroke(char: string): number {
     const restStroke = rest ? getStroke(rest) : 0;
     return r + (restStroke || 10);
   }
-  // 回退到 v1 引擎的笔画库(349个常用字)
-  return getStrokeV1(char);
+  return kangxi?.get(char) ?? fallbackStroke(char);
 }
 
 // ── 基础工具 ──
