@@ -27,6 +27,7 @@ export default function Nav() {
 
   const navLinks = [
     { href: '/master-report', label: '✦ 人生总览' },
+    { href: '/jiugong', label: '📜 九宫学理' },
     { href: '/daily', label: '🌅 每日运势' },
     { href: '/human-design', label: '🧬 人类图排盘' },
     { href: '/dharma', label: '☸ 法藏' },
