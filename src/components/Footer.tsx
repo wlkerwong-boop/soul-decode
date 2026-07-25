@@ -37,6 +37,14 @@ export default function Footer() {
               <li>抖音：@光明喜舍</li>
             </ul>
           </div>
+          {/* ── R5: 家族站点 ── */}
+          <div>
+            <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">🏠 家族站点</h4>
+            <ul className="space-y-1.5 text-xs text-[var(--text-secondary)]">
+              <li><a href="https://www.stella-aiedu.com" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--text-accent)] transition-colors">Stella 教育智囊 →</a></li>
+              <li className="text-[var(--text-tertiary)] cursor-default">见己学园 · 即将上线</li>
+            </ul>
+          </div>
         </div>
         <div className="border-t border-[var(--border-color)] pt-6 text-center">
           <p className="text-sm text-[var(--text-secondary)]">灵魂解码 · 用AI看见真实的自己</p>
