@@ -21,11 +21,10 @@ const S2T: Record<string,string> = {"献":"獻","国":"國","万":"萬","与":"�
 export function getStroke(c: string): number {
   const r = radStroke(c);
   if (r>0) { const rest=c.replace(/^[氵扌忄犭王礻衤月艹辶阝]/,'').replace(/阝$/,''); return r+(rest?(kangxi?.get(rest)??10):0); }
-  // 先查本字，再查繁体映射
-  const direct = kangxi?.get(c);
-  if (direct) return direct;
+  // 优先查繁体映射（技术规格：繁体笔画为准）
   const trad = S2T[c];
-  return trad ? (kangxi?.get(trad) ?? 10) : (kangxi?.get(c) ?? 10);
+  if (trad && kangxi?.has(trad)) return kangxi.get(trad)!;
+  return kangxi?.get(c)??10;
 }
 
 // ── 基础 ──
