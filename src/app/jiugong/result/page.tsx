@@ -47,9 +47,9 @@ export default function JiugongResultPage() {
             <span className="text-xs text-[var(--text-tertiary)]">质{d.zhi}·{d.zhiName}({d.zhiElement})：</span>
             <span className="text-sm">{d.zhiDesc}</span>
           </div>
-          {d.xingyun && <div className="bg-[var(--bg-highlight)] rounded-xl p-3">
-            <span className="text-xs text-[var(--text-tertiary)]">星运({d.total}画)·{d.xingyun}：</span>
-            <span className="text-sm">{d.xingyunDesc}</span>
+          {d.xingyunName && <div className="bg-[var(--bg-highlight)] rounded-xl p-3">
+            <span className="text-xs text-[var(--text-tertiary)]">星运({d.total}画)·{d.xingyunName}：</span>
+            <span className="text-sm">{d.xingyunNameDesc}</span>
           </div>}
         </div>
       </div>
