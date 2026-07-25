@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
           body: JSON.stringify({
-            model: 'deepseek-chat',
+            model: 'deepseek-v4-pro',
             messages: [
               { role: 'system', content: SYSTEM_PROMPT + '\n\n参考知识：\n' + context },
               { role: 'user', content: query }

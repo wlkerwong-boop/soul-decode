@@ -23,7 +23,7 @@ function getConfig() {
     deepseek: {
       baseUrl: 'https://api.deepseek.com/v1',
       apiKey: process.env.DEEPSEEK_API_KEY || '',
-      model: process.env.AI_MODEL || 'deepseek-chat',
+      model: process.env.AI_MODEL || 'deepseek-v4-pro',
     },
     openai: {
       baseUrl: 'https://api.openai.com/v1',

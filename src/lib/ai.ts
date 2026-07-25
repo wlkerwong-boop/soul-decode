@@ -15,7 +15,7 @@ function getConfig() {
     deepseek: {
       baseUrl: DEEPSEEK_BASE_URL,
       apiKey: process.env.DEEPSEEK_API_KEY || '',
-      model: process.env.AI_MODEL || 'deepseek-chat',
+      model: process.env.AI_MODEL || 'deepseek-v4-pro',
     },
     openai: {
       baseUrl: OPENAI_BASE_URL,

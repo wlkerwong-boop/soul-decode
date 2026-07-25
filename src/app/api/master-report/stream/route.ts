@@ -169,7 +169,7 @@ ${wuyunResult.description}
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
   const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
-  const modelName = process.env.AI_MODEL || 'deepseek-chat';
+  const modelName = process.env.AI_MODEL || 'deepseek-v4-pro';
 
   if (!apiKey) {
     return new Response(JSON.stringify({ error: 'API key not configured' }), { status: 500 });

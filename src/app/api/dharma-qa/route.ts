@@ -82,7 +82,7 @@ function getConfig() {
   return {
     baseUrl: 'https://api.deepseek.com/v1',
     apiKey: process.env.DEEPSEEK_API_KEY || '',
-    model: 'deepseek-chat',
+    model: 'deepseek-v4-pro',
   };
 }
 
