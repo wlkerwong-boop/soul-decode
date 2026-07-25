@@ -49,7 +49,7 @@ export default function JiugongResultPage() {
           </div>
           {d.xingyunName && <div className="bg-[var(--bg-highlight)] rounded-xl p-3">
             <span className="text-xs text-[var(--text-tertiary)]">星运({d.total}画)·{d.xingyunName}：</span>
-            <span className="text-sm">{d.xingyunNameDesc}</span>
+            <span className="text-sm">{d.xingyunFull}</span>
           </div>}
         </div>
       </div>

@@ -227,7 +227,7 @@ export function calcFull(name:string,year:number,month:number,day:number):Jiugon
   const zhi=total%10,zhiD=ZHI[zhi]||ZHI[5];
   
   // 星运
-  const xy=XINGYUN[total],xyDesc=XINGYUN_DESC[total]||'';
+  const xy=XINGYUN[total],xyDesc='';
   
   // 五行性格
   const tw=WX[tian%10],rw=WX[ren%10],dw=WX[di%10];
