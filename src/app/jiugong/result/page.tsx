@@ -2,316 +2,342 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { JiugongResult } from '@/lib/jiugong';
-import { calcLifeScroll } from '@/lib/jiugong';
+import type { JiugongFull } from '@/lib/jiugong-v3';
+import { ENERGY_DESC, QI_DESC, STRATEGY } from '@/lib/jiugong-v3';
 
-/* ═══════════════════════════════════════════
-   五格卡片
-   ═══════════════════════════════════════════ */
-function WuGeCard({ wuge, name }: { wuge: JiugongResult['wuge']; name: string }) {
-  const items = [
-    { label: '天格', value: wuge.tian, sub: '祖运·先天' },
-    { label: '人格', value: wuge.ren, sub: '主运·核心', highlight: true },
-    { label: '地格', value: wuge.di, sub: '前运·基础' },
-    { label: '总格', value: wuge.zong, sub: '后运·归宿' },
-    { label: '外格', value: wuge.wai, sub: '副运·人际' },
-  ];
+/* ═══════════════════════════════════
+   共享子组件
+   ═══════════════════════════════════ */
 
+function Section({ title, icon, badge, children }: { title:string; icon:string; badge?:string; children:React.ReactNode }) {
   return (
     <div className="card-jade p-5 md:p-6">
       <h2 className="text-base font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-        <span>📐</span> 姓名五格 · {name}
+        <span>{icon}</span> {title}
+        {badge && <span className="text-[11px] px-2 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-normal">{badge}</span>}
       </h2>
-      <div className="grid grid-cols-5 gap-2">
-        {items.map(g => (
-          <div
-            key={g.label}
-            className={`text-center rounded-xl p-3 transition-all ${
-              g.highlight
-                ? 'bg-[var(--color-primary)]/15 border border-[var(--color-primary)]/30'
-                : 'bg-[var(--bg-highlight)]'
-            }`}
-          >
-            <div className="text-[10px] text-[var(--text-tertiary)] mb-0.5">{g.label}</div>
-            <div className={`text-xl md:text-2xl font-bold ${g.highlight ? 'gradient-text' : 'text-[var(--text-primary)]'}`}>
-              {g.value}
-            </div>
-            <div className="text-[9px] text-[var(--text-tertiary)] mt-0.5">{g.sub}</div>
-          </div>
-        ))}
-      </div>
-      <p className="text-xs text-[var(--text-secondary)] text-center mt-3 px-2 py-1.5 rounded-lg bg-[var(--bg-highlight)]">
-        三才配置：{wuge.sancai}
-      </p>
+      {children}
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════
-   九宫气场图（3×3 动画展示）
-   ═══════════════════════════════════════════ */
-function JiuGongGrid({
-  labels,
-  rengePosition,
-}: {
-  labels: JiugongResult['jiugongLabels'];
-  rengePosition: [number, number];
-}) {
+function StatRow({ items }: { items: { label:string; value:string|number; sub?:string; highlight?:boolean }[] }) {
   return (
-    <div className="card-jade p-5 md:p-6">
-      <h2 className="text-base font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-        <span>🏠</span> 九宫气场
-      </h2>
-      <div className="grid grid-cols-3 gap-2 max-w-[280px] mx-auto">
-        {labels.map((g, i) => {
-          const isRenge = rengePosition[0] === g.row && rengePosition[1] === g.col;
-          return (
-            <div
-              key={`${g.row}-${g.col}`}
-              className={`aspect-square rounded-xl flex flex-col items-center justify-center text-center p-1.5 transition-all duration-500 animate-scale-in ${
-                isRenge
-                  ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/25 ring-2 ring-[var(--color-primary)]/40'
-                  : 'bg-[var(--bg-highlight)] hover:bg-[var(--bg-elevated)]'
-              }`}
-              style={{ animationDelay: `${i * 50}ms` }}
-            >
-              <div className={`text-lg md:text-xl font-bold ${isRenge ? 'text-white' : 'text-[var(--text-accent)]'}`}>
-                {g.num}
-              </div>
-              <div className={`text-[10px] leading-tight mt-0.5 ${isRenge ? 'text-white/85' : 'text-[var(--text-tertiary)]'}`}>
-                {g.name}
-              </div>
-              {isRenge && (
-                <div className="text-[9px] text-white/70 mt-0.5">人格所在</div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      <p className="text-[10px] text-[var(--text-tertiary)] text-center mt-3">
-        洛书九宫 · 人格所在宫高亮
-      </p>
+    <div className={`grid gap-2 ${items.length<=3?'grid-cols-3':items.length<=4?'grid-cols-4':'grid-cols-5'}`}>
+      {items.map((it,i) => (
+        <div key={i} className={`text-center rounded-xl p-3 ${
+          it.highlight ? 'bg-[var(--color-primary)]/15 border border-[var(--color-primary)]/30' : 'bg-[var(--bg-highlight)]'
+        }`}>
+          <div className="text-[10px] text-[var(--text-tertiary)]">{it.label}</div>
+          <div className={`text-lg md:text-xl font-bold ${it.highlight?'gradient-text':'text-[var(--text-primary)]'}`}>{it.value}</div>
+          {it.sub && <div className="text-[10px] text-[var(--text-tertiary)] mt-0.5">{it.sub}</div>}
+        </div>
+      ))}
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════
-   岁值星卡片
-   ═══════════════════════════════════════════ */
-function SuiZhiCard({ suizhi }: { suizhi: JiugongResult['suizhi'] }) {
+function HighlightBox({ children }: { children: React.ReactNode }) {
   return (
-    <div className="card-jade p-5 md:p-6 bg-gradient-to-br from-[var(--color-primary)]/8 to-[var(--bg-card)]">
-      <h2 className="text-base font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2">
-        <span>⭐</span> 岁值星
-      </h2>
-      <div className="flex items-center gap-4">
-        <div className="shrink-0 w-16 h-16 rounded-full bg-[var(--color-primary)]/15 flex items-center justify-center text-2xl">
-          ⭐
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs text-[var(--text-tertiary)]">虚岁</span>
-            <span className="text-xl font-bold gradient-text">{suizhi.xuSui}</span>
-            <span className="text-xs text-[var(--text-tertiary)]">岁</span>
-            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-[var(--color-primary)]/15 text-[var(--color-primary)]">
-              {suizhi.star}
-            </span>
-          </div>
-          <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{suizhi.desc}</p>
-        </div>
-      </div>
+    <div className="mt-3 p-3 md:p-4 rounded-xl bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10 text-sm text-[var(--text-secondary)] leading-relaxed">
+      {children}
     </div>
   );
 }
 
-/* ═══════════════════════════════════════════
-   90 年运势卷轴
-   ═══════════════════════════════════════════ */
-function LifeScroll({ name, year }: { name: string; year: number }) {
-  const scroll = calcLifeScroll(name, year);
-  const [hoveredAge, setHoveredAge] = useState<number | null>(null);
-
-  // 按十年分段
-  const decades: { start: number; items: typeof scroll }[] = [];
-  for (let i = 0; i < 9; i++) {
-    decades.push({ start: i * 10 + 1, items: scroll.slice(i * 10, (i + 1) * 10) });
-  }
-
-  const starColors: Record<string, string> = {
-    '将星': 'bg-amber-500/15 text-amber-400 border-amber-500/20',
-    '权星': 'bg-red-500/15 text-red-400 border-red-500/20',
-    '空亡星': 'bg-gray-500/15 text-gray-400 border-gray-500/20',
-    '车星': 'bg-blue-500/15 text-blue-400 border-blue-500/20',
-    '田宅星': 'bg-green-500/15 text-green-400 border-green-500/20',
-    '库星': 'bg-yellow-500/15 text-yellow-400 border-yellow-500/20',
-    '孤星': 'bg-purple-500/15 text-purple-400 border-purple-500/20',
-    '破军星': 'bg-orange-500/15 text-orange-400 border-orange-500/20',
-    '贵星': 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
-    '文星': 'bg-cyan-500/15 text-cyan-400 border-cyan-500/20',
-  };
-
-  return (
-    <div className="card-jade p-5 md:p-6">
-      <h2 className="text-base font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-        <span>📜</span> 人生 90 年运势卷轴
-      </h2>
-
-      {/* 卷轴容器 */}
-      <div className="overflow-x-auto scrollbar-hide -mx-2 px-2">
-        <div className="flex gap-1 min-w-[600px]">
-          {decades.map((decade) => (
-            <div key={decade.start} className="flex-1 min-w-[60px]">
-              {/* 十年标签 */}
-              <div className="text-center text-[10px] text-[var(--text-tertiary)] mb-1.5 font-semibold">
-                {decade.start}s
-              </div>
-              {/* 每年一个色块 */}
-              <div className="flex flex-col gap-0.5">
-                {decade.items.map((item) => {
-                  const isHovered = hoveredAge === item.age;
-                  const colorClass = starColors[item.star] || 'bg-gray-500/10 text-gray-400';
-                  return (
-                    <div
-                      key={item.age}
-                      className="relative group"
-                      onMouseEnter={() => setHoveredAge(item.age)}
-                      onMouseLeave={() => setHoveredAge(null)}
-                    >
-                      <div
-                        className={`h-7 rounded px-1 flex items-center justify-center text-[9px] font-semibold cursor-default transition-all border ${colorClass} ${
-                          isHovered ? 'scale-110 shadow-sm z-10' : ''
-                        }`}
-                      >
-                        {item.age}
-                      </div>
-                      {/* tooltip */}
-                      {isHovered && (
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-20 whitespace-nowrap bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg px-2 py-1 shadow-lg">
-                          <span className="text-[10px] font-semibold text-[var(--text-primary)]">
-                            {item.age}岁 · {item.star}
-                          </span>
-                          <span className="text-[9px] text-[var(--text-tertiary)] ml-1">
-                            {item.keyword}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 当前岁数指示 */}
-      <div className="mt-4 flex flex-wrap gap-1.5 justify-center">
-        {Object.entries(starColors).slice(0, 5).map(([star, cls]) => (
-          <span key={star} className={`text-[10px] px-1.5 py-0.5 rounded-full border ${cls}`}>
-            {star}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════
    结果页主组件
-   ═══════════════════════════════════════════ */
+   ═══════════════════════════════════ */
+
 export default function JiugongResultPage() {
   const router = useRouter();
-  const [result, setResult] = useState<JiugongResult | null>(null);
-  const [name, setName] = useState('');
-  const [year, setYear] = useState(0);
+  const [d, setD] = useState<JiugongFull | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const raw = sessionStorage.getItem('jiugong-result');
-    const storedName = sessionStorage.getItem('jiugong-name');
-    const storedYear = sessionStorage.getItem('jiugong-year');
-    if (!raw) {
-      router.replace('/jiugong');
-      return;
-    }
-    setResult(JSON.parse(raw));
-    setName(storedName || '');
-    setYear(parseInt(storedYear || '0'));
+    const raw = sessionStorage.getItem('jiugong-full');
+    if (!raw) { router.replace('/jiugong'); return; }
+    setD(JSON.parse(raw));
     setLoading(false);
   }, [router]);
 
-  if (loading) {
-    return (
-      <div className="gradient-bg min-h-screen flex items-center justify-center">
-        <div className="cosmic-loader">
-          <div className="cosmic-ring cosmic-ring-1" />
-          <div className="cosmic-ring cosmic-ring-2" />
-          <div className="cosmic-ring cosmic-ring-3" />
-          <div className="cosmic-center">🔮</div>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="gradient-bg min-h-screen flex items-center justify-center">
+      <div className="cosmic-loader"><div className="cosmic-ring cosmic-ring-1"/><div className="cosmic-ring cosmic-ring-2"/><div className="cosmic-ring cosmic-ring-3"/><div className="cosmic-center">🔮</div></div>
+    </div>
+  );
+  if (!d) return null;
 
-  if (!result) return null;
-  const { wuge, jiugongLabels, tezhi, suizhi, rengePosition } = result;
+  const wxOrders = {木:1,火:2,土:3,金:4,水:5} as Record<string,number>;
+  const ren2diRel = d.renWx===d.diWx?'平' : ((wxOrders[d.renWx]??0)+1)%5+1===(wxOrders[d.diWx]??0) ? '生' : ((wxOrders[d.diWx]??0)+1)%5+1===(wxOrders[d.renWx]??0) ? '被生' : '克';
 
   return (
     <div className="gradient-bg min-h-screen px-4 py-8 md:py-10">
-      <div className="max-w-2xl mx-auto">
-        {/* 页面标题 */}
+      <div className="max-w-3xl mx-auto">
+
+        {/* 报告标题 */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold mb-1">
-            {name} 的<span className="gradient-text">人生说明书</span>
-          </h1>
-          <p className="text-xs text-[var(--text-tertiary)]">九宫姓名学 · 河图洛书体系</p>
+          <span className="tag-pill text-xs tracking-widest mb-3 inline-block">程天相九宫学理 · 康熙字典笔画</span>
+          <h1 className="text-2xl md:text-3xl font-bold mb-1">{d.name} 的<span className="gradient-text">人生说明书</span></h1>
+          <p className="text-xs text-[var(--text-tertiary)]">{d.year}年{d.month}月{d.day}日出生 · 虚岁{d.xuAge} · 总笔画{d.total}</p>
         </div>
 
         <div className="space-y-4">
-          {/* 1. 五格卡片 */}
-          <WuGeCard wuge={wuge} name={name} />
 
-          {/* 2. 九宫气场图 */}
-          <JiuGongGrid labels={jiugongLabels} rengePosition={rengePosition} />
+          {/* ═══════════ 1. 命盘摘要 ═══════════ */}
+          <Section title="命盘摘要" icon="📋" badge={`局${d.ju}·质${d.zhi}`}>
+            <StatRow items={[
+              {label:'姓名',value:d.name},{label:'出生',value:`${d.year}.${d.month}.${d.day}`},
+              {label:'虚岁',value:`${d.xuAge}岁`},{label:'总笔画',value:`${d.total}画`},
+              {label:'三才',value:`天${d.tianWx}/人${d.renWx}/地${d.diWx}`},
+            ]}/>
+          </Section>
 
-          {/* 3. 十大特质 */}
-          <div className="card-jade p-5 md:p-6">
-            <h2 className="text-base font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2">
-              <span>🌟</span> 十大特质 · {tezhi.name}
-            </h2>
-            <div className="flex items-start gap-3">
-              <div className="shrink-0 w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-xl font-bold gradient-text">
-                {wuge.zong % 10}
+          {/* ═══════════ 2. 五格三才 ═══════════ */}
+          <Section title="五格三才" icon="🔢">
+            <StatRow items={[
+              {label:'天格',value:d.tian,sub:d.tianWx},{label:'人格',value:d.ren,sub:d.renWx,highlight:true},
+              {label:'地格',value:d.di,sub:d.diWx},{label:'总格',value:d.zong},{label:'外格',value:d.wai},
+            ]}/>
+            <HighlightBox>
+              <strong>三才配置：</strong>天{d.tianWx} / 人{d.renWx} / 地{d.diWx}。
+              人格与地格{d.renWx===d.diWx?'平' : ren2diRel==='生'?'相生(旺象)':ren2diRel==='被生'?'地生人(淡象)':'相克(破象)'}。
+              {ren2diRel==='生'?'人克地：主动开创，掌控力强。':ren2diRel==='被生'?'地被生：基础稳固，外援充足。':ren2diRel==='克'?'人与地相克：需调和自我与环境的关系。':'两格平衡：内外一致。'}
+            </HighlightBox>
+          </Section>
+
+          {/* ═══════════ 3. 成功机运 & 本质特质 ═══════════ */}
+          <Section title="成功机运 & 本质特质" icon="🎯">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="bg-[var(--bg-highlight)] rounded-xl p-4 border-l-4 border-[var(--color-primary)]">
+                <div className="text-xs text-[var(--text-tertiary)] mb-1">局差 {d.ju} · 成功机运</div>
+                <div className="text-sm font-semibold text-[var(--text-primary)]">{d.juDesc}</div>
+                <div className="text-xs text-[var(--text-secondary)] mt-2">{d.juAdvice}</div>
               </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
-                    {tezhi.name}
-                  </span>
-                  <span className="text-[10px] text-[var(--text-tertiary)]">五行属{tezhi.element} · 总格个位数 {wuge.zong % 10}</span>
-                </div>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{tezhi.desc}</p>
+              <div className="bg-[var(--bg-highlight)] rounded-xl p-4 border-l-4 border-emerald-400">
+                <div className="text-xs text-[var(--text-tertiary)] mb-1">质数 {d.zhi} · 本质特质</div>
+                <div className="text-sm font-semibold text-[var(--text-primary)]">{d.zhiDesc}</div>
               </div>
             </div>
-          </div>
+          </Section>
 
-          {/* 4. 岁值星 */}
-          <SuiZhiCard suizhi={suizhi} />
+          {/* ═══════════ 4. 管理IQ ═══════════ */}
+          <Section title="管理 IQ" icon="🧠" badge="九型管理风格">
+            <div className="bg-[var(--bg-highlight)] rounded-xl p-4 border-l-4 border-[var(--color-primary)]">
+              <div className="flex items-center gap-4">
+                <div className="shrink-0 w-14 h-14 rounded-full bg-[var(--color-primary)]/15 flex items-center justify-center text-2xl font-bold gradient-text">{d.mgtScore}</div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-bold text-[var(--text-primary)]">{d.mgtType}</span>
+                    <span className="text-xs text-[var(--text-tertiary)]">名字第二字 {d.secondStroke} 画</span>
+                  </div>
+                  <p className="text-sm text-[var(--text-secondary)]">{d.mgtDesc}</p>
+                </div>
+              </div>
+            </div>
+            <HighlightBox>
+              <strong>管理风格解读：</strong> {d.mgtScore>=80?'管理天赋高，善用影响力，组织能力强。':d.mgtScore>=70?'管理细胞良好，后天可培养，适合中层管理。':'管理细胞需后天激发，模仿学习。适合专业性管理工作。'}
+            </HighlightBox>
+          </Section>
 
-          {/* 5. 90 年运势卷轴 */}
-          <LifeScroll name={name} year={year} />
+          {/* ═══════════ 5. 五行性格 ═══════════ */}
+          <Section title="五行性格" icon="⚖️" badge="思想功能 · 行动功能">
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div className="bg-[var(--bg-highlight)] rounded-xl p-4 text-center">
+                <div className="text-xs text-[var(--text-tertiary)]">思想功能（天格→人格）</div>
+                <div className="text-lg font-bold text-[var(--text-primary)] mt-1">{d.thinkFunc}</div>
+                <div className="text-[11px] text-[var(--text-tertiary)] mt-1">35岁前思维模式 · 与上层关系</div>
+              </div>
+              <div className="bg-[var(--bg-highlight)] rounded-xl p-4 text-center">
+                <div className="text-xs text-[var(--text-tertiary)]">行动功能（人格→地格）</div>
+                <div className="text-lg font-bold text-[var(--text-primary)] mt-1">{d.actionFunc}</div>
+                <div className="text-[11px] text-[var(--text-tertiary)] mt-1">35岁后行为模式 · 与下属/配偶关系</div>
+              </div>
+            </div>
+            <HighlightBox>
+              <strong>性格倾向：</strong> {d.xinggeDetail}
+            </HighlightBox>
+          </Section>
+
+          {/* ═══════════ 6. 婚姻分析 ═══════════ */}
+          <Section title="婚姻分析" icon="💞">
+            <div className="bg-[var(--bg-highlight)] rounded-xl p-4 border-l-4 border-pink-400">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-bold text-[var(--text-primary)]">{d.marriageType}</span>
+                <span className="text-xs text-[var(--text-tertiary)]">婚姻宫</span>
+              </div>
+              <p className="text-sm text-[var(--text-secondary)]">{d.marriageDesc}</p>
+            </div>
+            <HighlightBox>
+              <strong>缘起缘灭：</strong> {d.marriageDetail}
+            </HighlightBox>
+          </Section>
+
+          {/* ═══════════ 7. 财运分析 ═══════════ */}
+          <Section title="财运分析" icon="💰">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+              <div className="bg-[var(--bg-highlight)] rounded-xl p-4 border-l-4 border-amber-400">
+                <div className="text-xs text-[var(--text-tertiary)]">财库类型</div>
+                <div className="font-bold text-[var(--text-primary)] mt-1">{d.wealthType}</div>
+                <div className="text-xs text-[var(--text-secondary)] mt-1">{d.wealthDesc}</div>
+              </div>
+              <div className="bg-[var(--bg-highlight)] rounded-xl p-4 border-l-4 border-yellow-400">
+                <div className="text-xs text-[var(--text-tertiary)]">财库通路</div>
+                <div className="font-bold text-[var(--text-primary)] mt-1">{d.pathType}</div>
+                <div className="text-xs text-[var(--text-secondary)] mt-1">{d.pathDesc}</div>
+              </div>
+            </div>
+            <HighlightBox>
+              <strong>理财建议：</strong> {d.wealthAdvice} 通路类型为{d.pathType}——{d.pathDesc}
+            </HighlightBox>
+          </Section>
+
+          {/* ═══════════ 8. 岁值星 ═══════════ */}
+          <Section title="岁值星 · 心灵动力" icon="⭐">
+            <div className="flex items-center gap-4 bg-[var(--bg-highlight)] rounded-xl p-4">
+              <div className="shrink-0 w-14 h-14 rounded-full bg-[var(--color-primary)]/15 flex items-center justify-center text-xl">⭐</div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs text-[var(--text-tertiary)]">虚岁{d.xuAge} · 尾数{d.xuAge%10}</span>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-[var(--color-primary)]/10 text-[var(--color-primary)]">{d.ageStar}</span>
+                </div>
+                <p className="text-sm text-[var(--text-secondary)]">{d.ageStarDesc}</p>
+              </div>
+            </div>
+          </Section>
+
+          {/* ═══════════ 9. 四大关系气场 ═══════════ */}
+          <Section title="四大关系 · 气场" icon="🌐">
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              {[
+                {label:'上层',qi:d.upperQi,icon:'⬆️'},{label:'自我',qi:d.selfQi,icon:'🎯'},
+                {label:'下层',qi:d.lowerQi,icon:'⬇️'},{label:'对外',qi:d.outerQi,icon:'🌍'},
+              ].map(item=>(
+                <div key={item.label} className="bg-[var(--bg-highlight)] rounded-xl p-3 border-l-4 border-[var(--color-primary)]/30">
+                  <div className="flex items-center gap-1 mb-1">
+                    <span>{item.icon}</span>
+                    <span className="text-xs text-[var(--text-tertiary)]">{item.label}关系</span>
+                  </div>
+                  <div className="text-base font-bold text-[var(--text-primary)]">{item.qi}</div>
+                  <div className="text-[11px] text-[var(--text-secondary)] mt-0.5">{QI_DESC[item.qi]||''}</div>
+                </div>
+              ))}
+            </div>
+            <HighlightBox>
+              <strong>上层策略：</strong>{d.strategy.upper}<br/>
+              <strong>自我策略：</strong>{d.strategy.self}<br/>
+              <strong>下层策略：</strong>{d.strategy.lower}<br/>
+              <strong>对外策略：</strong>{d.strategy.outer}
+            </HighlightBox>
+          </Section>
+
+          {/* ═══════════ 10. 十大能量 · 内在动能 ═══════════ */}
+          <Section title="十大能量 · 内在动能" icon="⚡">
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              {[
+                {label:'天格能量(脑力)',e:d.tianE},{label:'人格能量(情绪)',e:d.renE},
+                {label:'地格能量(行动)',e:d.diE},{label:'总格能量(整体)',e:d.zongE},
+              ].map(item=>(
+                <div key={item.label} className="bg-[var(--bg-highlight)] rounded-xl p-3 border-l-4 border-[var(--color-primary)]/30">
+                  <div className="text-[10px] text-[var(--text-tertiary)]">{item.label}</div>
+                  <div className="text-base font-bold text-[var(--text-primary)]">{item.e}</div>
+                  <div className="text-[11px] text-[var(--text-secondary)] mt-0.5">{ENERGY_DESC[item.e]||''}</div>
+                </div>
+              ))}
+            </div>
+            <HighlightBox>
+              胎是谷底也是转，一切变量九宫管。养得助力在人际，长生贵人生两地。<br/>
+              看人成功与失败，流年关键在冠带。临官动力是十足，创业升官看基础。<br/>
+              若是帝旺还负债，后运滚滚筑高台。衰是倦怠病最乱，死绝常有鬼来撞。
+            </HighlightBox>
+          </Section>
+
+          {/* ═══════════ 11. 碰撞周期 ═══════════ */}
+          <Section title="碰撞周期" icon="💥" badge="人生转折点">
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              <div className="bg-[var(--bg-highlight)] rounded-xl p-3 text-center">
+                <div className="text-[10px] text-[var(--text-tertiary)]">上层碰撞</div>
+                <div className="text-xs font-semibold mt-1 text-[var(--text-primary)]">{d.upperColl.slice(0,5).join('、')}…</div>
+                <div className="text-[10px] text-[var(--text-tertiary)] mt-1">犯上·变节·开窍·田宅</div>
+              </div>
+              <div className="bg-[var(--bg-highlight)] rounded-xl p-3 text-center">
+                <div className="text-[10px] text-[var(--text-tertiary)]">自我碰撞</div>
+                <div className="text-xs font-semibold mt-1 text-[var(--text-primary)]">{d.selfColl.slice(0,5).join('、')}…</div>
+                <div className="text-[10px] text-[var(--text-tertiary)] mt-1">变心·冲突·情绪不稳</div>
+              </div>
+              <div className="bg-[var(--bg-highlight)] rounded-xl p-3 text-center">
+                <div className="text-[10px] text-[var(--text-tertiary)]">下层碰撞</div>
+                <div className="text-xs font-semibold mt-1 text-[var(--text-primary)]">{d.lowerColl.slice(0,5).join('、')}…</div>
+                <div className="text-[10px] text-[var(--text-tertiary)] mt-1">情变·亲友反目·破财</div>
+              </div>
+            </div>
+            <HighlightBox>
+              <strong>应变之道：</strong> 上层碰撞需克制，思想上开窍；自我碰撞注意情绪与健康；下层碰撞理性抉择，防意外。碰撞之年宜静不宜动。
+            </HighlightBox>
+          </Section>
+
+          {/* ═══════════ 12. 90年运势卷轴 ═══════════ */}
+          <Section title="90年运势卷轴" icon="📜" badge="十年一组·九年一轮">
+            <div className="overflow-x-auto scrollbar-hide -mx-2 px-2">
+              <table className="w-full text-xs md:text-sm min-w-[600px]">
+                <thead>
+                  <tr className="border-b border-[var(--border-color)]">
+                    <th className="text-left py-2 text-[var(--text-tertiary)] font-semibold">组别</th>
+                    <th className="text-left py-2 text-[var(--text-tertiary)] font-semibold">年龄</th>
+                    <th className="text-left py-2 text-[var(--text-tertiary)] font-semibold">卦象</th>
+                    <th className="text-left py-2 text-[var(--text-tertiary)] font-semibold">口诀</th>
+                    <th className="text-left py-2 text-[var(--text-tertiary)] font-semibold">解读</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {d.groups.map((g,i) => (
+                    <tr key={i} className="border-b border-[var(--border-color)]/50 hover:bg-[var(--bg-highlight)]">
+                      <td className="py-2 font-semibold text-[var(--text-primary)]">{g.name}</td>
+                      <td className="py-2 text-[var(--text-secondary)]">{g.ages}</td>
+                      <td className="py-2">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] bg-[var(--color-primary)]/10 text-[var(--color-primary)]">{g.gua}</span>
+                      </td>
+                      <td className="py-2 text-[var(--text-secondary)] text-[11px]">{g.koujue}</td>
+                      <td className="py-2 text-[var(--text-secondary)] text-[11px]">{g.jie}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <HighlightBox>
+              十年一组，每组九年。运势如四季轮转——{d.groups[0].name}开局，{d.groups[5].name}正当年，{d.groups[9].name}收尾。顺势而为，逆势而修。
+            </HighlightBox>
+          </Section>
+
+          {/* ═══════════ 13. 流年运作策略 ═══════════ */}
+          <Section title="流年运作策略" icon="🧭">
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                {label:'上层',v:d.strategy.upper},{label:'自我',v:d.strategy.self},
+                {label:'下层',v:d.strategy.lower},{label:'对外',v:d.strategy.outer},
+              ].map(item=>(
+                <div key={item.label} className="bg-[var(--bg-highlight)] rounded-xl p-3 border-l-4 border-[var(--color-primary)]/30">
+                  <div className="text-[10px] text-[var(--text-tertiary)]">{item.label}策略</div>
+                  <div className="text-sm font-semibold text-[var(--text-primary)] mt-1">{item.v}</div>
+                </div>
+              ))}
+            </div>
+            <HighlightBox>
+              <strong>核心提醒：</strong> 气场不可改变，但能量可以调整。知道自己的磁场变化，就能提前布局。
+              运势好时紧追不舍，运势弱时耐心等待。每一年的岁值星是当年的心灵动力，配合气场策略使用效果更佳。
+            </HighlightBox>
+          </Section>
+
         </div>
 
-        {/* 底部操作 */}
+        {/* 底部 */}
         <div className="mt-6 text-center space-y-3">
-          <button
-            onClick={() => router.push('/jiugong')}
-            className="px-6 py-2.5 rounded-lg border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:border-[var(--color-primary)]/40 hover:text-[var(--text-accent)] transition-all"
-          >
+          <button onClick={()=>router.push('/jiugong')}
+            className="px-6 py-2.5 rounded-lg border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:border-[var(--color-primary)]/40 transition-all">
             ← 重新测算
           </button>
           <p className="text-xs text-[var(--text-tertiary)] opacity-60">
-            基于河图洛书五格三才体系 · 仅供自我认识参考
+            九宫姓名学 · 程天相九宫学理体系 · 仅供自我认识参考
           </p>
         </div>
       </div>
