@@ -1,6 +1,8 @@
 // ═══════════════════════════════════════════════════════
+import { JU_FULL, XINGYUN as XINGYUN_DATA, MGT_FULL, ENERGY_FULL, SUIZHI_FULL, WX_CHAR_FULL, XIANG_STRATEGY_FULL } from './jiugong-data';
 // 九宫学理 · 引擎 v5 — 逐条对照技术规格文档修正
 // ═══════════════════════════════════════════════════════
+import { JU_FULL, XINGYUN as XINGYUN_DATA, MGT_FULL, ENERGY_FULL, SUIZHI_FULL, WX_CHAR_FULL, XIANG_STRATEGY_FULL } from './jiugong-data';
 
 let kangxi: Map<string,number> | null = null;
 export async function loadKangxi(): Promise<void> {
@@ -60,9 +62,7 @@ const ZHI: Record<number,{name:string;element:string;desc:string}>={
   9:{name:'五鬼星',element:'阳水',desc:'变化型，破坏与创意并存'},
 };
 
-// ── 星运 (§7: 总笔画→星运) ──
-const XINGYUN: Record<number,string>={10:'零暗星',11:'接替星',12:'背景星',13:'天机星',14:'孤克星',15:'福寿星',16:'厚重星',17:'刚强星',18:'显达星',19:'辛苦星',20:'暗金星',21:'争权星',22:'秋霜星',23:'旭日星',24:'福德星',25:'资财星',26:'变怪星',27:'增长星',28:'阔达星',29:'智略星',30:'经营星',31:'勇明星',32:'侥幸星',33:'背景星',34:'破家星',35:'温和星',36:'领袖星',37:'威严星',38:'艺术星',39:'权贵星',40:'胆识星',41:'高瞻星',42:'宽厚星',43:'风光星',44:'隐士星',45:'顺境星',46:'散财星',47:'精进星',48:'才艺星',49:'虚浮星',50:'满贯星'};
-const XINGYUN_DESC: Record<number,string>={10:'隐而不发，需外力触发',11:'承接旧业，守成有方',12:'借光发亮，最忌独闯',13:'善用天时，随机应变',14:'独立性强，宜专业路线',15:'长寿有福，宜稳守',16:'根基深厚，大器晚成',17:'意志坚定，排除万难',18:'可出名望，宜公众人物',19:'劳碌有成，忌行险侥幸',20:'隐藏光芒，不鸣则已',21:'在斗争中成凤凰，带动力超强',22:'凌厉果断，善用势头',23:'光芒四射，人气旺盛',24:'贵人照顾，绝处逢生',25:'天生财运，善于经营',26:'变化多端，英雄豪杰',27:'与日俱增，稳步上升',28:'心胸宽阔，四海为家',29:'足智多谋，不宜妄动',30:'最会经营财富，最怕思多行少',31:'勇敢果断，迎难而上',32:'运气很好，关键时刻翻转',33:'借光发亮，最忌独闯',34:'破而后立，愈挫愈勇',35:'温文儒雅，亲和力强',36:'最易出CEO，统御四方',37:'不怒自威，令人敬畏',38:'才艺出众，审美独特',39:'有官运，宜掌握权力',40:'胆量过人，敢为人先',41:'高瞻远瞩，格局宏大',42:'宽以待人，得道多助',43:'表面风光，需防暗流',44:'大隐隐于市，内涵深厚',45:'顺风顺水，天时地利',46:'左手进右手出，需理财',47:'精益求精，工匠精神',48:'多才多艺，宜全面发展',49:'浮而不实，需脚踏实地',50:'圆满之象，功成名就'};
+// ── 星运 (§7: 总笔画→星运) ──const XINGYUN_DESC: Record<number,string>={10:'隐而不发，需外力触发',11:'承接旧业，守成有方',12:'借光发亮，最忌独闯',13:'善用天时，随机应变',14:'独立性强，宜专业路线',15:'长寿有福，宜稳守',16:'根基深厚，大器晚成',17:'意志坚定，排除万难',18:'可出名望，宜公众人物',19:'劳碌有成，忌行险侥幸',20:'隐藏光芒，不鸣则已',21:'在斗争中成凤凰，带动力超强',22:'凌厉果断，善用势头',23:'光芒四射，人气旺盛',24:'贵人照顾，绝处逢生',25:'天生财运，善于经营',26:'变化多端，英雄豪杰',27:'与日俱增，稳步上升',28:'心胸宽阔，四海为家',29:'足智多谋，不宜妄动',30:'最会经营财富，最怕思多行少',31:'勇敢果断，迎难而上',32:'运气很好，关键时刻翻转',33:'借光发亮，最忌独闯',34:'破而后立，愈挫愈勇',35:'温文儒雅，亲和力强',36:'最易出CEO，统御四方',37:'不怒自威，令人敬畏',38:'才艺出众，审美独特',39:'有官运，宜掌握权力',40:'胆量过人，敢为人先',41:'高瞻远瞩，格局宏大',42:'宽以待人，得道多助',43:'表面风光，需防暗流',44:'大隐隐于市，内涵深厚',45:'顺风顺水，天时地利',46:'左手进右手出，需理财',47:'精益求精，工匠精神',48:'多才多艺，宜全面发展',49:'浮而不实，需脚踏实地',50:'圆满之象，功成名就'};
 
 // ── 五行生克性格文案 ──
 const WX_CHAR: Record<string,string>={
@@ -195,7 +195,7 @@ export interface JiugongFull {
   tian:number;ren:number;di:number;zong:number;wai:number;
   tianWx:string;renWx:string;diWx:string;xuAge:number;
   ju:number;juDesc:string;zhi:number;zhiName:string;zhiElement:string;zhiDesc:string;
-  xingyun:string;xingyunDesc:string;
+  xingyunName:string;xingyunFull:string;juFull:string;zhiFull:string;mgtFull:string;wxThinkFull:string;wxActionFull:string;ageStarFull:string;energyFull:Record<string,string>;xiangStrategy:Record<string,{upper:string;self:string;lower:string;outer:string;caution:string}>|null;
   thinkRel:string;thinkDesc:string;actionRel:string;actionDesc:string;
   mainFunc:string;mainFuncDesc:string;
   wealthPath:string;wealthPathDesc:string;wealthPalace:string;wealthPalaceDesc:string;
