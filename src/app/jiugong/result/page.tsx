@@ -173,7 +173,7 @@ export default function JiugongResultPage() {
       <div className="card-jade p-5">
         <h2 className="text-lg font-bold mb-3">📜 90年运程卷轴</h2>
         <div className="text-xs text-[var(--text-tertiary)] mb-2">出生：{d.year}年 · 10组×9年=90年 · 每年独立卦象</div>
-        <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
+        <div className="overflow-x-auto max-h-[70vh] overflow-y-auto scroll-print-all">
           <table className="w-full text-xs">
             <thead><tr className="text-[var(--text-tertiary)] sticky top-0 bg-[var(--bg-card)]">
               <th className="p-1 text-left">年龄</th><th className="p-1 text-left">年份</th><th className="p-1 text-left">象</th>
