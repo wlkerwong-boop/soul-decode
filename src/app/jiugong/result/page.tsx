@@ -125,29 +125,25 @@ export default function JiugongResultPage() {
       {/* 90年运程卷轴 */}
       <div className="card-jade p-5">
         <h2 className="text-lg font-bold mb-3">📜 90年运程卷轴</h2>
-        <div className="text-xs text-[var(--text-tertiary)] mb-2">10组×9年=90年 · 出生：{d.year}年</div>
-        {d.groups.map((g,gi)=>(
-          <div key={gi} className="mb-3">
-            <div className="font-bold text-sm bg-[var(--bg-highlight)] rounded-lg px-3 py-1 mb-1">{g.name}（{g.ages}）</div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead><tr className="text-[var(--text-tertiary)]"><th className="p-1 text-left">年龄</th><th className="p-1 text-left">年份</th><th className="p-1 text-left">运程</th><th className="p-1 text-left">卦象</th><th className="p-1 text-left">口诀</th><th className="p-1 text-left">解读</th></tr></thead>
-                <tbody>
-                  {d.years.filter(y=>y.group===g.name).map((y,j)=>(
-                    <tr key={j} className="border-t border-[var(--border-color)] hover:bg-[var(--bg-highlight)]">
-                      <td className="p-1 font-semibold">{y.age}</td>
-                      <td className="p-1">{y.year}</td>
-                      <td className="p-1">{y.yun}</td>
-                      <td className="p-1">{y.gua}</td>
-                      <td className="p-1 text-[var(--text-secondary)]">{y.koujue}</td>
-                      <td className="p-1 text-[var(--text-secondary)]">{y.jiedu}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ))}
+        <div className="text-xs text-[var(--text-tertiary)] mb-2">出生：{d.year}年 · 每年独立算象+能量查表</div>
+        <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
+          <table className="w-full text-xs">
+            <thead><tr className="text-[var(--text-tertiary)] sticky top-0 bg-[var(--bg-card)]"><th className="p-1 text-left">年龄</th><th className="p-1 text-left">年份</th><th className="p-1 text-left">象</th><th className="p-1 text-left">运程</th><th className="p-1 text-left">卦象</th><th className="p-1 text-left">口诀</th><th className="p-1 text-left">解读</th></tr></thead>
+            <tbody>
+              {d.years.map((y,j)=>(
+                <tr key={j} className="border-t border-[var(--border-color)] hover:bg-[var(--bg-highlight)]">
+                  <td className="p-1 font-semibold">{y.age}</td>
+                  <td className="p-1">{y.year}</td>
+                  <td className="p-1">{y.chance}</td>
+                  <td className="p-1">{y.yun}</td>
+                  <td className="p-1 font-semibold">{y.gua}</td>
+                  <td className="p-1 text-[var(--text-secondary)]">{y.koujue}</td>
+                  <td className="p-1 text-[var(--text-secondary)]">{y.jiedu}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className="text-center text-xs text-[var(--text-tertiary)] py-6">
