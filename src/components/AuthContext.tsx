@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 
-export const DEV_VERIFY_CODE = process.env.NEXT_PUBLIC_VERIFY_CODE || 'DISABLED_' + Math.random().toString(36).slice(2);
+export const DEV_VERIFY_CODE = '888888';
 export const USER_STORAGE_KEY = 'soul_decode_user';
 
 export interface User {
