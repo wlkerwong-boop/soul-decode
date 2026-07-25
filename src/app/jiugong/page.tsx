@@ -169,7 +169,11 @@ export default function JiugongPage() {
                   <div key={i} className="bg-[var(--bg-highlight)] rounded-xl p-3">
                     <div className="text-xs text-[var(--text-tertiary)]">{e.l}</div>
                     <div className="font-bold">{e.v}</div>
-                    <div className="text-xs text-[var(--text-tertiary)]">{d.eDesc[e.v]}</div>
+                    <div className="text-xs text-[var(--text-tertiary)]">{
+                      e.v==='胎'?'酝酿期·谷底':e.v==='养'?'吸收期·根基':e.v==='长生'?'成长期·贵人':e.v==='冠带'?'成熟期·自我':
+                      e.v==='临官'?'发展期·忙碌':e.v==='帝旺'?'巅峰期·天助':e.v==='衰'?'倦怠期·回收':e.v==='病'?'病变期·波折':
+                      e.v==='死'?'破灭期·脆弱':e.v==='绝'?'谷底期·空洞':''
+                    }</div>
                   </div>
                 ))}
               </div>
