@@ -907,6 +907,7 @@ section {
    Print Styles (PDF export, Kimi-inspired)
    ═══════════════════════════════════════════════════ */
 @media print {
+  .no-print { display: none !important; }
   @page {
     size: A4;
     margin: 2cm 2.5cm;

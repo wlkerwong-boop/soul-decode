@@ -16,9 +16,16 @@ export default function JiugongResultPage() {
   const d = data;
 
   return (
-    <div className="gradient-bg min-h-screen px-4 py-8 max-w-3xl mx-auto space-y-5 text-sm">
-
-      {/* ═══ 命盘摘要 ═══ */}
+    <div className="gradient-bg min-h-screen px-4 py-8 max-w-3xl mx-auto space-y-6 text-sm">
+      
+      {/* PDF下载按钮 */}
+      <div className="no-print text-center mb-2">
+        <button onClick={() => window.print()} className="px-6 py-2 rounded-xl bg-[var(--text-accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity">
+          📥 下载 PDF 报告
+        </button>
+      </div>
+      
+      {/* 命盘摘要 */}
       <div className="card-jade p-5">
         <h2 className="text-lg font-bold mb-3">📋 基本命盘</h2>
         <div className="grid grid-cols-3 md:grid-cols-5 gap-2 text-center">
