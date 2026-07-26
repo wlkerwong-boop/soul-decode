@@ -136,8 +136,8 @@ export function calcFull(name:string,year:number,month:number,day:number):Jiugon
   // 五行性格
   const tw=WX[tian%10],rw=WX[ren%10],dw=WX[di%10];
   const wxOrder=(a:string)=>({木:1,火:2,土:3,金:4,水:5}as Record<string,number>)[a]||0;
-  const wxRel=(a:string,b:string)=>a===b?'平':((wxOrder(a)-wxOrder(b)+5)%5===1?'生':'克');
-  const thinkRel=`${tw}${wxRel(tw,rw)}${rw}`,actionRel=`${rw}${wxRel(rw,dw)}${dw}`;
+  const wxRel=(a:string,b:string)=>a===b?'平':((wxOrder(b)-wxOrder(a)+5)%5===1?'生':'克');
+  const thinkRel=`${rw}${wxRel(rw,tw)}${tw}`,actionRel=`${dw}${wxRel(dw,rw)}${rw}`;
   const thinkDesc=WX_CHAR_FULL[thinkRel]||'';
   const actionDesc=WX_CHAR_FULL[actionRel]||'';
   const gen=(wxOrder(rw)-wxOrder(dw)+5)%5;
