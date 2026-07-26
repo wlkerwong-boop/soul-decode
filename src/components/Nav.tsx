@@ -30,7 +30,8 @@ export default function Nav() {
     { href: '/jiugong', label: '📜 九宫学理' },
     { href: '/daily', label: '🌅 每日运势' },
     { href: '/human-design', label: '🧬 人类图排盘' },
-    { href: '/dharma', label: '☸ 法藏' },
+    // 法藏入口临时隐藏（含家庭私人信息，爸爸 2026-07-27 指令）；恢复时加回：
+    // { href: '/dharma', label: '☸ 法藏' },
   ];
 
   return (
