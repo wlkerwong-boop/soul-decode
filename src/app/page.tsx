@@ -130,7 +130,7 @@ export default function Home() {
           {/* 底部渐变遮罩 + 钩子 */}
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--bg-card)] via-[var(--bg-card)]/80 to-transparent flex items-end justify-center pb-5">
             <p className="text-sm text-[var(--color-primary)] font-medium">
-              完整报告约 80 页，含七大系统交叉分析 →
+              深度图文报告，含七大系统交叉分析 →
             </p>
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function Home() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { value: '7', label: '古老智慧系统', sub: '八字·人类图·占星·紫微·五运六气·MBTI·中医体质' },
-            { value: '80', label: '页深度报告', sub: '七系统交叉分析，篇幅真实可查' },
+            { value: '∞', label: '页深度报告', sub: '七系统交叉分析，AI 个性化解讀' },
             { value: '1', label: '一份完整报告', sub: '多系统交叉印证，不是堆砌' },
             { value: '∞', label: 'AI 深度解读', sub: '个性化成长路径规划' },
           ].map((s, i) => (

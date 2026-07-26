@@ -255,7 +255,7 @@ export default function MasterPage() {
                 <p>第三章 · 情绪与关系（占星×合盘）</p>
                 <p>第四章 · 身体与健康（五运六气×中医体质）</p>
                 <p>第五章 · 天赋与方向（七系统交叉解读）</p>
-                <p className="text-[var(--text-accent)]">……共约 80 页</p>
+                <p className="text-[var(--text-accent)]">七大系统交叉融合 · 深度图文报告</p>
               </div>
             </div>
 
@@ -385,7 +385,7 @@ export default function MasterPage() {
                   人生角色 {data.hd.profile} · {data.hd.authority}
                 </p>
                 <p className="text-xs text-[var(--text-tertiary)] mt-3">
-                  这只是人类图系统的冰山一角——你的完整报告涵盖 7 大古老智慧系统，约 80 页深度解读。
+                  这只是人类图系统的冰山一角——你的完整报告涵盖 7 大古老智慧系统，含深度图文解读。
                 </p>
               </div>
             )}
@@ -397,7 +397,7 @@ export default function MasterPage() {
               </p>
               <button onClick={() => setShowFullReport(true)}
                 className="px-8 py-4 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-semibold text-base hover:shadow-lg transition-all transform hover:scale-105">
-                📖 领取完整报告（约 80 页）→
+                📖 领取完整报告（深度图文版）→
               </button>
               <p className="text-xs text-[var(--text-tertiary)] mt-2">八字 · 人类图 · 占星 · 紫微斗数 · 五运六气 · MBTI · 中医体质</p>
             </div>
