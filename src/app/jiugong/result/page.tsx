@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { type JiugongFull } from '@/lib/jiugong-v3';
+import { centeredScrollTop } from '@/lib/jiugong-scroll';
 
 /* ═══════════════════════════════════
    共享小组件
@@ -37,6 +38,7 @@ function DetailBlock({ summary, children }: { summary: string; children: React.R
 export default function JiugongResultPage() {
   const [data, setData] = useState<JiugongFull | null>(null);
   const currentYearRef = useRef<HTMLTableRowElement>(null);
+  const scrollPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const raw = sessionStorage.getItem('jiugong-data');
@@ -45,9 +47,15 @@ export default function JiugongResultPage() {
 
   // 卷轴自动定位到当前年份
   useEffect(() => {
-    if (currentYearRef.current) {
+    if (currentYearRef.current && scrollPanelRef.current) {
       setTimeout(() => {
-        currentYearRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const row = currentYearRef.current;
+        const panel = scrollPanelRef.current;
+        if (!row || !panel) return;
+        panel.scrollTo({
+          top: centeredScrollTop(row.offsetTop, row.offsetHeight, panel.clientHeight),
+          behavior: 'smooth',
+        });
       }, 300);
     }
   }, [data]);
@@ -171,9 +179,9 @@ export default function JiugongResultPage() {
       </Section>
 
       {/* ═══ 8. 四格气场 ═══ */}
-      <Section icon="🌐" title="2026年气场 · 卦象">
+      <Section icon="🌐" title={`${currentYear}年气场 · 卦象`}>
         <div className="text-xs text-[var(--text-tertiary)] mb-3 text-center">
-          主数：2026−1111=915 → {d.mainNum}
+          主数：{currentYear}−1111={currentYear - 1111} → {d.mainNum}
         </div>
         <div className="space-y-2">
           {[
@@ -194,10 +202,20 @@ export default function JiugongResultPage() {
               </div>
               <div className="text-xs text-[var(--text-secondary)] mt-0.5">策略：{q.strategy}</div>
               {d.xiangStrategy?.[q.qi] && (
-                <div className="mt-1 text-[11px] text-[var(--text-secondary)] opacity-70 leading-relaxed">
-                  {['upper','self','lower','outer'].map(k => (
-                    <span key={k} className="mr-2">{d.xiangStrategy![q.qi][k as keyof typeof d.xiangStrategy[string]]}</span>
-                  ))}
+                <div className="mt-2 text-[11px] text-[var(--text-secondary)] leading-relaxed">
+                  <div className="flex flex-wrap gap-1.5">
+                    {([
+                      ['upper', '上层'],
+                      ['self', '自我'],
+                      ['lower', '下层'],
+                      ['outer', '对外'],
+                    ] as const).map(([key, label]) => (
+                      <span key={key} className="rounded-full border border-[var(--border-color)] bg-[var(--bg-card)] px-2 py-1">
+                        <span className="text-[var(--text-tertiary)]">{label}：</span>
+                        {d.xiangStrategy![q.qi][key]}
+                      </span>
+                    ))}
+                  </div>
                   {d.xiangStrategy[q.qi].caution && <span className="block mt-0.5 text-red-400">⚠ {d.xiangStrategy[q.qi].caution}</span>}
                 </div>
               )}
@@ -212,6 +230,7 @@ export default function JiugongResultPage() {
           出生：{d.year}年 · 当前 {currentAge}岁（{currentYear}年）· 高亮行
         </p>
         <div
+          ref={scrollPanelRef}
           className="overflow-x-auto max-h-[60vh] overflow-y-auto scrollbar-hide rounded-xl border border-[var(--border-color)]"
           style={{ WebkitOverflowScrolling: 'touch', scrollSnapType: 'x proximity' }}
         >
