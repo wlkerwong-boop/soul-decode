@@ -7,6 +7,7 @@ import BaziChart from '@/components/BaziChart';
 import ZiWeiChart from '@/components/ZiWeiChart';
 import { marked } from 'marked';
 import { CHINA_CITIES, INTERNATIONAL_CITIES, CITY_TZ } from '@/data/cities';
+import { beginNewReportView } from '@/lib/master-report-view';
 
 const YEARS = Array.from({length:121},(_,i)=>2026-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
@@ -86,14 +87,6 @@ export default function MasterPage() {
     try {
       const saved = localStorage.getItem('master_report_history');
       if (saved) setSavedReports(JSON.parse(saved));
-    } catch {}
-  }, []);
-
-  // Restore last report on mount — if user has a saved report, skip quick input
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('last_master_report');
-      if (saved) { const p=JSON.parse(saved); if(p.report){setReport(p.report);setData(p.data);setShowQuickInput(false);} }
     } catch {}
   }, []);
 
@@ -195,6 +188,16 @@ export default function MasterPage() {
 
   // ── R2: 骨架结果（免费排盘 → 仅展示核心 HD 信息）──
   const showSkeleton = data && !showFullReport;
+  const startNewReport = () => {
+    const next = beginNewReportView({ report, data, showQuickInput, showFullReport, error });
+    setReport(next.report);
+    setData(next.data);
+    setShowQuickInput(next.showQuickInput);
+    setShowFullReport(next.showFullReport);
+    setError(next.error);
+    try { localStorage.removeItem('last_master_report'); } catch {}
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="gradient-bg min-h-screen px-4 py-6 md:py-10">
@@ -204,6 +207,15 @@ export default function MasterPage() {
           <h1 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight leading-tight">✦ <span className="gradient-text">人生总览</span></h1>
           <p className="text-base md:text-lg text-[var(--text-secondary)]">一次输入 · 七大系统交叉融合</p>
           <p className="text-sm text-[var(--text-secondary)] opacity-70">八字·人类图·占星·紫微斗数·五运六气·流年·人生规划</p>
+          {(report || data) && !showQuickInput && (
+            <button
+              type="button"
+              onClick={startNewReport}
+              className="mt-4 rounded-xl border border-[var(--border-accent)] bg-[var(--bg-card)] px-5 py-2.5 text-sm font-semibold text-[var(--text-accent)] hover:bg-[var(--bg-highlight)] transition-colors"
+            >
+              ＋ 为新的人重新排盘
+            </button>
+          )}
         </div>
 
         {/* ── R3: 等待页覆盖 ── */}

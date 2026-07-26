@@ -1,9 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
-
-const MASTER_HASH = '92925488b28ab12584ac8fcaa8a27a0f497b2c62940c8f4fbc8ef19ebc87c43e';
-const WHITELIST = ['13800000000', '13900000000'].map(p => p.slice(0,0)); // 空白名单 — 白名单逻辑见下方
+import { canUseEmergencyCode } from '@/lib/auth-policy';
 
 async function sha256(str: string): Promise<string> {
   const data = new TextEncoder().encode(str);
@@ -11,14 +9,6 @@ async function sha256(str: string): Promise<string> {
   return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-function isWhitelisted(phone: string): boolean {
-  // 仅 test1/test2/yifei@test.com 对应的手机号（Supabase Auth 邮箱登录无手机号，此处用简化白名单）
-  // 实际校验：万能码仅对已存在的测试 session/localStorage 生效
-  const normalized = phone.replace(/\s/g, '');
-  const existing = loadUserFromStorage();
-  if (existing) return true; // 已登录用户可直接用万能码
-  return false; // 未登录用户不能用万能码
-}
 export const USER_STORAGE_KEY = 'soul_decode_user';
 
 export interface User {
@@ -85,8 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { ok: false, message: '请输入有效的11位手机号' };
     }
     const codeHash = await sha256(code);
-    if (codeHash !== MASTER_HASH) {
-      return { ok: false, message: '验证码错误' };
+    if (!canUseEmergencyCode(normalized, codeHash)) {
+      return { ok: false, message: '账号登录正在升级；人生总览无需登录，可直接排盘' };
     }
 
     // Auto-register if not found (seamless UX)
@@ -122,8 +112,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { ok: false, message: '请输入有效的11位手机号' };
     }
     const codeHash = await sha256(code);
-    if (codeHash !== MASTER_HASH) {
-      return { ok: false, message: '验证码错误' };
+    if (!canUseEmergencyCode(normalized, codeHash)) {
+      return { ok: false, message: '账号注册正在升级；人生总览无需登录，可直接排盘' };
     }
     if (!trimmedNickname || trimmedNickname.length < 2 || trimmedNickname.length > 20) {
       return { ok: false, message: '昵称长度需在 2-20 个字符之间' };
@@ -149,6 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     if (typeof window === 'undefined') return;
     localStorage.removeItem(USER_STORAGE_KEY);
+    localStorage.removeItem('last_master_report');
     setUser(null);
   }, []);
 
