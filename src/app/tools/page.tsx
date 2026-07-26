@@ -84,9 +84,7 @@ export default function ToolsPage() {
           <Link href="/" className="gradient-text text-xl font-bold tracking-wider">
             ✦ 灵魂解码
           </Link>
-          <Link href="/dharma" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-colors">
-            ☸ 法藏
-          </Link>
+          {/* 法藏链接已临时摘除（爸爸 2026-07-27 指令，含家庭私人信息） */}
         </div>
       </nav>
 
