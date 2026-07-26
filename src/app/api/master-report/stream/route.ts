@@ -3,19 +3,12 @@ import { NextRequest } from 'next/server';
 import { getBirthCoords } from '@/data/cities';
 import { calculateBodygraph } from '@/lib/hd';
 import { calcPlanetPositions } from '@/lib/astrology';
-
-function calcBazi(y: number, m: number, d: number, h: number) {
-  const { Solar } = require('lunar-javascript');
-  const solar = Solar.fromYmdHms(y, m, d, h, 0, 0);
-  const lunar = solar.getLunar();
-  const pillars = [
-    lunar.getYearInGanZhiExact(), lunar.getMonthInGanZhiExact(),
-    lunar.getDayInGanZhiExact(), lunar.getTimeInGanZhi()
-  ];
-  const dayMaster = lunar.getDayGan();
-  const elMap: Record<string, string> = {甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
-  return { pillars, dayMaster: `${dayMaster}（${elMap[dayMaster]}）` };
-}
+import {
+  buildPersonalReportSegments,
+  calculateReportBazi,
+  calculateWuyunLiuqi,
+  PERSONAL_REPORT_SYSTEM_PROMPT,
+} from '@/lib/report-depth';
 
 async function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
   try {
@@ -88,14 +81,6 @@ function calcZodiac(y: number, m: number, d: number) {
   return { zodiac: '摩羯座' };
 }
 
-function calcWuyunLiuqi(y: number) {
-  const stem = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'][(y-4) % 10];
-  const branch = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'][(y-4) % 12];
-  const yun: Record<string, string> = {甲:'土运',乙:'金运',丙:'水运',丁:'木运',戊:'火运',己:'土运',庚:'金运',辛:'水运',壬:'木运',癸:'火运'};
-  const qi: Record<string, string> = {子:'少阴君火',丑:'太阴湿土',寅:'少阳相火',卯:'阳明燥金',辰:'太阳寒水',巳:'厥阴风木',午:'少阴君火',未:'太阴湿土',申:'少阳相火',酉:'阳明燥金',戌:'太阳寒水',亥:'厥阴风木'};
-  return { year: y, stem, branch, wuyun: `${stem}年 → ${yun[stem]}`, liuqi: `${branch}年 → ${qi[branch]}`, description: `${y}年天干为${stem}，主${yun[stem]}；地支为${branch}，主${qi[branch]}。${yun[stem]}之年，${qi[branch]}为司天之气。` };
-}
-
 function calcLiuNian(y: number) {
   const stems = '甲乙丙丁戊己庚辛壬癸', branches = '子丑寅卯辰巳午未申酉戌亥';
   const cy = new Date().getFullYear();
@@ -111,61 +96,29 @@ export async function POST(req: NextRequest) {
   const tz = timezone || 'Asia/Shanghai';
   const { lat, lon } = getBirthCoords(body.city, location);
   const g = gender === '女' ? '女' : '男';
-  const age = new Date().getFullYear() - y;
+  const now = new Date();
+  const age = now.getFullYear() - y - (now.getMonth() + 1 < m || (now.getMonth() + 1 === m && now.getDate() < d) ? 1 : 0);
 
   // 计算所有数据
-  const baziResult = calcBazi(y, m, d, h);
+  const baziResult = calculateReportBazi(y, m, d, h);
   const hdResult = await calcHD(y, m, d, h, mi, tz, lat, lon);
   const ziweiResult = calcZiwei(y, m, d, h, g);
   const astrologyResult = await calcPlanetPositions(y, m, d, h, mi, lat, lon);
-  const wuyunResult = calcWuyunLiuqi(y);
+  const wuyunResult = calculateWuyunLiuqi(y);
   const liunianResult = calcLiuNian(y);
 
-  // 构建提示词
-  const planetSummary = astrologyResult.planets.map((p: any) => `${p.name}${p.sign}座${p.degree}°${p.retrograde ? '（逆行）' : ''}`).join('，');
-  const userPrompt = `请为一位${age}岁的${g}性出具一份七系统融合人生总览报告。用户未提供姓名，报告中称呼统一用"你"直接对话，禁止编造任何名字（如"星月""小明"等）。
-
-数据：
-八字四柱：${baziResult.pillars.join(' ')}
-日主：${baziResult.dayMaster}
-${hdResult ? `人类图：${hdResult.type} ${hdResult.profile}，${hdResult.authority}，策略：${hdResult.strategy}，定义中心：${(hdResult.definedCenters||[]).join('、')}，通道：${(hdResult.channels||[]).join('、')}` : '人类图：数据暂缺'}
-${ziweiResult ? `紫微斗数：${ziweiResult.palaces.map((p:any)=>`${p.name}宫${p.stars.slice(0,4).join('、')}`).join('，')}。四化：${(ziweiResult.sihua||[]).map((s:any)=>`${s.star}化${s.mutagen}（${s.palace}宫）`).join('、')}` : '紫微：数据暂缺'}
-星座：${astrologyResult.zodiac}（${planetSummary}）
-${wuyunResult.description}
-流年：${liunianResult}`;
-
-  const systemPrompt = `你是修炼数十年的命理导师，精通八字、人类图、占星、紫微斗数、五运六气、流年、人生规划七大体系。报告像长辈谈心——温暖、直接、有力。禁止AI套话。
-
-【核心原则】
-八字四柱、人类图、紫微斗数的基础数据已由前端图表展示，你不需重复输出基础数据表格。你的价值在于**分析、洞察、交叉印证**，而非搬运数据。
-
-【措辞规范 — 必须遵守】
-1. 人类图类型与角色必须区分：类型是类型（如投射者/显示者/生产者），角色是人生角色（如3/6爻），禁止说"类型是3/6爻"。
-2. 投射者核心需求："被认出/被看见"是第一需求，比"等待被邀请"更根本。投射者是别人的镜子，天生为别人看清方向。
-3. Splenic（脾脏直觉）权威特性：直觉"只响一次、不说第二遍"，转瞬即逝，解读时须强调这一特性。
-4. 3/6爻人生角色：约30岁前是"3爻试验期"（试错、碰壁、从中学习），约30岁后转入"6爻引路期"（超然、客观、成为典范）。
-5. 禁止编造无依据的精确数字断言（如"三次蜕变期分别在20岁、32岁、44岁"），改用大运/流年有据可依的表述。
-6. 职业建议禁止列通用职业列表（"医生、律师、金融分析师..."），应紧扣类型×通道给出坐标式表述。
-
-【报告结构】
-开头段：直接称呼"你"，融合核心命盘简述，200字以内自然引入。用户未提供姓名，禁止编造名字。
-
-以下7章，每章300-600字。禁止分段罗列，必须交叉印证：
-第一章 天性禀赋与人格底色（八字日主+人类图类型+星座交叉印证）
-第二章 事业天赋与财富格局（含当年流年运势要点）
-第三章 人际关系与情感模式
-第四章 学习成长与灵性发展
-第五章 健康体质与养生策略（先天体质+五运六气+具体养生方案）
-第六章 人生关键节点与风险提示（大运分析+1-5项编号风险）
-第七章 终极建议（两个核心结论）
-
-【必须包含的表格】（仅以下3个，不要额外加表）
-1. 七系统交叉印证表：横轴八字/人类图/占星/紫微，纵轴核心本质/能量模式/人际/事业/挑战/优势
-2. 流年运势表：维度/影响/建议三列
-3. 健康养生表：调理维度/具体建议两列
-
-收尾：点睛金句（加粗）
-末尾标注：*本报告基于八字（lunar-javascript）、人类图（Jovian认证v6引擎）、占星（swisseph精算）、紫微斗数（iztro引擎）、五运六气（天干化运/地支化气）七系统融合分析生成。*`;
+  const reportSegments = buildPersonalReportSegments({
+    age,
+    gender: g,
+    birth: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`,
+    location: [location, body.city].filter(Boolean).join(' ') || '未提供',
+    bazi: baziResult,
+    hd: hdResult,
+    ziwei: ziweiResult,
+    astrology: astrologyResult,
+    wuyun: wuyunResult,
+    liunian: liunianResult,
+  });
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
   const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
@@ -180,56 +133,46 @@ ${wuyunResult.description}
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        const res = await fetch(`${baseUrl}/chat/completions`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-          body: JSON.stringify({
-            model: modelName,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt }
-            ],
-            max_tokens: 24000,
-            temperature: 0.7,
-            stream: true,
-          }),
-        });
+        for (const segment of reportSegments) {
+          const res = await fetch(`${baseUrl}/chat/completions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+            body: JSON.stringify({
+              model: modelName,
+              messages: [
+                { role: 'system', content: PERSONAL_REPORT_SYSTEM_PROMPT },
+                { role: 'user', content: segment.prompt },
+              ],
+              max_tokens: segment.maxTokens,
+              temperature: 0.65,
+              stream: true,
+            }),
+          });
 
-        if (!res.ok) {
-          const err = await res.text();
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: `DeepSeek API error: ${res.status}` })}\n\n`));
-          controller.close();
-          return;
-        }
+          if (!res.ok) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: `DeepSeek API error: ${res.status} (${segment.id})` })}\n\n`));
+            controller.close();
+            return;
+          }
 
-        const reader = res.body?.getReader();
-        if (!reader) {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'No response body' })}\n\n`));
-          controller.close();
-          return;
-        }
-
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6).trim();
-              if (data === '[DONE]') continue;
+          const reader = res.body?.getReader();
+          if (!reader) throw new Error(`No response body (${segment.id})`);
+          const decoder = new TextDecoder();
+          let buffer = '';
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const payload = line.slice(6).trim();
+              if (payload === '[DONE]') continue;
               try {
-                const parsed = JSON.parse(data);
+                const parsed = JSON.parse(payload);
                 const content = parsed.choices?.[0]?.delta?.content;
-                if (content) {
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
-                }
+                if (content) controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
               } catch {}
             }
           }

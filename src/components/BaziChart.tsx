@@ -1,11 +1,13 @@
 'use client';
 
 import React from 'react';
+import { formatElementDistribution } from '@/lib/report-depth';
 
 interface BaziChartProps {
   pillars: string[];      // 四柱 e.g. ['辛酉','辛丑','庚戌','丁丑']
   dayMaster: string;      // 日主 e.g. '庚金'
   elements: string[];     // 五行 e.g. ['金','金','土','火']
+  elementDistribution?: Record<string, number>;
 }
 
 const COLUMN_NAMES = ['年柱','月柱','日柱','时柱'];
@@ -13,7 +15,7 @@ const COLORS: Record<string,string> = {
   '金':'#f0d060', '木':'#6bb86b', '水':'#4a9fd4', '火':'#e06050', '土':'#c8a85c'
 };
 
-export default function BaziChart({ pillars, dayMaster, elements }: BaziChartProps) {
+export default function BaziChart({ pillars, dayMaster, elements, elementDistribution }: BaziChartProps) {
   const W = 420, H = 220;
   const cw = 80, ch = 50;
 
@@ -49,15 +51,7 @@ export default function BaziChart({ pillars, dayMaster, elements }: BaziChartPro
 
       {/* 底部五行分布 */}
       <text x={W/2} y={H - 12} textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="9">
-        五行：{(() => {
-          const counts = Object.entries(COLORS).map(([el]) => {
-            const count = (elements || []).filter((e: string) => e === el).length;
-            return { el, count };
-          }).filter(c => c.count > 0);
-          return counts.length > 0 
-            ? counts.map(c => `${c.el}${c.count}`).join(' ') 
-            : '(数据暂缺)';
-        })()}
+        五行：{formatElementDistribution(elementDistribution || {})}
       </text>
     </svg>
   );
