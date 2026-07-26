@@ -73,15 +73,27 @@ export default function JiugongResultPage() {
   return (
     <div className="gradient-bg min-h-screen px-4 py-8 max-w-3xl mx-auto space-y-4">
 
+      {/* ── 报告标题 ── */}
+      <div className="text-center py-6">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs mb-4 border border-[var(--color-primary)]/20">
+          <span className="w-2 h-2 rounded-full bg-[var(--color-primary)] animate-pulse" />
+          {d.name} · {d.year}年生 · 虚岁{d.xuAge}
+        </div>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          📜 {d.name}的<span className="gradient-text">九宫人生说明书</span>
+        </h1>
+        <p className="text-xs text-[var(--text-tertiary)] mt-2">以下分析基于程天相九宫学理，旨在帮你看见自己的天赋底色与人生节律，不构成命运定论</p>
+      </div>
+
       {/* ── PDF 下载 ── */}
-      <div className="no-print text-center">
+      <div className="no-print text-center -mt-2 mb-2">
         <button onClick={() => window.print()} className="px-6 py-2 rounded-xl bg-gradient-to-r from-[var(--color-primary)] to-emerald-600 text-white text-sm font-medium hover:shadow-lg hover:-translate-y-0.5 transition-all">
           📥 下载 PDF 报告
         </button>
       </div>
 
       {/* ═══ 1. 命盘摘要 ═══ */}
-      <Section icon="📋" title="基本命盘">
+      <Section icon="📋" title="你的命盘速览">
         <div className="grid grid-cols-3 md:grid-cols-5 gap-2 text-center">
           {[{l:'姓名',v:d.name},{l:'出生',v:`${d.year}.${d.month}.${d.day}`},{l:'虚岁',v:d.xuAge},
             {l:'总笔画',v:d.total},{l:'局差',v:d.ju}].map((x,i)=>(
@@ -97,7 +109,7 @@ export default function JiugongResultPage() {
       </Section>
 
       {/* ═══ 2. 格局·特质·星运 ═══ */}
-      <Section icon="🎯" title="格局 · 特质 · 星运">
+      <Section icon="🎯" title="格局 · 先天特质 · 星运密码">
         <div className="space-y-3">
           <DetailBlock summary={`局差 ${d.ju}：${d.juDesc}`}>{d.juFull}</DetailBlock>
           <Highlight>
@@ -128,7 +140,7 @@ export default function JiugongResultPage() {
       )}
 
       {/* ═══ 4. 五行性格 ═══ */}
-      <Section icon="⚖️" title="五行性格">
+      <Section icon="⚖️" title="五行能量性格">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Highlight>
             <div className="text-[10px] text-[var(--text-tertiary)] mb-1">思想功能（天→人）· 35岁前</div>

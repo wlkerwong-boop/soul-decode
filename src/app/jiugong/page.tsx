@@ -37,10 +37,10 @@ export default function JiugongPage() {
             河图洛书 · 程天相九宫学理
           </div>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
-            📜 九宫<span className="gradient-text">人生解码</span>
+            📜 九宫<span className="gradient-text">人生说明书</span>
           </h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-2">
-            姓名 + 出生日期，解锁 13 维度专属人生说明书
+          <p className="text-sm text-[var(--text-secondary)] mt-2 leading-relaxed">
+            输入姓名与生日，即刻生成你的 13 维度天赋地图、性格密码与 90 年人生节律
           </p>
         </div>
 
@@ -53,10 +53,10 @@ export default function JiugongPage() {
             </label>
             <input
               value={name} onChange={e => setName(e.target.value)}
-              placeholder="请输入姓名（2-4个汉字）" maxLength={4}
+              placeholder="你的本名（如：王一然）" maxLength={4}
               className="input-jade text-base py-3 px-4 rounded-xl"
             />
-            <p className="text-[10px] text-[var(--text-tertiary)] mt-1">请使用十岁前的本名，如「王一然」</p>
+            <p className="text-[10px] text-[var(--text-tertiary)] mt-1">请使用出生时父母所取的名字，这是你生命蓝图的第一份约定</p>
           </div>
 
           {/* 出生日期 */}
@@ -98,18 +98,18 @@ export default function JiugongPage() {
             disabled={!valid || loading || !dictReady}
             className="w-full py-3.5 rounded-xl font-semibold text-lg bg-gradient-to-r from-[var(--color-primary)] to-emerald-600 text-white hover:shadow-lg hover:shadow-[var(--color-primary)]/25 hover:-translate-y-0.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
-            {loading ? '⏳ 生成中…' : dictReady ? '🔮 生成人生说明书' : '⏳ 加载字典中…'}
+            {loading ? '⏳ 正在为你绘制人生地图…' : dictReady ? '🔮 查看我的生命蓝图' : '⏳ 加载字典中…'}
           </button>
 
           {/* 隐私承诺 */}
-          <p className="text-xs text-[var(--text-tertiary)] text-center">
-            🔒 姓名和出生信息仅用于排盘，绝不外泄
+          <p className="text-xs text-[var(--text-tertiary)] text-center leading-relaxed">
+            🔒 你的姓名与生日仅用于排盘计算，数据不会存储到服务器，更不会外泄
           </p>
         </div>
 
         {/* 底部署名 */}
-        <div className="mt-6 text-center text-xs text-[var(--text-tertiary)] opacity-50">
-          基于程天相九宫学理体系 · 康熙字典笔画 · 五格三才 · 十大能量 · 90年运势
+        <div className="mt-6 text-center text-xs text-[var(--text-tertiary)] opacity-50 leading-relaxed">
+          程天相九宫学理体系 · 康熙字典正体笔画 · 五格三才框架 · 十大能量系统 · 90 年运势推演
         </div>
       </div>
     </div>
