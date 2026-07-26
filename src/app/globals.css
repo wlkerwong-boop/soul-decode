@@ -1052,8 +1052,10 @@ section {
   .print-only { display: none !important; }
 }
 @media print {
-  .print-hidden, select, button { display: none !important; }
+  .print-hidden { display: none !important; }
   .card-jade { break-inside: avoid; }
   .report-form { display: none !important; }
   nav, footer { display: none !important; }
+  /* 保留报告页内按钮（PDF下载等） */
+  .report-content button { display: inline-block !important; }
 }
