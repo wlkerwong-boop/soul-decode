@@ -1,7 +1,8 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { CHINA_CITIES, INTERNATIONAL_CITIES } from '@/data/cities';
 import { buildCompatibilityPersonPayload, consumeSseChunk } from '@/lib/compatibility-depth';
+import ReportWaiting from '@/components/ReportWaiting';
 
 const YEARS = Array.from({length:121},(_,i)=>2026-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
@@ -74,7 +75,31 @@ export default function HepanPage() {
   const [report, setReport] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [childrenCount, setChildrenCount] = useState(0); // 0-5 children
+  const [childrenCount, setChildrenCount] = useState(0);
+
+  // ── 等待体验 ──
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (loading && startTime) {
+      timerRef.current = setInterval(() => {
+        setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [loading, startTime]);
+
+  useEffect(() => {
+    if (!loading && !isStreaming && timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, [loading, isStreaming]);
+
+  const charCount = report.length;
 
   const setData = (k: string, v: string) => setForm(prev => ({...prev, [k]: v}));
 
@@ -82,8 +107,10 @@ export default function HepanPage() {
 
   const submit = async () => {
     setLoading(true); setError(''); setReport('');
+    setIsStreaming(false); setStartTime(Date.now()); setElapsedSeconds(0);
+
     const persons: any[] = [];
-    
+
     if (type === 'couple') {
       persons.push(prefixData('a'), prefixData('b'));
     } else if (type === 'friend') {
@@ -95,7 +122,7 @@ export default function HepanPage() {
         persons.push(prefixData('c'+i));
       }
     }
-    
+
     function prefixData(pfx: string) {
       return buildCompatibilityPersonPayload(form, pfx);
     }
@@ -106,23 +133,29 @@ export default function HepanPage() {
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ persons, type }),
       });
-      if (!r.ok) { setError('生成失败 ('+r.status+')'); return; }
+      if (!r.ok) { setError('生成失败 ('+r.status+')'); setLoading(false); return; }
       const reader = r.body?.getReader();
-      if (!reader) { setError('无法读取响应'); return; }
+      if (!reader) { setError('无法读取响应'); setLoading(false); return; }
       const dec = new TextDecoder();
       let sseBuffer = '';
+      let isFirstChunk = true;
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const parsed = consumeSseChunk(sseBuffer, dec.decode(value, { stream: true }));
         sseBuffer = parsed.buffer;
-        if (parsed.contents.length) setReport(previous => previous + parsed.contents.join(''));
-        if (parsed.error) setError(parsed.error);
-        if (parsed.done) break;
+        if (parsed.contents.length) {
+          if (isFirstChunk) { setLoading(false); setIsStreaming(true); isFirstChunk = false; }
+          setReport(previous => previous + parsed.contents.join(''));
+        }
+        if (parsed.error) { setError(parsed.error); setLoading(false); setIsStreaming(false); }
+        if (parsed.done) { setLoading(false); setIsStreaming(false); break; }
       }
-    } catch (e: any) { setError(e.message||'网络错误'); }
-    setLoading(false);
+    } catch (e: any) { setError(e.message||'网络错误'); setLoading(false); setIsStreaming(false); }
+    if (!error) { setLoading(false); setIsStreaming(false); }
   };
+
+  const handleRetry = useCallback(() => { submit(); }, [type, form, childrenCount]);
 
   return (
     <div className="gradient-bg min-h-screen px-4 py-8">
@@ -183,19 +216,47 @@ export default function HepanPage() {
             className="w-full py-3 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-bold text-base hover:shadow-lg transition-all disabled:opacity-40">
             {loading ? '⌛ 正在合盘...' : '✦ 生成合盘报告'}
           </button>
-          {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+          {error && !loading && !isStreaming && <p className="text-red-400 text-sm text-center">{error}</p>}
         </div>
+
+        {/* ── 等待页（loading=true 时覆盖）── */}
+        {loading && (
+          <div className="mt-6">
+            <ReportWaiting
+              type="compatibility"
+              isStreaming={false}
+              elapsedSeconds={elapsedSeconds}
+              charCount={0}
+              error={error}
+              onRetry={handleRetry}
+            />
+          </div>
+        )}
+
+        {/* ── 流式进度条（isStreaming 时顶部细条）── */}
+        {isStreaming && report && (
+          <div className="mt-6">
+            <ReportWaiting
+              type="compatibility"
+              isStreaming={true}
+              elapsedSeconds={elapsedSeconds}
+              charCount={charCount}
+              error={error}
+              onRetry={handleRetry}
+            />
+          </div>
+        )}
 
         {report && (
           <div className="card-jade p-6 mt-6">
             <h2 className="text-xl font-bold mb-4">📜 合盘解读</h2>
             <div className="prose prose-sm md:prose-base prose-invert whitespace-pre-wrap leading-relaxed">
-              {report.split('\n').map((line, i) => (<p key={i} className="mb-3">{line || '\u00A0'}</p>))}
+              {report.split('\n').map((line, i) => (<p key={i} className="mb-3">{line || ' '}</p>))}
             </div>
           </div>
         )}
 
-        {/* ── R4: 下一步 CTA（合盘页→见己学园占位）── */}
+        {/* ── R4: 下一步 CTA ── */}
         {report && (
           <div className="card-jade p-6 mt-6 text-center">
             <div className="text-3xl mb-3">🏫</div>
