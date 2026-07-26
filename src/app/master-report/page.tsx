@@ -407,6 +407,23 @@ export default function MasterPage() {
         {/* ── 完整报告区域（点击 CTA 后展开）── */}
         {showFullReport && (
           <>
+            {/* 打印封面页（仅打印时显示） */}
+            <div className="print-only" style={{pageBreakAfter:'always'}}>
+              <div style={{textAlign:'center', paddingTop:'6cm'}}>
+                <h1 style={{fontSize:'28pt', color:'#2d5a4f', marginBottom:'1cm'}}>
+                  灵魂解码 · 人生总览报告
+                </h1>
+                <p style={{fontSize:'10pt', color:'#999', marginBottom:'2cm'}}>
+                  八字 · 人类图 · 占星 · 紫微斗数 · 五运六气 · MBTI · 中医体质
+                </p>
+                <p style={{fontSize:'9pt', color:'#aaa', marginTop:'3cm'}}>
+                  生成日期：{new Date().toLocaleDateString('zh-CN')}
+                </p>
+                <p style={{fontSize:'8pt', color:'#ccc', marginTop:'1cm'}}>
+                  命理是地图不是判决书，七分天性三分环境
+                </p>
+              </div>
+            </div>
             {/* Charts */}
             {data && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
