@@ -1,6 +1,7 @@
 'use client';
 import { useState, useMemo } from 'react';
 import { CHINA_CITIES, INTERNATIONAL_CITIES } from '@/data/cities';
+import { buildCompatibilityPersonPayload, consumeSseChunk } from '@/lib/compatibility-depth';
 
 const YEARS = Array.from({length:121},(_,i)=>2026-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
@@ -96,11 +97,7 @@ export default function HepanPage() {
     }
     
     function prefixData(pfx: string) {
-      return {
-        year: form[pfx+'_year'], month: form[pfx+'_month'], day: form[pfx+'_day'],
-        hour: form[pfx+'_hour']||'12', minute: form[pfx+'_minute']||'0',
-        gender: form[pfx+'_gender']||'男',
-      };
+      return buildCompatibilityPersonPayload(form, pfx);
     }
 
     try {
@@ -113,19 +110,15 @@ export default function HepanPage() {
       const reader = r.body?.getReader();
       if (!reader) { setError('无法读取响应'); return; }
       const dec = new TextDecoder();
+      let sseBuffer = '';
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const txt = dec.decode(value, {stream:true});
-        const lines = txt.split('\n');
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          try {
-            const d = JSON.parse(line.slice(6));
-            if (d.done) break;
-            if (d.content) setReport(prev => prev + d.content);
-          } catch {}
-        }
+        const parsed = consumeSseChunk(sseBuffer, dec.decode(value, { stream: true }));
+        sseBuffer = parsed.buffer;
+        if (parsed.contents.length) setReport(previous => previous + parsed.contents.join(''));
+        if (parsed.error) setError(parsed.error);
+        if (parsed.done) break;
       }
     } catch (e: any) { setError(e.message||'网络错误'); }
     setLoading(false);

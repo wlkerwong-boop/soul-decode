@@ -2,6 +2,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getBirthCoords } from '@/data/cities';
 import { calculateBodygraph } from '@/lib/hd';
+import {
+  calculateReportBazi,
+  calculateWuyunLiuqi as calculateReportWuyunLiuqi,
+} from '@/lib/report-depth';
 
 function calcBazi(y: number, m: number, d: number, h: number) {
   const { Solar } = require('lunar-javascript');
@@ -114,13 +118,13 @@ export async function POST(req: NextRequest) {
 
     // 并行计算全部7个系统
     const [baziResult, hdResult, ziweiResult, zodiacResult] = await Promise.all([
-      Promise.resolve(calcBazi(y, m, d, h)),
+      Promise.resolve(calculateReportBazi(y, m, d, h)),
       Promise.resolve(calcHD(y, m, d, h, mi, tz, lat, lon)),
       Promise.resolve(calcZiwei(y, m, d, h, g)),
       Promise.resolve(calcZodiac(y, m, d)),
     ]);
     
-    const wuyunResult = calcWuyunLiuqi(y);
+    const wuyunResult = calculateReportWuyunLiuqi(y);
     const liunianResult = calcLiuNian(y, now.getFullYear());
 
     // 构建完整提示词（与阿里云 report-api 同步的七系统格式）
