@@ -425,7 +425,7 @@ export default function MasterPage() {
                 {data.bazi && (
                   <div className="card-jade p-5">
                     <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">🀄 八字四柱</h3>
-                    <BaziChart pillars={data.bazi.pillars||[]} dayMaster={data.bazi.dayMaster||''} elements={data.bazi.elements||data.bazi.pillars?.map((p:string)=>'?')||['?','?','?','?']}/>
+                    <BaziChart pillars={data.bazi.pillars||[]} dayMaster={data.bazi.dayMaster||''} elements={data.bazi.elementDistribution ? Object.entries(data.bazi.elementDistribution).flatMap(([el,count]) => Array(count).fill(el)) : data.bazi.elements||data.bazi.pillars?.map((p:string)=>'?')||['?','?','?','?']}/>
                   </div>
                 )}
                 {data.ziwei && (
@@ -438,8 +438,8 @@ export default function MasterPage() {
                   <div className="card-jade p-5">
                     <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">🌊 五运六气</h3>
                     <div className="text-sm text-[var(--text-secondary)] space-y-2">
-                      <p>出生年运：{data.wuyun.stem}年 → {data.wuyun.wuyun}</p>
-                      <p>出生气化：{data.wuyun.branch}年 → {data.wuyun.liuqi}</p>
+                      <p>出生年运：{data.wuyun.wuyun}</p>
+                      <p>出生气化：{data.wuyun.liuqi}</p>
                     </div>
                   </div>
                 )}
