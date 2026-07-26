@@ -53,7 +53,7 @@ export default function JiugongPage() {
             </label>
             <input
               value={name} onChange={e => setName(e.target.value)}
-              placeholder="你的本名（如：王一然）" maxLength={4}
+              placeholder="你的本名（如：罗大方）" maxLength={4}
               className="input-jade text-base py-3 px-4 rounded-xl"
             />
             <p className="text-[10px] text-[var(--text-tertiary)] mt-1">请使用出生时父母所取的名字，这是你生命蓝图的第一份约定</p>
