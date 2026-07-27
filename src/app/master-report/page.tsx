@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import VoiceReader from '@/components/VoiceReader';
 import BodygraphSVG from '@/components/BodygraphSVG';
 import BaziChart from '@/components/BaziChart';
 import ZiWeiChart from '@/components/ZiWeiChart';
+import ReportWaiting from '@/components/ReportWaiting';
 import { marked } from 'marked';
 import { CHINA_CITIES, INTERNATIONAL_CITIES, CITY_TZ } from '@/data/cities';
 import { beginNewReportView } from '@/lib/master-report-view';
@@ -28,26 +29,35 @@ export default function MasterPage() {
   const [reportName, setReportName] = useState('');
 
   // ── R2: 免费排盘模式 ──
-  const [showQuickInput, setShowQuickInput] = useState(true); // 默认显示极简输入
+  const [showQuickInput, setShowQuickInput] = useState(true);
   const [showFullReport, setShowFullReport] = useState(false);
 
-  // ── R3: 等待页 ──
-  const [progressStep, setProgressStep] = useState(0);
-  const [carouselIdx, setCarouselIdx] = useState(0);
-  const SYSTEMS = ['八字四柱','人类图','紫微斗数','占星星盘','五运六气','MBTI人格','中医体质'];
-  const CAROUSEL_TEXTS = [
-    '排定八字四柱，解读先天五行格局……',
-    '绘制你的专属人类图，分析能量类型与权威……',
-    '排定紫微十二宫，解析命宫主星……',
-    '计算行星位置，解读星座与相位……',
-    '推算五运六气，分析先天体质偏向……',
-    '结合MBTI与大五人格，交叉验证性格特质……',
-    '正在交叉融合七系统，生成深度解读……',
-  ];
+  // ── R3: 等待页 — 诚实进度 ──
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // ── R4: 下一步CTA配置（集中管理，R6支付接入后只改此处）──
+  // 计时器：每秒更新
+  useEffect(() => {
+    if (loading && startTime) {
+      timerRef.current = setInterval(() => {
+        setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
+      }, 1000);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [loading, startTime]);
+
+  // 流式结束后清理
+  useEffect(() => {
+    if (!loading && !isStreaming && timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, [loading, isStreaming]);
+
+  // ── R4: 下一步CTA配置 ──
   const NEXT_STEPS = {
-    // 完整报告末尾：推亲子合盘
     fullReport: {
       emoji: '👨‍👩‍👧‍👦',
       title: '想为孩子也解码一份？',
@@ -55,7 +65,6 @@ export default function MasterPage() {
       btn: '🔮 亲子合盘 · 两份报告交叉解读 →',
       href: '/compatibility',
     },
-    // 合盘页末尾：推见己学园占位
     compatibility: {
       emoji: '🏫',
       title: '见己学园 · 家庭成长助手',
@@ -65,22 +74,8 @@ export default function MasterPage() {
       placeholder: true,
     },
   };
-  useEffect(() => {
-    if (!loading) { setProgressStep(0); setCarouselIdx(0); return; }
-    const timer = setInterval(() => {
-      setProgressStep(p => {
-        if (p >= 7) return 7;
-        return p + 1;
-      });
-      setCarouselIdx(c => (c + 1) % CAROUSEL_TEXTS.length);
-    }, 2500);
-    return () => clearInterval(timer);
-  }, [loading]);
 
-  // 当报告开始流式到达，立刻跳到100%
-  useEffect(() => {
-    if (report && loading) { setProgressStep(7); setLoading(false); }
-  }, [report, loading]);
+  const charCount = report.length;
 
   // Load saved reports on mount
   useEffect(() => {
@@ -130,6 +125,8 @@ export default function MasterPage() {
 
   const submit = async () => {
     setLoading(true); setError(''); setReport(''); setData(null); setShowQuickInput(false);
+    setIsStreaming(false); setStartTime(Date.now()); setElapsedSeconds(0);
+
     const loc = isChina ? province : country;
     try {
       const r = await fetch('/api/master-report/stream', {
@@ -159,23 +156,32 @@ export default function MasterPage() {
           if (line.startsWith('data: ')) {
             try {
               const msg = JSON.parse(line.slice(6));
-              if (msg.error) { setError(msg.error); setLoading(false); return; }
+              if (msg.error) { setError(msg.error); setLoading(false); setIsStreaming(false); return; }
               if (msg.done) {
                 setData({ bazi: msg.bazi, hd: msg.hd, ziwei: msg.ziwei, zodiac: msg.zodiac, wuyun: msg.wuyun, liunian: msg.liunian });
                 setReport(fullReport);
                 setLoading(false);
+                setIsStreaming(false);
                 saveToHistory(fullReport, { bazi: msg.bazi, hd: msg.hd, ziwei: msg.ziwei, zodiac: msg.zodiac, wuyun: msg.wuyun, liunian: msg.liunian });
               } else if (msg.content) {
                 fullReport += msg.content;
                 setReport(fullReport);
-                if (isFirstChunk) { setLoading(false); isFirstChunk = false; }
+                if (isFirstChunk) {
+                  setLoading(false);   // 等待页 → 流式阶段
+                  setIsStreaming(true);
+                  isFirstChunk = false;
+                }
               }
             } catch {}
           }
         }
       }
-    } catch (e: any) { setError(e.message||'网络错误'); setLoading(false); }
+    } catch (e: any) { setError(e.message||'网络错误'); setLoading(false); setIsStreaming(false); }
+    // 流式自然结束
+    if (!error) { setLoading(false); setIsStreaming(false); }
   };
+
+  const handleRetry = useCallback(() => { submit(); }, [year, month, day, hour, minute, continent, country, province, city, gender]);
 
   const allFilled = year && month && day && continent && country && city;
   const quickFilled = year && month && day && continent && country && city;
@@ -186,7 +192,7 @@ export default function MasterPage() {
     catch { return report; }
   }, [report]);
 
-  // ── R2: 骨架结果（免费排盘 → 仅展示核心 HD 信息）──
+  // ── R2: 骨架结果 ──
   const showSkeleton = data && !showFullReport;
   const startNewReport = () => {
     const next = beginNewReportView({ report, data, showQuickInput, showFullReport, error });
@@ -195,6 +201,9 @@ export default function MasterPage() {
     setShowQuickInput(next.showQuickInput);
     setShowFullReport(next.showFullReport);
     setError(next.error);
+    setIsStreaming(false);
+    setStartTime(null);
+    setElapsedSeconds(0);
     try { localStorage.removeItem('last_master_report'); } catch {}
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -218,58 +227,28 @@ export default function MasterPage() {
           )}
         </div>
 
-        {/* ── R3: 等待页覆盖 ── */}
+        {/* ── R3: 等待页（loading=true 时全覆盖）── */}
         {loading && (
-          <div className="max-w-lg mx-auto mb-8">
-            <div className="card-jade p-8 text-center">
-              {/* 进度条 */}
-              <div className="mb-6">
-                <div className="flex justify-between mb-2">
-                  {SYSTEMS.map((sys, i) => (
-                    <span key={sys} className={`text-xs transition-all duration-500 ${i < progressStep ? 'text-[var(--text-accent)] font-semibold' : 'text-[var(--text-tertiary)]'}`}>
-                      {i < progressStep ? '●' : '○'} {sys.slice(0,2)}
-                    </span>
-                  ))}
-                </div>
-                <div className="h-2 bg-[var(--bg-highlight)] rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-[var(--text-accent)] to-emerald-400 rounded-full transition-all duration-1000 ease-out"
-                    style={{width: `${(progressStep/7)*100}%`}} />
-                </div>
-                <p className="text-sm text-[var(--text-secondary)] mt-3">
-                  {(progressStep/7*100).toFixed(0)}% · {progressStep < 7 ? '正在生成你的专属报告' : '报告即将呈现'}
-                </p>
-              </div>
+          <ReportWaiting
+            type="personal"
+            isStreaming={false}
+            elapsedSeconds={elapsedSeconds}
+            charCount={0}
+            error={error}
+            onRetry={handleRetry}
+          />
+        )}
 
-              {/* 系统轮播 */}
-              <div className="py-4 mb-4">
-                <p className="text-sm text-[var(--text-secondary)] animate-pulse">
-                  {CAROUSEL_TEXTS[carouselIdx]}
-                </p>
-              </div>
-
-              {/* 报告目录预览 */}
-              <div className="text-left bg-[var(--bg-highlight)] rounded-xl p-4 text-xs text-[var(--text-tertiary)] space-y-1.5">
-                <p className="text-[var(--text-secondary)] font-semibold mb-2">📑 报告包含</p>
-                <p>第一章 · 你的出厂配置（八字+人类图总览）</p>
-                <p>第二章 · 思维引擎（MBTI×大五人格）</p>
-                <p>第三章 · 情绪与关系（占星×合盘）</p>
-                <p>第四章 · 身体与健康（五运六气×中医体质）</p>
-                <p>第五章 · 天赋与方向（七系统交叉解读）</p>
-                <p className="text-[var(--text-accent)]">七大系统交叉融合 · 深度图文报告</p>
-              </div>
-            </div>
-
-            {/* 错误提示 */}
-            {error && (
-              <div className="card-jade p-5 mt-4 text-center border-red-400/30">
-                <p className="text-red-400 text-sm mb-3">❌ {error}</p>
-                <button onClick={submit}
-                  className="px-6 py-2 rounded-xl bg-red-500/20 text-red-300 text-sm hover:bg-red-500/30 transition-all">
-                  🔄 重新生成
-                </button>
-              </div>
-            )}
-          </div>
+        {/* ── R3: 流式进度条（isStreaming 时顶部细条）── */}
+        {isStreaming && report && (
+          <ReportWaiting
+            type="personal"
+            isStreaming={true}
+            elapsedSeconds={elapsedSeconds}
+            charCount={charCount}
+            error={error}
+            onRetry={handleRetry}
+          />
         )}
 
         {/* ── R2: 免费排盘极简输入（4 字段）── */}
@@ -285,7 +264,7 @@ export default function MasterPage() {
               ))}
             </div>
 
-            {/* 出生日期 — 4 字段：年/月/日/时 */}
+            {/* 出生日期 — 4 字段 */}
             <div className="grid grid-cols-4 gap-2 mb-4">
               <select value={year} onChange={e=>setYear(e.target.value)}
                 className="input-jade text-sm py-3 px-1 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
@@ -339,7 +318,7 @@ export default function MasterPage() {
               )}
             </div>
 
-            {/* 分钟+时区 — 按需展开 */}
+            {/* 分钟+时区 */}
             <details className="mb-4 text-xs text-[var(--text-tertiary)]">
               <summary className="cursor-pointer py-1 hover:text-[var(--text-secondary)] transition-colors">精确时间（可选）</summary>
               <div className="flex items-center gap-2 mt-2">
@@ -352,26 +331,23 @@ export default function MasterPage() {
               </div>
             </details>
 
-            {/* 隐私承诺 — R2 新增 */}
             <p className="text-xs text-[var(--text-tertiary)] text-center mb-4">
               🔒 出生信息仅用于排盘，绝不外泄
             </p>
 
-            {/* 提交按钮 */}
             <button onClick={submit} disabled={!quickFilled||loading}
               className={`w-full py-3.5 rounded-xl font-semibold text-sm transition-all ${
                 quickFilled&&!loading ? 'bg-[var(--text-accent)] text-white hover:shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-tertiary)] cursor-not-allowed'
               }`}>
               {loading ? '⌛ 正在排盘中...' : '✦ 免费排盘，查看我的出厂配置'}
             </button>
-            {error && <p className="text-red-400 text-xs mt-2 text-center">{error}</p>}
+            {error && !loading && <p className="text-red-400 text-xs mt-2 text-center">{error}</p>}
           </div>
         )}
 
-        {/* ── R2: 免费排盘骨架结果 → 仅 HD 核心数据 ── */}
+        {/* ── R2: 免费排盘骨架结果 ── */}
         {showSkeleton && (
           <div className="max-w-lg mx-auto mb-8">
-            {/* HD 卡片 — 骨架核心 */}
             {data.hd && (
               <div className="card-jade p-6 text-center mb-6">
                 <div className="text-sm text-[var(--text-tertiary)] mb-2">你的出厂配置预览</div>
@@ -390,7 +366,6 @@ export default function MasterPage() {
               </div>
             )}
 
-            {/* ── R2: 唯一 CTA ── */}
             <div className="text-center">
               <p className="text-sm text-[var(--text-secondary)] mb-3">
                 这只是你 7 个系统中的 <strong>1 个的 1/10</strong>
@@ -404,10 +379,10 @@ export default function MasterPage() {
           </div>
         )}
 
-        {/* ── 完整报告区域（点击 CTA 后展开）── */}
+        {/* ── 完整报告区域 ── */}
         {showFullReport && (
           <>
-            {/* 打印封面页（仅打印时显示） */}
+            {/* 打印封面页 */}
             <div className="print-only" style={{pageBreakAfter:'always'}}>
               <div style={{textAlign:'center', paddingTop:'6cm'}}>
                 <h1 style={{fontSize:'28pt', color:'#2d5a4f', marginBottom:'1cm'}}>
@@ -442,7 +417,7 @@ export default function MasterPage() {
                 {data.bazi && (
                   <div className="card-jade p-5">
                     <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">🀄 八字四柱</h3>
-<BaziChart
+                    <BaziChart
                       pillars={data.bazi.pillars || []}
                       dayMaster={data.bazi.dayMaster || ''}
                       elements={data.bazi.ganElements || []}
@@ -496,7 +471,7 @@ export default function MasterPage() {
                   dangerouslySetInnerHTML={{ __html: reportHtml }} />
               </div>
 
-              {/* ── R4: 下一步 CTA（单一主推，可配置）── */}
+              {/* ── R4: 下一步 CTA ── */}
               <div className="card-jade p-6 md:p-8 text-center">
                 <div className="text-3xl mb-3">{NEXT_STEPS.fullReport.emoji}</div>
                 <h3 className="text-lg font-bold mb-2">{NEXT_STEPS.fullReport.title}</h3>
