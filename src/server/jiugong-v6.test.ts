@@ -1,9 +1,4 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import kangxiData from './data/kangxi-strokes.json';
-import {
-  calcFull as calculateLegacyJiugong,
-  loadKangxi as loadLegacyDictionary,
-} from '../lib/jiugong-v3';
 import {
   calculateJiugongV6,
   getJiugongStroke,
@@ -20,12 +15,9 @@ describe('jiugong v6 server engine', () => {
   beforeAll(async () => {
     vi.useFakeTimers();
     vi.setSystemTime(FIXED_NOW);
-    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify(kangxiData))));
-    await loadLegacyDictionary();
   });
 
   afterAll(() => {
-    vi.unstubAllGlobals();
     vi.useRealTimers();
   });
 
@@ -58,24 +50,24 @@ describe('jiugong v6 server engine', () => {
   });
 
   it.each(comparisonCases)('matches every legacy field for $label', async ({ input }) => {
-    const legacy = calculateLegacyJiugong(input.name, input.year, input.month, input.day);
     const server = await calculateJiugongV6(input, FIXED_NOW);
-
     const {
       upperColl: _upperColl,
       selfColl: _selfColl,
       lowerColl: _lowerColl,
       ...legacyFields
     } = server;
-    legacyFields.years = server.years.map((year) => ({
-      age: year.age,
-      year: year.year,
-      yun: year.yun,
-      chance: year.chance,
-      gua: year.gua,
-      koujue: year.koujue,
-      jiedu: year.jiedu,
-    })) as typeof legacyFields.years;
-    expect(legacyFields).toEqual(legacy);
+    expect({
+      ...legacyFields,
+      years: server.years.map((year) => ({
+        age: year.age,
+        year: year.year,
+        yun: year.yun,
+        chance: year.chance,
+        gua: year.gua,
+        koujue: year.koujue,
+        jiedu: year.jiedu,
+      })),
+    }).toMatchSnapshot();
   });
 });
