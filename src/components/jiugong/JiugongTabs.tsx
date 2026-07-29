@@ -216,7 +216,10 @@ function EnvironmentPanel({
         <h3 className="mb-3 font-serif text-lg font-semibold text-[var(--text-primary)]">
           九十年运势卷轴
         </h3>
-        <div className="max-h-[52vh] overflow-auto rounded-2xl border border-[var(--border-color)]">
+        <div
+          data-jiugong-years
+          className="max-h-[52vh] overflow-auto rounded-2xl border border-[var(--border-color)]"
+        >
           <table className="min-w-[680px] text-left text-xs">
             <thead className="sticky top-0 z-10 bg-[var(--bg-card)] text-[var(--text-tertiary)]">
               <tr>
@@ -385,7 +388,7 @@ export function JiugongTabs({ data }: { data: JiugongFull }) {
         </div>
       </div>
 
-      <div className="hidden space-y-8 print:block">
+      <div className="jiugong-print-report hidden space-y-8 print:block">
         <TraitsPanel data={data} />
         <EnvironmentPanel
           data={data}

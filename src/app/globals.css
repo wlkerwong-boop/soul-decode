@@ -1133,4 +1133,34 @@ section {
 
   /* 链接去掉下划线 */
   a { text-decoration: none !important; }
+
+  /*
+   * 九宫打印报告含三个长章节和 90 年表格。全局 section/table 的
+   * break-inside: avoid 会让 Chromium 把超页内容整体挪出可打印区域，
+   * 因此仅在九宫打印副本内恢复正常分页。
+   */
+  .jiugong-print-report {
+    display: block !important;
+  }
+  .jiugong-print-report section {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+  .jiugong-print-report table {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+    min-width: 0 !important;
+  }
+  .jiugong-print-report [data-jiugong-years] {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .jiugong-print-report thead {
+    display: table-header-group;
+    position: static !important;
+  }
+  .jiugong-print-report tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }
