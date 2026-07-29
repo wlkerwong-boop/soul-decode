@@ -38,6 +38,7 @@ const dsum=(n:number)=>{let s=String(n);while(s.length>1)s=String([...s].reduce(
 
 // ── 十种能量 ──
 const YUN=['冠带','临官','帝旺','衰','病','死','绝','胎','养','长生'];
+const COLLISION_ENERGY=['帝旺','临官','冠带','长生','养','胎','绝','死','病','衰'];
 
 // ── 局差简版 ──
 const JU_DESC=['先求稳定与平安，更上一层楼需名气靠山','紧跟贵人得第一，不可独闯','兢兢业业得天下，劳碌辛苦','士农工商皆通，用心惜福','志向远大，求功名'];
@@ -99,8 +100,16 @@ export interface JiugongFull {
   outerQi:string;outerEnergy:string;outerGua:string;outerStrategy:string;
   energyFull:Record<string,string>;
   xiangStrategy:Record<string,{upper:string;self:string;lower:string;outer:string;caution:string}>|null;
+  upperColl:number[];selfColl:number[];lowerColl:number[];
   groups:{name:string;ages:string;count:number}[];
-  years:{age:number;year:number;yun:string;chance:string;gua:string;koujue:string;jiedu:string}[];
+  years:{
+    age:number;year:number;yun:string;chance:string;gua:string;koujue:string;jiedu:string;
+    upperQi:string;upperEnergy:string;
+    selfQi:string;selfEnergy:string;
+    lowerQi:string;lowerEnergy:string;
+    outerQi:string;outerEnergy:string;
+    ageStar:string;ageStarDesc:string;
+  }[];
 }
 
 export interface JiugongInput {
@@ -164,10 +173,10 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
   const mainNum=dsum(now.getFullYear()-1111);
   
   // 四格气场
-  function qiEnergy(n:number,grid:number):{qi:string;energy:string;gua:string;strategy:string}{
+  function qiEnergy(n:number,grid:number,age=xuAge):{qi:string;energy:string;gua:string;strategy:string}{
     const qiNum=((n-grid)%9+9)%9;
     const qi=XIANG[qiNum]||'名望';
-    const yunIdx=(xuAge-grid%10+10)%10;
+    const yunIdx=(age-grid%10+10)%10;
     const energy=YUN[yunIdx%10];
     const gua=`${qi}${energy}`;
     const st=XIANG_STRATEGY_FULL[qi]||{upper:'',self:'',lower:'',outer:'',caution:''};
@@ -175,6 +184,18 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
   }
   const upper=qiEnergy(mainNum,tian),self=qiEnergy(mainNum,ren);
   const lower=qiEnergy(mainNum,di),outer=qiEnergy(mainNum,zong);
+
+  // 碰撞周期：恢复 v5 已验收规则（每 10 年一次）
+  const tianBaseEnergy=COLLISION_ENERGY[(10-tian%10)%10];
+  const renBaseEnergy=COLLISION_ENERGY[(12-ren%10)%10];
+  const diBaseEnergy=COLLISION_ENERGY[(12-di%10)%10];
+  const collisionAges=(energy:string)=>Array.from(
+    {length:9},
+    (_,i)=>COLLISION_ENERGY.indexOf(energy)+1+i*10,
+  ).filter(n=>n<=90);
+  const upperColl=collisionAges(tianBaseEnergy);
+  const selfColl=collisionAges(renBaseEnergy);
+  const lowerColl=collisionAges(diBaseEnergy);
   
   // 90年卷轴查表
   const SCROLL_LUT = ALL_GROUPS.flatMap(g=>g.years.map(y=>({chance:y.chance,yun:y.yun,gua:y.gua,koujue:y.koujue,jiedu:y.jiedu})));
@@ -186,7 +207,18 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
     const yunIdx=(a%10-zong%10+10)%10;
     const energy=YUN[yunIdx%10];
     const row=SCROLL_LUT.find(r=>r.chance===qi&&r.yun===energy)||SCROLL_LUT[0];
-    return{age:a,year:year+i,yun:row.yun,chance:row.chance,gua:row.gua,koujue:row.koujue,jiedu:row.jiedu};
+    const yearUpper=qiEnergy(yearMainNum,tian,a);
+    const yearSelf=qiEnergy(yearMainNum,ren,a);
+    const yearLower=qiEnergy(yearMainNum,di,a);
+    const yearOuter=qiEnergy(yearMainNum,zong,a);
+    return{
+      age:a,year:year+i,yun:row.yun,chance:row.chance,gua:row.gua,koujue:row.koujue,jiedu:row.jiedu,
+      upperQi:yearUpper.qi,upperEnergy:yearUpper.energy,
+      selfQi:yearSelf.qi,selfEnergy:yearSelf.energy,
+      lowerQi:yearLower.qi,lowerEnergy:yearLower.energy,
+      outerQi:yearOuter.qi,outerEnergy:yearOuter.energy,
+      ageStar:STAR[a%10],ageStarDesc:STAR_DESC[a%10],
+    };
   });
   
   const ages=['1-9岁','10-18岁','19-27岁','28-36岁','37-45岁','46-54岁','55-63岁','64-72岁','73-81岁','82-90岁'];
@@ -211,6 +243,7 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
     lowerQi:lower.qi,lowerEnergy:lower.energy,lowerGua:lower.gua,lowerStrategy:lower.strategy,
     outerQi:outer.qi,outerEnergy:outer.energy,outerGua:outer.gua,outerStrategy:outer.strategy,
     energyFull:ENERGY_FULL,xiangStrategy:XIANG_STRATEGY_FULL,
+    upperColl,selfColl,lowerColl,
     groups,years};
 }
 

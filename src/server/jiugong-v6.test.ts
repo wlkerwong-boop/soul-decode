@@ -43,10 +43,39 @@ describe('jiugong v6 server engine', () => {
     expect(await getJiugongStroke('献')).toBe(20);
   });
 
+  it('restores the v5-approved collision cycles as v6 output fields', async () => {
+    const result = await calculateJiugongV6(
+      { name: '王献科', year: 1973, month: 6, day: 5 },
+      FIXED_NOW,
+    );
+
+    expect(result.upperColl).toHaveLength(9);
+    expect(result.selfColl).toHaveLength(9);
+    expect(result.lowerColl).toHaveLength(9);
+    expect(result.upperColl.every((age, index, ages) => (
+      index === 0 || age - ages[index - 1] === 10
+    ))).toBe(true);
+  });
+
   it.each(comparisonCases)('matches every legacy field for $label', async ({ input }) => {
     const legacy = calculateLegacyJiugong(input.name, input.year, input.month, input.day);
     const server = await calculateJiugongV6(input, FIXED_NOW);
 
-    expect(server).toEqual(legacy);
+    const {
+      upperColl: _upperColl,
+      selfColl: _selfColl,
+      lowerColl: _lowerColl,
+      ...legacyFields
+    } = server;
+    legacyFields.years = server.years.map((year) => ({
+      age: year.age,
+      year: year.year,
+      yun: year.yun,
+      chance: year.chance,
+      gua: year.gua,
+      koujue: year.koujue,
+      jiedu: year.jiedu,
+    })) as typeof legacyFields.years;
+    expect(legacyFields).toEqual(legacy);
   });
 });
