@@ -1,10 +1,11 @@
 // 九宫学理 · 引擎 v6 — 复姓天格+1, 详细数据来自jiugong-data.ts
 import { JU_FULL, XINGYUN as XYN, MGT_FULL, ENERGY_FULL, SUIZHI_FULL, WX_CHAR_FULL, XIANG_STRATEGY_FULL } from './jiugong-data';
+import kangxiData from './data/kangxi-strokes.json';
 
 let kangxi: Map<string,number> | null = null;
-export async function loadKangxi(): Promise<void> {
+export async function loadJiugongDictionary(): Promise<void> {
   if (kangxi) return;
-  kangxi = new Map(Object.entries(await (await fetch('/data/kangxi-strokes.json')).json()));
+  kangxi = new Map(Object.entries(kangxiData));
 }
 
 // ── 部首 ──
@@ -37,6 +38,7 @@ const dsum=(n:number)=>{let s=String(n);while(s.length>1)s=String([...s].reduce(
 
 // ── 十种能量 ──
 const YUN=['冠带','临官','帝旺','衰','病','死','绝','胎','养','长生'];
+const COLLISION_ENERGY=['帝旺','临官','冠带','长生','养','胎','绝','死','病','衰'];
 
 // ── 局差简版 ──
 const JU_DESC=['先求稳定与平安，更上一层楼需名气靠山','紧跟贵人得第一，不可独闯','兢兢业业得天下，劳碌辛苦','士农工商皆通，用心惜福','志向远大，求功名'];
@@ -98,12 +100,27 @@ export interface JiugongFull {
   outerQi:string;outerEnergy:string;outerGua:string;outerStrategy:string;
   energyFull:Record<string,string>;
   xiangStrategy:Record<string,{upper:string;self:string;lower:string;outer:string;caution:string}>|null;
+  upperColl:number[];selfColl:number[];lowerColl:number[];
   groups:{name:string;ages:string;count:number}[];
-  years:{age:number;year:number;yun:string;chance:string;gua:string;koujue:string;jiedu:string}[];
+  years:{
+    age:number;year:number;yun:string;chance:string;gua:string;koujue:string;jiedu:string;
+    upperQi:string;upperEnergy:string;
+    selfQi:string;selfEnergy:string;
+    lowerQi:string;lowerEnergy:string;
+    outerQi:string;outerEnergy:string;
+    ageStar:string;ageStarDesc:string;
+  }[];
+}
+
+export interface JiugongInput {
+  name:string;
+  year:number;
+  month:number;
+  day:number;
 }
 
 // ══════════ 主计算 ══════════
-export function calcFull(name:string,year:number,month:number,day:number):JiugongFull {
+function calcFull(name:string,year:number,month:number,day:number,now=new Date()):JiugongFull {
   const chars=Array.from(name), strokes=chars.map(getStroke), total=strokes.reduce((a,b)=>a+b,0);
   
   // 五格 (复姓天格=姓之和+1)
@@ -114,7 +131,7 @@ export function calcFull(name:string,year:number,month:number,day:number):Jiugon
   const zong=total,wai=isDouble?zong-ren:zong-ren+1;
   
   // 虚岁
-  const now=new Date(),birth=new Date(year,month-1,day);
+  const birth=new Date(year,month-1,day);
   let age=now.getFullYear()-birth.getFullYear();
   if(now.getMonth()<birth.getMonth()||(now.getMonth()===birth.getMonth()&&now.getDate()<birth.getDate()))age--;
   const xuAge=age+1;
@@ -145,7 +162,7 @@ export function calcFull(name:string,year:number,month:number,day:number):Jiugon
   const mainFuncDesc=mainFunc==='主功能'?'主动性强、勤劳踏实、白手起家，适合操作流年':'善用头脑、人际关系、机会点，需要合作不能独闯';
   
   // 财富
-  const pdiff=Math.abs(ren-di);let pnum=pdiff>4?(Math.min(ren,di)+9)-Math.max(ren,di):pdiff;
+  const pdiff=Math.abs(ren-di);const pnum=pdiff>4?(Math.min(ren,di)+9)-Math.max(ren,di):pdiff;
   const PATH_DESC=['局平（名气暗财型）：靠专业成名','加1（能力暗财型）：白手起家，财库最旺','加2（能力正财型）：实力派，不能投机','加3（机运暗财型）：受栽培，赚钱无人知','加4（机运正财型）：人际关系为本，适合组织'];
   const PALACE=gen===0?['库平','从商格，说话婉转']:gen===1||gen===3?['库泄','大方型，钱留不住']:gen===4?['库旺','守财型，企业家标配']:['库破','冲动型，冲动时破财'];
   
@@ -156,10 +173,10 @@ export function calcFull(name:string,year:number,month:number,day:number):Jiugon
   const mainNum=dsum(now.getFullYear()-1111);
   
   // 四格气场
-  function qiEnergy(n:number,grid:number):{qi:string;energy:string;gua:string;strategy:string}{
+  function qiEnergy(n:number,grid:number,age=xuAge):{qi:string;energy:string;gua:string;strategy:string}{
     const qiNum=((n-grid)%9+9)%9;
     const qi=XIANG[qiNum]||'名望';
-    const yunIdx=(xuAge-grid%10+10)%10;
+    const yunIdx=(age-grid%10+10)%10;
     const energy=YUN[yunIdx%10];
     const gua=`${qi}${energy}`;
     const st=XIANG_STRATEGY_FULL[qi]||{upper:'',self:'',lower:'',outer:'',caution:''};
@@ -167,6 +184,18 @@ export function calcFull(name:string,year:number,month:number,day:number):Jiugon
   }
   const upper=qiEnergy(mainNum,tian),self=qiEnergy(mainNum,ren);
   const lower=qiEnergy(mainNum,di),outer=qiEnergy(mainNum,zong);
+
+  // 碰撞周期：恢复 v5 已验收规则（每 10 年一次）
+  const tianBaseEnergy=COLLISION_ENERGY[(10-tian%10)%10];
+  const renBaseEnergy=COLLISION_ENERGY[(12-ren%10)%10];
+  const diBaseEnergy=COLLISION_ENERGY[(12-di%10)%10];
+  const collisionAges=(energy:string)=>Array.from(
+    {length:9},
+    (_,i)=>COLLISION_ENERGY.indexOf(energy)+1+i*10,
+  ).filter(n=>n<=90);
+  const upperColl=collisionAges(tianBaseEnergy);
+  const selfColl=collisionAges(renBaseEnergy);
+  const lowerColl=collisionAges(diBaseEnergy);
   
   // 90年卷轴查表
   const SCROLL_LUT = ALL_GROUPS.flatMap(g=>g.years.map(y=>({chance:y.chance,yun:y.yun,gua:y.gua,koujue:y.koujue,jiedu:y.jiedu})));
@@ -178,7 +207,18 @@ export function calcFull(name:string,year:number,month:number,day:number):Jiugon
     const yunIdx=(a%10-zong%10+10)%10;
     const energy=YUN[yunIdx%10];
     const row=SCROLL_LUT.find(r=>r.chance===qi&&r.yun===energy)||SCROLL_LUT[0];
-    return{age:a,year:year+i,yun:row.yun,chance:row.chance,gua:row.gua,koujue:row.koujue,jiedu:row.jiedu};
+    const yearUpper=qiEnergy(yearMainNum,tian,a);
+    const yearSelf=qiEnergy(yearMainNum,ren,a);
+    const yearLower=qiEnergy(yearMainNum,di,a);
+    const yearOuter=qiEnergy(yearMainNum,zong,a);
+    return{
+      age:a,year:year+i,yun:row.yun,chance:row.chance,gua:row.gua,koujue:row.koujue,jiedu:row.jiedu,
+      upperQi:yearUpper.qi,upperEnergy:yearUpper.energy,
+      selfQi:yearSelf.qi,selfEnergy:yearSelf.energy,
+      lowerQi:yearLower.qi,lowerEnergy:yearLower.energy,
+      outerQi:yearOuter.qi,outerEnergy:yearOuter.energy,
+      ageStar:STAR[a%10],ageStarDesc:STAR_DESC[a%10],
+    };
   });
   
   const ages=['1-9岁','10-18岁','19-27岁','28-36岁','37-45岁','46-54岁','55-63岁','64-72岁','73-81岁','82-90岁'];
@@ -203,5 +243,16 @@ export function calcFull(name:string,year:number,month:number,day:number):Jiugon
     lowerQi:lower.qi,lowerEnergy:lower.energy,lowerGua:lower.gua,lowerStrategy:lower.strategy,
     outerQi:outer.qi,outerEnergy:outer.energy,outerGua:outer.gua,outerStrategy:outer.strategy,
     energyFull:ENERGY_FULL,xiangStrategy:XIANG_STRATEGY_FULL,
+    upperColl,selfColl,lowerColl,
     groups,years};
+}
+
+export async function getJiugongStroke(character:string):Promise<number> {
+  await loadJiugongDictionary();
+  return getStroke(character);
+}
+
+export async function calculateJiugongV6(input:JiugongInput,now=new Date()):Promise<JiugongFull> {
+  await loadJiugongDictionary();
+  return calcFull(input.name,input.year,input.month,input.day,now);
 }
