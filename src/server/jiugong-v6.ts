@@ -162,7 +162,7 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
   const mainFuncDesc=mainFunc==='主功能'?'主动性强、勤劳踏实、白手起家，适合操作流年':'善用头脑、人际关系、机会点，需要合作不能独闯';
   
   // 财富
-  const pdiff=Math.abs(ren-di);let pnum=pdiff>4?(Math.min(ren,di)+9)-Math.max(ren,di):pdiff;
+  const pdiff=Math.abs(ren-di);const pnum=pdiff>4?(Math.min(ren,di)+9)-Math.max(ren,di):pdiff;
   const PATH_DESC=['局平（名气暗财型）：靠专业成名','加1（能力暗财型）：白手起家，财库最旺','加2（能力正财型）：实力派，不能投机','加3（机运暗财型）：受栽培，赚钱无人知','加4（机运正财型）：人际关系为本，适合组织'];
   const PALACE=gen===0?['库平','从商格，说话婉转']:gen===1||gen===3?['库泄','大方型，钱留不住']:gen===4?['库旺','守财型，企业家标配']:['库破','冲动型，冲动时破财'];
   

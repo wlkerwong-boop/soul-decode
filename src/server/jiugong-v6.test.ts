@@ -57,6 +57,9 @@ describe('jiugong v6 server engine', () => {
       lowerColl: _lowerColl,
       ...legacyFields
     } = server;
+    void _upperColl;
+    void _selfColl;
+    void _lowerColl;
     expect({
       ...legacyFields,
       years: server.years.map((year) => ({
