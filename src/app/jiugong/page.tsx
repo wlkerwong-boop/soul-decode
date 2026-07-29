@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { calcFull, loadKangxi } from '@/lib/jiugong-v3';
+import { requestJiugongV6 } from '@/lib/jiugong-client';
 
 export default function JiugongPage() {
   const [name, setName] = useState('');
@@ -10,20 +10,33 @@ export default function JiugongPage() {
   const [month, setMonth] = useState('1');
   const [day, setDay] = useState('1');
   const [loading, setLoading] = useState(false);
-  const [dictReady, setDictReady] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
-
-  useEffect(() => { loadKangxi().then(() => setDictReady(true)); }, []);
 
   const valid = name.length >= 2 && /^[一-鿿]{2,4}$/.test(name.replace(/\s/g,'')) && year && parseInt(year) >= 1900;
 
   const submit = async () => {
     if (!valid || loading) return;
     setLoading(true);
-    await loadKangxi();
-    const result = calcFull(name.trim(), parseInt(year), parseInt(month)||1, parseInt(day)||1);
-    sessionStorage.setItem('jiugong-data', JSON.stringify(result));
-    router.push('/jiugong/result');
+    setError('');
+    try {
+      const result = await requestJiugongV6({
+        name: name.trim(),
+        year: parseInt(year),
+        month: parseInt(month) || 1,
+        day: parseInt(day) || 1,
+      });
+      sessionStorage.setItem('jiugong-data', JSON.stringify(result));
+      router.push('/jiugong/result');
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : '排盘暂时不可用，请稍后重试',
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -95,15 +108,21 @@ export default function JiugongPage() {
           {/* 提交按钮 — 对齐 R1 gradient 风格 */}
           <button
             onClick={submit}
-            disabled={!valid || loading || !dictReady}
+            disabled={!valid || loading}
             className="w-full py-3.5 rounded-xl font-semibold text-lg bg-gradient-to-r from-[var(--color-primary)] to-emerald-600 text-white hover:shadow-lg hover:shadow-[var(--color-primary)]/25 hover:-translate-y-0.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
-            {loading ? '⏳ 正在为你绘制人生地图…' : dictReady ? '🔮 查看我的生命蓝图' : '⏳ 加载字典中…'}
+            {loading ? '⏳ 正在为你绘制人生地图…' : '🔮 查看我的生命蓝图'}
           </button>
+
+          {error && (
+            <p role="alert" className="text-sm text-red-500 text-center">
+              {error}
+            </p>
+          )}
 
           {/* 隐私承诺 */}
           <p className="text-xs text-[var(--text-tertiary)] text-center leading-relaxed">
-            🔒 你的姓名与生日仅用于排盘计算，数据不会存储到服务器，更不会外泄
+            🔒 姓名与生日仅用于本次排盘计算，不作存储，也不会用于其他用途
           </p>
         </div>
 
