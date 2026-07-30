@@ -1173,4 +1173,8 @@ section {
     break-inside: avoid;
     page-break-inside: avoid;
   }
+  .jiugong-print-report [data-jiugong-print-topic] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 }

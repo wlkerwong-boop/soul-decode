@@ -11,6 +11,15 @@ const globalCss = readFileSync(
 );
 
 describe('jiugong print report', () => {
+  it('prints all five advice topics instead of only the currently selected topic', () => {
+    expect(tabsSource).toContain('function PrintAnalysisPanel');
+    expect(tabsSource).toContain('data-jiugong-print-topics');
+    expect(tabsSource).toContain('<PrintAnalysisPanel data={data} environment={environment} />');
+    expect(tabsSource).not.toMatch(
+      /jiugong-print-report[\s\S]*?<AnalysisPanel[\s\S]*?topic=\{state\.topic\}/,
+    );
+  });
+
   it('renders the individualized four-layer explanation inside the environment chapter', () => {
     expect(tabsSource).toContain('buildRelationshipDetails');
     expect(tabsSource).toContain('个人年度四层关系详解');

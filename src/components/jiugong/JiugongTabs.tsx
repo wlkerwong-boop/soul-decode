@@ -386,6 +386,48 @@ function AnalysisPanel({
   );
 }
 
+function PrintAnalysisPanel({
+  data,
+  environment,
+}: {
+  data: JiugongFull;
+  environment: YearEnvironment;
+}) {
+  return (
+    <section data-jiugong-print-topics>
+      <PanelTitle
+        eyebrow="03 · ACTION"
+        title="把趋势变成可执行的提醒"
+        description={`以下五类建议均以 ${environment.year} 年的线上 v6 气场、碰撞、岁值星和【${environment.group.name}】为依据。`}
+      />
+      <div className="space-y-4">
+        {TOPIC_OPTIONS.map((option) => {
+          const advice = buildJiugongAdvice(data, environment, option.key);
+          return (
+            <article
+              key={option.key}
+              data-jiugong-print-topic={option.key}
+              className="rounded-[1.75rem] border border-[var(--color-primary)]/25 bg-gradient-to-br from-[var(--color-primary)]/[0.10] to-transparent p-5 sm:p-7"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs font-semibold tracking-[0.12em] text-[var(--color-primary)]">
+                  {option.label} · 年度建议
+                </p>
+                <span className="text-[10px] text-[var(--text-tertiary)]">
+                  确定性文案 · 不调用 AI
+                </span>
+              </div>
+              <p className="mt-4 text-sm leading-8 text-[var(--text-primary)]">
+                {advice.text}
+              </p>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export function JiugongTabs({ data }: { data: JiugongFull }) {
   const currentYear = new Date().getFullYear();
   const initialYear = data.years.some((item) => item.year === currentYear)
@@ -461,13 +503,7 @@ export function JiugongTabs({ data }: { data: JiugongFull }) {
           onYearChange={() => undefined}
           interactive={false}
         />
-        <AnalysisPanel
-          data={data}
-          environment={environment}
-          topic={state.topic}
-          onTopicChange={() => undefined}
-          interactive={false}
-        />
+        <PrintAnalysisPanel data={data} environment={environment} />
       </div>
     </>
   );
