@@ -1050,6 +1050,7 @@ section {
 /* Print hide/show utilities */
 @media screen {
   .print-only { display: none !important; }
+  .jiugong-print-report { display: none !important; }
 }
 @media print {
   /* ═══ 全局打印主题：白底黑字 ═══ */
@@ -1093,10 +1094,12 @@ section {
     color: #2d5a4f !important;
     font-weight: 700 !important;
   }
-  .text-[var(--text-tertiary)], .text-[var(--text-secondary)] {
+  [class~="text-[var(--text-tertiary)]"],
+  [class~="text-[var(--text-secondary)]"] {
     color: #666 !important;
   }
-  .text-[var(--color-primary)], .text-[var(--text-accent)] {
+  [class~="text-[var(--color-primary)]"],
+  [class~="text-[var(--text-accent)]"] {
     color: #2d5a4f !important;
   }
 
@@ -1142,7 +1145,14 @@ section {
   .jiugong-print-report {
     display: block !important;
   }
+  .jiugong-print-report,
+  .jiugong-print-report * {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
   .jiugong-print-report section {
+    display: block !important;
     break-inside: auto !important;
     page-break-inside: auto !important;
   }

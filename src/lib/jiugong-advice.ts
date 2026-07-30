@@ -72,31 +72,16 @@ const TOPIC_FOCUS: Record<AdviceTopic, string> = {
   health: '保持规律作息、适量活动和必要检查；出现不适及时寻求专业帮助。',
 };
 
-function collisionText(environment: YearEnvironment): string {
-  const active = [
-    environment.collisions.upper && '上层',
-    environment.collisions.self && '自我',
-    environment.collisions.lower && '下层',
-  ].filter(Boolean);
-  return active.length
-    ? `本年处于${active.join('、')}碰撞期，重要决定宜留出复核与缓冲。`
-    : '本年未命中三类碰撞期，仍应按实际条件稳健推进。';
-}
-
 export function buildJiugongAdvice(
   data: JiugongFull,
   environment: YearEnvironment,
   topic: AdviceTopic,
 ): AdviceResult {
-  const upper = JIUGONG_STRATEGIES.upper[environment.upperQi] || '顺势而为';
-  const self = JIUGONG_STRATEGIES.self[environment.selfQi] || '保持稳定';
-  const lower = JIUGONG_STRATEGIES.lower[environment.lowerQi] || '保持团队稳定';
   const text = [
     `${environment.year}年（虚岁${environment.age}）${TOPIC_OPENING[topic](data)}。`,
     `岁值星为${environment.ageStar}；当前处于【${environment.group.name}】，年度卷轴提示“${environment.jiedu}”。`,
     TOPIC_FOCUS[topic],
-    `上层策略：${upper}；自我策略：${self}；下层策略：${lower}。`,
-    collisionText(environment),
+    `结合本年“${environment.outerQi}·${environment.outerEnergy}”的对外气场，先从一件可验证的小事开始，观察反馈后再扩大行动。`,
   ].join('');
 
   return {

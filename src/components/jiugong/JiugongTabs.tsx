@@ -10,6 +10,7 @@ import {
   selectYearEnvironment,
   type YearEnvironment,
 } from '../../lib/jiugong-environment';
+import { buildRelationshipDetails } from '../../lib/jiugong-relationships';
 import {
   createJiugongViewState,
   reduceJiugongViewState,
@@ -155,6 +156,11 @@ function EnvironmentPanel({
     if (interactive) currentRowRef.current?.scrollIntoView({ block: 'center' });
   }, [interactive, year]);
 
+  const relationshipDetails = useMemo(
+    () => buildRelationshipDetails(data, environment),
+    [data, environment],
+  );
+
   const relations = [
     ['上层', environment.upperQi, environment.upperEnergy, environment.strategies.upper],
     ['自我', environment.selfQi, environment.selfEnergy, environment.strategies.self],
@@ -209,6 +215,64 @@ function EnvironmentPanel({
           <CollisionBadge active={environment.collisions.upper} label="上层" />
           <CollisionBadge active={environment.collisions.self} label="自我" />
           <CollisionBadge active={environment.collisions.lower} label="下层" />
+        </div>
+      </div>
+
+      <div className="mt-7">
+        <div className="mb-4">
+          <h3 className="font-serif text-xl font-semibold text-[var(--text-primary)]">
+            个人年度四层关系详解
+          </h3>
+          <p className="mt-2 max-w-3xl text-xs leading-6 text-[var(--text-secondary)]">
+            以下内容把当年气场与姓名形成的个人结构合并解释。四层分别回答：环境在说什么、为什么与你有关、优势和风险在哪里，以及今年具体怎么做。
+          </p>
+        </div>
+        <div className="grid gap-4 xl:grid-cols-2">
+          {relationshipDetails.map((detail) => (
+            <article
+              key={detail.key}
+              className="rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)]/80 p-5"
+            >
+              <h4 className="font-serif text-lg font-semibold text-[var(--text-primary)]">
+                {detail.title}
+              </h4>
+              <p className="mt-2 text-xs leading-6 text-[var(--text-secondary)]">{detail.meaning}</p>
+
+              <div className="mt-4 space-y-4 text-xs leading-6">
+                <div>
+                  <p className="font-semibold text-[var(--text-primary)]">为什么这样判断</p>
+                  <p className="mt-1 text-[var(--text-secondary)]">{detail.annualContext}</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-[var(--text-primary)]">与你的个人结构如何结合</p>
+                  <p className="mt-1 text-[var(--text-secondary)]">{detail.personalFit}</p>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl bg-emerald-500/[0.07] p-3">
+                    <p className="font-semibold text-emerald-800">有利表现</p>
+                    <ul className="mt-1 list-disc space-y-1 pl-4 text-[var(--text-secondary)]">
+                      {detail.strengths.map((item) => <li key={item}>{item}</li>)}
+                    </ul>
+                  </div>
+                  <div className="rounded-2xl bg-amber-500/[0.08] p-3">
+                    <p className="font-semibold text-amber-800">需要留意</p>
+                    <ul className="mt-1 list-disc space-y-1 pl-4 text-[var(--text-secondary)]">
+                      {detail.risks.map((item) => <li key={item}>{item}</li>)}
+                    </ul>
+                  </div>
+                </div>
+                <div>
+                  <p className="font-semibold text-[var(--text-primary)]">行动建议</p>
+                  <ol className="mt-1 list-decimal space-y-1 pl-4 text-[var(--text-secondary)]">
+                    {detail.actions.map((item) => <li key={item}>{item}</li>)}
+                  </ol>
+                </div>
+              </div>
+              <p className="mt-4 border-t border-[var(--border-color)]/60 pt-3 text-[10px] text-[var(--text-tertiary)]">
+                学理依据：{detail.sourceIds.join('、')}
+              </p>
+            </article>
+          ))}
         </div>
       </div>
 
@@ -388,7 +452,7 @@ export function JiugongTabs({ data }: { data: JiugongFull }) {
         </div>
       </div>
 
-      <div className="jiugong-print-report hidden space-y-8 print:block">
+      <div className="jiugong-print-report space-y-8">
         <TraitsPanel data={data} />
         <EnvironmentPanel
           data={data}

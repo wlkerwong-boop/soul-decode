@@ -40,6 +40,10 @@ describe('jiugong advice', () => {
       expect(advice.text).toContain('2026年');
       expect(advice.text).toContain(environment.group.name);
       expect(advice.text.length).toBeGreaterThan(80);
+      expect(advice.text).not.toContain('上层策略：');
+      expect(advice.text).not.toContain('自我策略：');
+      expect(advice.text).not.toContain('下层策略：');
+      expect(advice.text).not.toContain('本年未命中三类碰撞期');
     },
   );
 });
