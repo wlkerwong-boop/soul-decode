@@ -1,0 +1,1323 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "sourceId": "JG-SRC-001",
+      "path": "95e8aa8d0c8f60ddefc20e2297e17bc3.pdf",
+      "format": "pdf",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "10 5 15 1982 1983 1984 1985 1986 1987 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 1982 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 30 1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 17 18 19 2",
+      "extractor": "pypdf",
+      "characters": 726
+    },
+    {
+      "sourceId": "JG-SRC-002",
+      "path": "九宫姓名学/九宫姓名学.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "九宫姓名学 你的人生说明书 1.理论基础 1.1命运的定数 1.2名字的奥秘 1.3何谓五格三才 1.4岁值星之心灵动力 2.人格特质分析 2.1名气看气场 2.2名字看格局 2.3名字看特质 2.4名字看星运 2.5名字人格看职业方向 2.6名字看上下助力 2.7名字看属下助力 2.8名字看管理IQ 2.9名字看五行性格 3.婚姻分析 3.1婚姻主副功能 3.2婚姻显象 4.财运分析 4.1名字看财运 4.2财宫分析 5.人体自然规律分析 5.1人体九大气场说明 5.2三大",
+      "extractor": "python-docx",
+      "characters": 76403
+    },
+    {
+      "sourceId": "JG-SRC-003",
+      "path": "九宫姓名学/第一章-命运规律/从河图洛.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "从河图洛书的神奇看人身上的规律 河图、洛书是中国传统文化的数学哲学基础，中华文明的源头，被誉为\"宇宙魔方\"，用 1 — 9 这九个基本自然数排列，又称合称“河洛之数”。 相传，上古伏羲氏时，洛阳东北孟津县境内的黄河中浮出龙马，背负“河图”，献给伏羲。伏羲依此而演成八卦，后为《周易》来源。 又相传，大禹时，洛阳境内洛河中浮出神龟，背驮\"洛书\"，献给大禹。大禹依此治水成功，遂划天下为九州。又依此定九章大法，治理社会，流传下来收入《尚书》中，名《洪范》。所以，《易·系辞上》中说：天",
+      "extractor": "python-docx",
+      "characters": 1457
+    },
+    {
+      "sourceId": "JG-SRC-004",
+      "path": "九宫姓名学/第一章-命运规律/何谓五格.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "五行",
+        "个人结构"
+      ],
+      "summary": "何谓五格三才 五格三才中的五格是：天格、人格、地格、总格、外格等五格;三才配置就是指“天格、人格、地格”的五行（金木水火土）之生克关系。三才的生克关系在姓名学中是极为重要的。 首先介绍一下什么是五格： 1、 天格： 天格数是先祖留传下来的，其数理对人影响不大。 单姓和复姓计算天格数理是不同的。单姓的天格数理是“单姓笔画+1”，而复姓的天格数理是“复姓笔画数相加”。 2、人格： 人格数又称主运，是整个姓名的中心点，影响人的一生命运。 单字名者，以名字划数加 1 即为地格之数。 ",
+      "extractor": "python-docx",
+      "characters": 563
+    },
+    {
+      "sourceId": "JG-SRC-005",
+      "path": "九宫姓名学/第一章-命运规律/命运有没.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "1命运有没有定数 世界其实就是一场游戏； 如同我们在电脑面前玩电脑游戏一样，电脑里面的游戏是一个二维的世界，我们身处的是立体的三维世界；里面的游戏世界是人类设定的； 而我们所处的这个世界其实是一个更高维度空间设定的游戏；那样一个维度是我们可以称之为灵界或神界；人是有灵魂的，世间有轮回，也有因果；我们的灵魂来自更高维度的灵界； 我们今天所处的三维世界，可以理解为灵界的灵魂犯了错，到三维世界来历练；生命在凡世中的演绎，其实是灵魂在尘世中的修行； 既然是游戏，游戏自然就有一定的游戏",
+      "extractor": "python-docx",
+      "characters": 334
+    },
+    {
+      "sourceId": "JG-SRC-006",
+      "path": "九宫姓名学/第一章-命运规律/岁值星之.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "星运",
+        "岁值星"
+      ],
+      "summary": "岁值星之10种心灵动力 今天先谈谈岁值星，岁值的力量，会左右一个人的元神，带来一个星座的磁场感应，会帮助人，去发挥配合流年使用，效果会更好。所有数字里含有一股灵动力，人的灵数也一样。从一到十有一股力量；不同的岁数尾数呈现不同的感应；大家可以对照之； 注意了，计算岁值星，用的是虚岁；比如你1990年出生，今年是2016年，则你的虚岁为2016-1990+1=27岁；对应的岁值星为《孤星》 ； 岁数尾数1《权星》 又称之为『带动星』，其掌管着权力的迹象，凡11.21.31.41.",
+      "extractor": "python-docx",
+      "characters": 1709
+    },
+    {
+      "sourceId": "JG-SRC-007",
+      "path": "九宫姓名学/第七章-择日取名/关于取名.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "7.2如何取名 1取孩子名，和取公司名； 2名字代表一股力量 3千万不要帮人取名字；第一，会无形中把自身的频率和能量传递给名字；如果非要去，可以找家族里最有名望的人取；得文找文人取，得武找武者取；第二，会跟家人没有缘分；第三，取名字的人会带给小孩子相应的进化格或退化格； 4建议方法；第一，希望他干什么，选相应的字即可；名字无好坏，关键在经营；第二，看父母格局，男从父，女从母；假如妈妈吃苦，要跳出去，生宫跳克宫，克宫跳生宫；如果爸爸一事无成，行动功能阳改成阴； 5父母宫要取克宫",
+      "extractor": "python-docx",
+      "characters": 698
+    },
+    {
+      "sourceId": "JG-SRC-008",
+      "path": "九宫姓名学/第七章-择日取名/定位吉凶.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "7.3定位─吉凶位置表 每个人都有最适合的位置与最忌讳的位置,以命宫相并数为主看宫位,适合者为吉.忌讳者为 凶。 吉位─凡是命宫数之本位皆称「吉位」。 例:李静瑀37划3+7=10 1+0=「1」宜坐北位, 27划「9」宜坐南位,32划「5」居中或四正位皆宜。 凶位─1，帝6，侯8，帅9，王2，相4，卫5，公7，袭3，将。 「1」最忌坐东南位─帝气进东南，容易丢江山。(例：蒋介石、赵构) 「2」最忌坐中宫──相位居中宫，思维一片空。 「3」最忌坐西北位─将门入西北，能力难发挥",
+      "extractor": "python-docx",
+      "characters": 850
+    },
+    {
+      "sourceId": "JG-SRC-009",
+      "path": "九宫姓名学/第七章-择日取名/择日之用.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "7.1择日之用法 1四中节气；结婚，丧事，开张，入宅； 2结婚，是男人的气，以男人为主；订婚，是女人的气，以女人为主；女人一定要想办法让男人跟你订婚；订婚以女人为主；订婚那天，女人要少动，不要动； 3婚庆以命宫为主，名，官，衰，交；男人结婚，名第一，其次为官，衰，交；女人订婚，交第一，其次衰，名，官； 4丧事，以子女为主，看父母宫；衰，财，利，绝；若父母有成就，气往下降，无成就，气往上走；无成就选利和绝；有成就选衰和财；生前多灾难选命宫的交日；死人不健康死，选择一周出殡，不能",
+      "extractor": "python-docx",
+      "characters": 631
+    },
+    {
+      "sourceId": "JG-SRC-010",
+      "path": "九宫姓名学/第三章-婚姻/婚姻显象.doc",
+      "format": "doc",
+      "status": "extracted",
+      "topics": [
+        "婚姻",
+        "关系"
+      ],
+      "summary": "1婚姻宫淡象 比较不重视对方，反而对自己比较欣赏比较自恋一点。往往对方比较喜欢你、接受你、比较爱你，而使你成为被宠、被爱、被滋养的一方。您的婚姻期往往比别人晚一点。宜跟外人结婚(外国、远方、相亲)。 缘起 A被动。 B经由旁人的牵引介绍比较容易成就婚缘。 缘灭 大概有百分之六十以上的因素在房中生活过于冷淡、关系不能协调，转而极端地投入工作与事业，最后导致婚姻破裂。 注意 A要懂安逸、享受、 配合。 B要注意心理失衡协调难。 此型往往对对方掌控心强、要求高、不安全感重。 一、在",
+      "extractor": "textutil",
+      "characters": 4729
+    },
+    {
+      "sourceId": "JG-SRC-011",
+      "path": "九宫姓名学/第三章-婚姻/论婚姻当.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "婚姻",
+        "关系"
+      ],
+      "summary": "论婚姻当中的阴阳 从两人关系的第一步开始就注定了未来的方向； 主动为阴，被动为阳；就如月亮和太阳的关系； 阴适合管理层面，阳适合开拓层面； 若阴做着开拓层面的工作，则阳极易离开，因为阳的特性被掩盖； 若阳做着管理层面的工作，则阴极易离开，因为阴的特性被掩盖； 若都做着阳的工作，会因工作吵架而分开； 若都做着阴的工作，会因生活无趣而分开；",
+      "extractor": "python-docx",
+      "characters": 169
+    },
+    {
+      "sourceId": "JG-SRC-012",
+      "path": "九宫姓名学/第二章-名字解读/名字人格.doc",
+      "format": "doc",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "木 总裁达人ＶＳ秘书达人 个性特质 个位数１自我意识很强，又有判断力与观察力，随然比较主观，铁齿，但强烈的领导欲望和严格的自我要求，让这类人容易成为领导者，男生通常是野心勃勃，女生则有成为女强人的特质。 个位数２随然和个位数１的人同样庸有杰出的思考能力，但主观意识也很强，不过比个位数１的人销微弱势一点，喜欢有条理地分析事情，男生看起来斯文温和，女生则是要求完美。 适合职业 人格属木的人是走［专业技术］路线的，也就是说自己的主修和专长是什么，就会从事那方面的工作，个位数１的人适",
+      "extractor": "textutil",
+      "characters": 1716
+    },
+    {
+      "sourceId": "JG-SRC-013",
+      "path": "九宫姓名学/第二章-名字解读/名字看上.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "名字看你的上下助力 甚幺叫「生」？从字面上的意思，很容易理解成「产生、发生、变成、生出」，事实上在五行中， 「生」代表一种「滋养、转移、传承」。 「水生木」表示水养木，「木生火」表示木头能量转移成火、、、以此类推。「生」代表着未成熟、缓慢、渐进的过程。 而「克」的解释，传统的中国人一看到「克」，就联想到克夫、克子、等等极为负面的说法。事实上「克」在五行当中作「改造、结合、破坏」解释。「金克木」金改造了木头；「木克土」木头的根部可以结合土壤；「土克水」就更好解释了，和稀泥嘛！「",
+      "extractor": "python-docx",
+      "characters": 1457
+    },
+    {
+      "sourceId": "JG-SRC-014",
+      "path": "九宫姓名学/第二章-名字解读/名字看五.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "五行",
+        "个人结构"
+      ],
+      "summary": "名字看五行性格 名字中其实已经蕴藏着的五行，可以分析一个人大致性格；在讲解五行性格之前，我们先了解如何从名字看一个人的五行； 一、算笔划、放入各宫数字： 首先你必须先算出自己名字每一个字的笔划。姓名学是沿自古代的洛书及河图，算姓名最根本的基础就是算笔划，因此笔划的计算必须依据康熙字典的笔划数。（大陆的简体字要用繁体来算笔划喔！）因为现在大家都打计算机，很多字你可能已忘记怎么写了，所以学习初期要勤查字典，只要有怀疑的字都要查字典确认，即使只有一划之差却可以使整个命盘都被改变，因",
+      "extractor": "python-docx",
+      "characters": 7723
+    },
+    {
+      "sourceId": "JG-SRC-015",
+      "path": "九宫姓名学/第二章-名字解读/名字看属.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "从名字的地格合并数看你的属下助力 上一章我们知道了名字天格，人格，地格的算法；今天我们就先从地格这个数来看有什么奥秘存在； 属下助力，意思就是，当你如果成为一个主管，成为一个管理者，属下会呈现什么助力，对应的你该用什么方法去管理； 看属下助力是用地格的合并数来看；比如你的地格数是20，则合并数是2，地格数是18，则合并数是9，地格数是38，则为3+8=11,11再相互加得2； 好了，计算出你的地格数（名字的第二个字和第三个字相加之和），对应下面的即可； 数字1；要点；扶强除弱",
+      "extractor": "python-docx",
+      "characters": 759
+    },
+    {
+      "sourceId": "JG-SRC-016",
+      "path": "九宫姓名学/第二章-名字解读/名字看星.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "星运",
+        "岁值星"
+      ],
+      "summary": "名字看星运 提示：务必使用九岁前的姓名，及繁体字笔画； 可登录 http://tool.httpcn.com/KangXi/ 康熙字典 可查询你名字各个字的笔画，相加总和得到的数对应下面的星运说明；可以做一个基本判断；好，闲话不多说，上干货； 笔画10-15 笔划 10── 财星（文曲）（局差一，一辈子靠头脑吃饭。） 1、智能想当高，思考能力相当强的星座，其主宰着智能与财富的磁场； 2、先、后天皆属隐藏性，故不易被发掘。但拥有不发则已，一鸣惊人的能量； 3、最忌不表现自己，",
+      "extractor": "python-docx",
+      "characters": 5796
+    },
+    {
+      "sourceId": "JG-SRC-017",
+      "path": "九宫姓名学/第二章-名字解读/名字看机.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "名字看一个人的局 我们经常讲格局，格局，在名字里面，每个人其实都有一个局；局决定着你这一生的成功机运；即怎么做才能成功； 这里所谓的「局」，就是每个人姓名笔划数（繁体字，以康熙字典为准，九岁之前的本名），十位数与个位数的数字相减，得到的结果就是「局」。如果相减的结果有超过5，需重新用小的数字加上9再减去另一个数得到0-4之间的数值。例如17划，7减1等于6，这就需要重新算，用1+9=10，然后再减去7得到3，所以是局差三。 这样相减的结果，会有五种，对应的情况就是： 局差0 ",
+      "extractor": "python-docx",
+      "characters": 1928
+    },
+    {
+      "sourceId": "JG-SRC-018",
+      "path": "九宫姓名学/第二章-名字解读/名字看气.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "名字看气场(九宫母气图) 气场的算法 姓名数直接相加 四 属初夏 代表万物长成、 活力鲜艳桃花、 亲和力与口舌 九 属炎夏为南帝 代表光芒四射、 得天独厚与独霸 带动力强 二 为初秋第一次收成 代表享成懒散阴沉、 由动转静、以逸待劳 安逸 三 属正春为东王 代表万物欣欣向荣、 竞争争夺、辛苦成长历练 自我意识强 五 为中土 代表多变杂沉、 综合复杂、多聚散、 随遇而安、城腑 七 属深秋为西王 代表肃杀、收歛、 权威性享成 严肃 八 属初春 代表生命萌芽、 走前端之象 刚毅、开",
+      "extractor": "python-docx",
+      "characters": 311
+    },
+    {
+      "sourceId": "JG-SRC-019",
+      "path": "九宫姓名学/第二章-名字解读/名字看特.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "名字看特质 一个人名字笔划的加总,通常会得到两个数字，比如35 38 50……，后天数是指你姓名总笔画数的个位数，这里称之为质；在姓名笔画里，可以把人归纳为十大类型，大家可以一一对照；这一套学会了对于企业的人力资源十分有用；比如招聘人的时候，如果他的质为3或是6的时候，特别适合做业务；如果质为2，要么能说，适合做大客户沟通，要么能写，文案功夫特别强；质为4的人福德，容易受人照顾； 此篇说明后天数(个位数:子数)所代表的意义。 质为1；五行中属木，阳木，权星（紫金家族），掌管理",
+      "extractor": "python-docx",
+      "characters": 1065
+    },
+    {
+      "sourceId": "JG-SRC-020",
+      "path": "九宫姓名学/第二章-名字解读/名字看管.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "名字看管理IQ 明白了如下内容，可以用来分析个人的管理风格偏向，从而取长补短；或做父母的以后为孩子取名字，可有意识选取相应笔画； 管理IQ指数共可分为九型，因为数字的相并后只有九种： 第一型：名字第二个字是1、10、19者，称之为【流水型】。 第二型：名字第二个字是2、11、20者，称之为【林木型】。 第三型：名字第二个字是3、12、21者，称之为【太阳型】 第四型：名字第二个字是4、13者，称之为【月亮型】。 第五型：名字第二个字是5、14者，称之为【天空型】。 第六型：名",
+      "extractor": "python-docx",
+      "characters": 2565
+    },
+    {
+      "sourceId": "JG-SRC-021",
+      "path": "九宫姓名学/第五章-人生气场/三大关系.doc",
+      "format": "doc",
+      "status": "extracted",
+      "topics": [
+        "气场",
+        "四层关系",
+        "五行",
+        "个人结构"
+      ],
+      "summary": "上层关系解读 名望 1解释 这是一个聚集得到四季气流的位置，太阳一年四季都照耀着你；这是大环境的气和你共鸣的一个位置，这股气流让你在这一年里特别容易凸显，很容易让你成名，给你亮丽的光芒；可以造就出你个人的知名度； 2产生现象 公司在这一年知名度很容易打开，当年要想办法尽量去突显它；相反的，如果公司的体质很差，在这一年就很容易出现问题或是结束； 个人在这一年最容易得到别人的帮忙，有困难可以找长辈来帮助，可以经营上层人际关系； 店面生意会红，上班族代表机运名望，如果走名望，且能量",
+      "extractor": "textutil",
+      "characters": 10243
+    },
+    {
+      "sourceId": "JG-SRC-022",
+      "path": "九宫姓名学/第五章-人生气场/人体九大.doc",
+      "format": "doc",
+      "status": "extracted",
+      "topics": [
+        "气场",
+        "四层关系",
+        "五行",
+        "个人结构"
+      ],
+      "summary": "九大气场解释 河图洛书的惊天发现 九大气场的由来 南 付出 4 转变 9 享成 2 争夺 3 名望 5 升格 7 开拓 8 晦暗 1 入库 6 名字的笔划总数相加得到的数字对应上面所代表的气场； 晦 代表北方， 代表冬天； 代表子夜； 是一个隐藏的时空， 一片白茫茫；什么都看不见，什么都藏起来，动植物都在休眠；是个隐藏的位置 子夜代表黑暗；所有的东西看不见，很容易产生假象，不真实的东西，就会有误判；有陷阱；产生危机，危险； 对人来讲，是一个伤害，会产生很大的损失； 黑暗的，看",
+      "extractor": "textutil",
+      "characters": 1435
+    },
+    {
+      "sourceId": "JG-SRC-023",
+      "path": "九宫姓名学/第五章-人生气场/流年运作.doc",
+      "format": "doc",
+      "status": "extracted",
+      "topics": [
+        "流年",
+        "年度环境",
+        "气场",
+        "四层关系",
+        "五行",
+        "个人结构"
+      ],
+      "summary": "流年运作策略 从生日的前六个月起，你身上的能量渐渐的进入不稳定的阶段，这个接段称之为『震荡期』；其意味着你的思绪、心态和行为举止在这一波段中会产生很不稳定的状况，在想法上会出现多种变化，心态上容易惶恐不安、在行为上也会有急躁不稳定的情形出现，这些现象都将造成『变节和转换』的频率产生。然而『变节转换』的频率可能感应到两种磁场反应： *第一种： 良性的—有新的思维，可以获得老板、主管认同而受重用，或者可以吸收到比较好的工作职场而被认任用。 *第二种： 劣性的—会吸引到不良的事物或",
+      "extractor": "textutil",
+      "characters": 1701
+    },
+    {
+      "sourceId": "JG-SRC-024",
+      "path": "九宫姓名学/第五章-人生气场/流年运势.doc",
+      "format": "doc",
+      "status": "extracted",
+      "topics": [
+        "流年",
+        "年度环境",
+        "气场",
+        "四层关系",
+        "五行",
+        "个人结构"
+      ],
+      "summary": "十年运势解说 解说版1 1胎（酝酿运）---一切新的开始 一. 磁场： 弱，由无到有万物。由无到有的时候，必有吸力产生，自然而然外围的力量会被吸入，在运势的解说上，将可得到外围的助力。 二. 动能： 被动，暗中酝酿，由不动慢慢转成会动，动作缓慢的导引往新的方位前进。 三. 生命力： 一个生命周期的开始，但很脆弱，往往经不起打击。故在这一段运中，最怕受到环境的打击或刺激，意志力较薄弱，身体状况比较容易不好，或有不顺，或有流失，尤其以45岁以后的人走到这一段运，体能不强，很容易备",
+      "extractor": "textutil",
+      "characters": 19808
+    },
+    {
+      "sourceId": "JG-SRC-025",
+      "path": "九宫姓名学/第五章-人生气场/碰撞解读.doc",
+      "format": "doc",
+      "status": "extracted",
+      "topics": [
+        "碰撞",
+        "流年风险",
+        "气场",
+        "四层关系",
+        "五行",
+        "个人结构"
+      ],
+      "summary": "解说版本1 磁场经过一段时间后，一定会起变化，做转变，有如地壳变动，地震，火山爆发等巨大的震撼，任何有生命周期，磁场周期的，来自于本身生命体的自转，在固定的时空中，自转一周后就会碰到起点，而产生转换，突变，这种撞击变化就叫做碰撞期； 大自然的碰撞现象有地震，火山爆发； 人的碰撞是每九年回到原点，会跟原点产生碰撞，而产生另一种质变，它有五种明显的现象发生； 1排斥，2冲击，3破坏，4吸引，5转变； 上层关系碰撞 解释 反射一个人的思考，智慧，因此这个位置也主宰者一个人的节操； ",
+      "extractor": "textutil",
+      "characters": 4807
+    },
+    {
+      "sourceId": "JG-SRC-026",
+      "path": "九宫姓名学/第六章-推演能量/人生大限.xls",
+      "format": "xls",
+      "status": "failed-needs-review",
+      "topics": [
+        "人生大限",
+        "九年运组"
+      ],
+      "summary": "",
+      "extractor": "",
+      "characters": 0
+    },
+    {
+      "sourceId": "JG-SRC-027",
+      "path": "九宫姓名学/第六章-推演能量/推演四格.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "推演四格气场 第一步，先用康熙字典算出每个字的笔画； 第二步，算四格； 天格；姓名的天格（笔画加1） 人格；姓笔画加名笔画，如果是复姓后一个字加名； 地格；名笔画加字笔画，如果是单名用名的笔画加1； 总格；姓名的总笔画； 第三步；算主数； 用当年的年份减去1111，再将剩下的数个位数相加得出相应数字； 第四步；计算各个关系的气场； 上层关系；将第三步得出的数字减去天格，得到的数字对应上层关系是哪个气场；如不够减，加9再减； 自我关系；将第三步得出的数字减去人格，得到的数字对应",
+      "extractor": "python-docx",
+      "characters": 401
+    },
+    {
+      "sourceId": "JG-SRC-028",
+      "path": "九宫姓名学/第六章-推演能量/推算碰撞.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "碰撞",
+        "流年风险"
+      ],
+      "summary": "6.3推算碰撞期 往后推算，将每个关系的数字加1位碰撞起点，往后再加9，以此类推； 往前推算，将每个关系的数字直接减10为碰撞； 注：磁场的启动都从1开始，故碰撞的计算要加1；以后再加9，换句话说，倒退是也要先减1，再减9；",
+      "extractor": "python-docx",
+      "characters": 112
+    },
+    {
+      "sourceId": "JG-SRC-029",
+      "path": "九宫姓名学/第六章-推演能量/能量推算.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "6.2能量运势推演 按如下方法推算你当年处于哪个运程； 将你的笔划数计算出来之后，例如18划，那幺将笔划数的尾数8放在冠带的位置，然后顺时钟的方向往下排，9就是临官、10就是帝旺、、一路排下去，然后又回到8冠带。 这是甚幺意思呢？这张『九宫流年运势图』告诉你：如果你的笔划数尾数是8的时候（8、18、28、38、48、58划），只要你的虚岁（比实岁多一岁）的尾数也是8的时候，例如18；28、38、48、58岁，就是走冠带运。虚岁尾数9的时候，就是走临官运，一共有十个数字，所以一",
+      "extractor": "python-docx",
+      "characters": 502
+    },
+    {
+      "sourceId": "JG-SRC-030",
+      "path": "九宫姓名学/第四章-财运/名字看财.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "财运",
+        "财库"
+      ],
+      "summary": "名字看财运 请先记住五行是甚幺？ 数字1、2、3、4、5、6、7、8、9、0分别代表着阴阳五行，奇数为阳、偶数为阴。 木（1、2）火（3、4）土（5、6）金（7、8）水（9、0） 举例来说：1是阳木、2是阴木；3是阳火、4是阴火，以此类推。 「五行的生克关系」 （生宫） 金生水→水生木→木生火→火生土→土生金，然后又是金生水，循环不已。 （克宫） 金克木→木克土→土克水→水克火→火克金，然后又是金克木，循环不已。 以上的五行生克关系要牢牢的记住，一定要能背下来，成为口诀，这是",
+      "extractor": "python-docx",
+      "characters": 1630
+    },
+    {
+      "sourceId": "JG-SRC-031",
+      "path": "九宫姓名学/第四章-财运/名字看财库.docx",
+      "format": "docx",
+      "status": "extracted",
+      "topics": [
+        "财运",
+        "财库"
+      ],
+      "summary": "如何看你的财库通路 财库通路分为三大类： (1)能力财：一辈子的财须靠辛苦、劳力、体力、实力，辛苦去创造、去赚之财。虽辛苦但较有成就感。靠运，长生以后之运势开始赚钱。几乎都出现在白手起家，做技术发展。 (2)机运财：一辈子的财都比较轻松得到。例：父母亲留下来或景气造就，得到比较轻松。得到总是在偶然机会。靠命格、重机会点、从人际关系发展。 (3)知名财：赌财、最暴起暴落的，知名度之财。赌财-起伏很大、输赢很大、冒险性很大，投机性的。 ◎正财者-乃投资专业、劳力经营之所得。 ◎暗",
+      "extractor": "python-docx",
+      "characters": 2052
+    },
+    {
+      "sourceId": "JG-SRC-032",
+      "path": "九宫学理系统技术规格.md",
+      "format": "md",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "# 九宫学理 · 人生说明书 & 90年运程系统 技术规格文档 > 基于程天相（程春生）九宫学理体系 > 数据来源：课程讲义 + 实战案例XLS + 90年运程卷轴PDF模板 --- ## 一、系统概述 输入：用户姓名（中文）+ 出生年月日（YYYYMMDD） 输出： 1. **人生说明书** — 五格、局、质、五行性格、财富、婚姻、星运、四格气场、年度卦象 2. **90年运程卷轴** — 10组趋势 × 9年 = 90年完整运势序列 --- ## 二、笔画数据库 ### ",
+      "extractor": "utf-8",
+      "characters": 11954
+    },
+    {
+      "sourceId": "JG-SRC-033",
+      "path": "人生大限解说.xls",
+      "format": "xls",
+      "status": "failed-needs-review",
+      "topics": [
+        "人生大限",
+        "九年运组"
+      ],
+      "summary": "",
+      "extractor": "",
+      "characters": 0
+    },
+    {
+      "sourceId": "JG-SRC-034",
+      "path": "录音笔记/宋老师20150603/0926.m4a",
+      "format": "m4a",
+      "status": "discovered",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": ""
+    },
+    {
+      "sourceId": "JG-SRC-035",
+      "path": "录音笔记/宋老师20150603/1056.m4a",
+      "format": "m4a",
+      "status": "discovered",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": ""
+    },
+    {
+      "sourceId": "JG-SRC-036",
+      "path": "录音笔记/宋老师20150603/1429.m4a",
+      "format": "m4a",
+      "status": "discovered",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": ""
+    },
+    {
+      "sourceId": "JG-SRC-037",
+      "path": "录音笔记/宋老师20150603/1628.m4a",
+      "format": "m4a",
+      "status": "discovered",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": ""
+    },
+    {
+      "sourceId": "JG-SRC-038",
+      "path": "录音笔记/宋老师20150603/1816.m4a",
+      "format": "m4a",
+      "status": "discovered",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": ""
+    },
+    {
+      "sourceId": "JG-SRC-039",
+      "path": "录音笔记/宋老师20150801/0927.m4a",
+      "format": "m4a",
+      "status": "discovered",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": ""
+    },
+    {
+      "sourceId": "JG-SRC-040",
+      "path": "录音笔记/宋老师20150801/1058.m4a",
+      "format": "m4a",
+      "status": "discovered",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": ""
+    },
+    {
+      "sourceId": "JG-SRC-041",
+      "path": "录音笔记/宋老师20150801/1407.m4a",
+      "format": "m4a",
+      "status": "discovered",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": ""
+    },
+    {
+      "sourceId": "JG-SRC-042",
+      "path": "录音笔记/宋老师20150801/1451.m4a",
+      "format": "m4a",
+      "status": "discovered",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": ""
+    },
+    {
+      "sourceId": "JG-SRC-043",
+      "path": "录音笔记/宋老师20150801/1714.m4a",
+      "format": "m4a",
+      "status": "discovered",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": ""
+    },
+    {
+      "sourceId": "JG-SRC-044",
+      "path": "录音笔记/录音笔记.doc",
+      "format": "doc",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "人生趋势密码笔记 20150601 1九大气场 南 付出 4 转变 9 享成 2 争夺 3 名望 5 升格 7 开拓 8 晦暗 1 入库 6 北 2十大能量 胎\u0007养\u0007长生\u0007冠带\u0007临官\u0007帝旺\u0007衰\u0007病\u0007死\u0007绝\u0007\u0007松弛\u0007稳定\u0007发作\u0007轻狂\u0007横冲\u0007高亢\u0007无力\u0007不稳\u0007已死\u0007低落\u0007\u0007 3四个关系 前三个可分开看，最后一个讲整体； 上层关系；侧重思想；思绪，代表创意，压力；企业，长官，父母；房子，办公室； 中层关系；侧重情绪和健康；代表心情，情绪，企图心；财产大小，来财力量；健康，疾病； 下",
+      "extractor": "textutil",
+      "characters": 26413
+    },
+    {
+      "sourceId": "JG-SRC-045",
+      "path": "录音笔记/课程要点.doc",
+      "format": "doc",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "趋势密码要点 1九大气场 南 付出 4 转变 9 享成 2 争夺 3 名望 5 升格 7 开拓 8 晦暗 1 入库 6 北 2十大能量 胎\u0007养\u0007长生\u0007冠带\u0007临官\u0007帝旺\u0007衰\u0007病\u0007死\u0007绝\u0007\u0007松弛\u0007稳定\u0007发作\u0007轻狂\u0007横冲\u0007高亢\u0007无力\u0007不稳\u0007已死\u0007低落\u0007\u0007 3四个关系 前三个可分开看，最后一个讲整体； 上层关系；侧重思想；思绪，代表创意，压力；企业，长官，父母；房子，办公室； 中层关系；侧重情绪和健康；代表心情，情绪，企图心；财产大小，来财力量；健康，疾病； 下层关系；侧重行为和环境",
+      "extractor": "textutil",
+      "characters": 1922
+    },
+    {
+      "sourceId": "JG-SRC-046",
+      "path": "录音笔记/课程讲义.doc",
+      "format": "doc",
+      "status": "extracted",
+      "topics": [
+        "待提取分类"
+      ],
+      "summary": "人生趋势解码课程讲义 第一课 九大气场解释 河图洛书的惊天发现 九大气场的由来 南 付出 4 转变 9 享成 2 争夺 3 名望 5 升格 7 开拓 8 晦暗 1 入库 6 第二课 看人成功机运 每个人都有一个局；每个名字影响你一辈子； 自己名字的总笔画数相减，注意用康熙字典的笔画；比如23划，3-2得1，如果是18划，按顺序8到9再回到1，算是2；对应下面分析； 对应情况： 局0的人，今生何处去发展，要有名气或靠山；要找有钱的做靠山； 局1的人，紧追贵人得第一，若要独闯便是",
+      "extractor": "textutil",
+      "characters": 12681
+    },
+    {
+      "sourceId": "JG-SRC-047",
+      "path": "录音笔记/趋势密码.doc",
+      "format": "doc",
+      "status": "extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "总体解释 1气场是跟环境感应出来的个人磁场持续的变化；每9年一个循环； 地球有磁场，人体也有磁场，人与人之间的磁场也会相互作用，从而形成每个人独特的气场； 3人与人之间通过名字来发生相互作用，人的出生年月确认了跟环境的关系；所以我们把名字和出生年月来作为介质； 4人体有四个关系，上层关系，自我关系，下层关系，对外关系； 上层关系代表思绪，创意，代表企业主，企业，长官，父母，房子；凡是能保护我们的就是上层关系；对于企业家最重要； 自我关系代表着你的心情，情绪，企图心，财气大小，",
+      "extractor": "textutil",
+      "characters": 12548
+    },
+    {
+      "sourceId": "JG-SRC-048",
+      "path": "录音笔记/趋势密码（二）.doc",
+      "format": "doc",
+      "status": "extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "趋势密码要点 1九大气场 南 付出 4 转变 9 享成 2 争夺 3 名望 5 升格 7 开拓 8 晦暗 1 入库 6 北 2十大能量 胎\u0007养\u0007长生\u0007冠带\u0007临官\u0007帝旺\u0007衰\u0007病\u0007死\u0007绝\u0007\u0007松弛\u0007稳定\u0007发作\u0007轻狂\u0007横冲\u0007高亢\u0007无力\u0007不稳\u0007已死\u0007低落\u0007\u0007 3四个关系 前三个可分开看，最后一个讲整体； 上层关系；侧重思想；思绪，代表创意，压力；企业，长官，父母；房子，办公室； 中层关系；侧重情绪和健康；代表心情，情绪，企图心；财产大小，来财力量；健康，疾病； 下层关系；侧重行为和环境",
+      "extractor": "textutil",
+      "characters": 2805
+    },
+    {
+      "sourceId": "JG-SRC-049",
+      "path": "课程PPT/人生趋势.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": ". ms - 1 ad 4% RE” ON 我 仕 无 泓 解 开 一 \"_ 英 一 -",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 44
+    },
+    {
+      "sourceId": "JG-SRC-050",
+      "path": "课程PPT/人生趋势20200302_1.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "人 一 萧 子 的 成 功 RK, 工 作 上 顺 遂 、 感 情 上 美 满 oR” aS sS 老 阚 的 事 业 能 长 长 久 仁 巳 so 认 & 光 “",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 82
+    },
+    {
+      "sourceId": "JG-SRC-051",
+      "path": "课程PPT/人生趋势20200302_10.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "回 不 图七 曰 图 一 国 曰 图 曰 国 一 国 一 国 一 国 一 国 一 国 丞 国 林 f冒墨 ee F 二`=〈…^…》~′/ ie 二 SSS a | 1 ie a) 1 「王兽j′亡] Z | = i: a | _二′】 | zo 1 , 1 ]",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 131
+    },
+    {
+      "sourceId": "JG-SRC-052",
+      "path": "课程PPT/人生趋势20200302_11.png",
+      "format": "png",
+      "status": "ocr-needs-visual-review",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "P_′鳙_曹` c = a",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 13
+    },
+    {
+      "sourceId": "JG-SRC-053",
+      "path": "课程PPT/人生趋势20200302_12.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "Rit . : * 我 想 作 为 一 个 企 业 家 , 如 果 说 能 够 预 测 未 来 将 要 有 可 能 发 生 的 事 情 , 那 绝 对 是 能 趋 吉 避 凶 的 , 绝 对 的 是 有 帮 助 的 !",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 109
+    },
+    {
+      "sourceId": "JG-SRC-054",
+      "path": "课程PPT/人生趋势20200302_13.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "| * 听 了 人 生 趋 势 密 码 , 我 个 人 感 悟 很 深 ! 人 往 往 到 了 生 命 即 将 走 到 尽 头 时 , 才 后 悔 自 己 人 生 的 起 伏 , 走 了 许 多 弯 路 , 到 了 一 无 所 有 才 伟 来 仁 息 ! 1 | |",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 133
+    },
+    {
+      "sourceId": "JG-SRC-055",
+      "path": "课程PPT/人生趋势20200302_14.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "俞 生 良 「 Ps 。 《 人 生 超 劾 密 码 》 为 我 公 司 挽 回 咤 一〔 一 __4 工 大 损 失 , 非 常 感 谢 宋 老 师 的 忠 “ , <a 育 f 1 告 和 建 议 ! 这 门 课 非 常 推 荐 给 老 ANS 板 们 学 , 正 所 谓 创 业 容 易 守 业 难 , ot Sa % 预 知 可 以 早 做 准 备 与 预 防 ! al 1 p 一 x D -",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 201
+    },
+    {
+      "sourceId": "JG-SRC-056",
+      "path": "课程PPT/人生趋势20200302_15.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "沥 技 技 林 That Pot Rt 屋 朋 BRON E RE BS 页 沥 皂 月 芸 Bbw Al 月 公 页 标 目 坂 浩 探 国 re eee be ee 怀 2 河 E 司 - 国 移 日 门 许 善 文 oe ees ea 邹 闯 一 志 5 的 卷 俊 阎 闻 . 加 果 iL 我 回 答 这 二 十 年 来 上 过 烨 圆 2 的 丕 清 的 课 程 , 哪 一 个 课 程 最 好 : Rea bat 我 会 毫 不 犹 豫 的 把 宋 老 师 的 趋 ",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 357
+    },
+    {
+      "sourceId": "JG-SRC-057",
+      "path": "课程PPT/人生趋势20200302_16.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "\\ re YN EL Oe 吴 INANE 民 . H ASI alesis Ma a | 形 余 / 余 途 刃 团 根 的 问 意 i' | ] ¥ ee i s smo 工 om 1 /′ “ 【 一 = r 李 一 e - as | 巳 一 | sama ss ,",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 136
+    },
+    {
+      "sourceId": "JG-SRC-058",
+      "path": "课程PPT/人生趋势20200302_17.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "ANSEL =e a 2 : 目 ′了J亡 g ~ 一 一 一 课 程 会 为 你 提 供 无 可 竞 争 的 增 值 服 务 ff ee ag 一 国 吊 i p , , 医",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 88
+    },
+    {
+      "sourceId": "JG-SRC-059",
+      "path": "课程PPT/人生趋势20200302_18.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "_ 、 ′」_′ s | ’ NG a 住 不 国 亚 f 人 丨 ZIJN J dag 一 7 ——- 1 tee Me 才 人 Th Soares Sopa yigesdlsecsaplec say Pie oe eee Dela he toca BA a Te Bus ie eit tae oS eRe prema re TE a cere ate ae ath en SAE ean ceansac Be Sia) ii SY (iF aie aps gee ET Ma",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 1107
+    },
+    {
+      "sourceId": "JG-SRC-060",
+      "path": "课程PPT/人生趋势20200302_19.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "工 一 民 不 人 4 刑 ( 仪 巴 卫 英 庞 仪 A FAAS VAVZs paw 的 目 4 仪 河 € i 川 E | 区 中 1 rv. j F LZ SAISE:",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 88
+    },
+    {
+      "sourceId": "JG-SRC-061",
+      "path": "课程PPT/人生趋势20200302_2.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "小 == “il = E 5 =— == 。 = 一 一 一 — te : = —— 一 一 apes a = Se SS a See Se SS Sea Tia ~— a —— See 标 Leg i = SS “Ge 人 二 “ 命 一 at SS a= 27 << oe a a 一",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 144
+    },
+    {
+      "sourceId": "JG-SRC-062",
+      "path": "课程PPT/人生趋势20200302_20.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "t i — c 2 \\ R . 3 3 〉_ 二濠'卓2二 薯戛言_虔警嘻 oe — a “ 4 c oe 2 0 i .' 2 - E 一 医 刑 : - SS 3 。 2 7 圆 s 卞 绝疟 哼金让遢} ak",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 107
+    },
+    {
+      "sourceId": "JG-SRC-063",
+      "path": "课程PPT/人生趋势20200302_21.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "每 个 人 都 有 迷 栓 的 踏 候 ….",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 22
+    },
+    {
+      "sourceId": "JG-SRC-064",
+      "path": "课程PPT/人生趋势20200302_22.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "人 生 的 道 路 上 您 选 择 当 “ ee OF era Say 一 河 招 \\ Ae Was 明 眼 瞥 | 嗣 暗 眼 |) ae) - ′星二 <",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 79
+    },
+    {
+      "sourceId": "JG-SRC-065",
+      "path": "课程PPT/人生趋势20200302_23.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "[二 NZ 目 外 | 圭 * 九 十 年 人 生 趣 势 PETER 2285 1986 1987 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 1998 1999 200 E 园 团 吾 吾 国 国 国 国 团 逊 园 迅町 国 国 团 mei | 国 团 出 园 团 国 国 国 国 国 国 西 四 逊 团 邦 3 cD} 5 仁 |* 门 le T 驱 余 | oe [* [Fe ale I wna] = Pal a",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 985
+    },
+    {
+      "sourceId": "JG-SRC-066",
+      "path": "课程PPT/人生趋势20200302_24.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "身 体 结 构 潘 蕊 的 一 股 秘 密 > Em » Zia > =",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 36
+    },
+    {
+      "sourceId": "JG-SRC-067",
+      "path": "课程PPT/人生趋势20200302_25.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "身 体 结 构 潘 蕊 的 一 股 秘 密 . 多 EE 氢 场 ame",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 36
+    },
+    {
+      "sourceId": "JG-SRC-068",
+      "path": "课程PPT/人生趋势20200302_26.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "LLL ete LA AA a 名 : 光 芒 四 射 m 晦 : 黑 夜 煞 神 m A: 只 进 不 出 a: 天 官 赚 福 a 升 : 由 一 为 二 m 予 : 一 片 酯 象 m 开 : 瓶 颈 压 力 “ 付 : 只 出 不 进 。 转 : 转 型 改 变",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 135
+    },
+    {
+      "sourceId": "JG-SRC-069",
+      "path": "课程PPT/人生趋势20200302_27.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "» J 任 正 非 2019 华 为 处 在 危 亡 关 头 . A: 主 宰 思 想 、 企 芜 、 卯 懋 鼠 op =r at 付 5 5 0 井 5 一 5 怒 师 怀 任 i JE 挂 团 脚 | 享 | 非 | 口 ss & ame | 熹蜃 __.-__.」蜇_颤_I置_崛攫崛_晒 75 | 76 卜 77 | 78 | 79 | 80 | 81 | 82 | 83 , | ah pie an | eo | 大 踝 [ 能 力 | 断 足 | 功 名 | 包 袱",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 1059
+    },
+    {
+      "sourceId": "JG-SRC-070",
+      "path": "课程PPT/人生趋势20200302_28.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "l=' Ny 、 吴 秀 波 2019 出 轨 门 区 一 _ ) 匹 A: 主 宰 思 想 、 企 业 、 规 | 口 5 “ 月 英 莲 一 AAA we 观 家 6 ae 秀 _ 卫 72 e 一 一 二 c 膏 何 | 波 * at | aa 8 et elas [as [a7 [as [a9 [so [51 {52 [sa | sa [ss [Se [7 | 5a | 2x | ae [set axe |e ae | a a4 | otc | im mt | a a",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 980
+    },
+    {
+      "sourceId": "JG-SRC-071",
+      "path": "课程PPT/人生趋势20200302_29.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "一/\\、 + Fy 王 健 林 因 一 , 欠 下 4200 . AR: 主 宰 思 想 、 企 芳 、 规 ia) 辖 Le | et 巳 王 ae A / E 0 sss a 巾 廷 : 国 a AAA er eee rss! a sp. 53 | 4 一 一 一 一 一 漆 Z_L58_L593 | 60 | 61 | 62 | 63 [ 64 [65 | 66 | 67 | 68 | 69 | 70 | AS tz. |sabe] pe 名 | 奈 半 | 盅 心 |",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 956
+    },
+    {
+      "sourceId": "JG-SRC-072",
+      "path": "课程PPT/人生趋势20200302_3.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "皂 葛 夏 丫 丈 、`.,'.a\"[一 gee 4 一 一 有 —_ ′′ 宣丁〕票晏熹茎摹 eer 现 代 人 罂 乏 正 确 的 A Sa) i. “ 天 时 “ 自 然 规 律 观 念 he eo <i ea A ag ae sha , Be Sis Mae Re a eS aN _ ` ′ “ g 振 Dy - ENE",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 165
+    },
+    {
+      "sourceId": "JG-SRC-073",
+      "path": "课程PPT/人生趋势20200302_30.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "贾 跃 亭 一 跃 享 辞 去 乐 视 网 董 事 长 一 职 D . ERR: 主 军 惠 想 、 武 粥 、 财 w 13 口 曹 3 “_ 不 廷 He 圆 振 色 一 小 | 囱 闸 国 国 园 国 J |33 | 34 | 国 国 一 “ 国 图 38_| 39 | 40 | 41 | 42 | 43 | 44 | 45 | 46 | 47 | 48 | 49 | 50 | [em ESIEZAE-¢3 阜 深 淅 [ 货 人 | 济 产 [ 空 欺 | 小 得 |",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 975
+    },
+    {
+      "sourceId": "JG-SRC-074",
+      "path": "课程PPT/人生趋势20200302_31.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "王 宝 强 发 布 离 婚 声 明 . 系 : 主 宰 怡 想 、 动 念 、 企 WO i ma fee -— s &] 妙 生 目 辽 学 蘑〕熹泞 r 勒 团 国 国 界 国 国 团 团 —— 长 生 | 冠 帕 | ee a 83 Fo} 26 | 27 | 28 | 29 | 30 | 31 | 32 33 卜 34 | 35 | 36 | 37 | 38 | 39 | 40 | 卷 认 frre | se ae | oe a | erm | oe a | aoe ",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 984
+    },
+    {
+      "sourceId": "JG-SRC-075",
+      "path": "课程PPT/人生趋势20200302_32.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "王 宝 强 发 布 离 婚 声 明 . 系 : 主 宰 思 想 、 动 念 、 财 〗 ry Z 人 扑 E 亮 付 “ 明 | e 国 团 国 园 团 迎 四 阆 oa a 刑 AY 、′ | 图 国 团 因 四 贾 四 团 卷 — | 死 | 纪 长 生 | 冠 帝 月 蚝 弋 引 』.`黜_夏__4-疆_三z置_疆_二阜__Z疆 30 || 31 | 32 | 33 [ 34 | 35 | 36 | 37 | 38 轻 2 丘 秸 | 英 险 | 芸 成 [ 迹 氯 |",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 995
+    },
+    {
+      "sourceId": "JG-SRC-076",
+      "path": "课程PPT/人生趋势20200302_33.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "王 宝 强 发 布 离 婚 声 明 . 团 工 月 阮 F 3 EE HU (a) Vy | 3 付 各 付 Bo 死 组 店 So) 民 团 国 团 团 要 国 团 国 国 因 死 er E .『__ a7 | 28 | 29 | 30 | 31 | 32 | 33 || 34 | 35 | 36 | 37 | 38 | 39 | 40 | 41 | 42 | 43 _ lO PICHIEALT ICS ESS SASS ee Ces 闯 只 | 呸 定 | 看 左 | 鳕",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 976
+    },
+    {
+      "sourceId": "JG-SRC-077",
+      "path": "课程PPT/人生趋势20200302_34.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "3 3 仪 急 男 星 乔 任 梁 上 海 意 外 死 亡 D . ERM: 主 笙 愿 悦 、 职 志 、 财 asl ft = 乐 elea * mts |i | 国 园 园 Soames ! | 图 西 图 梁 [ ic | 长 生 | ae 卷 31 | ee a | wr | oa ome | 44 OF RO) ot He ae | ae ee | eee | ma | seat | 投 楼 | 否 生 | 以 瑙 | 奕 驮 | = 标 志 | 坂 强 | 龚 ",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 913
+    },
+    {
+      "sourceId": "JG-SRC-078",
+      "path": "课程PPT/人生趋势20200302_35.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "雷 军 创 办 小 米 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 水 口 园 国 雯 国 园 园 弛 国 雯 国 国 雷 国 园 国 雨 E 3 名 E D 雷 va[Fa|v j | 园 “ | | 压 | 心 。 马 | 之 | 山 逸 国 匹 匹 居 园 医 国 国 国 初 团 国 园 咤 干 厢 「 切 国 国 因 国 因 因 国 ",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 1113
+    },
+    {
+      "sourceId": "JG-SRC-079",
+      "path": "课程PPT/人生趋势20200302_36.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "一 创 立 阿 里 巴 巴 1984 1985 1986 1987 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 1998 1999 2000 2001 郎 国 国 国 国 团 图 国 医 选 四 达 团 国 达 跋 国 E 素 生 忘 3D 3D 付 eal we aloe [a ae [ a [a . 厂 图 | 口 | | | 。 = 巳 区 . 民 .|< leh eel ell = = = 与 刀 国 医 郎 团",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 1141
+    },
+    {
+      "sourceId": "JG-SRC-080",
+      "path": "课程PPT/人生趋势20200302_37.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "蔡 峄 信 放 秽 七 十 万 美 元 年 薪 宇 1 丁 元 1990 1991 1992 1993 1994 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 国 惠 命 园 吊 国 国 跋 星 围 性 园 囹 国 国 园 国 图 园 阅 愚 呆 春 吉 春 国 国 国 跟 逸 吊 易 明 国 达 国 2 巳 巳 主 闹 命 咏 国 | 国 | 国 | 国 国 | 囹 | 国 | 园 国 国 ",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 1168
+    },
+    {
+      "sourceId": "JG-SRC-081",
+      "path": "课程PPT/人生趋势20200302_38.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "_ 、 oY ) 明 基 并 购 西 门 子 手 机 厂 挫 败 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 轼 园 3 闸 委 元 升 国 | 入 元 E 李 医 区 : 国 片 E E 长 生 “ 刑 国 国 团 国 吴 翊 国 命 团 图 国 因 团 因 翔 国 国 { ee | 元 欲 宣 睑 宣 | aE | be [ | 鱼 被 ",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 1089
+    },
+    {
+      "sourceId": "JG-SRC-082",
+      "path": "课程PPT/人生趋势20200302_39.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "1993 1994 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 国 图 邱 商 霖 国 零 明 国 达 述 咏 喜 罡 园 趵 国 图 王 7 国 是 呕 咏 周 述 进 明 团 趾 春 明 迅 吴 园 岑 迅 过 李 & rw 国 用 途 Tale Peal a tae ae eal | 办 国 国 因 明 国 国 闻 岩 囹 国 国 图 园 园 国 需 胡 ",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 1090
+    },
+    {
+      "sourceId": "JG-SRC-083",
+      "path": "课程PPT/人生趋势20200302_4.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "一 Sees ell ~~ 育 - 2 SS — ee a CN ww ^ 翼]置!A\\`\\ g tier, a ORE Se a x 。 a =~. z < —— 当 您 愧 恼 、 后 悔 之 时 , | <<. 恩 | 才 知 道 。 [ 礼 金 难 买 早 知 道 ] 一 井 Sse a 一 网 uuuuunipic.com E = SS 3 根 ~~.) By:askin No:201507151409403",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 211
+    },
+    {
+      "sourceId": "JG-SRC-084",
+      "path": "课程PPT/人生趋势20200302_40.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "王 传 福 接 受 股 份 出 让 1984 1985 1986 1987 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 1998 1999 2000 2001 国 雷 国 喜 吴 逆 吊 国 因 跌 国 国 道 霄 惜 团 国 国 刑 否 命 明 春 团 趵 国 述 迹 吾 国 达 国 国 霁 昭 吴 进 园 吾 国 吴 国 雷 国 春 命 传 Pal LF al? a [n 民 = B |m fs A 晓 宣 5 师 ",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 1056
+    },
+    {
+      "sourceId": "JG-SRC-085",
+      "path": "课程PPT/人生趋势20200302_41.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "匹 = 尿 ty 马 丁 磊 网 易 股 价 下 滑 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 ALAS ASASSSSSSMAAasAA eal [a a [fF 5 [Meal el oad ef a P| nF | | 2 AFP Pal* al ePelsPeal ela f alla 2 硕 民 月 ! 切 邹 园 图 国 图图 ",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 1105
+    },
+    {
+      "sourceId": "JG-SRC-086",
+      "path": "课程PPT/人生趋势20200302_42.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "人 要 如 何 安 身 立 命 5 ae | | , 我 们 的 人 生 是 输 不 起 的 , 他 是 不 能 重 来 的 , _′ “ REN a",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 75
+    },
+    {
+      "sourceId": "JG-SRC-087",
+      "path": "课程PPT/人生趋势20200302_43.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "看 格 一 看 局 一 破 局 一 布 局 五 一 一 EE …. 园 口 『 园 pene | 目 a 个 性 五 行 : 水 火 土 , 思 想 为 水 克 火 ; 主 热 忱 、 活 跃 型 、 学 臼 RAENEOE be 习 力 强 、 悟 性 高 、 善 分 析 、 变 通 性 强 , 行 事 风 格 主 动 、 做 jas [afm onan aa imc [A] MRE | 。 吴 | E 行 动 为 火 生 土 ; 主 急 躁 , 外 柔 内 个 , 占 有",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 530
+    },
+    {
+      "sourceId": "JG-SRC-088",
+      "path": "课程PPT/人生趋势20200302_44.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "看 格 一 看 局 一 破 局 一 布 局 te 人 生 锭 荣 椿 位 诵 罚 囤晕薯=二… 二 、 看 局 : ( 人 生 的 机 运 与 方 向 ) 雷 ehankon 门 Bee RE] 对 外 关 系 :45, 局 一 的 人 生 机 运 方 向 「 今 生 前 程 不 远 求 , 求 官 实 频 自 已 得 格 会 「 frame | 疃昌昌 URES An Ls] 求 禄 永 不 休 , 紧 跟 贵 人 得 第 一 , 若 是 独 闻 便 是 空 。 | 解 心",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 510
+    },
+    {
+      "sourceId": "JG-SRC-089",
+      "path": "课程PPT/人生趋势20200302_45.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "看 格 一 看 局 一 破 局 一 布 局 te 人 生 锭 荣 椿 佐 讽 罚 园 囤 三 、 破 局 : ( 人 生 机 运 方 向 是 不 会 改 变 的 , 唯 一 只 能 改 变 自 己 ) 许 [ Bee P| 为 了 自 己 一 辈 孔 能 够 出 人 头 地 , 成 功 , 荣 华 富 贵 , 局 一 的 人 , Perrys Frama E SHAS An 525 斗 经 营 方 向 就 是 追 随 「 成 功 的 老 板 」 , 努 力 表 现 自 己 的",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 529
+    },
+    {
+      "sourceId": "JG-SRC-090",
+      "path": "课程PPT/人生趋势20200302_46.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "看 格 一 看 局 一 破 局 一 布 局 an . 2013 年 之 前 刚 好 落 入 第 十 组 趋 势 与 第 一 组 趋 势 : Be 此 星 粟 贾 主 接 收 「 诊 认 ah Pree 玟 第 十 组 趋 势 的 成 功 模 式 是 「 前 四 后 五 , 就 是 趋 势 经 营 需 Beare =o 要 前 面 付 出 , 后 面 来 收 获 的 , 简 单 说 就 是 一 半 好 一 半 不 好 , 目 团 E | 前 四 年 是 努 力 付 出 垫 基 ",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 797
+    },
+    {
+      "sourceId": "JG-SRC-091",
+      "path": "课程PPT/人生趋势20200302_47.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "人 生 趣 势 密 码 “ 吊 吴 吴 吴 吴 明 吴 阮 阮 园 园 园 吴 它 不 仅 仅 是 一 堂 课 程 它 将 改 变 您 一 生 沪 策 [ 巳 [ 团 国 国 国 国 国 国 园 国 园 园 明 园 园 园 育 育 园 吴 吴",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 121
+    },
+    {
+      "sourceId": "JG-SRC-092",
+      "path": "课程PPT/人生趋势20200302_48.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "八 大 好 处 幅 结 您 1, 让 您 拥 有 先 知 先 觉 能 力 。 2, 让 您 未 雨 绸 缪 规 避 风 险 。 3, 让 您 知 人 善 用 知 己 知 彼 。 4. 让 您 情 绪 管 理 增 加 财 富 。 5, 让 您 因 应 趋 势 正 确 投 资 。 6, 让 您 不 走 弯 路 倍 增 生 命 。 1. 让 您 看 清 人 生 前 方 道 路 。 8, 清 楚 人 生 是 不 能 重 来 的 。",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 213
+    },
+    {
+      "sourceId": "JG-SRC-093",
+      "path": "课程PPT/人生趋势20200302_49.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "- Se S.-C 7 3 Ss 一 诊 , dee pra 。 2 沥 认 2 人 Se eA eee R r 6 Si See Oe 2 Sr i “ eee gy 4G See ee ESE v p 1 - 人 园 命 a eae ee ee este SS Se oO” 7 ee * “ u i et ee & 司 pee E 8 8 : eee eee ae eee ee ee 5 4 Ge = ea hi Sage a 2 ae ee ee ee hy = Ra ",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 437
+    },
+    {
+      "sourceId": "JG-SRC-094",
+      "path": "课程PPT/人生趋势20200302_5.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "銮 d — E = ae %., nf = 口 *w eA ke - SP 孙 >. > > - , | 如 何 遮 免 案 跟 斗 、 ` 少 走 弯 路 、 把 握 时 机",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 88
+    },
+    {
+      "sourceId": "JG-SRC-095",
+      "path": "课程PPT/人生趋势20200302_50.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "= LEE 9 A ay, » = 英 OG d 叶 一 BR 木 绣 构 漪 瘘 的 雨 股 秘 密 荨[ \\ | ox mt | 椅 位 说 日 1965 1966 1967 1968 1969 1970 1971 1972 1973 PS = 头 部 《 | 口 Karr 一 1 ) \\ 吊 园 2 移 | 月 一 暨 = ||) o> 园 UN) E 四 四 团 巳 巴 巳 巳 团 团 日 一 整 体 厂 3 司 [ | 区 四 | 屋 尺 毛 | 机 途 提 示 |",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 687
+    },
+    {
+      "sourceId": "JG-SRC-096",
+      "path": "课程PPT/人生趋势20200302_51.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "第 三 个 分 享 > 如 何 训 一 个 工 厂 老 阚 挽 回 了 500 万 的 损 失 , 从 不 理 解 到 眼 见 为 选 的 历 程 , 从 夫 妻 常 争 吵 到 相 敬 如 实 的 变 化 , 创 造 奇 踢 的 幕 响 故 事 如 何 ? b 海 益 俞 总 光 伏 太 阳 能 有 限 公 司 总 经 理 接 触 到 了 《 人 生 趋 势 秘 笈 》, 对 我 和 我 的 公 司 帮 助 很 大 , 为 我 公 司 挽 回 了 巨 大 损 失 , 非 常",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 375
+    },
+    {
+      "sourceId": "JG-SRC-097",
+      "path": "课程PPT/人生趋势20200302_52.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "> O 〇 O 〇 实 业 公 司 MR 2015 执 著 投 资 攘 厂 差 一 点 损 失 SOOK 机 会 点 能 量 人 - 腐 [7 ] 口 面 临 怀 力 , 很 不 好 经 营 ; 股 东 意 见 多 , 最 不 团 结 、 力 量 最 脂 骏 。 刑 霁 > 养 是 货 收 、 心 动 期 , 受 到 引 诱 产 生 投 机 , 想 要 擂 大 投 资 。 脑 力 能 量 | 一 REHM, BARS, AMMA. BAER, SAB ake 象 投 资 的 ",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 550
+    },
+    {
+      "sourceId": "JG-SRC-098",
+      "path": "课程PPT/人生趋势20200302_53.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "A 图 回 G OF ull 醒 r206 吴 一 * 不 遂 台 投 资 , 园 咤 咤 咤 咤 命 国 | 语 学 理 Soe 日 lll AOE 谅 丁 ′ [ 二 垂 ,Wrsg, 吴 oT ( a 圆 园 一 “ 圃 #872 i ′ 国 〖 ` 一 - BHF, 钱 行 的 绊 也 马 上 还 不 万 \\\\、 \\ : 1 了 , 朋 天 去 拖 行 长 再 读 读 , 怎 仁 a 心 〖 s 心 理 国 EZ 5 b ——_— [ b 一 Be \\ ad —— i",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 279
+    },
+    {
+      "sourceId": "JG-SRC-099",
+      "path": "课程PPT/人生趋势20200302_54.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "> O 〇 O 家 具 店 老 阉 2COX5 年 KALSOR 与 内 弟 合 夥 餐 历 机 会 点 能 量 人 一 & 【/ 目 容 易 得 到 上 层 的 帮 忙 。 如 果 本 质 很 差 , 这 一 年 就 很 容 易 出 间 题 。 女 唐 > 唐 是 吸 收 、 心 动 期 , 受 到 引 诱 产 生 投 机 , 想 要 攒 大 投 资 。 脑 力 能 量 | 一 代 表 大 起 大 落 , 起 伏 很 大 , 因 此 最 容 勇 引 起 一 个 人 的 贪 ",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 433
+    },
+    {
+      "sourceId": "JG-SRC-100",
+      "path": "课程PPT/人生趋势20200302_55.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "- Se S.-C 7 3 Ss 一 诊 , dee pra 。 2 沥 认 2 人 Se eA eee R r 6 Si See Oe 2 Sr i “ eee gy 4G See ee ESE v p 1 - 人 园 命 a eae ee ee este SS Se oO” 7 ee * “ u i et ee & 司 pee E 8 8 : eee eee ae eee ee ee 5 4 Ge = ea hi Sage a 2 ae ee ee ee hy = Ra ",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 437
+    },
+    {
+      "sourceId": "JG-SRC-101",
+      "path": "课程PPT/人生趋势20200302_6.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "“ ae 1 t , a A RR pe d “<= E _^ r - . | ee sn | 人 生 趋 势 解 码 为 您 揪 开 存 在 | 日 伟 , | 人 身 上 的 自 然 规 律 ae ! rai ee cS +, = Pai 3 fee. SB 。 。 dalle mS e r z",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 150
+    },
+    {
+      "sourceId": "JG-SRC-102",
+      "path": "课程PPT/人生趋势20200302_7.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "^. an E 一 吴 ites owe 洁 pw \"i hey a F 炜 a a Be. ng “ 命 人 绘 力 返 程 卸 口 途 一 猝 - 5 SP | + ee ee eee? 林许 kc. ' Se Sa Se a ee - eae og es \\ 个 个 Won Aiea A “ L / A a 一 一 KKy 一 a! Cy Mee en 辜 辜 辜 伟 5 口 ie ae 辜 1 障 - f ; f ae ae E “ 河 . 一 H H 。 ee ee",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 272
+    },
+    {
+      "sourceId": "JG-SRC-103",
+      "path": "课程PPT/人生趋势20200302_8.png",
+      "format": "png",
+      "status": "ocr-extracted",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "“ 弯 , 论 求 的 过 程 A Ree. a Sa 我 们 的 计 虽 c , 真 正 的 达 程 | i im a ae an 1 命 邹 “ 一 “ “ “ “ “ p 镳 2",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 92
+    },
+    {
+      "sourceId": "JG-SRC-104",
+      "path": "课程PPT/人生趋势20200302_9.png",
+      "format": "png",
+      "status": "ocr-needs-visual-review",
+      "topics": [
+        "人生趋势",
+        "课程资料"
+      ],
+      "summary": "人 怡 起 等 训 俘",
+      "extractor": "tesseract-chi_sim+eng",
+      "characters": 11
+    }
+  ]
+}
