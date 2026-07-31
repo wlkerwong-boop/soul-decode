@@ -451,7 +451,43 @@ export default function MasterPage() {
                   <h2 className="text-xl font-bold">📜 人生总览报告</h2>
                   <div className="flex gap-2">
                     <VoiceReader text={report} title="🔊 听报告" />
-                    <button onClick={()=>window.print()}
+                    <button onClick={async ()=>{
+                      const btn = document.activeElement as HTMLButtonElement;
+                      const origText = btn.textContent;
+                      try {
+                        btn.textContent = '⏳ 生成中...';
+                        btn.disabled = true;
+                        // 构建完整 HTML：提取当前页面 DOM + 内联样式
+                        const clone = document.documentElement.cloneNode(true) as HTMLElement;
+                        // 移除所有 script 标签
+                        clone.querySelectorAll('script').forEach(s => s.remove());
+                        // 移除不需要的元素
+                        clone.querySelectorAll('.no-print, nav, .voice-reader-btn').forEach(el => el.remove());
+                        const html = '<!DOCTYPE html>' + clone.outerHTML;
+                        const resp = await fetch('/api/pdf', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ html }),
+                        });
+                        if (!resp.ok) {
+                          const err = await resp.json().catch(() => ({ message: `HTTP ${resp.status}` }));
+                          alert('PDF 生成失败: ' + (err.message || err.error || '未知错误'));
+                          return;
+                        }
+                        const blob = await resp.blob();
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `人生总览_${year||'report'}.pdf`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      } catch(e: any) {
+                        alert('PDF 生成异常: ' + (e.message || '网络错误'));
+                      } finally {
+                        btn.textContent = origText;
+                        btn.disabled = false;
+                      }
+                    }}
                       className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
                       📥 下载PDF
                     </button>

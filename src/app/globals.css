@@ -907,6 +907,11 @@ section {
    Print Styles (PDF export, Kimi-inspired)
    ═══════════════════════════════════════════════════ */
 @media print {
+  /* 强制保留背景色和颜色（Chrome 默认会剥离） */
+  body, html, * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
   .no-print { display: none !important; }
   .scroll-print-all { max-height: none !important; overflow: visible !important; }
   @page {
@@ -1057,6 +1062,10 @@ section {
   @page {
     margin: 12mm 10mm;
     size: A4;
+  }
+  body, html, * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   body, .gradient-bg, .hero-premium, [class*="bg-"] {
     background: white !important;
