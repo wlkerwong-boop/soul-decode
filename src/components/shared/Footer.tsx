@@ -25,6 +25,36 @@ export interface FooterProps {
   className?: string;
 }
 
+function SocialIcon({ label }: { label: string }) {
+  if (label === '微信') {
+    return (
+      <svg data-social-icon="wechat" aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M9.2 3C4.7 3 1 6 1 9.8c0 2.1 1.2 4 3 5.3l-.8 2.5 2.9-1.5c1 .3 2 .5 3.1.5h.5a6.6 6.6 0 0 1-.6-2.7c0-3.7 3.4-6.7 7.7-6.7h.4C16 4.7 12.9 3 9.2 3Zm-2.8 4.6a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm5.5 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2Z" />
+        <path d="M23 13.9c0-3-2.8-5.5-6.2-5.5-3.5 0-6.3 2.5-6.3 5.5s2.8 5.5 6.3 5.5c.8 0 1.7-.1 2.4-.4l2.3 1.2-.6-2c1.3-1 2.1-2.6 2.1-4.3Zm-8.3-.8a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6Zm4.3 0a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6Z" />
+      </svg>
+    );
+  }
+
+  if (label === '小红书') {
+    return (
+      <svg data-social-icon="xiaohongshu" aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
+        <path d="M4 7.5h16v9H4zM8 4.5v15M16 4.5v15M4 12h16" />
+        <path d="m10.5 9 3 6M13.5 9l-3 6" opacity=".8" />
+      </svg>
+    );
+  }
+
+  if (label.toLowerCase() === 'stella') {
+    return (
+      <svg data-social-icon="stella" aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none">
+        <path d="m12 3 2.1 6.2 6.4.1-5.1 3.8 1.9 6.2-5.3-3.6-5.3 3.6 1.9-6.2-5.1-3.8 6.4-.1L12 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+
+  return <span data-social-icon="fallback" className="text-xs">{label.slice(0, 2)}</span>;
+}
+
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
@@ -59,14 +89,14 @@ export const Footer: React.FC<FooterProps> = ({
               <div className="mt-5 flex gap-3">
                 {socialLinks.map((s) => (
                   <a
-                    key={s.href}
+                    key={`${s.label}-${s.href}`}
                     href={s.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] text-[var(--color-text-muted)] transition-colors duration-[var(--transition-fast)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-[#334155] bg-[#1E293B]/75 text-[var(--color-text-muted)] transition-all duration-[var(--transition-fast)] hover:-translate-y-0.5 hover:border-[var(--color-accent)]/50 hover:text-[var(--color-accent)]"
                     aria-label={s.label}
                   >
-                    {s.icon || (s.label.length <= 4 ? s.label : s.label.slice(0, 2))}
+                    {s.icon || <SocialIcon label={s.label} />}
                   </a>
                 ))}
               </div>

@@ -19,7 +19,7 @@
   --color-accent-dark: #A68A1E;
 
   /* Backgrounds */
-  --color-bg: #0F172A;
+  --color-bg: #0B1120;
   --color-bg-alt: #1E293B;
   --color-bg-card: rgba(30, 41, 59, 0.85);
 
@@ -154,7 +154,7 @@ body {
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.8;
   min-height: 100vh;
   margin: 0;
   padding: 0;
