@@ -1,16 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer, { Browser } from 'puppeteer-core';
-
-// macOS 系统 Chrome 路径
-const MAC_CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-
-// Linux 常见 Chrome/Chromium 路径（阿里云服务器）
-const LINUX_CHROMES = [
-  '/usr/bin/chromium-browser',
-  '/usr/bin/chromium',
-  '/usr/bin/google-chrome',
-  '/usr/bin/google-chrome-stable',
-];
+import puppeteer, { Browser } from 'puppeteer';
 
 const ALLOWED_ORIGIN = 'https://aisoulcode.cn';
 
@@ -26,32 +15,9 @@ function setCors(response: NextResponse, origin: string | null) {
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
 }
 
-/** 查找可用的 Chrome 可执行文件 */
-function findChromePath(): string {
-  const { platform } = process;
-  if (platform === 'darwin') return MAC_CHROME;
-
-  // Linux: 尝试各路径
-  const { execSync } = require('child_process');
-  for (const path of LINUX_CHROMES) {
-    try {
-      execSync(`test -x "${path}"`, { stdio: 'ignore' });
-      return path;
-    } catch {}
-  }
-  // 回退: 用 which
-  try {
-    return execSync('which chromium-browser || which chromium || which google-chrome', { encoding: 'utf8' }).trim();
-  } catch {
-    throw new Error('未找到 Chrome/Chromium 浏览器。请安装 chromium-browser。');
-  }
-}
-
-/** 启动 Puppeteer Browser */
+/** 启动 Puppeteer Browser（puppeteer 自带 Chromium，无需系统安装） */
 async function launchBrowser(): Promise<Browser> {
-  const chromePath = findChromePath();
   return puppeteer.launch({
-    executablePath: chromePath,
     headless: true,
     args: [
       '--no-sandbox',
