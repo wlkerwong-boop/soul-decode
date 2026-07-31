@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import '@/components/shared/theme.css';
 import { AuthProvider } from '@/components/AuthContext';
 import AppNav from '@/components/AppNav';
 import { Footer } from '@/components/shared';
@@ -37,12 +38,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" data-theme="soulcode">
       <head>
-        {/* Google Fonts: Inter (English) + Noto Sans SC (Chinese) */}
+        {/* 霞鹜文楷 CDN 字体 — 用于标题和正文 */}
+        <link rel="stylesheet" href="https://chinese-font.netlify.app/packages/lxgwwenkai/dist/LXGWWenKai-Regular/result.css" />
+        <link rel="preconnect" href="https://chinese-font.netlify.app" crossOrigin="anonymous" />
+        {/* 系统字体降级 */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#0F172A" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
@@ -78,9 +81,9 @@ export default function RootLayout({
                 },
               ]}
               socialLinks={[
-                { label: '微信公众号：光明喜舍', href: '#' },
-                { label: '小红书：@光明喜舍', href: '#' },
-                { label: 'Stella 教育智囊', href: 'https://www.stella-aiedu.com' },
+                { label: '微信', href: '#' },
+                { label: '小红书', href: '#' },
+                { label: 'Stella', href: 'https://www.stella-aiedu.com' },
               ]}
               copyright="© 2026 灵魂解码 · 光明喜舍"
             />

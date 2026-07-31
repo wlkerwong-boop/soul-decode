@@ -66,7 +66,7 @@ export const Footer: React.FC<FooterProps> = ({
                     className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] text-[var(--color-text-muted)] transition-colors duration-[var(--transition-fast)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
                     aria-label={s.label}
                   >
-                    {s.icon || s.label[0]}
+                    {s.icon || (s.label.length <= 4 ? s.label : s.label.slice(0, 2))}
                   </a>
                 ))}
               </div>

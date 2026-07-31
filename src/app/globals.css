@@ -41,7 +41,7 @@
   --color-card-shadow: rgba(212, 175, 55, 0.08);
 
   /* Typography */
-  --font-family: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+  --font-family: 'LXGW WenKai', 'PingFang SC', 'MiSans', 'Noto Sans SC', system-ui, sans-serif;
   --font-family-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 
   /* Radius */
@@ -90,7 +90,7 @@
   --glow-green: rgba(212, 175, 55, 0.12);
   --glow-gold: rgba(212, 175, 55, 0.15);
 
-  --font-sans: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+  --font-sans: 'LXGW WenKai', 'PingFang SC', 'MiSans', 'Noto Sans SC', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
