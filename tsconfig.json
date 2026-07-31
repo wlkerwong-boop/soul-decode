@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@jianji/ui": ["../jianji-ops/packages/ui/dist"]
     }
   },
   "include": [

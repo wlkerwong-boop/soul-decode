@@ -1,0 +1,144 @@
+/* ============================================================
+   @jianji/ui — Theme System
+   CSS Custom Properties for three-site theme switching.
+
+   Usage:
+     import '@jianji/ui/styles/theme.css';
+
+   Sites override :root or set data-theme="..." on <html>:
+     SoulCode   — data-theme="soulcode"    深靛蓝 + 暖金
+     Stella     — data-theme="stella"      暖沙色 + 珊瑚橘
+     见己学园   — data-theme="jianji"      松烟绿 + 米白
+   ============================================================ */
+
+/* ---------- Base (SoulCode 深靛蓝 + 暖金) ---------- */
+:root,
+[data-theme="soulcode"] {
+  --color-primary: #0F172A;
+  --color-primary-light: #1E293B;
+  --color-primary-dark: #020617;
+
+  --color-accent: #D4AF37;
+  --color-accent-light: #E8C84A;
+  --color-accent-dark: #A68A1E;
+
+  --color-bg: #0F172A;
+  --color-bg-alt: #1E293B;
+  --color-bg-card: rgba(30, 41, 59, 0.85);
+
+  --color-text: #F8FAFC;
+  --color-text-muted: #94A3B8;
+  --color-text-dim: #64748B;
+
+  --color-border: rgba(148, 163, 184, 0.15);
+  --color-border-hover: rgba(212, 175, 55, 0.4);
+
+  --color-navbar-bg: rgba(15, 23, 42, 0.6);
+  --color-navbar-blur: saturate(180%) blur(20px);
+
+  --color-shadow: rgba(0, 0, 0, 0.5);
+  --color-card-shadow: rgba(212, 175, 55, 0.08);
+
+  --font-family: "LXGW WenKai", "Noto Serif SC", "Songti SC", serif;
+  --font-family-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --transition-fast: 150ms ease;
+  --transition-base: 300ms ease;
+  --transition-slow: 500ms ease;
+
+  --navbar-height: 64px;
+  --navbar-scroll-offset: 100px;
+}
+
+/* ---------- Stella (暖沙色 + 珊瑚橘) ---------- */
+[data-theme="stella"] {
+  --color-primary: #F5E6D3;
+  --color-primary-light: #FBF3EB;
+  --color-primary-dark: #E8D5BC;
+
+  --color-accent: #E07A5F;
+  --color-accent-light: #F09A7E;
+  --color-accent-dark: #C05A3F;
+
+  --color-bg: #FBF6F0;
+  --color-bg-alt: #F5E6D3;
+  --color-bg-card: rgba(255, 255, 255, 0.9);
+
+  --color-text: #2D2D2D;
+  --color-text-muted: #5C5C5C;
+  --color-text-dim: #8F8F8F;
+
+  --color-border: rgba(92, 92, 92, 0.12);
+  --color-border-hover: rgba(224, 122, 95, 0.4);
+
+  --color-navbar-bg: rgba(251, 246, 240, 0.6);
+  --color-navbar-blur: saturate(180%) blur(20px);
+
+  --color-shadow: rgba(0, 0, 0, 0.08);
+  --color-card-shadow: rgba(224, 122, 95, 0.1);
+
+  --font-family: "LXGW WenKai", "Noto Serif SC", "Songti SC", serif;
+}
+
+/* ---------- 见己学园 (松烟绿 #5D8C73 + 米白 #F4F7F5) ---------- */
+[data-theme="jianji"] {
+  --color-primary: #2D3A2E;
+  --color-primary-light: #3D4F3E;
+  --color-primary-dark: #1A241C;
+
+  --color-accent: #5D8C73;
+  --color-accent-light: #7EAD93;
+  --color-accent-dark: #3D6C53;
+
+  --color-bg: #F4F7F5;
+  --color-bg-alt: #E8EDEA;
+  --color-bg-card: rgba(255, 255, 255, 0.92);
+
+  --color-text: #2D3A2E;
+  --color-text-muted: #5A7A65;
+  --color-text-dim: #8DA898;
+
+  --color-border: rgba(45, 58, 46, 0.1);
+  --color-border-hover: rgba(93, 140, 115, 0.4);
+
+  --color-navbar-bg: rgba(244, 247, 245, 0.75);
+  --color-navbar-blur: saturate(160%) blur(20px);
+
+  --color-shadow: rgba(0, 0, 0, 0.06);
+  --color-card-shadow: rgba(93, 140, 115, 0.1);
+
+  --font-family: "LXGW WenKai", "Noto Serif SC", "Songti SC", serif;
+}
+
+/* ==================== Base Reset ==================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-family);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

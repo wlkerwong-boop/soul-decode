@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/components/AuthContext';
-import Nav from '@/components/Nav';
-import Footer from '@/components/Footer';
+import AppNav from '@/components/AppNav';
+import { Footer } from '@/components/shared';
 
 export const metadata: Metadata = {
   title: '自我认知与成长测评 — 发现真实的自己',
@@ -44,17 +44,46 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#1a1a2e" />
+        <meta name="theme-color" content="#0F172A" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body className="antialiased">
         <AuthProvider>
           <div className="gradient-bg min-h-screen flex flex-col">
-            <Nav />
+            <AppNav />
             <main className="flex-1">
               {children}
             </main>
-            <Footer />
+            <Footer
+              brand="灵魂解码"
+              description="八字·人类图·占星·紫微·五运六气·MBTI·中医体质 — 七系统AI深度融合，一份完整的自我认知报告。"
+              columns={[
+                {
+                  title: '探索',
+                  links: [
+                    { label: '人生总览', href: '/master-report' },
+                    { label: '九宫学理', href: '/jiugong' },
+                    { label: '人类图排盘', href: '/human-design' },
+                    { label: '每日运势', href: '/daily' },
+                    { label: '关系合盘', href: '/compatibility' },
+                  ],
+                },
+                {
+                  title: '关于',
+                  links: [
+                    { label: '八字 + 人类图 + 占星', href: '/master-report' },
+                    { label: '七系统深度融合', href: '/master-report' },
+                    { label: '大理 · 银桥', href: '#' },
+                  ],
+                },
+              ]}
+              socialLinks={[
+                { label: '微信公众号：光明喜舍', href: '#' },
+                { label: '小红书：@光明喜舍', href: '#' },
+                { label: 'Stella 教育智囊', href: 'https://www.stella-aiedu.com' },
+              ]}
+              copyright="© 2026 灵魂解码 · 光明喜舍"
+            />
           </div>
         </AuthProvider>
       </body>

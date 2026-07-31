@@ -11,6 +11,7 @@
     "index:dharma": "python3 scripts/build-dharma-index.py"
   },
   "dependencies": {
+    "@jianji/ui": "file:../jianji-ops/packages/ui",
     "@next/swc-wasm-nodejs": "^16.2.6",
     "echarts": "^6.1.0",
     "echarts-for-react": "^3.0.6",
