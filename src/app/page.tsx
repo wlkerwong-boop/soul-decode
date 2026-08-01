@@ -50,10 +50,11 @@ export default function HomePage() {
         <div className="hero-bg" style={{ backgroundImage: "url('/assets/homepage/soulcode-hero.png')" }} />
         <div className="hero-veil" />
         <div className="hero-content">
-          <p className="hero-kicker">SOULCODE · 灵魂解码</p>
-          <h1 className="hero-title">解码你的生命蓝图</h1>
-          <p className="hero-sub">七大系统融合，看见独一无二的你</p>
-          <a className="hero-cta" href="#report">生成我的报告</a>
+          <p className="hero-kicker">七系统融合 · AI 深度解读</p>
+          <h1 className="hero-title">7 大古老系统，1 份只属于您的报告</h1>
+          <p className="hero-sub">八字 · 人类图 · 占星 · 紫微斗数 · 五运六气 · MBTI · 中医体质——七个维度交叉印证，AI 深度融合解读。不是七份报告，是一份完整的您。</p>
+          <a className="hero-cta" href="/master-report">免费排盘，看看您的出厂配置 →</a>
+          <p className="hero-note">🔒 出生信息仅用于排盘，绝不外泄</p>
         </div>
         <div className="hero-scroll">向下探索</div>
       </header>
@@ -63,14 +64,14 @@ export default function HomePage() {
         <div className="section-inner">
           <div className="section-head reveal">
             <p className="section-kicker">核心服务</p>
-            <h2 className="section-title">三条路径，抵达同一个你</h2>
+            <h2 className="section-title">三条路径，抵达同一个您</h2>
           </div>
           <div className="cards">
-            <a className="card reveal" href="#report">
+            <a className="card reveal" href="/master-report">
               <div className="card-img" style={{ backgroundImage: "url('/assets/homepage/card-seven-systems.png')" }} />
               <div className="card-body">
-                <h3 className="card-title">七系统融合报告</h3>
-                <p className="card-text">七个维度交叉印证，生成你的专属生命蓝图。</p>
+                <h3 className="card-title">人生总览</h3>
+                <p className="card-text">七个维度交叉印证，生成您的专属生命蓝图。</p>
                 <span className="card-link">了解更多 <span>→</span></span>
               </div>
             </a>
@@ -82,10 +83,10 @@ export default function HomePage() {
                 <span className="card-link">了解更多 <span>→</span></span>
               </div>
             </a>
-            <a className="card reveal" href="#">
+            <a className="card reveal" href="/human-design">
               <div className="card-img" style={{ backgroundImage: "url('/assets/homepage/card-assessment.png')" }} />
               <div className="card-body">
-                <h3 className="card-title">单项测评</h3>
+                <h3 className="card-title">人类图排盘</h3>
                 <p className="card-text">从一个问题开始，轻轻推开自我认知的门。</p>
                 <span className="card-link">了解更多 <span>→</span></span>
               </div>
@@ -104,11 +105,14 @@ export default function HomePage() {
             </div>
             <div className="report-copy reveal">
               <p className="section-kicker">报告预览</p>
-              <h2 className="report-title">一本只关于你的书</h2>
-              <p className="report-text">
-                七个系统，七次凝视。当星盘、九宫与心理测评在同一张图上交汇，你会第一次完整地看见自己。手机上也能一键下载 PDF，随时翻阅。
-              </p>
-              <a className="report-cta" href="/master-report">查看完整报告</a>
+              <h2 className="report-title">一份让您感到“被看穿”的灵魂级分析</h2>
+              <ul className="report-text report-list">
+                <li>✦ <strong>核心天赋：</strong>看见您与生俱来的优势，以及最适合发挥它们的方向。</li>
+                <li>✦ <strong>人生角色：</strong>理解您在不同关系与人生阶段中的独特位置。</li>
+                <li>✦ <strong>能量曲线：</strong>读懂您的能量起伏，知道何时蓄力、何时行动。</li>
+                <li>✦ <strong>决策策略：</strong>找到符合您内在机制的选择方式，不再被外界声音牵引。</li>
+              </ul>
+              <a className="report-cta" href="/master-report">深度图文报告，含七大系统交叉分析 →</a>
             </div>
           </div>
         </div>
@@ -122,35 +126,29 @@ export default function HomePage() {
             <h2 className="section-title">沿途的风景</h2>
           </div>
           <div className="explore-track reveal">
+            <a className="explore-card" href="#">
+              <span className="explore-ico">🧠</span>
+              <span className="explore-name">大五人格测评</span>
+            </a>
+            <a className="explore-card" href="/human-design">
+              <span className="explore-ico">🧬</span>
+              <span className="explore-name">人类图解析</span>
+            </a>
+            <a className="explore-card" href="#">
+              <span className="explore-ico">🔮</span>
+              <span className="explore-name">八字命盘</span>
+            </a>
+            <a className="explore-card" href="/compatibility">
+              <span className="explore-ico">❤️</span>
+              <span className="explore-name">关系合盘</span>
+            </a>
             <a className="explore-card" href="/dharma">
-              <span className="explore-ico">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z" /><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5" /></svg>
-              </span>
+              <span className="explore-ico">📖</span>
               <span className="explore-name">法藏</span>
             </a>
             <a className="explore-card" href="#">
-              <span className="explore-ico">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z" /></svg>
-              </span>
+              <span className="explore-ico">🌿</span>
               <span className="explore-name">昌宁活动</span>
-            </a>
-            <a className="explore-card" href="/daily">
-              <span className="explore-ico">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
-              </span>
-              <span className="explore-name">每日运势</span>
-            </a>
-            <a className="explore-card" href="/compatibility">
-              <span className="explore-ico">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="8" cy="12" r="4" /><circle cx="16" cy="12" r="4" /></svg>
-              </span>
-              <span className="explore-name">关系合盘</span>
-            </a>
-            <a className="explore-card" href="/mbti">
-              <span className="explore-ico">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 3a7 7 0 0 1 7 7c0 2.4-1.2 4.2-2.6 5.6-.9.9-1.4 2.1-1.4 3.4h-6c0-1.3-.5-2.5-1.4-3.4C6.2 14.2 5 12.4 5 10a7 7 0 0 1 7-7z" /><path d="M9 21h6" /></svg>
-              </span>
-              <span className="explore-name">MBTI 测评</span>
             </a>
           </div>
         </div>
@@ -161,16 +159,11 @@ export default function HomePage() {
         <div className="section-inner">
           <div className="section-head reveal">
             <p className="section-kicker">关于</p>
-            <h2 className="section-title">点亮这盏灯的人</h2>
-          </div>
-          <div className="about reveal">
-            <div className="about-avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" /></svg>
-            </div>
+          <h2 className="section-title">关于光明喜舍</h2>
+        </div>
+          <div className="about about-text-only reveal">
             <div>
-              <h3 className="about-name">阿宽</h3>
-              <p className="about-role">SOULCODE 创始人 · 生命教育探索者</p>
-              <p className="about-text">愿每一个人，都能在此照见自己的光。</p>
+              <p className="about-text">2016 年起深入研习心理学人格理论、东方传统文化与人类图体系。多维度测评融合并非简单堆叠——心理学为基、人类图为骨、传统文化为脉。多个维度交叉印证，才是一份真正完整的自我认知报告。目前在大理 · 银桥持续深耕。</p>
             </div>
           </div>
         </div>

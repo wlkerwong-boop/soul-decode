@@ -24,6 +24,9 @@ body[data-site="soulcode"] {
   --btn-text: #0B1120;
 }
 
+/* The homepage owns the visual navigation; keep the authenticated app nav on inner pages. */
+body[data-site="soulcode"] .soulcode-global-nav { display: none; }
+
 /* ---- Stella：暖沙 + 珊瑚橘 ---- */
 body[data-site="stella"] {
   --bg: #FDF8F3;
@@ -183,6 +186,11 @@ body[data-site="jianji"] .hero-sub {
   box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 38%, transparent);
 }
 .hero-cta:hover { transform: translateY(-3px); box-shadow: 0 14px 36px color-mix(in srgb, var(--accent) 48%, transparent); }
+.hero-note {
+  margin-top: 14px;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+}
 .hero-scroll {
   position: absolute;
   bottom: 32px;
@@ -318,6 +326,12 @@ body[data-site="jianji"] .hero-sub {
   margin-bottom: 32px;
   max-width: 32em;
 }
+.report-list {
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+.report-list strong { color: var(--text); font-weight: 600; }
 .report-cta {
   display: inline-block;
   border: 1px solid var(--accent);
@@ -390,6 +404,8 @@ body[data-site="jianji"] .hero-sub {
 .about-name { font-size: 1.12rem; letter-spacing: 0.08em; margin-bottom: 6px; }
 .about-role { font-size: 0.85rem; color: var(--accent); letter-spacing: 0.14em; margin-bottom: 12px; }
 .about-text { color: var(--text-dim); font-size: 0.94rem; }
+.about-text-only { display: block; text-align: center; max-width: 780px; }
+.about-text-only .about-text { font-size: 1rem; line-height: 2; }
 @media (max-width: 640px) {
   .about { grid-template-columns: 1fr; text-align: center; }
   .about-avatar { margin: 0 auto; width: 96px; height: 96px; }

@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   description: '多维人格分析 · 天赋识别 · 成长路径规划。融合心理学与传统文化智慧，用数据看清自己。',
   keywords: ['人格测评', '大五人格', 'MBTI', '自我认知', '成长规划', '天赋测试', '人类图', '八字排盘'],
   openGraph: {
-    title: '灵魂解码 — 你的生命使命解读报告',
-    description: '一份让你感到"被看穿"的灵魂级分析报告。八字排盘 · 能量曲线 · AI深度解读',
+  title: '灵魂解码 — 您的生命使命解读报告',
+  description: '一份让您感到"被看穿"的灵魂级分析报告。八字排盘 · 能量曲线 · AI深度解读',
     type: 'website',
     locale: 'zh_CN',
     siteName: '灵魂解码',
@@ -53,39 +53,40 @@ export default function RootLayout({
       <body className="antialiased">
         <AuthProvider>
           <div className="gradient-bg min-h-screen flex flex-col">
-            <AppNav />
+            <div className="soulcode-global-nav">
+              <AppNav />
+            </div>
             <main className="flex-1">
               {children}
             </main>
             <Footer
               brand="灵魂解码"
-              description="八字·人类图·占星·紫微·五运六气·MBTI·中医体质 — 七系统AI深度融合，一份完整的自我认知报告。"
+              description="灵魂解码 · 用 AI 看见真实的自己"
               columns={[
                 {
                   title: '探索',
                   links: [
                     { label: '人生总览', href: '/master-report' },
-                    { label: '九宫学理', href: '/jiugong' },
                     { label: '人类图排盘', href: '/human-design' },
                     { label: '每日运势', href: '/daily' },
-                    { label: '关系合盘', href: '/compatibility' },
                   ],
                 },
                 {
-                  title: '关于',
+                  title: '联系与家族站点',
                   links: [
-                    { label: '八字 + 人类图 + 占星', href: '/master-report' },
-                    { label: '七系统深度融合', href: '/master-report' },
-                    { label: '大理 · 银桥', href: '#' },
+                    { label: '关系合盘', href: '/compatibility' },
+                    { label: 'MBTI 性格', href: '/mbti' },
+                    { label: 'Stella 教育智囊', href: 'https://www.stella-aiedu.com' },
+                    { label: '见己学园 · 即将上线', href: '#' },
                   ],
                 },
               ]}
               socialLinks={[
-                { label: '微信', href: '#' },
-                { label: '小红书', href: '#' },
-                { label: 'Stella', href: 'https://www.stella-aiedu.com' },
+                { label: '微信公众号：光明喜舍', href: '#' },
+                { label: '小红书：@光明喜舍', href: '#' },
+                { label: '抖音：@光明喜舍', href: '#' },
               ]}
-              copyright="© 2026 灵魂解码 · 光明喜舍"
+              copyright="© 2026 光明喜舍 · 大理 · 银桥"
             />
           </div>
         </AuthProvider>
