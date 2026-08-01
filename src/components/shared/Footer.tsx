@@ -70,13 +70,13 @@ export const Footer: React.FC<FooterProps> = ({
 
   return (
     <footer
-      className={`border-t border-[var(--color-border)] bg-[var(--color-bg-alt)] ${className}`}
+      className={`footer border-t border-[var(--color-border)] bg-[var(--color-bg-alt)] ${className}`}
     >
-      <div className="mx-auto max-w-7xl px-6 py-16 lg:px-10">
+      <div className="footer-inner mx-auto max-w-7xl px-6 py-16 lg:px-10">
         {/* Grid: about column + link columns */}
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {/* About */}
-          <div className="sm:col-span-2 lg:col-span-1">
+          <div className="footer-brand sm:col-span-2 lg:col-span-1">
             <h4 className="mb-3 text-lg font-bold text-[var(--color-accent)]">
               {brand}
             </h4>
@@ -86,14 +86,14 @@ export const Footer: React.FC<FooterProps> = ({
 
             {/* Social links */}
             {socialLinks && socialLinks.length > 0 && (
-              <div className="mt-5 flex gap-3">
+              <div className="footer-social mt-5 flex gap-3">
                 {socialLinks.map((s) => (
                   <a
                     key={`${s.label}-${s.href}`}
                     href={s.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex h-10 w-10 items-center justify-center rounded-full border border-[#334155] bg-[#1E293B]/75 text-[var(--color-text-muted)] transition-all duration-[var(--transition-fast)] hover:-translate-y-0.5 hover:border-[var(--color-accent)]/50 hover:text-[var(--color-accent)]"
+                    className="social-btn flex h-10 w-10 items-center justify-center rounded-full border border-[#334155] bg-[#1E293B]/75 text-[var(--color-text-muted)] transition-all duration-[var(--transition-fast)] hover:-translate-y-0.5 hover:border-[var(--color-accent)]/50 hover:text-[var(--color-accent)]"
                     aria-label={s.label}
                   >
                     {s.icon || <SocialIcon label={s.label} />}
@@ -105,7 +105,7 @@ export const Footer: React.FC<FooterProps> = ({
 
           {/* Link columns */}
           {columns.map((col) => (
-            <div key={col.title}>
+            <div className="footer-col" key={col.title}>
               <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[var(--color-text)]">
                 {col.title}
               </h4>

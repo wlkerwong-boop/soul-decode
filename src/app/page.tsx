@@ -1,222 +1,181 @@
-import Link from 'next/link';
+"use client";
 
-const IconCrystal = () => (
-  <svg aria-hidden="true" className="mb-5 h-12 w-12" viewBox="0 0 48 48" fill="none">
-    <path d="M24 4 44 18 24 44 4 18 24 4Z" fill="url(#crystal)" />
-    <path d="M24 4v40M4 18h40" stroke="#D4AF37" strokeWidth=".75" opacity=".45" />
-    <defs>
-      <linearGradient id="crystal" x1="4" y1="4" x2="44" y2="44">
-        <stop stopColor="#26354D" />
-        <stop offset="1" stopColor="#0F172A" />
-      </linearGradient>
-    </defs>
-  </svg>
-);
+/**
+ * SoulCode 首页 · 海报级重设计（K3 定稿版）
+ * ---------------------------------------------------------------
+ * 集成说明（给 Codex）：
+ * 1. 将 homepage.css 复制为 src/app/homepage.css，并在本文件 import "./homepage.css";
+ *    （或并入 globals.css，注意保留 body[data-site] 主题变量块）
+ * 2. 将 assets/ 下 5 张图片复制到 public/assets/homepage/
+ * 3. 霞鹜文楷 CDN 已在项目 layout 的 <head> 中引入，无需重复添加
+ * 4. 零外部组件依赖：纯 CSS + 内联 SVG，不引入 swiper/framer-motion
+ * 5. body 需带 data-site="soulcode"（在 layout.tsx 的 <body> 上加，或本文件 useEffect 设置）
+ * 6. 下方链接 href 为占位，替换为项目真实路由
+ */
 
-const IconScroll = () => (
-  <svg aria-hidden="true" className="mb-5 h-12 w-12" viewBox="0 0 48 48" fill="none">
-    <rect x="8" y="4" width="32" height="40" rx="4" stroke="#D4AF37" strokeWidth="2" />
-    <path d="M14 12h20M14 20h20M14 28h14" stroke="#D4AF37" strokeWidth="1.5" opacity=".65" />
-  </svg>
-);
+import { useEffect } from "react";
+import "./homepage.css";
 
-const IconDna = () => (
-  <svg aria-hidden="true" className="mb-5 h-12 w-12" viewBox="0 0 48 48" fill="none">
-    <path d="M12 8c0 0 8 8 12 16s12 16 12 16M36 8s-8 8-12 16-12 16-12 16" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" />
-    <path d="m17 14 14 20M31 14 17 34" stroke="#D4AF37" strokeWidth="1" opacity=".45" />
-  </svg>
-);
+export default function HomePage() {
+  useEffect(() => {
+    document.body.setAttribute("data-site", "soulcode");
+    const nav = document.getElementById("nav");
+    const onScroll = () => nav?.classList.toggle("scrolled", window.scrollY > 40);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    const io = new IntersectionObserver(
+      (es) => es.forEach((e) => e.isIntersecting && e.target.classList.add("in")),
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      io.disconnect();
+    };
+  }, []);
 
-const Arrow = () => (
-  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path d="m8 6 4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const services = [
-  {
-    icon: <IconCrystal />,
-    title: '七系统融合报告',
-    desc: '八字·人类图·占星·紫微·五运六气·MBTI·中医体质，七维交叉印证，一份完整的你。',
-    href: '/master-report',
-  },
-  {
-    icon: <IconScroll />,
-    title: '九宫学理',
-    desc: '河图洛书·程天相体系，13维度天赋地图、性格密码、90年人生节律，看见生命的底层代码。',
-    href: '/jiugong',
-  },
-  {
-    icon: <IconDna />,
-    title: '单项测评',
-    desc: '人类图排盘·MBTI性格·关系合盘·大五人格，从一个维度开始，逐步拼出完整的自己。',
-    href: '/human-design',
-  },
-];
-
-const reportChapters = [
-  { num: '01', title: '八字命盘分析', desc: '四柱·十神·五行·大运·流年', intro: '你的出厂配置里，藏着这一生的主线剧情。' },
-  { num: '02', title: '人类图解析', desc: '能量类型·人生角色·内在权威·通道与闸门', intro: '能量类型决定你如何与世界交换能量。' },
-  { num: '03', title: '紫微斗数', desc: '十二宫·十四主星·四化飞星·格局论断', intro: '十二宫如同人生的十二个房间，各有风景。' },
-  { num: '04', title: '占星本命盘', desc: '行星·星座·宫位·相位解读', intro: '行星是演员，星座是角色，宫位是舞台。' },
-  { num: '05', title: '五运六气', desc: '黄帝内经体系·先天体质偏性·年度运气', intro: '顺应天时，方能事半功倍。' },
-  { num: '06', title: '中医体质辨识', desc: '九种体质·饮食起居·调理建议', intro: '体质是地基，调理是修缮。' },
-  { num: '07', title: 'MBTI × 大五人格', desc: '心理学黄金标准·性格特质·适配领域', intro: '认识自己，是改变的开始。' },
-];
-
-const moreExplore = [
-  { emoji: '📿', title: '法藏', desc: '经典研读', href: '/dharma' },
-  { emoji: '🏔️', title: '昌宁活动', desc: '线下共修', href: '/dharma' },
-  { emoji: '🌅', title: '每日运势', desc: '今日指引', href: '/daily' },
-  { emoji: '💞', title: '关系合盘', desc: '双人·家庭', href: '/compatibility' },
-  { emoji: '🧠', title: 'MBTI测评', desc: '16种人格', href: '/mbti' },
-];
-
-const reportHighlights = [
-  ['核心天赋', '你的 G 中心被定义，天生带着明确的人生方向感——你不是迷路，你只是在等对的时机。'],
-  ['人生角色', '6/2 角色型——前半生在试错中积累智慧，后半生自然散发影响力。'],
-  ['能量曲线', '情绪中心开放，你容易吸收他人情绪。报告会帮助你分辨哪些是你的，哪些是别人的。'],
-];
-
-export default function Home() {
   return (
-    <div className="overflow-x-hidden bg-[#0B1120] text-[#F8FAFC]">
-      <section className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-6 py-[20vh] text-center">
-        <div className="absolute inset-0 bg-[#0B1120]" aria-hidden="true">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(30,58,138,0.18)_0%,transparent_60%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(212,175,55,0.07)_0%,transparent_48%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(212,175,55,0.05)_0%,transparent_42%)]" />
-          <div
-            className="absolute inset-0 opacity-40"
-            style={{
-              backgroundImage: 'radial-gradient(2px 2px at 20px 30px,rgba(212,175,55,.45),transparent),radial-gradient(2px 2px at 40px 70px,rgba(255,255,255,.28),transparent),radial-gradient(1px 1px at 90px 40px,rgba(212,175,55,.5),transparent),radial-gradient(2px 2px at 160px 120px,rgba(255,255,255,.2),transparent),radial-gradient(1px 1px at 230px 80px,rgba(212,175,55,.4),transparent),radial-gradient(2px 2px at 300px 150px,rgba(255,255,255,.28),transparent)',
-              backgroundSize: '350px 200px',
-            }}
-          />
+    <>
+      <nav className="nav" id="nav">
+        <a className="nav-logo" href="/">Soul<em>Code</em></a>
+        <div className="nav-links">
+          <a href="#services">服务</a>
+          <a href="#report">报告</a>
+          <a href="#about">关于</a>
+          <a className="nav-cta" href="#report">开始测评</a>
         </div>
+      </nav>
 
-        <div className="relative z-10 mx-auto max-w-2xl">
-          <p className="mb-6 text-xs tracking-[0.3em] text-[#D4AF37]/75">SOULCODE · 灵魂解码</p>
-          <h1 className="mb-8 text-4xl font-medium leading-[1.35] tracking-[0.05em] [text-shadow:0_2px_40px_rgba(0,0,0,.55)] md:text-5xl lg:text-6xl">
-            解码你的生命蓝图
-          </h1>
-          <p className="mx-auto mb-10 max-w-md text-base leading-[1.8] text-[#94A3B8] md:text-lg">
-            七系统交叉印证，AI 深度融合——以古老智慧为镜，看清自己本来模样。
-          </p>
-          <Link href="/master-report" className="inline-block rounded-full bg-[#D4AF37] px-8 py-3.5 font-medium text-[#0B1120] transition-all duration-300 hover:-translate-y-1 hover:text-[#0B1120] hover:shadow-[0_8px_30px_rgba(212,175,55,.3)] active:scale-95">
-            免费排盘，看看你的出厂配置
-          </Link>
+      {/* Hero */}
+      <header className="hero">
+        <div className="hero-bg" style={{ backgroundImage: "url('/assets/homepage/soulcode-hero.png')" }} />
+        <div className="hero-veil" />
+        <div className="hero-content">
+          <p className="hero-kicker">SOULCODE · 灵魂解码</p>
+          <h1 className="hero-title">解码你的生命蓝图</h1>
+          <p className="hero-sub">七大系统融合，看见独一无二的你</p>
+          <a className="hero-cta" href="#report">生成我的报告</a>
         </div>
+        <div className="hero-scroll">向下探索</div>
+      </header>
 
-        <div className="absolute bottom-8 left-0 right-0 text-center" aria-hidden="true">
-          <p className="text-xs tracking-[0.3em] text-[#475569]">SCROLL</p>
-          <div className="mx-auto mt-2 h-8 w-px bg-gradient-to-b from-[#475569] to-transparent" />
-        </div>
-      </section>
-
-      <section className="px-4 py-24 md:px-8">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="mb-3 text-center text-2xl tracking-wide md:text-3xl">核心服务</h2>
-          <p className="mb-12 text-center text-sm text-[#94A3B8] md:text-base">从多个维度理解自己，选择适合你的入口</p>
-          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-7 [scrollbar-width:none]">
-            {services.map((service) => (
-              <Link
-                data-service-card="true"
-                key={service.href}
-                href={service.href}
-                className="group w-[280px] flex-none snap-start rounded-2xl border border-[#334155]/50 bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/90 p-6 shadow-[0_14px_45px_rgba(0,0,0,.22)] transition-all duration-300 hover:-translate-y-2 hover:border-[#D4AF37]/30 hover:shadow-[0_18px_50px_rgba(0,0,0,.34)] md:w-[320px]"
-              >
-                {service.icon}
-                <h3 className="mb-2 text-lg font-medium transition-colors group-hover:text-[#D4AF37]">{service.title}</h3>
-                <p className="mb-5 line-clamp-3 text-sm leading-[1.8] text-[#94A3B8]">{service.desc}</p>
-                <span className="inline-flex items-center text-sm text-[#D4AF37]">了解更多 <Arrow /></span>
-              </Link>
-            ))}
+      {/* 核心服务 */}
+      <section className="section" id="services">
+        <div className="section-inner">
+          <div className="section-head reveal">
+            <p className="section-kicker">核心服务</p>
+            <h2 className="section-title">三条路径，抵达同一个你</h2>
+          </div>
+          <div className="cards">
+            <a className="card reveal" href="#report">
+              <div className="card-img" style={{ backgroundImage: "url('/assets/homepage/card-seven-systems.png')" }} />
+              <div className="card-body">
+                <h3 className="card-title">七系统融合报告</h3>
+                <p className="card-text">七个维度交叉印证，生成你的专属生命蓝图。</p>
+                <span className="card-link">了解更多 <span>→</span></span>
+              </div>
+            </a>
+            <a className="card reveal" href="/jiugong">
+              <div className="card-img" style={{ backgroundImage: "url('/assets/homepage/card-jiugong.png')" }} />
+              <div className="card-body">
+                <h3 className="card-title">九宫学理</h3>
+                <p className="card-text">东方智慧为骨，照见当下的位置与方向。</p>
+                <span className="card-link">了解更多 <span>→</span></span>
+              </div>
+            </a>
+            <a className="card reveal" href="#">
+              <div className="card-img" style={{ backgroundImage: "url('/assets/homepage/card-assessment.png')" }} />
+              <div className="card-body">
+                <h3 className="card-title">单项测评</h3>
+                <p className="card-text">从一个问题开始，轻轻推开自我认知的门。</p>
+                <span className="card-link">了解更多 <span>→</span></span>
+              </div>
+            </a>
           </div>
         </div>
       </section>
 
-      <section className="bg-[#0F172A]/55 px-4 py-24 md:px-8">
-        <div className="mx-auto max-w-2xl">
-          <h2 className="mb-3 text-center text-2xl tracking-wide md:text-3xl">报告预览</h2>
-          <p className="mb-12 text-center text-sm text-[#94A3B8]">一份让你感到「被看穿」的灵魂级分析</p>
-          <div className="space-y-3">
-            {reportChapters.map((chapter) => (
-              <details key={chapter.num} className="group overflow-hidden rounded-xl border border-[#1E293B] transition-colors open:border-[#334155]">
-                <summary className="flex cursor-pointer list-none items-center gap-4 p-4 text-left transition-colors hover:bg-[#1E293B]/30 [&::-webkit-details-marker]:hidden">
-                  <span className="font-mono text-sm text-[#D4AF37]">{chapter.num}</span>
-                  <span className="flex-1 font-medium">{chapter.title}</span>
-                  <span className="text-[#94A3B8] transition-transform duration-300 group-open:rotate-180" aria-hidden="true">⌄</span>
-                </summary>
-                <div className="border-t border-[#1E293B] px-4 pb-4 text-sm leading-[1.8] text-[#94A3B8]">
-                  <p className="pt-3">{chapter.desc}</p>
-                  <p className="mt-3 rounded-lg bg-[#1E293B]/40 p-3 text-xs italic text-[#CBD5E1]">「{chapter.intro}」</p>
-                </div>
-              </details>
-            ))}
-          </div>
-
-          <div className="mt-12 rounded-2xl border border-[#1E293B] bg-gradient-to-b from-[#1E293B]/40 to-transparent p-6 text-center md:p-8">
-            <p className="mb-3 text-sm tracking-[0.2em] text-[#D4AF37]">SOULCODE · 灵魂解码</p>
-            <h3 className="mb-3 text-xl">个人生命使命解读报告</h3>
-            <p className="mb-7 text-sm text-[#94A3B8]">基于七大古老智慧系统 · AI 深度融合</p>
-            <div className="space-y-4 text-left text-sm leading-[1.8] text-[#CBD5E1]">
-              {reportHighlights.map(([title, text]) => (
-                <div key={title} className="flex gap-3">
-                  <span className="mt-0.5 text-[#D4AF37]">◆</span>
-                  <p><span className="text-[#D4AF37]">{title}：</span>{text}</p>
-                </div>
-              ))}
+      {/* 报告预览 */}
+      <section className="section" id="report" style={{ background: "var(--bg-soft)" }}>
+        <div className="section-inner">
+          <div className="report">
+            <div className="report-img reveal">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/assets/homepage/report-cover.png" alt="七系统融合报告封面" />
             </div>
-            <Link href="/master-report" className="mt-7 inline-block text-sm text-[#D4AF37] hover:underline">查看完整报告示例 →</Link>
+            <div className="report-copy reveal">
+              <p className="section-kicker">报告预览</p>
+              <h2 className="report-title">一本只关于你的书</h2>
+              <p className="report-text">
+                七个系统，七次凝视。当星盘、九宫与心理测评在同一张图上交汇，你会第一次完整地看见自己。手机上也能一键下载 PDF，随时翻阅。
+              </p>
+              <a className="report-cta" href="/master-report">查看完整报告</a>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="px-4 py-20 md:px-8">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="mb-2 text-center text-xl tracking-wide md:text-2xl">更多探索</h2>
-          <p className="mb-8 text-center text-sm text-[#64748B]">从不同维度认识自己</p>
-          <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-4 [scrollbar-width:none]">
-            {moreExplore.map((item) => (
-              <Link
-                data-explore-card="true"
-                key={item.href}
-                href={item.href}
-                className="w-[140px] flex-none snap-start rounded-xl border border-[#334155]/30 bg-[#1E293B]/50 p-4 text-center transition-all duration-300 hover:border-[#D4AF37]/20 hover:bg-[#1E293B]"
-              >
-                <span className="mb-2 block text-3xl" aria-hidden="true">{item.emoji}</span>
-                <h3 className="mb-1 text-sm font-medium">{item.title}</h3>
-                <p className="text-xs text-[#64748B]">{item.desc}</p>
-              </Link>
-            ))}
+      {/* 更多探索 */}
+      <section className="section">
+        <div className="section-inner">
+          <div className="section-head reveal">
+            <p className="section-kicker">更多探索</p>
+            <h2 className="section-title">沿途的风景</h2>
+          </div>
+          <div className="explore-track reveal">
+            <a className="explore-card" href="/dharma">
+              <span className="explore-ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z" /><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5" /></svg>
+              </span>
+              <span className="explore-name">法藏</span>
+            </a>
+            <a className="explore-card" href="#">
+              <span className="explore-ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z" /></svg>
+              </span>
+              <span className="explore-name">昌宁活动</span>
+            </a>
+            <a className="explore-card" href="/daily">
+              <span className="explore-ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+              </span>
+              <span className="explore-name">每日运势</span>
+            </a>
+            <a className="explore-card" href="/compatibility">
+              <span className="explore-ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="8" cy="12" r="4" /><circle cx="16" cy="12" r="4" /></svg>
+              </span>
+              <span className="explore-name">关系合盘</span>
+            </a>
+            <a className="explore-card" href="/mbti">
+              <span className="explore-ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 3a7 7 0 0 1 7 7c0 2.4-1.2 4.2-2.6 5.6-.9.9-1.4 2.1-1.4 3.4h-6c0-1.3-.5-2.5-1.4-3.4C6.2 14.2 5 12.4 5 10a7 7 0 0 1 7-7z" /><path d="M9 21h6" /></svg>
+              </span>
+              <span className="explore-name">MBTI 测评</span>
+            </a>
           </div>
         </div>
       </section>
 
-      <section className="bg-gradient-to-b from-[#0B1120] via-[#0F172A] to-[#0B1120] px-4 py-24 md:px-8">
-        <div className="mx-auto flex max-w-2xl flex-col items-center gap-8 sm:flex-row sm:items-start">
-          <div className="flex h-28 w-28 flex-none items-center justify-center overflow-hidden rounded-full border-2 border-[#D4AF37]/30 bg-gradient-to-br from-[#1E293B] to-[#334155] text-3xl" role="img" aria-label="创始人头像占位">🧘</div>
-          <div className="text-center sm:text-left">
-            <h2 className="mb-4 text-xl md:text-2xl">关于光明喜舍</h2>
-            <p className="line-clamp-4 text-sm leading-[1.8] text-[#94A3B8] md:text-base">
-              2016 年起深入研习心理学人格理论、东方传统文化与人类图体系。心理学为基、人类图为骨、传统文化为脉，让多个维度彼此印证，呈现一份真正完整的自我认知报告。目前在大理 · 银桥持续深耕。
-            </p>
+      {/* 关于 */}
+      <section className="section" id="about" style={{ background: "var(--bg-soft)" }}>
+        <div className="section-inner">
+          <div className="section-head reveal">
+            <p className="section-kicker">关于</p>
+            <h2 className="section-title">点亮这盏灯的人</h2>
+          </div>
+          <div className="about reveal">
+            <div className="about-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" /></svg>
+            </div>
+            <div>
+              <h3 className="about-name">阿宽</h3>
+              <p className="about-role">SOULCODE 创始人 · 生命教育探索者</p>
+              <p className="about-text">愿每一个人，都能在此照见自己的光。</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="relative overflow-hidden px-4 py-24 text-center">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(212,175,55,.08)_0%,transparent_70%)]" aria-hidden="true" />
-        <div className="relative z-10 mx-auto max-w-2xl">
-          <h2 className="mb-4 text-2xl md:text-3xl">准备好发现真实的自己了吗？</h2>
-          <p className="mb-8 text-sm text-[#94A3B8] md:text-base">输入出生信息，即可获得一份专属于你的深度自我认知报告</p>
-          <Link href="/master-report" className="inline-block rounded-full bg-[#D4AF37] px-8 py-3.5 font-medium text-[#0B1120] transition-all duration-300 hover:-translate-y-1 hover:text-[#0B1120] hover:shadow-[0_8px_30px_rgba(212,175,55,.3)]">
-            免费排盘，看看你的出厂配置
-          </Link>
-          <p className="mt-4 text-xs text-[#475569]">🔒 出生信息仅用于排盘，绝不外泄</p>
-        </div>
-      </section>
-    </div>
+    </>
   );
 }
