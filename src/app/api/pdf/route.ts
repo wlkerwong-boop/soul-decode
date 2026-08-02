@@ -25,6 +25,7 @@ async function launchBrowser(): Promise<Browser> {
       '--disable-dev-shm-usage',
       '--disable-gpu',
       '--disable-software-rasterizer',
+      '--single-process',
     ],
   });
 }
@@ -141,11 +142,14 @@ export async function POST(req: NextRequest) {
 
       await browser.close();
 
+      const filename = `人生总览报告_${new Date().toISOString().slice(0, 10)}.pdf`;
       const res = new NextResponse(Buffer.from(pdfBuffer), {
         status: 200,
         headers: {
           'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="人生总览报告_${new Date().toISOString().slice(0, 10)}.pdf"`,
+          // ASCII fallback avoids the Fetch Headers ByteString limit; RFC 5987
+          // preserves the original Chinese filename in capable clients.
+          'Content-Disposition': `attachment; filename="soulcode-report.pdf"; filename*=UTF-8''${encodeURIComponent(filename)}`,
           'Content-Length': String(pdfBuffer.length),
         },
       });
