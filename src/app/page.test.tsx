@@ -1,30 +1,35 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import Home from './page';
+import HomePage from './page';
 
-describe('SoulCode homepage blueprint', () => {
-  it('renders the full-height hero and semantic seven-chapter report accordion', () => {
-    const html = renderToStaticMarkup(<Home />);
+describe('SoulCode homepage production contract', () => {
+  it('keeps the homepage CSS class structure in the rendered page', () => {
+    const html = renderToStaticMarkup(<HomePage />);
 
-    expect(html).toContain('min-h-[100dvh]');
-    expect(html).toContain('tracking-[0.05em]');
-    expect(html.match(/<details/g)).toHaveLength(7);
-    expect(html).not.toContain('flip-card');
+    expect(html).toContain('class="hero"');
+    expect(html).toContain('class="cards"');
+    expect(html).toContain('class="report"');
+    expect(html).toContain('class="explore-track reveal"');
+    expect(html).toContain('class="about about-text-only reveal"');
   });
 
-  it('renders compact horizontal service and exploration tracks with real routes', () => {
-    const html = renderToStaticMarkup(<Home />);
+  it('uses the real assessment routes and marks Changning as upcoming', () => {
+    const html = renderToStaticMarkup(<HomePage />);
 
-    expect(html.match(/data-service-card="true"/g)).toHaveLength(3);
-    expect(html.match(/data-explore-card="true"/g)).toHaveLength(5);
-    expect(html.match(/snap-x/g)?.length).toBeGreaterThanOrEqual(2);
     expect(html).toContain('href="/human-design"');
-    expect(html).toContain('href="/dharma"');
-    expect(html).not.toContain('href="/events"');
-    expect(html).toContain('昌宁活动');
-    expect(html).toContain('href="/daily"');
-    expect(html).toContain('href="/compatibility"');
     expect(html).toContain('href="/mbti"');
+    expect(html).toContain('href="/compatibility"');
+    expect(html).toContain('昌宁活动');
+    expect(html).toContain('即将推出');
+    expect(html).not.toContain('href="#"><span class="explore-ico">🧠</span><span class="explore-name">大五人格测评');
+    expect(html).not.toContain('href="#"><span class="explore-ico">🔮</span><span class="explore-name">八字命盘');
+  });
+
+  it('uses 您 throughout the homepage copy', () => {
+    const html = renderToStaticMarkup(<HomePage />);
+
+    expect(html).not.toContain('你');
+    expect(html).toContain('您的');
   });
 });

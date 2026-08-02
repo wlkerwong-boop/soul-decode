@@ -50,7 +50,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#0F172A" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body className="antialiased">
+      <body className="antialiased" data-site="soulcode">
         <AuthProvider>
           <div className="gradient-bg min-h-screen flex flex-col">
             <div className="soulcode-global-nav">

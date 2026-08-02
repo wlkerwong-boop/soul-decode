@@ -126,7 +126,7 @@ export default function HomePage() {
             <h2 className="section-title">沿途的风景</h2>
           </div>
           <div className="explore-track reveal">
-            <a className="explore-card" href="#">
+            <a className="explore-card" href="/mbti">
               <span className="explore-ico">🧠</span>
               <span className="explore-name">大五人格测评</span>
             </a>
@@ -134,7 +134,7 @@ export default function HomePage() {
               <span className="explore-ico">🧬</span>
               <span className="explore-name">人类图解析</span>
             </a>
-            <a className="explore-card" href="#">
+            <a className="explore-card" href="/human-design">
               <span className="explore-ico">🔮</span>
               <span className="explore-name">八字命盘</span>
             </a>
@@ -149,6 +149,7 @@ export default function HomePage() {
             <a className="explore-card" href="#">
               <span className="explore-ico">🌿</span>
               <span className="explore-name">昌宁活动</span>
+              <span className="explore-badge">即将推出</span>
             </a>
           </div>
         </div>
