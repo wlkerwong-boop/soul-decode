@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { sageFigures, camps, type SageFigure } from '@/data/tools/sageData';
 import { sageBios } from '@/data/tools/sageBioData';
+import '../tools.css';
 
 function FigureDetail({ figure, onClose }: { figure: SageFigure; onClose: () => void }) {
   return (
@@ -84,7 +85,7 @@ export default function FiguresPage() {
     : sageFigures;
 
   return (
-    <div className="min-h-screen gradient-bg px-6 py-12">
+    <div className="tools-page min-h-screen gradient-bg px-6 py-12">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">

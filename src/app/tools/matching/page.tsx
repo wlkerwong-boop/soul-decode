@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { sageFigures, getFigureById, type SageFigure } from '@/data/tools/sageData';
+import '../tools.css';
 
 // ── 12 Questions (4 dimensions) ──
 interface Question {
@@ -13,28 +14,28 @@ interface Question {
 
 const questions: Question[] = [
   // 维度1：性格特质（4题）
-  { id: 1, dimension: '性格特质', text: '周末不用上学，你更倾向于？',
+  { id: 1, dimension: '性格特质', text: '周末不用上学，您更倾向于？',
     options: [
       { label: '📚 安静看书、画画、做手工', keywords: ['喜欢安静', '爱写作', '爱画画', '喜欢手工'] },
       { label: '🏃 去户外跑跳、打球、爬山', keywords: ['爱冒险', '爱自然', '勇敢', '爱户外'] },
       { label: '🎮 玩会儿游戏再干别的', keywords: [] },
       { label: '👫 约朋友一起出去玩', keywords: ['喜欢交友'] },
     ]},
-  { id: 2, dimension: '性格特质', text: '遇到一道很难的数学题，你通常？',
+  { id: 2, dimension: '性格特质', text: '遇到一道很难的数学题，您通常？',
     options: [
       { label: '💪 自己想办法，一定要解出来', keywords: ['有毅力', '有钻研精神', '爱钻研'] },
       { label: '🙋 先自己试试，不行再找人帮忙', keywords: ['勇于尝试'] },
       { label: '📱 搜一下答案看看解析', keywords: [] },
       { label: '⏭️ 先放一放，过会儿再看', keywords: ['有耐心'] },
     ]},
-  { id: 3, dimension: '性格特质', text: '你觉得自己更像哪种人？',
+  { id: 3, dimension: '性格特质', text: '您觉得自己更像哪种人？',
     options: [
       { label: '🎯 目标明确，说做就做', keywords: ['执行力强', '果断', '有规划'] },
       { label: '🤔 想得多，喜欢先观察再行动', keywords: ['善于观察', '有观察力', '爱思考'] },
       { label: '💡 想法多，经常有新点子', keywords: ['有创意', '有想象力'] },
       { label: '🤝 随和，大家怎么样我就怎么样', keywords: [] },
     ]},
-  { id: 4, dimension: '性格特质', text: '在团队合作中你通常是？',
+  { id: 4, dimension: '性格特质', text: '在团队合作中您通常是？',
     options: [
       { label: '👑 主动承担，领头的那一个', keywords: ['有领导力', '有担当', '有责任心'] },
       { label: '🤲 积极配合，把分配的事做好', keywords: ['负责任', '做事认真'] },
@@ -43,21 +44,21 @@ const questions: Question[] = [
     ]},
 
   // 维度2：兴趣方向（3题）
-  { id: 5, dimension: '兴趣方向', text: '去图书馆，你最先走向哪个区域？',
+  { id: 5, dimension: '兴趣方向', text: '去图书馆，您最先走向哪个区域？',
     options: [
       { label: '🚀 科学/发明类', keywords: ['爱科学', '爱发明', '想当科学家', '爱天文'] },
       { label: '📜 历史/人物传记类', keywords: ['爱历史', '爱读书'] },
       { label: '🧙 神话/奇幻/冒险类', keywords: ['有好奇心', '爱冒险', '爱探索'] },
       { label: '🎨 艺术/手工类', keywords: ['有艺术感', '喜欢手工', '爱画画'] },
     ]},
-  { id: 6, dimension: '兴趣方向', text: '课余时间你更愿意做什么？',
+  { id: 6, dimension: '兴趣方向', text: '课余时间您更愿意做什么？',
     options: [
       { label: '🌱 养植物、观察昆虫、去公园', keywords: ['喜欢自然', '爱自然', '种植物', '爱观察'] },
       { label: '✏️ 写日记、写故事、摘抄好句子', keywords: ['爱写作', '有才华', '喜欢记录'] },
       { label: '🧩 搭积木、做模型、编程', keywords: ['喜欢动手', '爱发明', '有创意'] },
       { label: '🏀 运动、跑步、活动身体', keywords: [] },
     ]},
-  { id: 7, dimension: '兴趣方向', text: '哪种类型的视频/故事最能吸引你？',
+  { id: 7, dimension: '兴趣方向', text: '哪种类型的视频/故事最能吸引您？',
     options: [
       { label: '🌍 探险/旅行/地理纪录片', keywords: ['爱冒险', '爱旅行', '爱地理', '有探索精神'] },
       { label: '🔬 科学实验/发明创造', keywords: ['爱科学', '爱发明', '有好奇心', '喜欢动手'] },
@@ -66,14 +67,14 @@ const questions: Question[] = [
     ]},
 
   // 维度3：成长期待（3题）
-  { id: 8, dimension: '成长期待', text: '你希望将来成为一个什么样的人？',
+  { id: 8, dimension: '成长期待', text: '您希望将来成为一个什么样的人？',
     options: [
       { label: '🧠 有学问、有智慧的人', keywords: ['有学问', '有才华', '爱学习'] },
       { label: '❤️ 善良、乐于助人的人', keywords: ['善良', '有爱心', '乐于助人', '有同理心'] },
       { label: '💪 勇敢、有担当的人', keywords: ['勇敢', '有担当', '有骨气', '有勇气'] },
       { label: '🎨 有创造力、能改变世界的人', keywords: ['有创意', '有想象力', '敢于创新'] },
     ]},
-  { id: 9, dimension: '成长期待', text: '你最佩服哪种品质？',
+  { id: 9, dimension: '成长期待', text: '您最佩服哪种品质？',
     options: [
       { label: '🏔️ 坚持不放弃', keywords: ['有毅力', '有恒心', '长期坚持', '坚持到底'] },
       { label: '🤲 乐于分享、帮助他人', keywords: ['乐于助人', '爱分享', '有爱心'] },
@@ -89,14 +90,14 @@ const questions: Question[] = [
     ]},
 
   // 维度4：个人特质（2题）
-  { id: 11, dimension: '个人特质', text: '你的朋友最常用哪个词形容你？',
+  { id: 11, dimension: '个人特质', text: '您的朋友最常用哪个词形容您？',
     options: [
       { label: '📣 热心肠，爱管闲事', keywords: ['有爱心', '乐于助人', '善良', '有正义感'] },
       { label: '🧠 点子多，鬼主意大王', keywords: ['有创意', '有想象力', '喜欢动手'] },
-      { label: '🛡️ 靠谱，交给你的事放心', keywords: ['负责任', '有责任心', '说到做到', '做事认真'] },
+      { label: '🛡️ 靠谱，交给您的事放心', keywords: ['负责任', '有责任心', '说到做到', '做事认真'] },
       { label: '😄 乐观，什么困难都不怕', keywords: ['乐观', '心态好', '幽默', '自信'] },
     ]},
-  { id: 12, dimension: '个人特质', text: '你更喜欢什么样的学习方式？',
+  { id: 12, dimension: '个人特质', text: '您更喜欢什么样的学习方式？',
     options: [
       { label: '📖 自己读书、琢磨', keywords: ['爱学习', '爱读书', '有钻研精神', '独立'] },
       { label: '👥 和同学一起讨论', keywords: ['喜欢交友', '善于协调'] },
@@ -205,13 +206,13 @@ export default function MatchingPage() {
   // ── Welcome Screen ──
   if (step === 'welcome') {
     return (
-      <div className="min-h-screen gradient-bg flex items-center justify-center px-6">
+      <div className="tools-page min-h-screen gradient-bg flex items-center justify-center px-6">
         <div className="max-w-lg w-full text-center">
           <div className="text-6xl mb-6">🧭</div>
           <h1 className="text-3xl md:text-4xl font-bold mb-4">精神坐标定位器</h1>
           <p className="text-[var(--text-secondary)] leading-relaxed mb-4">
-            12道选择题，帮你从60位古圣先贤中
-            <br />找到和你最"心灵相通"的那一位。
+            12道选择题，帮您从60位古圣先贤中
+            <br />找到和您最"心灵相通"的那一位。
           </p>
           <div className="flex flex-wrap justify-center gap-2 mb-8 text-xs text-[var(--text-secondary)]">
             <span className="tag-pill">🧠 性格特质</span>
@@ -240,7 +241,7 @@ export default function MatchingPage() {
     const hasAnswer = answers[currentQ] !== undefined;
 
     return (
-      <div className="min-h-screen gradient-bg flex items-center justify-center px-6 py-12">
+      <div className="tools-page min-h-screen gradient-bg flex items-center justify-center px-6 py-12">
         <div className="max-w-lg w-full">
           {/* Progress */}
           <div className="flex items-center gap-3 mb-2">
@@ -299,13 +300,13 @@ export default function MatchingPage() {
 
   // ── Result Screen ──
   return (
-    <div className="min-h-screen gradient-bg px-6 py-12">
+    <div className="tools-page min-h-screen gradient-bg px-6 py-12">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <div className="text-6xl mb-4">🌟</div>
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">你的精神坐标已找到！</h1>
+          <h1 className="text-2xl md:text-3xl font-bold mb-2">您的精神坐标已找到！</h1>
           <p className="text-[var(--text-secondary)]">
-            基于你的选择，以下3位先贤与你的精神气质最契合
+            基于您的选择，以下3位先贤与您的精神气质最契合
           </p>
         </div>
 

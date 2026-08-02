@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { sageFigures } from '@/data/tools/sageData';
+import '../tools.css';
 
 const threeQuestions = [
   {
@@ -17,7 +18,7 @@ const threeQuestions = [
     title: '第二问 🤔',
     subtitle: '抉择',
     template: '他人生面临最难抉择时，做出选择的底层原因是什么？',
-    tip: '提示：找人物传记中"两难时刻"。没有标准答案——你的思考比答案更重要。',
+    tip: '提示：找人物传记中"两难时刻"。没有标准答案——您的思考比答案更重要。',
     example: '好的追问："如果是他，他会怎么看待今天的孩子面临的诱惑？"',
   },
   {
@@ -57,7 +58,7 @@ export default function Ai3QPage() {
   // ── Figure Selection Screen ──
   if (!selectedFigure) {
     return (
-      <div className="min-h-screen gradient-bg px-6 py-12">
+      <div className="tools-page min-h-screen gradient-bg px-6 py-12">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
             <div className="text-6xl mb-4">🤖</div>
@@ -124,7 +125,7 @@ export default function Ai3QPage() {
 
   // ── Question Flow ──
   return (
-    <div className="min-h-screen gradient-bg px-6 py-12">
+    <div className="tools-page min-h-screen gradient-bg px-6 py-12">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
@@ -173,7 +174,7 @@ export default function Ai3QPage() {
                 <p className="text-xs text-[var(--text-secondary)]">{threeQuestions[currentStep].example}</p>
               </div>
               <label className="text-sm text-[var(--text-secondary)] mb-2 block">
-                用你自己的话改写这个提问：
+                用您自己的话改写这个提问：
               </label>
               <textarea
                 value={answers[currentStep]}
@@ -208,7 +209,7 @@ export default function Ai3QPage() {
               />
               <div className="mt-2">
                 <label className="text-sm text-[var(--text-secondary)] mb-2 block">
-                  用一句话总结你学到的东西：
+                  用一句话总结您学到的东西：
                 </label>
                 <input
                   type="text"
@@ -256,7 +257,7 @@ export default function Ai3QPage() {
         {/* Summary at the end */}
         {currentStep === 2 && answers.some(a => a.trim()) && (
           <div className="mt-8 p-4 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-accent)]">
-            <h3 className="font-bold text-sm text-[var(--text-accent)] mb-2">📋 你的三问记录</h3>
+            <h3 className="font-bold text-sm text-[var(--text-accent)] mb-2">📋 您的三问记录</h3>
             {threeQuestions.map((q, i) => (
               <div key={q.id} className="mb-2">
                 <p className="text-xs font-semibold text-[var(--text-primary)]">{q.title}</p>

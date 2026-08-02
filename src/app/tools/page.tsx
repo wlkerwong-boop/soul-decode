@@ -1,13 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import './tools.css';
 
 const tools = [
   {
     icon: '🧭',
     title: '精神坐标定位器',
-    subtitle: '趣味问答 · 找到你的专属先贤榜样',
-    desc: '12道选择题，通过生日、性格、兴趣、志向四维匹配，从60位古圣先贤中找到和你最"心灵相通"的那一位。',
+    subtitle: '趣味问答 · 找到您的专属先贤榜样',
+    desc: '12道选择题，通过生日、性格、兴趣、志向四维匹配，从60位古圣先贤中找到和您最"心灵相通"的那一位。',
     href: '/tools/matching',
     color: 'rgba(74, 124, 111, 0.08)',
     borderColor: 'rgba(74, 124, 111, 0.25)',
@@ -77,19 +78,10 @@ const tools = [
 
 export default function ToolsPage() {
   return (
-    <div className="min-h-screen gradient-bg">
-      {/* Nav */}
-      <nav className="glass-nav sticky top-0 z-50 px-6 py-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <Link href="/" className="gradient-text text-xl font-bold tracking-wider">
-            ✦ 灵魂解码
-          </Link>
-          {/* 法藏链接已临时摘除（爸爸 2026-07-27 指令，含家庭私人信息） */}
-        </div>
-      </nav>
+    <div className="tools-page min-h-screen gradient-bg">
 
       {/* Hero */}
-      <section className="px-6 pt-16 pb-8 text-center max-w-4xl mx-auto">
+      <section className="tools-hero px-4">
         <div className="inline-block mb-6">
           <span className="tag-pill text-xs tracking-widest">亲子互动工具包</span>
         </div>
@@ -114,16 +106,16 @@ export default function ToolsPage() {
       </section>
 
       {/* Gold Divider */}
-      <div className="gold-divider max-w-5xl mx-auto mb-12" />
+      <div className="gold-divider tools-container mb-12" />
 
       {/* Tools Grid */}
-      <section className="px-6 pb-12 max-w-5xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-5">
+      <section className="tools-container pb-12">
+        <div className="tools-grid">
           {tools.map((tool) => (
             tool.status === 'ready' ? (
               <Link key={tool.href} href={tool.href}>
                 <div
-                  className="group p-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] hover:border-[var(--text-accent)]/40 transition-all duration-300 cursor-pointer"
+                  className="tool-card group p-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-card-hover)] hover:border-[var(--text-accent)]/40 transition-all duration-300 cursor-pointer"
                   style={{ background: tool.color, borderColor: tool.borderColor }}
                 >
                   <div className="flex items-start justify-between">
@@ -143,7 +135,7 @@ export default function ToolsPage() {
             ) : (
               <div
                 key={tool.href}
-                className="group p-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] opacity-60 cursor-not-allowed"
+                className="tool-card group p-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] opacity-60 cursor-not-allowed"
                 style={{ background: tool.color, borderColor: tool.borderColor }}
               >
                 <div className="flex items-start justify-between">
@@ -165,10 +157,10 @@ export default function ToolsPage() {
       </section>
 
       {/* Gold Divider */}
-      <div className="gold-divider max-w-5xl mx-auto mb-12" />
+      <div className="gold-divider tools-container mb-12" />
 
       {/* Description */}
-      <section className="px-6 pb-12 max-w-3xl mx-auto text-center">
+      <section className="tools-about px-4 pb-12">
         <h2 className="text-lg font-bold mb-4 gradient-text">✦ 关于这些工具</h2>
         <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
           本工具包为「点亮星图·昌宁茶乡精神图谱共建行动」配套设计。<br />
@@ -179,8 +171,8 @@ export default function ToolsPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-[var(--border-color)] py-8 px-6">
-        <div className="max-w-5xl mx-auto text-center text-sm text-[var(--text-secondary)]">
+      <footer className="border-t border-[var(--border-color)] py-8 px-4">
+        <div className="tools-footer text-center text-sm text-[var(--text-secondary)]">
           <p>点亮星图 · 昌宁茶乡精神图谱共建行动</p>
           <p className="mt-1">
             <Link href="/" className="hover:text-[var(--text-accent)] transition-colors opacity-60 hover:opacity-100">

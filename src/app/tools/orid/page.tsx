@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import '../tools.css';
 
 // ── Constants ──
 const TOTAL_DAYS = 7;
@@ -31,32 +32,32 @@ const steps: StepInfo[] = [
     key: 'objective',
     label: 'O·客观事实',
     icon: '👁️',
-    kidQuestion: '今天发生了什么？你看到了什么、听到了什么、做了什么？',
-    parentQuestion: '今天孩子做了什么、说了什么？你观察到了哪些具体行为？',
+    kidQuestion: '今天发生了什么？您看到了什么、听到了什么、做了什么？',
+    parentQuestion: '今天孩子做了什么、说了什么？您观察到了哪些具体行为？',
     placeholder: '例如：今天在草原上徒步了3公里……',
   },
   {
     key: 'reflective',
     label: 'R·感受反应',
     icon: '❤️',
-    kidQuestion: '今天你有什么感受？开心、意外、难过、还是累？',
-    parentQuestion: '今天孩子的情绪状态怎么样？你自己有什么感受？',
+    kidQuestion: '今天您有什么感受？开心、意外、难过、还是累？',
+    parentQuestion: '今天孩子的情绪状态怎么样？您自己有什么感受？',
     placeholder: '例如：刚开始觉得很累，但到山顶看到草原的时候特别开心……',
   },
   {
     key: 'interpretive',
     label: 'I·深层思考',
     icon: '🧠',
-    kidQuestion: '今天这件事让你学到了什么？或者想到了什么？',
-    parentQuestion: '今天孩子的表现说明了什么？你有什么新的发现或感悟？',
+    kidQuestion: '今天这件事让您学到了什么？或者想到了什么？',
+    parentQuestion: '今天孩子的表现说明了什么？您有什么新的发现或感悟？',
     placeholder: '例如：我明白了坚持走完累的路，才能看到好看的风景……',
   },
   {
     key: 'decisional',
     label: 'D·未来行动',
     icon: '🎯',
-    kidQuestion: '接下来你会怎么做？今天的经历有没有改变你的想法？',
-    parentQuestion: '接下来你会怎么支持孩子？今天的经历对你有何启发？',
+    kidQuestion: '接下来您会怎么做？今天的经历有没有改变您的想法？',
+    parentQuestion: '接下来您会怎么支持孩子？今天的经历对您有何启发？',
     placeholder: '例如：以后遇到困难，我会先试着自己走完，再看要不要帮忙……',
   },
 ];
@@ -124,7 +125,7 @@ export default function OridPage() {
 
   // ── Render ──
   return (
-    <div className="min-h-screen gradient-bg px-6 py-12">
+    <div className="tools-page min-h-screen gradient-bg px-6 py-12">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">

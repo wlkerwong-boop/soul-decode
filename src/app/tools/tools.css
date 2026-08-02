@@ -1,0 +1,68 @@
+/* Shared layout for the 点亮星图 activity pages.  The global AppNav owns the
+   navigation; these rules keep the activity content readable at every width. */
+.tools-page {
+  min-height: 100%;
+  padding: calc(var(--navbar-height) + 2.5rem) 0 3rem;
+}
+
+.tools-page .tools-container {
+  width: min(1200px, calc(100% - 3rem));
+  margin-inline: auto;
+}
+
+.tools-page .tools-hero {
+  max-width: 900px;
+  margin: 0 auto 2.5rem;
+  text-align: center;
+}
+
+.tools-page .tools-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.tools-page .tool-card {
+  min-width: 0;
+  min-height: 220px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal) var(--ease-out), border-color var(--duration-normal) var(--ease-out);
+}
+
+.tools-page .tool-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.tools-page .tools-about {
+  max-width: 720px;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.tools-page .tools-footer {
+  max-width: 1200px;
+  width: calc(100% - 3rem);
+  margin-inline: auto;
+}
+
+.tools-page .tools-scroll-row {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) transparent;
+}
+
+@media (max-width: 1023px) {
+  .tools-page .tools-container,
+  .tools-page .tools-footer { width: min(720px, calc(100% - 3rem)); }
+  .tools-page .tools-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .tools-page { padding-top: calc(var(--navbar-height) + 1.5rem); }
+  .tools-page .tools-container,
+  .tools-page .tools-footer { width: calc(100% - 2rem); }
+  .tools-page .tools-hero { margin-bottom: 2rem; }
+  .tools-page .tools-grid { gap: 1rem; }
+  .tools-page .tool-card { min-height: 0; }
+}

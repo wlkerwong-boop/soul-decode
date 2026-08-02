@@ -25,7 +25,7 @@ body[data-site="soulcode"] {
 }
 
 /* The homepage owns the visual navigation; keep the authenticated app nav on inner pages. */
-body[data-site="soulcode"] .soulcode-global-nav { display: none; }
+body.homepage-active .soulcode-global-nav { display: none; }
 
 /* ---- Stella：暖沙 + 珊瑚橘 ---- */
 body[data-site="stella"] {

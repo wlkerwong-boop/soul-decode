@@ -19,6 +19,7 @@ import "./homepage.css";
 export default function HomePage() {
   useEffect(() => {
     document.body.setAttribute("data-site", "soulcode");
+    document.body.classList.add("homepage-active");
     const nav = document.getElementById("nav");
     const onScroll = () => nav?.classList.toggle("scrolled", window.scrollY > 40);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -28,6 +29,7 @@ export default function HomePage() {
     );
     document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
     return () => {
+      document.body.classList.remove("homepage-active");
       window.removeEventListener("scroll", onScroll);
       io.disconnect();
     };
