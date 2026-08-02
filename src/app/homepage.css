@@ -381,15 +381,10 @@ body[data-site="jianji"] .hero-sub {
 }
 .explore-ico svg { width: 20px; height: 20px; }
 .explore-name { font-size: 0.92rem; letter-spacing: 0.06em; white-space: nowrap; }
-.explore-badge {
-  display: inline-block;
-  margin-left: 4px;
-  padding: 2px 7px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  color: var(--accent);
-  font-size: 0.68rem;
-  letter-spacing: 0.04em;
+.explore-desc {
+  color: var(--text-dim);
+  font-size: 0.76rem;
+  line-height: 1.5;
   white-space: nowrap;
 }
 

@@ -146,10 +146,10 @@ export default function HomePage() {
               <span className="explore-ico">📖</span>
               <span className="explore-name">法藏</span>
             </a>
-            <a className="explore-card" href="#">
-              <span className="explore-ico">🌿</span>
-              <span className="explore-name">昌宁活动</span>
-              <span className="explore-badge">即将推出</span>
+            <a className="explore-card" href="/tools">
+              <span className="explore-ico">🌟</span>
+              <span className="explore-name">点亮星图</span>
+              <span className="explore-desc">昌宁茶乡精神图谱共建行动 · 亲子互动工具包</span>
             </a>
           </div>
         </div>

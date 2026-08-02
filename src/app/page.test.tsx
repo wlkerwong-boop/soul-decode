@@ -14,16 +14,14 @@ describe('SoulCode homepage production contract', () => {
     expect(html).toContain('class="about about-text-only reveal"');
   });
 
-  it('uses the real assessment routes and marks Changning as upcoming', () => {
+  it('links the Changning star-map activity to its live tools page', () => {
     const html = renderToStaticMarkup(<HomePage />);
 
-    expect(html).toContain('href="/human-design"');
-    expect(html).toContain('href="/mbti"');
-    expect(html).toContain('href="/compatibility"');
-    expect(html).toContain('昌宁活动');
-    expect(html).toContain('即将推出');
-    expect(html).not.toContain('href="#"><span class="explore-ico">🧠</span><span class="explore-name">大五人格测评');
-    expect(html).not.toContain('href="#"><span class="explore-ico">🔮</span><span class="explore-name">八字命盘');
+    expect(html).toContain('href="/tools"');
+    expect(html).toContain('点亮星图');
+    expect(html).toContain('昌宁茶乡精神图谱共建行动 · 亲子互动工具包');
+    expect(html).not.toContain('即将推出');
+    expect(html).not.toContain('explore-badge');
   });
 
   it('uses 您 throughout the homepage copy', () => {
