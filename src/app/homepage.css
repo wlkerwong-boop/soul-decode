@@ -529,6 +529,12 @@ body[data-site="jianji"] .hero-sub {
   .section-desc { font-size: 0.9rem; margin-top: 10px; padding: 0 8px; }
 
   /* ---- 服务卡片：内容对齐、行高收紧 ---- */
+  .cards {
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
   .card-body { padding: 20px 22px 26px; }
   .card-title { font-size: 1.05rem; letter-spacing: 0.03em; margin-bottom: 8px; }
   .card-text { font-size: 0.88rem; line-height: 1.8; margin-bottom: 14px; }
@@ -544,9 +550,18 @@ body[data-site="jianji"] .hero-sub {
 
   /* ---- 更多探索横栏 ---- */
   .explore-track { margin: 0 -20px; padding: 4px 20px 16px; gap: 12px; }
-  .explore-card { padding: 10px 20px 10px 12px; gap: 10px; }
+  .explore-card {
+    max-width: calc(100vw - 40px);
+    padding: 10px 20px 10px 12px;
+    gap: 10px;
+  }
   .explore-ico { width: 36px; height: 36px; }
   .explore-name { font-size: 0.88rem; letter-spacing: 0.03em; }
+  .explore-desc {
+    max-width: 180px;
+    white-space: normal;
+    line-height: 1.7;
+  }
 
   /* ---- 关于区 ---- */
   .about { gap: 20px; }

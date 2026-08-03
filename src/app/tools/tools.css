@@ -65,4 +65,21 @@
   .tools-page .tools-hero { margin-bottom: 2rem; }
   .tools-page .tools-grid { gap: 1rem; }
   .tools-page .tool-card { min-height: 0; }
+  .tools-page .tool-card h3 {
+    line-height: 1.5;
+    margin-bottom: .4rem;
+  }
+  .tools-page .tool-card p {
+    line-height: 1.9;
+  }
+  .tools-page p,
+  .tools-page li {
+    line-height: 1.9;
+  }
+  .tools-page button,
+  .tools-page input,
+  .tools-page textarea,
+  .tools-page select {
+    line-height: 1.6;
+  }
 }

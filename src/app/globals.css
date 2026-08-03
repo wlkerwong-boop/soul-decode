@@ -942,6 +942,29 @@ section { animation: fade-in-up 0.6s ease-out; }
   .jiugong-print-report { display: none !important; }
 }
 
+/* 移动端统一阅读节奏：中文正文需要更充足的字面间距和行距。 */
+@media (max-width: 640px) {
+  body {
+    line-height: 1.9;
+  }
+  p,
+  li {
+    line-height: 1.9;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    line-height: 1.45;
+  }
+  button,
+  input,
+  textarea,
+  select {
+    line-height: 1.6;
+  }
+}
+
 @media print {
   @page { margin: 12mm 10mm; size: A4; }
   body, html, * {
