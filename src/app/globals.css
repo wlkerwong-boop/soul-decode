@@ -190,9 +190,9 @@ a:hover {
 /* ── Page Background Gradient ── */
 .gradient-bg {
   background:
-    radial-gradient(ellipse 80% 45% at 50% -20%, rgba(212, 175, 55, 0.06), transparent 65%),
-    radial-gradient(ellipse 50% 30% at 80% 95%, rgba(212, 175, 55, 0.04), transparent 55%),
-    radial-gradient(ellipse 40% 25% at 20% 80%, rgba(15, 23, 42, 0.3), transparent 50%),
+    radial-gradient(ellipse 80% 45% at 50% -20%, rgba(212, 175, 55, 0.10), transparent 65%),
+    radial-gradient(ellipse 50% 30% at 80% 95%, rgba(201, 169, 106, 0.08), transparent 55%),
+    radial-gradient(ellipse 40% 25% at 20% 80%, rgba(201, 169, 106, 0.06), transparent 50%),
     var(--color-bg);
 }
 

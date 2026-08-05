@@ -48,9 +48,23 @@ export default function HomePage() {
       </nav>
 
       {/* Hero */}
-      <header className="hero">
-        <div className="hero-bg" style={{ backgroundImage: "url('/assets/homepage/soulcode-hero.png')" }} />
+      <header className="hero hero-light">
+        <div className="hero-bg" />
         <div className="hero-veil" />
+        <div className="hero-deco" aria-hidden="true">
+          <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+            <circle cx="180" cy="140" r="2.2" fill="#C9A96A" opacity="0.5" />
+            <circle cx="420" cy="90" r="1.5" fill="#C9A96A" opacity="0.4" />
+            <circle cx="1180" cy="160" r="2.4" fill="#C9A96A" opacity="0.5" />
+            <circle cx="1320" cy="280" r="1.5" fill="#C9A96A" opacity="0.35" />
+            <circle cx="300" cy="300" r="1.2" fill="#C9A96A" opacity="0.3" />
+            <circle cx="960" cy="120" r="1.8" fill="#C9A96A" opacity="0.45" />
+            <circle cx="80" cy="420" r="1.4" fill="#C9A96A" opacity="0.35" />
+            <circle cx="1360" cy="520" r="1.8" fill="#C9A96A" opacity="0.4" />
+            <path d="M0 720 Q 300 640 560 700 Q 800 750 1080 680 Q 1280 640 1440 690 L 1440 900 L 0 900 Z" fill="#E8DFCF" opacity="0.55" />
+            <path d="M0 780 Q 400 720 760 770 Q 1100 810 1440 760 L 1440 900 L 0 900 Z" fill="#DDD2BD" opacity="0.6" />
+          </svg>
+        </div>
         <div className="hero-content">
           <p className="hero-kicker">SOULCODE · 灵魂解码</p>
           <h1 className="hero-title">解码你的生命蓝图</h1>
@@ -98,7 +112,7 @@ export default function HomePage() {
       </section>
 
       {/* 报告预览 */}
-      <section className="section" id="report" style={{ background: "var(--bg-soft)" }}>
+      <section className="section report-golden" id="report">
         <div className="section-inner">
           <div className="report">
             <div className="report-img reveal">

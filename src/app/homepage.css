@@ -11,17 +11,45 @@
   --maxw: 1100px;
 }
 
-/* ---- SoulCode：深靛蓝 + 暖金 ---- */
+/* ---- SoulCode：米白暖调 + 深金（2026-08-05 浅色化） ---- */
 body[data-site="soulcode"] {
-  --bg: #0B1120;
-  --bg-soft: #131B2E;
-  --surface: rgba(255, 255, 255, 0.045);
-  --border: rgba(212, 175, 55, 0.22);
-  --accent: #D4AF37;
-  --accent-soft: rgba(212, 175, 55, 0.12);
-  --text: #E9EDF5;
-  --text-dim: rgba(233, 237, 245, 0.66);
-  --btn-text: #0B1120;
+  --bg: #FBF7F0;
+  --bg-soft: #F5EDE0;
+  --surface: rgba(255, 255, 255, 0.85);
+  --border: rgba(166, 138, 30, 0.25);
+  --accent: #A8843C;
+  --accent-soft: rgba(168, 132, 60, 0.12);
+  --text: #2B2620;
+  --text-dim: rgba(43, 38, 32, 0.64);
+  --btn-text: #2B2620;
+  /* 覆盖 globals :root 深色变量（保证浅色全局生效） */
+  --color-bg: #FBF7F0;
+  --color-bg-alt: #F5EDE0;
+  --color-bg-card: rgba(255, 255, 255, 0.9);
+  --color-text: #2B2620;
+  --color-text-muted: #5C554A;
+  --color-text-dim: #8A8072;
+  --color-border: rgba(43, 38, 32, 0.10);
+  --color-border-hover: rgba(168, 132, 60, 0.4);
+  --color-navbar-bg: rgba(251, 247, 240, 0.72);
+  --color-accent: #A8843C;
+  --color-accent-light: #C5A332;
+  --color-accent-dark: #7A5F14;
+  --color-primary: #2B2620;
+  --color-primary-light: #3D3A35;
+  --color-primary-dark: #1A1713;
+  --color-gold: #A8843C;
+  --color-gold-light: #C5A332;
+  --color-gold-dark: #7A5F14;
+  --text-inverse: #FBF7F0;
+  --border-light: rgba(43, 38, 32, 0.06);
+  --bg-highlight: rgba(168, 132, 60, 0.10);
+  --shadow-xs: 0 1px 2px rgba(43, 38, 32, 0.05);
+  --shadow-sm: 0 1px 3px rgba(43, 38, 32, 0.06);
+  --shadow-md: 0 4px 12px rgba(43, 38, 32, 0.08);
+  --shadow-lg: 0 10px 30px rgba(43, 38, 32, 0.10);
+  --shadow-xl: 0 20px 50px rgba(43, 38, 32, 0.12);
+  --glow-gold: rgba(168, 132, 60, 0.12);
 }
 
 /* The homepage owns the visual navigation; keep the authenticated app nav on inner pages. */
@@ -202,6 +230,71 @@ body[data-site="jianji"] .hero-sub {
   z-index: 2;
   animation: bob 2.4s var(--ease) infinite;
 }
+
+/* ============ 浅色 Hero（hero-light，2026-08-05 新增） ============ */
+.hero-light .hero-bg {
+  background-image: url('/assets/homepage/hero-light-bg.jpg');
+  background-size: cover;
+  background-position: center 30%;
+  transform: scale(1.02);
+}
+body[data-site="soulcode"] .hero-light .hero-veil {
+  background: linear-gradient(
+    180deg,
+    rgba(251, 247, 240, 0.10) 0%,
+    rgba(251, 247, 240, 0.38) 45%,
+    rgba(251, 247, 240, 0.82) 82%,
+    #FBF7F0 100%
+  );
+}
+.hero-light .hero-deco {
+  display: none;
+}
+.hero-light .hero-content { z-index: 2; }
+.hero-light .hero-kicker {
+  color: #8A6D2F;
+  text-shadow: 0 1px 14px rgba(250, 246, 239, 0.95);
+}
+.hero-light .hero-title {
+  color: #2B2620;
+  text-shadow: 0 2px 22px rgba(250, 246, 239, 0.95), 0 1px 4px rgba(201, 169, 106, 0.4);
+}
+.hero-light .hero-sub {
+  color: #4A443C;
+  text-shadow: 0 1px 12px rgba(250, 246, 239, 0.9);
+}
+.hero-light .hero-cta {
+  background: linear-gradient(180deg, #D4B87E 0%, #C9A96A 100%);
+  color: #2B2620;
+  box-shadow: 0 10px 30px rgba(201, 169, 106, 0.45);
+}
+.hero-light .hero-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(201, 169, 106, 0.55);
+}
+.hero-light .hero-note {
+  color: #5C554A;
+  text-shadow: 0 1px 10px rgba(250, 246, 239, 0.9);
+}
+.hero-light .hero-scroll {
+  color: #4A443C;
+  text-shadow: 0 1px 10px rgba(250, 246, 239, 0.9);
+}
+
+/* ============ 报告预览区金色光柱背景（2026-08-05） ============ */
+.report-golden {
+  position: relative;
+  background: var(--bg-soft);
+}
+.report-golden::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/assets/homepage/section-golden-rays.jpg') center / cover no-repeat;
+  opacity: 0.22;
+  pointer-events: none;
+}
+.report-golden .section-inner { position: relative; z-index: 1; }
 @keyframes bob {
   0%, 100% { transform: translate(-50%, 0); opacity: 0.55; }
   50% { transform: translate(-50%, 8px); opacity: 1; }
