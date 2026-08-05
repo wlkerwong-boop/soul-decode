@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { buildCompatibilityPersonPayload, buildCompatibilitySegments, consumeSseChunk } from './compatibility-depth';
 
 const members = [
-  { label: '家长', age: 44, bazi: '壬戌 庚戌 乙亥 辛巳', elementDistribution: { 木: 1 }, hd: { type: 'Projector', profile: '3/6', authority: 'Splenic', channels: ['18-58'] } },
-  { label: '孩子1', age: 11, bazi: '乙未 辛巳 辛亥 戊戌', elementDistribution: { 金: 2 }, hd: { type: 'Projector', profile: '3/6', authority: 'Splenic', channels: ['28-38'] } },
+  { label: '家长', age: 44, bazi: '壬戌 庚戌 乙亥 辛巳', elementDistribution: { 木: 1, 金: 0 }, hd: { type: 'Projector', profile: '3/6', authority: 'Splenic', channels: ['18-58'] } },
+  { label: '孩子1', age: 11, bazi: '乙未 辛巳 辛亥 戊戌', elementDistribution: { 木: 0, 金: 2 }, hd: { type: 'Projector', profile: '3/6', authority: 'Splenic', channels: ['28-38'] } },
 ];
 
 describe('compatibility depth prompt', () => {

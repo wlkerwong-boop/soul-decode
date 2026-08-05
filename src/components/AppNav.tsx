@@ -26,7 +26,7 @@ export default function AppNav() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const displayName = user?.nickname || (user?.phone ? user.phone.slice(0, 3) + '****' + user.phone.slice(-4) : '');
+  const displayName = user?.nickname || user?.email || '';
   const handleLogout = () => { logout(); setMenuOpen(false); };
 
   return (

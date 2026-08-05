@@ -1,164 +1,174 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
-import { canUseEmergencyCode } from '@/lib/auth-policy';
-
-async function sha256(str: string): Promise<string> {
-  const data = new TextEncoder().encode(str);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
+import { normalizeEmail, translateAuthError } from '@/lib/email-auth';
+import { toAppUser, type AppUser } from '@/lib/auth-user';
+import { createClient } from '@/lib/supabase/client';
 
 export const USER_STORAGE_KEY = 'soul_decode_user';
 
-export interface User {
-  phone: string;
-  nickname: string;
-  registerTime: string;
-  loginTime: string;
+interface AuthResult {
+  ok: boolean;
+  message?: string;
+  requiresEmailVerification?: boolean;
 }
 
 interface AuthContextValue {
-  user: User | null;
+  user: AppUser | null;
   isLoading: boolean;
   isLoggedIn: boolean;
-  login: (phone: string, code: string) => Promise<{ ok: boolean; message?: string }>;
-  register: (phone: string, code: string, nickname: string) => Promise<{ ok: boolean; message?: string }>;
-  logout: () => void;
-  updateNickname: (nickname: string) => void;
+  isConfigured: boolean;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  register: (email: string, password: string, nickname: string) => Promise<AuthResult>;
+  resendVerification: (email: string) => Promise<AuthResult>;
+  logout: () => Promise<void>;
+  updateNickname: (nickname: string) => Promise<AuthResult>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function isValidPhone(phone: string): boolean {
-  return /^1[3-9]\d{9}$/.test(phone.replace(/\s/g, ''));
-}
-
-function normalizePhone(phone: string): string {
-  return phone.replace(/\s/g, '');
-}
-
-function loadUserFromStorage(): User | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = localStorage.getItem(USER_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed.phone || !parsed.nickname) return null;
-    return parsed as User;
-  } catch {
-    return null;
-  }
-}
-
-function saveUserToStorage(user: User): void {
+function saveCompatibilityUser(user: AppUser | null) {
   if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
-  } catch {
-    // ignore storage errors
-  }
+  if (user) localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+  else localStorage.removeItem(USER_STORAGE_KEY);
+}
+
+function emailRedirectTo() {
+  return `${window.location.origin}/auth/callback?next=/my`;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const supabase = useMemo(() => createClient(), []);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setUser(loadUserFromStorage());
-    setIsLoading(false);
-  }, []);
-
-  const login = useCallback(async (phone: string, code: string) => {
-    const normalized = normalizePhone(phone);
-    if (!isValidPhone(normalized)) {
-      return { ok: false, message: '请输入有效的11位手机号' };
-    }
-    const codeHash = await sha256(code);
-    if (!canUseEmergencyCode(normalized, codeHash)) {
-      return { ok: false, message: '账号登录正在升级；人生总览无需登录，可直接排盘' };
+    if (!supabase) {
+      setIsLoading(false);
+      return;
     }
 
-    // Auto-register if not found (seamless UX)
-    const existing = loadUserFromStorage();
-    if (existing && existing.phone === normalized) {
-      const updated: User = {
-        ...existing,
-        loginTime: new Date().toISOString(),
-      };
-      saveUserToStorage(updated);
-      setUser(updated);
-      return { ok: true };
-    }
+    let active = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (!active) return;
+      const nextUser = data.user ? toAppUser(data.user) : null;
+      setUser(nextUser);
+      saveCompatibilityUser(nextUser);
+      setIsLoading(false);
+    });
 
-    // Auto-create user on first login
-    const now = new Date().toISOString();
-    const newUser: User = {
-      phone: normalized,
-      nickname: normalized.slice(0, 3) + '****' + normalized.slice(-4),
-      registerTime: now,
-      loginTime: now,
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const nextUser = session?.user ? toAppUser(session.user) : null;
+      setUser(nextUser);
+      saveCompatibilityUser(nextUser);
+      setIsLoading(false);
+    });
+
+    return () => {
+      active = false;
+      authListener.subscription.unsubscribe();
     };
-    saveUserToStorage(newUser);
-    setUser(newUser);
+  }, [supabase]);
+
+  const login = useCallback(async (email: string, password: string): Promise<AuthResult> => {
+    if (!supabase) return { ok: false, message: '登录服务尚未配置' };
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: normalizeEmail(email),
+      password,
+    });
+    if (error) return { ok: false, message: translateAuthError(error.message || error.code || '') };
+
+    const nextUser = data.user ? toAppUser(data.user) : null;
+    setUser(nextUser);
+    saveCompatibilityUser(nextUser);
     return { ok: true };
-  }, []);
+  }, [supabase]);
 
-  const register = useCallback(async (phone: string, code: string, nickname: string) => {
-    const normalized = normalizePhone(phone);
-    const trimmedNickname = nickname.trim();
+  const register = useCallback(async (
+    email: string,
+    password: string,
+    nickname: string
+  ): Promise<AuthResult> => {
+    if (!supabase) return { ok: false, message: '注册服务尚未配置' };
 
-    if (!isValidPhone(normalized)) {
-      return { ok: false, message: '请输入有效的11位手机号' };
+    const { data, error } = await supabase.auth.signUp({
+      email: normalizeEmail(email),
+      password,
+      options: {
+        emailRedirectTo: emailRedirectTo(),
+        data: {
+          nickname: nickname.trim(),
+          source_site: 'soulcode',
+        },
+      },
+    });
+
+    if (error) return { ok: false, message: translateAuthError(error.message || error.code || '') };
+    if (data.user?.identities?.length === 0) {
+      return { ok: false, message: '该邮箱已注册，请直接登录' };
     }
-    const codeHash = await sha256(code);
-    if (!canUseEmergencyCode(normalized, codeHash)) {
-      return { ok: false, message: '账号注册正在升级；人生总览无需登录，可直接排盘' };
-    }
-    if (!trimmedNickname || trimmedNickname.length < 2 || trimmedNickname.length > 20) {
+
+    return {
+      ok: true,
+      requiresEmailVerification: !data.session,
+    };
+  }, [supabase]);
+
+  const resendVerification = useCallback(async (email: string): Promise<AuthResult> => {
+    if (!supabase) return { ok: false, message: '验证邮件服务尚未配置' };
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: normalizeEmail(email),
+      options: { emailRedirectTo: emailRedirectTo() },
+    });
+    return error
+      ? { ok: false, message: translateAuthError(error.message || error.code || '') }
+      : { ok: true };
+  }, [supabase]);
+
+  const logout = useCallback(async () => {
+    if (supabase) await supabase.auth.signOut();
+    saveCompatibilityUser(null);
+    setUser(null);
+  }, [supabase]);
+
+  const updateNickname = useCallback(async (nickname: string): Promise<AuthResult> => {
+    const trimmed = nickname.trim();
+    if (!supabase || !user || trimmed.length < 2 || trimmed.length > 20) {
       return { ok: false, message: '昵称长度需在 2-20 个字符之间' };
     }
-
-    const existing = loadUserFromStorage();
-    if (existing && existing.phone === normalized) {
-      return { ok: false, message: '该手机号已注册，请直接登录' };
-    }
-
-    const now = new Date().toISOString();
-    const newUser: User = {
-      phone: normalized,
-      nickname: trimmedNickname,
-      registerTime: now,
-      loginTime: now,
-    };
-    saveUserToStorage(newUser);
-    setUser(newUser);
+    const { data, error } = await supabase.auth.updateUser({ data: { nickname: trimmed } });
+    if (error) return { ok: false, message: translateAuthError(error.message || error.code || '') };
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ nickname: trimmed })
+      .eq('auth_id', data.user.id);
+    if (profileError) return { ok: false, message: '昵称暂时无法保存，请稍后再试' };
+    const nextUser = toAppUser(data.user);
+    setUser(nextUser);
+    saveCompatibilityUser(nextUser);
     return { ok: true };
-  }, []);
-
-  const logout = useCallback(() => {
-    if (typeof window === 'undefined') return;
-    localStorage.removeItem(USER_STORAGE_KEY);
-    localStorage.removeItem('last_master_report');
-    setUser(null);
-  }, []);
-
-  const updateNickname = useCallback((nickname: string) => {
-    const trimmed = nickname.trim();
-    if (!user || !trimmed || trimmed.length < 2 || trimmed.length > 20) return;
-    const updated: User = { ...user, nickname: trimmed };
-    saveUserToStorage(updated);
-    setUser(updated);
-  }, [user]);
+  }, [supabase, user]);
 
   return (
     <AuthContext.Provider
       value={{
         user,
         isLoading,
-        isLoggedIn: !!user,
+        isLoggedIn: Boolean(user),
+        isConfigured: Boolean(supabase),
         login,
         register,
+        resendVerification,
         logout,
         updateNickname,
       }}
@@ -170,8 +180,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within an AuthProvider');
   return context;
 }

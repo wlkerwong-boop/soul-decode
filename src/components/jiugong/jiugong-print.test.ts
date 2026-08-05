@@ -33,13 +33,13 @@ describe('jiugong print report', () => {
     expect(tabsSource).not.toContain('jiugong-print-report hidden');
     expect(globalCss).toContain('.jiugong-print-report { display: none !important; }');
     expect(globalCss).toMatch(
-      /\.jiugong-print-report,\s*\.jiugong-print-report \*\s*\{[^}]*animation:\s*none\s*!important[^}]*opacity:\s*1\s*!important/s,
+      /\.jiugong-print-report,\s*\.jiugong-print-report \*\s*\{[^}]*animation:\s*none\s*!important[^}]*opacity:\s*1\s*!important/,
     );
     expect(globalCss).toMatch(
-      /\.jiugong-print-report\s+section\s*\{[^}]*display:\s*block\s*!important[^}]*break-inside:\s*auto\s*!important/s,
+      /\.jiugong-print-report\s+section\s*\{[^}]*display:\s*block\s*!important[^}]*break-inside:\s*auto\s*!important/,
     );
     expect(globalCss).toMatch(
-      /\.jiugong-print-report\s+\[data-jiugong-years\]\s*\{[^}]*max-height:\s*none\s*!important[^}]*overflow:\s*visible\s*!important/s,
+      /\.jiugong-print-report\s+\[data-jiugong-years\]\s*\{[^}]*max-height:\s*none\s*!important[^}]*overflow:\s*visible\s*!important/,
     );
   });
 });

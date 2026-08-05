@@ -17,18 +17,18 @@ export default function ShareReferral() {
     if (!user) return;
     const extraTokens = getExtraFollowUps();
     setExtra(extraTokens);
-    const existingCode = getMyShareCode(user.phone);
+    const existingCode = getMyShareCode(user.email);
     if (existingCode) {
       setShareCode(existingCode);
-      setStats(getShareStats(user.phone));
+      setStats(getShareStats(user.email));
     }
   }, [user]);
 
   const handleGenerateCode = () => {
     if (!user) return;
-    const code = createShareRecord(user.phone);
+    const code = createShareRecord(user.email);
     setShareCode(code);
-    setStats(getShareStats(user.phone));
+    setStats(getShareStats(user.email));
   };
 
   const handleCopy = async () => {
@@ -44,11 +44,11 @@ export default function ShareReferral() {
 
   const handleRedeem = () => {
     if (!user || !referralInput.trim()) return;
-    const result = useReferralCode(referralInput.trim(), user.phone);
+    const result = useReferralCode(referralInput.trim(), user.email);
     setReferralResult(result);
     if (result.ok) {
       setExtra(getExtraFollowUps());
-      setStats(getShareStats(user.phone));
+      setStats(getShareStats(user.email));
     }
   };
 

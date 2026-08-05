@@ -23,7 +23,7 @@ export default function Nav() {
     setMobileNavOpen(false);
   };
 
-  const displayName = user?.nickname || (user?.phone ? user.phone.slice(0, 3) + '****' + user.phone.slice(-4) : '');
+  const displayName = user?.nickname || user?.email || '';
 
   const navLinks = [
     { href: '/master-report', label: '✦ 人生总览' },
