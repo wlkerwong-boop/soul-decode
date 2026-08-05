@@ -158,6 +158,7 @@ export default function HomePage() {
             <a className="explore-card" href="/dharma">
               <span className="explore-ico">📖</span>
               <span className="explore-name">法藏</span>
+              <span className="explore-badge">即将上线</span>
             </a>
             <a className="explore-card" href="/tools">
               <span className="explore-ico">🌟</span>

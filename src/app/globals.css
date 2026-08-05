@@ -160,6 +160,60 @@ body {
   padding: 0;
 }
 
+/* ── SoulCode 全站浅色主题（米白暖调 + 深金，2026-08-06 全站生效）── */
+body[data-site="soulcode"] {
+  --bg: #FBF7F0;
+  --bg-soft: #F5EDE0;
+  --surface: rgba(255, 255, 255, 0.85);
+  --border: rgba(166, 138, 30, 0.25);
+  --accent: #A8843C;
+  --accent-soft: rgba(168, 132, 60, 0.12);
+  --text: #2B2620;
+  --text-dim: rgba(43, 38, 32, 0.64);
+  --btn-text: #2B2620;
+  /* 覆盖 :root / [data-theme] 深色变量 */
+  --color-bg: #FBF7F0;
+  --color-bg-alt: #F5EDE0;
+  --color-bg-card: rgba(255, 255, 255, 0.9);
+  --color-text: #2B2620;
+  --color-text-muted: #5C554A;
+  --color-text-dim: #8A8072;
+  --color-border: rgba(43, 38, 32, 0.10);
+  --color-border-hover: rgba(168, 132, 60, 0.4);
+  --color-navbar-bg: rgba(251, 247, 240, 0.72);
+  --color-accent: #A8843C;
+  --color-accent-light: #C5A332;
+  --color-accent-dark: #7A5F14;
+  --color-primary: #2B2620;
+  --color-primary-light: #3D3A35;
+  --color-primary-dark: #1A1713;
+  --color-gold: #A8843C;
+  --color-gold-light: #C5A332;
+  --color-gold-dark: #7A5F14;
+  --text-inverse: #FBF7F0;
+  --border-light: rgba(43, 38, 32, 0.06);
+  --bg-highlight: rgba(168, 132, 60, 0.10);
+  /* :root 别名直接覆盖（继承时已解析，必须逐一定义） */
+  --bg-page: #FBF7F0;
+  --bg-card: rgba(255, 255, 255, 0.9);
+  --bg-card-hover: #F5EDE0;
+  --bg-section-alt: #F5EDE0;
+  --text-primary: #2B2620;
+  --text-secondary: #5C554A;
+  --text-tertiary: #8A8072;
+  --text-accent: #A8843C;
+  --text-accent-light: #C5A332;
+  --text-accent-gold: #A8843C;
+  --border-color: rgba(43, 38, 32, 0.10);
+  --border-accent: rgba(168, 132, 60, 0.35);
+  --shadow-xs: 0 1px 2px rgba(43, 38, 32, 0.05);
+  --shadow-sm: 0 1px 3px rgba(43, 38, 32, 0.06);
+  --shadow-md: 0 4px 12px rgba(43, 38, 32, 0.08);
+  --shadow-lg: 0 10px 30px rgba(43, 38, 32, 0.10);
+  --shadow-xl: 0 20px 50px rgba(43, 38, 32, 0.12);
+  --glow-gold: rgba(168, 132, 60, 0.12);
+}
+
 /* ── Selection ── */
 ::selection {
   background: var(--color-accent);

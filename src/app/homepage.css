@@ -11,46 +11,7 @@
   --maxw: 1100px;
 }
 
-/* ---- SoulCode：米白暖调 + 深金（2026-08-05 浅色化） ---- */
-body[data-site="soulcode"] {
-  --bg: #FBF7F0;
-  --bg-soft: #F5EDE0;
-  --surface: rgba(255, 255, 255, 0.85);
-  --border: rgba(166, 138, 30, 0.25);
-  --accent: #A8843C;
-  --accent-soft: rgba(168, 132, 60, 0.12);
-  --text: #2B2620;
-  --text-dim: rgba(43, 38, 32, 0.64);
-  --btn-text: #2B2620;
-  /* 覆盖 globals :root 深色变量（保证浅色全局生效） */
-  --color-bg: #FBF7F0;
-  --color-bg-alt: #F5EDE0;
-  --color-bg-card: rgba(255, 255, 255, 0.9);
-  --color-text: #2B2620;
-  --color-text-muted: #5C554A;
-  --color-text-dim: #8A8072;
-  --color-border: rgba(43, 38, 32, 0.10);
-  --color-border-hover: rgba(168, 132, 60, 0.4);
-  --color-navbar-bg: rgba(251, 247, 240, 0.72);
-  --color-accent: #A8843C;
-  --color-accent-light: #C5A332;
-  --color-accent-dark: #7A5F14;
-  --color-primary: #2B2620;
-  --color-primary-light: #3D3A35;
-  --color-primary-dark: #1A1713;
-  --color-gold: #A8843C;
-  --color-gold-light: #C5A332;
-  --color-gold-dark: #7A5F14;
-  --text-inverse: #FBF7F0;
-  --border-light: rgba(43, 38, 32, 0.06);
-  --bg-highlight: rgba(168, 132, 60, 0.10);
-  --shadow-xs: 0 1px 2px rgba(43, 38, 32, 0.05);
-  --shadow-sm: 0 1px 3px rgba(43, 38, 32, 0.06);
-  --shadow-md: 0 4px 12px rgba(43, 38, 32, 0.08);
-  --shadow-lg: 0 10px 30px rgba(43, 38, 32, 0.10);
-  --shadow-xl: 0 20px 50px rgba(43, 38, 32, 0.12);
-  --glow-gold: rgba(168, 132, 60, 0.12);
-}
+/* ---- 主题变量已迁移至 globals.css body[data-site="soulcode"]（全站生效） ---- */
 
 /* The homepage owns the visual navigation; keep the authenticated app nav on inner pages. */
 body.homepage-active .soulcode-global-nav { display: none; }
