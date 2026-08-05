@@ -52,10 +52,10 @@ export default function HomePage() {
         <div className="hero-bg" style={{ backgroundImage: "url('/assets/homepage/soulcode-hero.png')" }} />
         <div className="hero-veil" />
         <div className="hero-content">
-          <p className="hero-kicker">七系统融合 · AI 深度解读</p>
-          <h1 className="hero-title">7 大古老系统，1 份只属于您的报告</h1>
-          <p className="hero-sub">八字 · 人类图 · 占星 · 紫微斗数 · 五运六气 · MBTI · 中医体质——七个维度交叉印证，AI 深度融合解读。不是七份报告，是一份完整的您。</p>
-          <a className="hero-cta" href="/master-report">免费排盘，看看您的出厂配置 →</a>
+          <p className="hero-kicker">SOULCODE · 灵魂解码</p>
+          <h1 className="hero-title">解码你的生命蓝图</h1>
+          <p className="hero-sub">七大系统融合，看见独一无二的你</p>
+          <a className="hero-cta" href="/master-report">生成我的报告</a>
           <p className="hero-note">🔒 出生信息仅用于排盘，绝不外泄</p>
         </div>
         <div className="hero-scroll">向下探索</div>
@@ -72,7 +72,7 @@ export default function HomePage() {
             <a className="card reveal" href="/master-report">
               <div className="card-img" style={{ backgroundImage: "url('/assets/homepage/card-seven-systems.png')" }} />
               <div className="card-body">
-                <h3 className="card-title">人生总览</h3>
+                <h3 className="card-title">七系统融合报告</h3>
                 <p className="card-text">七个维度交叉印证，生成您的专属生命蓝图。</p>
                 <span className="card-link">了解更多 <span>→</span></span>
               </div>
@@ -88,7 +88,7 @@ export default function HomePage() {
             <a className="card reveal" href="/human-design">
               <div className="card-img" style={{ backgroundImage: "url('/assets/homepage/card-assessment.png')" }} />
               <div className="card-body">
-                <h3 className="card-title">人类图排盘</h3>
+                <h3 className="card-title">单项测评</h3>
                 <p className="card-text">从一个问题开始，轻轻推开自我认知的门。</p>
                 <span className="card-link">了解更多 <span>→</span></span>
               </div>
@@ -107,14 +107,11 @@ export default function HomePage() {
             </div>
             <div className="report-copy reveal">
               <p className="section-kicker">报告预览</p>
-              <h2 className="report-title">一份让您感到“被看穿”的灵魂级分析</h2>
-              <ul className="report-text report-list">
-                <li>✦ <strong>核心天赋：</strong>看见您与生俱来的优势，以及最适合发挥它们的方向。</li>
-                <li>✦ <strong>人生角色：</strong>理解您在不同关系与人生阶段中的独特位置。</li>
-                <li>✦ <strong>能量曲线：</strong>读懂您的能量起伏，知道何时蓄力、何时行动。</li>
-                <li>✦ <strong>决策策略：</strong>找到符合您内在机制的选择方式，不再被外界声音牵引。</li>
-              </ul>
-              <a className="report-cta" href="/master-report">深度图文报告，含七大系统交叉分析 →</a>
+              <h2 className="report-title">一本只关于您的书</h2>
+              <p className="report-text">
+                七个系统，七次凝视。当星盘、九宫与心理测评在同一张图上交汇，您会第一次完整地看见自己。手机上也能一键下载 PDF，随时翻阅。
+              </p>
+              <a className="report-cta" href="/master-report">查看完整报告</a>
             </div>
           </div>
         </div>
@@ -162,11 +159,14 @@ export default function HomePage() {
         <div className="section-inner">
           <div className="section-head reveal">
             <p className="section-kicker">关于</p>
-          <h2 className="section-title">关于光明喜舍</h2>
-        </div>
-          <div className="about about-text-only reveal">
+            <h2 className="section-title">关于光明喜舍</h2>
+          </div>
+          <div className="about reveal">
+            <div className="about-avatar">
+              <span className="text-3xl" role="img" aria-label="创始人头像">🧘</span>
+            </div>
             <div>
-              <p className="about-text">2016 年起深入研习心理学人格理论、东方传统文化与人类图体系。多维度测评融合并非简单堆叠——心理学为基、人类图为骨、传统文化为脉。多个维度交叉印证，才是一份真正完整的自我认知报告。目前在大理 · 银桥持续深耕。</p>
+              <p className="about-text">2016 年起深入研习心理学人格理论、东方传统文化与人类图体系。心理学为基、人类图为骨、传统文化为脉，让多个维度彼此印证，呈现一份真正完整的自我认知报告。目前在大理 · 银桥持续深耕。</p>
             </div>
           </div>
         </div>
