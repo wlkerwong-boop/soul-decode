@@ -13,10 +13,19 @@
  * 6. 下方链接 href 为占位，替换为项目真实路由
  */
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "./homepage.css";
 
 export default function HomePage() {
+  const [dailyQuote, setDailyQuote] = useState<{ quote: string; source: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/daily-quote")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d?.quote && setDailyQuote({ quote: d.quote, source: d.source }))
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
     document.body.setAttribute("data-site", "soulcode");
     document.body.classList.add("homepage-active");
@@ -131,6 +140,19 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 每日一言 */}
+      {dailyQuote && (
+        <section className="section quote-section">
+          <div className="section-inner">
+            <div className="quote-card reveal">
+              <div className="quote-mark" aria-hidden="true">“</div>
+              <p className="quote-text">{dailyQuote.quote}</p>
+              <p className="quote-source">—— 金刚老师 · {dailyQuote.source}</p>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* 更多探索 */}
       <section className="section">
         <div className="section-inner">
@@ -140,28 +162,40 @@ export default function HomePage() {
           </div>
           <div className="explore-track reveal">
             <a className="explore-card" href="/mbti">
-              <span className="explore-ico">🧠</span>
+              <span className="explore-ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 4a6 6 0 0 1 6 6c0 2.6-1.4 4.4-3 5.4V18h-6v-2.6C7.4 14.4 6 12.6 6 10a6 6 0 0 1 6-6z" /><path d="M9.5 9l1.6 1.6L14 8M9.5 13.5l1.6-1.6L14 14.5" /></svg>
+              </span>
               <span className="explore-name">大五人格测评</span>
             </a>
             <a className="explore-card" href="/human-design">
-              <span className="explore-ico">🧬</span>
+              <span className="explore-ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" /></svg>
+              </span>
               <span className="explore-name">人类图解析</span>
             </a>
             <a className="explore-card" href="/human-design">
-              <span className="explore-ico">🔮</span>
+              <span className="explore-ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="12" cy="12" r="9" /><path d="M12 3v18M3 12h18" opacity="0.65" /></svg>
+              </span>
               <span className="explore-name">八字命盘</span>
             </a>
             <a className="explore-card" href="/compatibility">
-              <span className="explore-ico">❤️</span>
+              <span className="explore-ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="8" cy="12" r="4" /><circle cx="16" cy="12" r="4" /></svg>
+              </span>
               <span className="explore-name">关系合盘</span>
             </a>
             <a className="explore-card" href="/dharma">
-              <span className="explore-ico">📖</span>
+              <span className="explore-ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z" /><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5" /></svg>
+              </span>
               <span className="explore-name">法藏</span>
               <span className="explore-badge">即将上线</span>
             </a>
             <a className="explore-card" href="/tools">
-              <span className="explore-ico">🌟</span>
+              <span className="explore-ico">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z" /></svg>
+              </span>
               <span className="explore-name">点亮星图</span>
               <span className="explore-desc">昌宁茶乡精神图谱共建行动 · 亲子互动工具包</span>
             </a>

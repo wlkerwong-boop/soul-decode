@@ -242,6 +242,41 @@ body[data-site="soulcode"] .hero-light .hero-veil {
   text-shadow: 0 1px 10px rgba(250, 246, 239, 0.9);
 }
 
+/* ============ 每日一言（2026-08-06 新增） ============ */
+.quote-section { padding-top: 0; }
+.quote-card {
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 48px 40px;
+  text-align: center;
+}
+.quote-mark {
+  font-family: Georgia, "Songti SC", serif;
+  font-size: 3.6rem;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.5;
+  margin-bottom: 10px;
+}
+.quote-text {
+  font-size: 1.1rem;
+  line-height: 2;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+.quote-source {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+@media (max-width: 640px) {
+  .quote-card { padding: 36px 24px; }
+  .quote-text { font-size: 1rem; }
+}
+
 /* ============ 报告预览区金色光柱背景（2026-08-05） ============ */
 .report-golden {
   position: relative;
