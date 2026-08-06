@@ -265,7 +265,7 @@ export default function MasterPage() {
             </div>
 
             {/* 出生日期 — 4 字段 */}
-            <div className="grid grid-cols-4 gap-2 mb-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
               <select value={year} onChange={e=>setYear(e.target.value)}
                 className="input-jade text-sm py-3 px-1 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
                 <option value="">年份</option>
