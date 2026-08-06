@@ -45,3 +45,5 @@ next-env.d.ts.env.local
 test_*
 ephemeris/
 .se1
+.next.old-0727b/
+tools-screenshots/
