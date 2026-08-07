@@ -1122,3 +1122,15 @@ section { animation: fade-in-up 0.6s ease-out; }
     animation: none !important;
   }
 }
+
+/* ===== 布局兜底（防扩展注入破坏 @layer 顺序导致工具类失效）=====
+   非 layer 规则优先级高于所有 @layer 规则——无论页面被什么扩展/脚本
+   注入 @layer 声明，以下核心布局类都保持生效。 */
+.mx-auto { margin-inline: auto; }
+.text-center { text-align: center; }
+.w-full { width: 100%; }
+.flex { display: flex; }
+.hidden { display: none; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.grid { display: grid; }
