@@ -214,13 +214,37 @@ export default function HumanDesignPage() {
 
   return (
     <div className="py-8 md:py-16 px-4 max-w-5xl mx-auto">
-      <div className="text-center mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold gradient-text mb-2">人类图 · Human Design</h1>
-        <p className="text-sm text-[var(--text-secondary)]">输入出生信息，生成你的专属能量地图</p>
+      <div className="text-center mb-12 md:mb-16">
+        <p className="text-[10px] md:text-[11px] tracking-[0.4em] uppercase text-[var(--text-accent)] opacity-70 mb-4 font-medium">Human Design</p>
+        <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight text-[var(--text-primary)]">
+          人类图 · <span className="gradient-text">Human Design</span>
+        </h1>
+        <p className="text-sm md:text-base text-[var(--text-secondary)] opacity-90">输入出生信息，生成你的专属能量地图</p>
       </div>
 
       {!hd && (
-        <form onSubmit={handleSubmit} className="max-w-xl mx-auto space-y-4 card-jade p-6 md:p-8">
+        <div className="grid md:grid-cols-5 gap-6 md:gap-12 items-start max-w-4xl mx-auto mb-10">
+          <div className="md:col-span-2 hidden md:block pt-3">
+            <h2 className="text-2xl font-bold text-[var(--text-primary)] leading-snug mb-5">
+              你的出厂设定，<br />一生的<span className="gradient-text">能量地图</span>
+            </h2>
+            <p className="text-sm text-[var(--text-secondary)] opacity-80 leading-loose mb-7">
+              人类图融合占星、易经、卡巴拉与脉轮系统，揭示你的类型、人生角色与内在权威——你与生俱来的决策方式与天赋通道。
+            </p>
+            <div className="flex flex-wrap gap-2.5 mb-9">
+              {['类型','人生角色','内在权威','天赋通道','中心定义'].map(s => (
+                <span key={s} className="px-3.5 py-1.5 rounded-full bg-[var(--bg-highlight)] border border-[var(--border-accent)] text-xs text-[var(--text-accent)] opacity-90">
+                  {s}
+                </span>
+              ))}
+            </div>
+            <div className="flex items-center gap-2.5 text-xs text-[var(--text-tertiary)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--text-accent)] opacity-70" />
+              出生信息仅用于排盘，绝不外泄
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="md:col-span-3 card-jade p-7 md:p-10 space-y-6">
           <div>
             <label className="block text-sm text-[var(--text-secondary)] mb-2 font-medium">出生日期 *</label>
             <div className="grid grid-cols-3 gap-3">
@@ -267,10 +291,11 @@ export default function HumanDesignPage() {
             </select>
           </div>
           {error && <div className="text-sm text-red-500">{error}</div>}
-          <button type="submit" className="btn-jade w-full" disabled={loading}>
-            {loading ? '🧬 计算中...' : '🧬 生成我的人类图'}
+          <button type="submit" className="btn-jade w-full py-3.5 rounded-2xl" disabled={loading}>
+            {loading ? '计算中...' : '✦ 生成我的人类图'}
           </button>
         </form>
+        </div>
       )}
 
       {loading && (

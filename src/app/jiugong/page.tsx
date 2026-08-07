@@ -58,7 +58,7 @@ export default function JiugongPage() {
         </div>
 
         {/* 表单卡片 */}
-        <div className="card-jade p-6 md:p-8 space-y-5 animate-fade-in-up">
+        <div className="card-jade p-8 md:p-10 space-y-5 animate-fade-in-up">
           {/* 姓名 */}
           <div>
             <label className="block text-xs text-[var(--text-secondary)] mb-1.5 font-semibold">
