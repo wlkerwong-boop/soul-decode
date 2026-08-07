@@ -215,8 +215,7 @@ export default function HumanDesignPage() {
   return (
     <div className="py-8 md:py-16 px-4 max-w-5xl mx-auto">
       <div className="text-center mb-10">
-        <div className="text-3xl mb-3">🧬</div>
-        <h1 className="text-2xl md:text-3xl font-bold gradient-text mb-2">人类图 · Human Design</h1>
+        <h1 className="text-3xl md:text-4xl font-bold gradient-text mb-2">人类图 · Human Design</h1>
         <p className="text-sm text-[var(--text-secondary)]">输入出生信息，生成你的专属能量地图</p>
       </div>
 

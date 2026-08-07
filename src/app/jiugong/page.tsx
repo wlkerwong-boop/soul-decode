@@ -50,7 +50,7 @@ export default function JiugongPage() {
             河图洛书 · 程天相九宫学理
           </div>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
-            📜 九宫<span className="gradient-text">人生说明书</span>
+            九宫<span className="gradient-text">人生说明书</span>
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mt-2 leading-relaxed">
             输入姓名与生日，即刻生成你的 13 维度天赋地图、性格密码与 90 年人生节律
