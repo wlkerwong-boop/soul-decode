@@ -40,6 +40,8 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" data-theme="soulcode">
       <head>
+        {/* 🔒 固定 CSS @layer 优先级顺序（防浏览器扩展注入 @layer 声明破坏 Tailwind 层序） */}
+        <style>{`@layer theme, base, components, utilities;`}</style>
         {/* 霞鹜文楷 CDN 字体 — 用于标题和正文 */}
         <link rel="stylesheet" href="https://chinese-font.netlify.app/packages/lxgwwenkai/dist/LXGWWenKai-Regular/result.css" />
         <link rel="preconnect" href="https://chinese-font.netlify.app" crossOrigin="anonymous" />
