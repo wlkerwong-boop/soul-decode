@@ -212,12 +212,12 @@ export default function MasterPage() {
     <div className="gradient-bg min-h-screen px-4 py-6 md:py-10">
       <div className="max-w-4xl mx-auto">
 
-        <div className="text-center mb-10 md:mb-14">
-          <p className="text-[11px] md:text-xs tracking-[0.35em] uppercase text-[var(--text-accent)] mb-3 font-semibold">Seven-System Reading</p>
-          <h1 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight leading-tight text-[var(--text-primary)]">
+        <div className="text-center mb-12 md:mb-16">
+          <p className="text-[10px] md:text-[11px] tracking-[0.4em] uppercase text-[var(--text-accent)] opacity-70 mb-4 font-medium">Seven-System Reading</p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight leading-tight text-[var(--text-primary)]">
             人生<span className="gradient-text">总览</span>
           </h1>
-          <p className="text-base md:text-lg text-[var(--text-secondary)]">一次输入 · 七个维度交叉印证，看见完整的你</p>
+          <p className="text-base md:text-lg text-[var(--text-secondary)] opacity-90">一次输入 · 七个维度交叉印证，看见完整的你</p>
           {(report || data) && !showQuickInput && (
             <button
               type="button"
@@ -257,89 +257,89 @@ export default function MasterPage() {
         {showQuickInput && (
           <div className="grid md:grid-cols-5 gap-6 md:gap-12 items-start max-w-4xl mx-auto mb-10">
             {/* 左：品牌信息（桌面） */}
-            <div className="md:col-span-2 hidden md:block pt-2">
-              <h2 className="text-2xl font-bold text-[var(--text-primary)] leading-snug mb-4">
+            <div className="md:col-span-2 hidden md:block pt-3">
+              <h2 className="text-2xl font-bold text-[var(--text-primary)] leading-snug mb-5">
                 七套古老智慧，<br />交叉印证<span className="gradient-text">同一件事</span>
               </h2>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-6">
+              <p className="text-sm text-[var(--text-secondary)] opacity-80 leading-loose mb-7">
                 你的出生信息将同时经由七个系统运算——东方命理与西方能量学彼此校验，输出一份互为印证的完整报告。
               </p>
-              <div className="flex flex-wrap gap-2 mb-8">
+              <div className="flex flex-wrap gap-2.5 mb-9">
                 {['八字','人类图','占星','紫微斗数','五运六气','流年','人生规划'].map(s => (
-                  <span key={s} className="px-3 py-1.5 rounded-full bg-[var(--bg-highlight)] border border-[var(--border-accent)] text-xs text-[var(--text-accent)]">
+                  <span key={s} className="px-3.5 py-1.5 rounded-full bg-[var(--bg-highlight)] border border-[var(--border-accent)] text-xs text-[var(--text-accent)] opacity-90">
                     {s}
                   </span>
                 ))}
               </div>
               <div className="flex items-center gap-2.5 text-xs text-[var(--text-tertiary)]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[var(--text-accent)]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--text-accent)] opacity-70" />
                 出生信息仅用于排盘，绝不外泄
               </div>
             </div>
 
             {/* 右：表单卡 */}
-            <div className="md:col-span-3 card-jade p-6 md:p-8 report-form">
+            <div className="md:col-span-3 card-jade p-7 md:p-10 report-form">
               {/* 01 基本信息 */}
-              <p className="text-[11px] font-semibold tracking-[0.25em] text-[var(--text-accent)] mb-3">01 · 基本信息</p>
-              <div className="grid grid-cols-2 gap-3 mb-8">
+              <p className="text-[10px] font-medium tracking-[0.3em] text-[var(--text-accent)] opacity-70 mb-4">基本信息</p>
+              <div className="grid grid-cols-2 gap-3 mb-10">
                 {['男','女'].map(g => (
                   <button key={g} onClick={()=>setGender(g)}
-                    className={`py-3.5 rounded-2xl text-sm font-semibold transition-all border ${
+                    className={`py-3 rounded-2xl text-sm font-medium transition-all border ${
                       gender===g ? 'bg-gradient-to-r from-[var(--text-accent)] to-[var(--color-accent)] text-white shadow-md border-transparent' : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-color)] hover:border-[var(--border-accent)]'
                     }`}>{g}</button>
                 ))}
               </div>
 
               {/* 02 出生时间 */}
-              <p className="text-[11px] font-semibold tracking-[0.25em] text-[var(--text-accent)] mb-3">02 · 出生时间</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+              <p className="text-[10px] font-medium tracking-[0.3em] text-[var(--text-accent)] opacity-70 mb-4">出生时间</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
                 <select value={year} onChange={e=>setYear(e.target.value)}
-                  className="input-jade text-base py-3.5 px-2 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+                  className="input-jade text-[15px] py-3 px-2 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
                   <option value="">年份</option>
                   {YEARS.map(y=><option key={y} value={y}>{y}</option>)}
                 </select>
                 <select value={month} onChange={e=>setMonth(e.target.value)}
-                  className="input-jade text-base py-3.5 px-2 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+                  className="input-jade text-[15px] py-3 px-2 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
                   <option value="">月</option>
                   {MONTHS.map(m=><option key={m} value={m}>{m}</option>)}
                 </select>
                 <select value={day} onChange={e=>setDay(e.target.value)}
-                  className="input-jade text-base py-3.5 px-2 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+                  className="input-jade text-[15px] py-3 px-2 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
                   <option value="">日</option>
                   {DAYS.map(d=><option key={d} value={d}>{d}</option>)}
                 </select>
                 <select value={hour} onChange={e=>setHour(e.target.value)}
-                  className="input-jade text-base py-3.5 px-2 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+                  className="input-jade text-[15px] py-3 px-2 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
                   <option value="">时</option>
                   {HOURS.map(h=><option key={h} value={h}>{h}</option>)}
                 </select>
               </div>
 
               {/* 03 出生地点 */}
-              <p className="text-[11px] font-semibold tracking-[0.25em] text-[var(--text-accent)] mb-3">03 · 出生地点</p>
-              <div className="space-y-3 mb-8">
+              <p className="text-[10px] font-medium tracking-[0.3em] text-[var(--text-accent)] opacity-70 mb-4">出生地点</p>
+              <div className="space-y-3 mb-10">
                 <select value={continent} onChange={e=>{setContinent(e.target.value);setCountry('');setProvince('');setCity('');}}
-                  className="w-full input-jade text-base py-3.5 px-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+                  className="w-full input-jade text-[15px] py-3 px-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
                   <option value="">选择大洲</option>
                   {continents.map(c=><option key={c} value={c}>{c}</option>)}
                 </select>
                 {continent && (
                   <select value={country} onChange={e=>{setCountry(e.target.value);setProvince('');setCity('');}}
-                    className="w-full input-jade text-base py-3.5 px-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+                    className="w-full input-jade text-[15px] py-3 px-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
                     <option value="">选择国家</option>
                     {continentCountries.map(c=><option key={c} value={c}>{c}</option>)}
                   </select>
                 )}
                 {isChina && country && (
                   <select value={province} onChange={e=>{setProvince(e.target.value);setCity('');}}
-                    className="w-full input-jade text-base py-3.5 px-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+                    className="w-full input-jade text-[15px] py-3 px-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
                     <option value="">选择省份</option>
                     {provinces.map(p=><option key={p} value={p}>{p}</option>)}
                   </select>
                 )}
                 {country && cities.length > 0 && (
                   <select value={city} onChange={e=>setCity(e.target.value)}
-                    className="w-full input-jade text-base py-3.5 px-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
+                    className="w-full input-jade text-[15px] py-3 px-4 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
                     <option value="">选择城市</option>
                     {cities.map(c=><option key={c} value={c}>{c}</option>)}
                   </select>
@@ -347,7 +347,7 @@ export default function MasterPage() {
               </div>
 
               {/* 04 精确时间（可选） */}
-              <details className="mb-8 text-xs text-[var(--text-tertiary)]">
+              <details className="mb-10 text-xs text-[var(--text-tertiary)]">
                 <summary className="cursor-pointer py-1 hover:text-[var(--text-secondary)] transition-colors">精确时间（可选）</summary>
                 <div className="flex items-center gap-2 mt-3">
                   <span>分钟：</span>
@@ -361,7 +361,7 @@ export default function MasterPage() {
 
               {/* CTA */}
               <button onClick={submit} disabled={!quickFilled||loading}
-                className={`w-full py-4 rounded-2xl font-semibold text-base transition-all ${
+                className={`w-full py-3.5 rounded-2xl font-semibold text-[15px] transition-all ${
                   quickFilled&&!loading ? 'bg-gradient-to-r from-[var(--text-accent)] to-[var(--color-accent)] text-white shadow-md hover:shadow-lg' : 'bg-[var(--bg-highlight)] text-[var(--text-tertiary)] cursor-not-allowed'
                 }`}>
                 {loading ? '⌛ 正在排盘中...' : '✦ 免费排盘，查看我的出厂配置'}
