@@ -1113,3 +1113,12 @@ section { animation: fade-in-up 0.6s ease-out; }
   .jiugong-print-report tr { break-inside: avoid; page-break-inside: avoid; }
   .jiugong-print-report [data-jiugong-print-topic] { break-inside: avoid; page-break-inside: avoid; }
 }
+
+/* ===== 2026-08-07 cache-busting marker ===== */
+@media (prefers-reduced-motion: reduce) {
+  .hero-light .hero-bg,
+  .report-golden::before {
+    transition: none !important;
+    animation: none !important;
+  }
+}
