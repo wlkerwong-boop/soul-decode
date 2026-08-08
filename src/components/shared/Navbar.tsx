@@ -57,9 +57,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             {logo || <span className="text-[var(--color-accent)]">JiànJǐ</span>}
           </a>
 
-          {/* Links — desktop */}
+          {/* Links — desktop (xl 1280px+ 才显示；以下宽度用汉堡菜单避免挤压) */}
           {links.length > 0 && (
-            <ul className="hidden items-center gap-1 md:flex">
+            <ul className="hidden items-center gap-1 xl:flex">
               {links.map((link) => (
                 <li key={link.href}>
                   <a
@@ -86,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="inline-flex items-center md:hidden z-50"
+              className="inline-flex items-center xl:hidden z-50"
               aria-label="Toggle menu"
             >
               {mobileOpen ? (
@@ -109,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Mobile full-screen overlay menu */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 flex flex-col items-center justify-center md:hidden"
+          className="fixed inset-0 z-40 flex flex-col items-center justify-center xl:hidden"
           style={{
             background: 'var(--color-bg)',
             backdropFilter: 'saturate(180%) blur(20px)',
