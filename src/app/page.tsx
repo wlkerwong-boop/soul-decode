@@ -14,10 +14,12 @@
  */
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import "./homepage.css";
 
 export default function HomePage() {
   const [dailyQuote, setDailyQuote] = useState<{ quote: string; source: string } | null>(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/daily-quote")
@@ -47,12 +49,25 @@ export default function HomePage() {
   return (
     <>
       <nav className="nav" id="nav">
-        <a className="nav-logo" href="/">Soul<em>Code</em></a>
-        <div className="nav-links">
-          <a href="#services">服务</a>
-          <a href="#report">报告</a>
-          <a href="#about">关于</a>
-          <a className="nav-cta" href="#report">开始测评</a>
+        <Link className="nav-logo" href="/" onClick={() => setMobileNavOpen(false)}>Soul<em>Code</em></Link>
+        <button
+          className={`nav-toggle${mobileNavOpen ? " is-open" : ""}`}
+          type="button"
+          aria-label={mobileNavOpen ? "关闭导航菜单" : "打开导航菜单"}
+          aria-expanded={mobileNavOpen}
+          aria-controls="homepage-nav-links"
+          onClick={() => setMobileNavOpen((open) => !open)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+        <div className={`nav-links${mobileNavOpen ? " is-open" : ""}`} id="homepage-nav-links">
+          <a href="#services" onClick={() => setMobileNavOpen(false)}>认识自己</a>
+          <a href="/compatibility" onClick={() => setMobileNavOpen(false)}>关系解码</a>
+          <a href="#report" onClick={() => setMobileNavOpen(false)}>报告</a>
+          <a href="#about" onClick={() => setMobileNavOpen(false)}>关于</a>
+          <a className="nav-cta" href="/master-report" onClick={() => setMobileNavOpen(false)}>开始测评</a>
         </div>
       </nav>
 
@@ -77,9 +92,9 @@ export default function HomePage() {
         <div className="hero-content">
           <p className="hero-kicker">SOULCODE · 灵魂解码</p>
           <h1 className="hero-title">解码你的生命蓝图</h1>
-          <p className="hero-sub">七大系统融合，看见独一无二的你</p>
+          <p className="hero-sub">先看见自己，再理解关系，最后找到下一步</p>
           <a className="hero-cta" href="/master-report">生成我的报告</a>
-          <p className="hero-note">🔒 出生信息仅用于排盘，绝不外泄</p>
+          <p className="hero-note">🔒 出生信息仅用于生成报告 · 结果由你自己保管</p>
         </div>
         <div className="hero-scroll">向下探索</div>
       </header>
@@ -89,31 +104,35 @@ export default function HomePage() {
         <div className="section-inner">
           <div className="section-head reveal">
             <p className="section-kicker">核心服务</p>
-            <h2 className="section-title">三条路径，抵达同一个您</h2>
+            <h2 className="section-title">从认识自己开始，走向更清晰的关系</h2>
+            <p className="section-desc">不必一次使用所有工具，先从最接近你当下问题的一步开始。</p>
           </div>
           <div className="cards">
             <a className="card reveal" href="/master-report">
               <div className="card-img" style={{ backgroundImage: "url('/assets/homepage/card-seven-systems.png')" }} />
               <div className="card-body">
-                <h3 className="card-title">七系统融合报告</h3>
-                <p className="card-text">七个维度交叉印证，生成您的专属生命蓝图。</p>
-                <span className="card-link">了解更多 <span>→</span></span>
+                <p className="card-step">01 · 看见自己</p>
+                <h3 className="card-title">生命蓝图</h3>
+                <p className="card-text">把八字、人类图、人格等系统放回同一份报告，先看懂自己的节奏、优势与盲点。</p>
+                <span className="card-link">开始认识自己 <span>→</span></span>
               </div>
             </a>
-            <a className="card reveal" href="/jiugong">
+            <a className="card reveal" href="/compatibility">
               <div className="card-img" style={{ backgroundImage: "url('/assets/homepage/card-jiugong.png')" }} />
               <div className="card-body">
-                <h3 className="card-title">九宫学理</h3>
-                <p className="card-text">东方智慧为骨，照见当下的位置与方向。</p>
-                <span className="card-link">了解更多 <span>→</span></span>
+                <p className="card-step">02 · 理解关系</p>
+                <h3 className="card-title">关系解码</h3>
+                <p className="card-text">从伴侣、亲子到伙伴，看见彼此的差异、互动模式与更有效的相处方向。</p>
+                <span className="card-link">理解重要的人 <span>→</span></span>
               </div>
             </a>
-            <a className="card reveal" href="/human-design">
+            <a className="card reveal" href="/tools">
               <div className="card-img" style={{ backgroundImage: "url('/assets/homepage/card-assessment.png')" }} />
               <div className="card-body">
-                <h3 className="card-title">单项测评</h3>
-                <p className="card-text">从一个问题开始，轻轻推开自我认知的门。</p>
-                <span className="card-link">了解更多 <span>→</span></span>
+                <p className="card-step">03 · 找到下一步</p>
+                <h3 className="card-title">成长工具</h3>
+                <p className="card-text">将认识转化为行动：从一次小测评、一次亲子任务或一份成长计划开始。</p>
+                <span className="card-link">选择一件小事开始 <span>→</span></span>
               </div>
             </a>
           </div>
@@ -130,9 +149,9 @@ export default function HomePage() {
             </div>
             <div className="report-copy reveal">
               <p className="section-kicker">报告预览</p>
-              <h2 className="report-title">一本只关于您的书</h2>
+                <h2 className="report-title">一本只关于你的书</h2>
               <p className="report-text">
-                七个系统，七次凝视。当星盘、九宫与心理测评在同一张图上交汇，您会第一次完整地看见自己。手机上也能一键下载 PDF，随时翻阅。
+                七个系统，七次凝视。当不同的视角在同一份报告里交汇，你会更完整地看见自己的节奏、选择和关系。八字排盘已经纳入生命蓝图，不再需要单独寻找入口。
               </p>
               <a className="report-cta" href="/master-report">查看完整报告</a>
             </div>
@@ -157,8 +176,9 @@ export default function HomePage() {
       <section className="section">
         <div className="section-inner">
           <div className="section-head reveal">
-            <p className="section-kicker">更多探索</p>
-            <h2 className="section-title">沿途的风景</h2>
+            <p className="section-kicker">可选工具</p>
+            <h2 className="section-title">当你有了具体问题，再选择合适的工具</h2>
+            <p className="section-desc">这些工具不是彼此竞争的入口，而是生命蓝图之后的不同观察角度。</p>
           </div>
           <div className="explore-track reveal">
             <a className="explore-card" href="/mbti">
@@ -173,12 +193,6 @@ export default function HomePage() {
               </span>
               <span className="explore-name">人类图解析</span>
             </a>
-            <a className="explore-card" href="/master-report">
-              <span className="explore-ico">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18M7 15h6" /></svg>
-              </span>
-              <span className="explore-name">八字命盘</span>
-            </a>
             <a className="explore-card" href="/compatibility">
               <span className="explore-ico">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="8" cy="12" r="4" /><circle cx="16" cy="12" r="4" /></svg>
@@ -189,7 +203,7 @@ export default function HomePage() {
               <span className="explore-ico">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z" /><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5" /></svg>
               </span>
-              <span className="explore-name">法藏</span>
+              <span className="explore-name">静心与阅读</span>
               <span className="explore-badge">即将上线</span>
             </a>
             <a className="explore-card" href="/tools">
