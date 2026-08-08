@@ -47,7 +47,7 @@ body[data-site="jianji"] {
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: "LXGW WenKai", "Songti SC", "STSong", Georgia, serif;
+  font-family: "LXGW WenKai", "PingFang SC", "MiSans", "Noto Sans SC", system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.9;

@@ -213,7 +213,7 @@ export default function HumanDesignPage() {
   };
 
   return (
-    <div className="py-8 md:py-16 px-4 max-w-5xl mx-auto">
+    <div className="py-8 md:py-16 px-4 max-w-5xl mx-auto pt-nav">
       <div className="text-center mb-12 md:mb-16">
         <p className="text-[10px] md:text-[11px] tracking-[0.4em] uppercase text-[var(--text-accent)] opacity-70 mb-4 font-medium">Human Design</p>
         <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight text-[var(--text-primary)]">

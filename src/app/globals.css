@@ -1135,3 +1135,17 @@ section { animation: fade-in-up 0.6s ease-out; }
 .relative:not([class*="sm:"]):not([class*="md:"]):not([class*="lg:"]):not([class*="xl:"]):not([class*="2xl:"]) { position: relative; }
 .absolute:not([class*="sm:"]):not([class*="md:"]):not([class*="lg:"]):not([class*="xl:"]):not([class*="2xl:"]) { position: absolute; }
 .grid:not([class*="sm:"]):not([class*="md:"]):not([class*="lg:"]):not([class*="xl:"]):not([class*="2xl:"]) { display: grid; }
+/* —— 内页顶部留白兜底：fixed 导航高 64px，内页容器必须 pt ≥ 96px 否则标题被盖 —— */
+.py-8:not([class*="md:"]) { padding-top: 2rem; padding-bottom: 2rem; }
+.py-6:not([class*="md:"]) { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+.py-10:not([class*="md:"]) { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+.pt-16:not([class*="md:"]) { padding-top: 4rem; }
+.pt-20:not([class*="md:"]) { padding-top: 5rem; }
+.pt-24:not([class*="md:"]) { padding-top: 6rem; }
+/* 统一内页顶部留白类：fixed nav(64px) + 32px 呼吸空间 */
+.pt-nav { padding-top: 96px !important; }
+@media (min-width: 768px) {
+  .md\:py-16 { padding-top: 4rem; padding-bottom: 4rem; }
+  .md\:py-10 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+  .md\:pt-16 { padding-top: 4rem; }
+}

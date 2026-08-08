@@ -42,12 +42,8 @@ export default function RootLayout({
       <head>
         {/* 🔒 固定 CSS @layer 优先级顺序（防浏览器扩展注入 @layer 声明破坏 Tailwind 层序） */}
         <style>{`@layer theme, base, components, utilities;`}</style>
-        {/* 霞鹜文楷 CDN 字体 — 用于标题和正文（jsdelivr NPM 路径，官方文档指定） */}
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@chinese-fonts/lxgwwenkai/dist/LXGWWenKai-Regular/result.css" />
-        <link rel="preconnect" href="https://chinese-font.netlify.app" crossOrigin="anonymous" />
-        {/* 系统字体降级 */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* 霞鹜文楷 — 本地化（public/fonts，不依赖外部 CDN，根治字体失效） */}
+        <link rel="stylesheet" href="/fonts/lxgwwenkai/lxgwwenkai-regular.css" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#FBF7F0" />
         <link rel="apple-touch-icon" href="/icon-192.png" />

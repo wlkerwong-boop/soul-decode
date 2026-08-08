@@ -209,7 +209,7 @@ export default function MasterPage() {
   };
 
   return (
-    <div className="gradient-bg min-h-screen px-4 py-6 md:py-10">
+    <div className="gradient-bg min-h-screen px-4 py-6 md:py-10 pt-nav">
       <div className="max-w-4xl mx-auto">
 
         <div className="text-center mb-12 md:mb-16">

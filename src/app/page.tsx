@@ -173,9 +173,9 @@ export default function HomePage() {
               </span>
               <span className="explore-name">人类图解析</span>
             </a>
-            <a className="explore-card" href="/human-design">
+            <a className="explore-card" href="/master-report">
               <span className="explore-ico">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="12" cy="12" r="9" /><path d="M12 3v18M3 12h18" opacity="0.65" /></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 10h18M7 15h6" /></svg>
               </span>
               <span className="explore-name">八字命盘</span>
             </a>
