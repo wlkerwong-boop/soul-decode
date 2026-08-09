@@ -112,17 +112,20 @@ export function buildPersonalReportSegments(context: PersonalReportContext): Rep
   return [
     {
       id: 'foundation',
-      maxTokens: 7000,
+      // The prompt asks for roughly 2,200–3,200 Chinese characters. 7,000
+      // output tokens made a single report unnecessarily slow on the current
+      // provider, so keep enough headroom without allowing runaway output.
+      maxTokens: 3500,
       prompt: `这是三段报告的第1段。只输出以下三章，约2200-3200字：\n\n## 0. 排盘数据声明\n逐条列出出生信息、八字四柱与五行、人类图类型/角色/权威/通道、紫微命宫主星、占星行星星座、五运六气。末尾原样写：命理是地图不是判决书，七分天性三分环境，与真人不符之处以真人为准。\n\n## 1. 核心命盘总览\n用“系统 × 关键数据 × 一句话主题”的七行表格；收尾以“七个系统说的是同一个人：”给出综合画像。\n\n## 2. 交叉印证\n提炼3-5个核心特质。每个特质必须并列至少三个系统的具体证据，并写“给你的提醒”：阴影面 + 一句可执行动作。至少写一处系统矛盾及整合解释。${shared}`,
     },
     {
       id: 'direction',
-      maxTokens: 7000,
+      maxTokens: 3500,
       prompt: `这是三段报告的第2段。直接从第3章开始，不重复数据声明，约2200-3200字。\n\n## 3. ${minor ? '成长阶段与学习风格' : '此刻的人生'}\n解释当前年龄在人类图爻线阶段、紫微身命结构、八字大运/流年的含义。无可靠大运数据时明确说“本次数据未提供大运起运”，不得编造。\n\n## 4. ${minor ? '天赋保护与养育建议' : '天赋与方向'}\n提供天赋地图表；每个方向标注由哪几个系统共同指向；给出具体编号避坑清单。${minor ? '补充尊重孩子类型特质的教育方式与家长可直接使用的话术。' : ''}\n\n## 5. 健康与情绪养护\n结合八字五行、五运六气和开放/定义中心，写体质观察与情绪出口；每条建议落到时辰与每周频次，并明确非医疗诊断。${shared}`,
     },
     {
       id: 'practice',
-      maxTokens: 6000,
+      maxTokens: 2800,
       prompt: `这是三段报告的第3段。直接从第6章开始，约1600-2400字。\n\n## 6. ${minor ? '家长行动清单' : '实践纲领'}\n每日、每周、每月、每年各1-3条。每条包含具体做法、触发条件和完成标准；至少给出两句“练习说：……”的话术。\n\n## 7. 最终寄语\n第二人称，回扣报告中至少三个真实具体数据，有温度但不滥情，不承诺命运结果。结尾再次提醒把报告当地图而非判决书。${shared}`,
     },
   ];

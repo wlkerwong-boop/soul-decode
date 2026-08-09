@@ -75,7 +75,7 @@ export default function RootLayout({
                     { label: '关系合盘', href: '/compatibility' },
                     { label: 'MBTI 性格', href: '/mbti' },
                     { label: 'Stella 教育智囊', href: 'https://www.stella-aiedu.com' },
-                    { label: '见己学园 · 即将上线', href: '#' },
+                    { label: '见己学园', href: 'https://jianjixueyuan.com/' },
                   ],
                 },
               ]}

@@ -1,240 +1,230 @@
 "use client";
 
-/**
- * SoulCode 首页 · 海报级重设计（K3 定稿版）
- * ---------------------------------------------------------------
- * 集成说明（给 Codex）：
- * 1. 将 homepage.css 复制为 src/app/homepage.css，并在本文件 import "./homepage.css";
- *    （或并入 globals.css，注意保留 body[data-site] 主题变量块）
- * 2. 将 assets/ 下 5 张图片复制到 public/assets/homepage/
- * 3. 霞鹜文楷 CDN 已在项目 layout 的 <head> 中引入，无需重复添加
- * 4. 零外部组件依赖：纯 CSS + 内联 SVG，不引入 swiper/framer-motion
- * 5. body 需带 data-site="soulcode"（在 layout.tsx 的 <body> 上加，或本文件 useEffect 设置）
- * 6. 下方链接 href 为占位，替换为项目真实路由
- */
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import "./homepage.css";
 
+type DailyQuote = { quote: string; source: string };
+
+const selfTools = [
+  { name: "人类图解析", description: "看见你的能量与决策方式", href: "/human-design" },
+  { name: "大五人格", description: "理解稳定的人格倾向", href: "/bigfive" },
+  { name: "MBTI 测评", description: "从一个具体问题开始", href: "/mbti" },
+];
+
 export default function HomePage() {
-  const [dailyQuote, setDailyQuote] = useState<{ quote: string; source: string } | null>(null);
+  const [dailyQuote, setDailyQuote] = useState<DailyQuote | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/daily-quote")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => d?.quote && setDailyQuote({ quote: d.quote, source: d.source }))
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => data?.quote && setDailyQuote({ quote: data.quote, source: data.source }))
       .catch(() => {});
   }, []);
 
   useEffect(() => {
     document.body.setAttribute("data-site", "soulcode");
-    document.body.classList.add("homepage-active");
+    document.body.classList.add("homepage-active", "homepage-motion");
     const nav = document.getElementById("nav");
-    const onScroll = () => nav?.classList.toggle("scrolled", window.scrollY > 40);
+    const onScroll = () => nav?.classList.toggle("scrolled", window.scrollY > 24);
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    const io = new IntersectionObserver(
-      (es) => es.forEach((e) => e.isIntersecting && e.target.classList.add("in")),
+
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add("in")),
       { threshold: 0.12 }
     );
-    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+    document.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
+
     return () => {
-      document.body.classList.remove("homepage-active");
+      document.body.classList.remove("homepage-active", "homepage-motion");
       window.removeEventListener("scroll", onScroll);
-      io.disconnect();
+      observer.disconnect();
     };
   }, []);
 
+  const closeMobileNav = () => setMobileNavOpen(false);
+
   return (
     <>
-      <nav className="nav" id="nav">
-        <Link className="nav-logo" href="/" onClick={() => setMobileNavOpen(false)}>Soul<em>Code</em></Link>
-        <button
-          className={`nav-toggle${mobileNavOpen ? " is-open" : ""}`}
-          type="button"
-          aria-label={mobileNavOpen ? "关闭导航菜单" : "打开导航菜单"}
-          aria-expanded={mobileNavOpen}
-          aria-controls="homepage-nav-links"
-          onClick={() => setMobileNavOpen((open) => !open)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
-        <div className={`nav-links${mobileNavOpen ? " is-open" : ""}`} id="homepage-nav-links">
-          <a href="#services" onClick={() => setMobileNavOpen(false)}>认识自己</a>
-          <a href="/compatibility" onClick={() => setMobileNavOpen(false)}>关系解码</a>
-          <a href="#report" onClick={() => setMobileNavOpen(false)}>报告</a>
-          <a href="#about" onClick={() => setMobileNavOpen(false)}>关于</a>
-          <a className="nav-cta" href="/master-report" onClick={() => setMobileNavOpen(false)}>开始测评</a>
+      <nav className="nav" id="nav" aria-label="SoulCode 主导航">
+        <div className="shell nav-inner">
+          <Link className="brand" href="/" onClick={closeMobileNav}>
+            <span className="brand-mark" aria-hidden="true" />
+            <span>Soul<em>Code</em></span>
+          </Link>
+          <button
+            className={`nav-toggle${mobileNavOpen ? " is-open" : ""}`}
+            type="button"
+            aria-label={mobileNavOpen ? "关闭导航菜单" : "打开导航菜单"}
+            aria-expanded={mobileNavOpen}
+            aria-controls="homepage-nav-links"
+            onClick={() => setMobileNavOpen((open) => !open)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+          <div className={`nav-links${mobileNavOpen ? " is-open" : ""}`} id="homepage-nav-links">
+            <a href="#who" onClick={closeMobileNav}>认识自己</a>
+            <Link href="/master-report" onClick={closeMobileNav}>生命蓝图</Link>
+            <Link href="/compatibility" onClick={closeMobileNav}>关系解码</Link>
+            <a href="#ecosystem" onClick={closeMobileNav}>三站协同</a>
+            <Link className="nav-cta" href="/master-report" onClick={closeMobileNav}>开始建立蓝图</Link>
+          </div>
         </div>
       </nav>
 
-      {/* Hero */}
-      <header className="hero hero-light">
-        <div className="hero-bg" />
-        <div className="hero-veil" />
-        <div className="hero-deco" aria-hidden="true">
-          <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
-            <circle cx="180" cy="140" r="2.2" fill="#C9A96A" opacity="0.5" />
-            <circle cx="420" cy="90" r="1.5" fill="#C9A96A" opacity="0.4" />
-            <circle cx="1180" cy="160" r="2.4" fill="#C9A96A" opacity="0.5" />
-            <circle cx="1320" cy="280" r="1.5" fill="#C9A96A" opacity="0.35" />
-            <circle cx="300" cy="300" r="1.2" fill="#C9A96A" opacity="0.3" />
-            <circle cx="960" cy="120" r="1.8" fill="#C9A96A" opacity="0.45" />
-            <circle cx="80" cy="420" r="1.4" fill="#C9A96A" opacity="0.35" />
-            <circle cx="1360" cy="520" r="1.8" fill="#C9A96A" opacity="0.4" />
-            <path d="M0 720 Q 300 640 560 700 Q 800 750 1080 680 Q 1280 640 1440 690 L 1440 900 L 0 900 Z" fill="#E8DFCF" opacity="0.55" />
-            <path d="M0 780 Q 400 720 760 770 Q 1100 810 1440 760 L 1440 900 L 0 900 Z" fill="#DDD2BD" opacity="0.6" />
-          </svg>
-        </div>
-        <div className="hero-content">
-          <p className="hero-kicker">SOULCODE · 灵魂解码</p>
-          <h1 className="hero-title">解码你的生命蓝图</h1>
-          <p className="hero-sub">先看见自己，再理解关系，最后找到下一步</p>
-          <a className="hero-cta" href="/master-report">生成我的报告</a>
-          <p className="hero-note">🔒 出生信息仅用于生成报告 · 结果由你自己保管</p>
-        </div>
-        <div className="hero-scroll">向下探索</div>
-      </header>
-
-      {/* 核心服务 */}
-      <section className="section" id="services">
-        <div className="section-inner">
-          <div className="section-head reveal">
-            <p className="section-kicker">核心服务</p>
-            <h2 className="section-title">从认识自己开始，走向更清晰的关系</h2>
-            <p className="section-desc">不必一次使用所有工具，先从最接近你当下问题的一步开始。</p>
-          </div>
-          <div className="cards">
-            <a className="card reveal" href="/master-report">
-              <div className="card-img" style={{ backgroundImage: "url('/assets/homepage/card-seven-systems.png')" }} />
-              <div className="card-body">
-                <p className="card-step">01 · 看见自己</p>
-                <h3 className="card-title">生命蓝图</h3>
-                <p className="card-text">把八字、人类图、人格等系统放回同一份报告，先看懂自己的节奏、优势与盲点。</p>
-                <span className="card-link">开始认识自己 <span>→</span></span>
-              </div>
-            </a>
-            <a className="card reveal" href="/compatibility">
-              <div className="card-img" style={{ backgroundImage: "url('/assets/homepage/card-jiugong.png')" }} />
-              <div className="card-body">
-                <p className="card-step">02 · 理解关系</p>
-                <h3 className="card-title">关系解码</h3>
-                <p className="card-text">从伴侣、亲子到伙伴，看见彼此的差异、互动模式与更有效的相处方向。</p>
-                <span className="card-link">理解重要的人 <span>→</span></span>
-              </div>
-            </a>
-            <a className="card reveal" href="/tools">
-              <div className="card-img" style={{ backgroundImage: "url('/assets/homepage/card-assessment.png')" }} />
-              <div className="card-body">
-                <p className="card-step">03 · 找到下一步</p>
-                <h3 className="card-title">成长工具</h3>
-                <p className="card-text">将认识转化为行动：从一次小测评、一次亲子任务或一份成长计划开始。</p>
-                <span className="card-link">选择一件小事开始 <span>→</span></span>
-              </div>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* 报告预览 */}
-      <section className="section report-golden" id="report">
-        <div className="section-inner">
-          <div className="report">
-            <div className="report-img reveal">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/assets/homepage/report-cover.png" alt="七系统融合报告封面" />
-            </div>
-            <div className="report-copy reveal">
-              <p className="section-kicker">报告预览</p>
-                <h2 className="report-title">一本只关于你的书</h2>
-              <p className="report-text">
-                七个系统，七次凝视。当不同的视角在同一份报告里交汇，你会更完整地看见自己的节奏、选择和关系。八字排盘已经纳入生命蓝图，不再需要单独寻找入口。
+      <main>
+        <section className="hero" aria-labelledby="hero-title">
+          <div className="shell hero-grid">
+            <div className="hero-copy reveal">
+              <p className="eyebrow">A PERSONAL MAP FOR A CLEARER LIFE</p>
+              <h1 id="hero-title">先看见自己，<br /><em>再走近彼此。</em></h1>
+              <p className="hero-lead">
+                灵魂解码不是把你归类成一个标签，而是把复杂的你，整理成一张可以阅读、可以对话、可以继续成长的生命蓝图。
               </p>
-              <a className="report-cta" href="/master-report">查看完整报告</a>
+              <div className="actions">
+                <Link className="btn" href="/master-report">开始建立我的蓝图</Link>
+                <a className="btn ghost" href="#who">我想先了解谁？</a>
+              </div>
+              <p className="privacy-note">出生信息仅用于生成你的报告 · 结果由你自己保管</p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 每日一言 */}
-      {dailyQuote && (
-        <section className="section quote-section">
-          <div className="section-inner">
-            <div className="quote-card reveal">
-              <div className="quote-mark" aria-hidden="true">“</div>
-              <p className="quote-text">{dailyQuote.quote}</p>
-              <p className="quote-source">—— 金刚老师 · {dailyQuote.source}</p>
+            <div className="orbit reveal" aria-label="生命蓝图视觉示意">
+              <span className="orbit-dot dot-a" />
+              <span className="orbit-dot dot-b" />
+              <span className="orbit-dot dot-c" />
+              <div className="orbit-core">
+                <strong>生命<br />蓝图</strong>
+                <span>一份属于你的清晰说明</span>
+              </div>
             </div>
           </div>
         </section>
-      )}
 
-      {/* 更多探索 */}
-      <section className="section">
-        <div className="section-inner">
-          <div className="section-head reveal">
-            <p className="section-kicker">可选工具</p>
-            <h2 className="section-title">当你有了具体问题，再选择合适的工具</h2>
-            <p className="section-desc">这些工具不是彼此竞争的入口，而是生命蓝图之后的不同观察角度。</p>
-          </div>
-          <div className="explore-track reveal">
-            <a className="explore-card" href="/mbti">
-              <span className="explore-ico">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 4a6 6 0 0 1 6 6c0 2.6-1.4 4.4-3 5.4V18h-6v-2.6C7.4 14.4 6 12.6 6 10a6 6 0 0 1 6-6z" /><path d="M9.5 9l1.6 1.6L14 8M9.5 13.5l1.6-1.6L14 14.5" /></svg>
-              </span>
-              <span className="explore-name">大五人格测评</span>
-            </a>
-            <a className="explore-card" href="/human-design">
-              <span className="explore-ico">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5" /></svg>
-              </span>
-              <span className="explore-name">人类图解析</span>
-            </a>
-            <a className="explore-card" href="/compatibility">
-              <span className="explore-ico">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="8" cy="12" r="4" /><circle cx="16" cy="12" r="4" /></svg>
-              </span>
-              <span className="explore-name">关系合盘</span>
-            </a>
-            <a className="explore-card" href="/dharma">
-              <span className="explore-ico">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z" /><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5" /></svg>
-              </span>
-              <span className="explore-name">静心与阅读</span>
-              <span className="explore-badge">即将上线</span>
-            </a>
-            <a className="explore-card" href="/tools">
-              <span className="explore-ico">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z" /></svg>
-              </span>
-              <span className="explore-name">点亮星图</span>
-              <span className="explore-desc">昌宁茶乡精神图谱共建行动 · 亲子互动工具包</span>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* 关于 */}
-      <section className="section" id="about" style={{ background: "var(--bg-soft)" }}>
-        <div className="section-inner">
-          <div className="section-head reveal">
-            <p className="section-kicker">关于</p>
-            <h2 className="section-title">关于光明喜舍</h2>
-          </div>
-          <div className="about reveal">
-            <div className="about-avatar">
-              <span className="text-3xl" role="img" aria-label="创始人头像">🧘</span>
+        <section className="section" id="who">
+          <div className="shell">
+            <div className="section-head reveal">
+              <div>
+                <p className="eyebrow">ONE PROFILE · MANY QUESTIONS</p>
+                <h2>你现在最想了解谁？</h2>
+              </div>
+              <p>不用先选择八字、人类图或人格测评。先从你真正关心的人开始，系统会在后台选择合适的分析依据。</p>
             </div>
-            <div>
-              <p className="about-text">2016 年起深入研习心理学人格理论、东方传统文化与人类图体系。心理学为基、人类图为骨、传统文化为脉，让多个维度彼此印证，呈现一份真正完整的自我认知报告。目前在大理 · 银桥持续深耕。</p>
+            <div className="who-grid">
+              <Link className="who-card reveal" href="/master-report">
+                <strong>我自己</strong><span>我的优势、节奏、关系方式与下一步</span>
+              </Link>
+              <Link className="who-card reveal" href="/master-report">
+                <strong>我的孩子</strong><span>怎样理解孩子，怎样陪伴他学习与成长</span>
+              </Link>
+              <Link className="who-card reveal" href="/compatibility">
+                <strong>我的伴侣</strong><span>我们为什么靠近，又为什么反复卡住</span>
+              </Link>
+              <Link className="who-card reveal" href="/compatibility">
+                <strong>我的伙伴</strong><span>朋友、合伙人、师生之间如何更好合作</span>
+              </Link>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
+        <section className="section section-tinted" id="paths">
+          <div className="shell">
+            <div className="section-head reveal">
+              <div>
+                <p className="eyebrow">A QUIETLY DEEPER JOURNEY</p>
+                <h2>从一张卡，走向三条路。</h2>
+              </div>
+              <p>免费体验让你先获得具体洞察；完整报告、关系解码和成长工具，再把理解变成下一步。</p>
+            </div>
+            <div className="path-grid">
+              <Link className="path-card reveal" data-no="01" href="/master-report">
+                <span className="tag">SELF</span><h3>生命蓝图</h3><p>把多套分析体系翻译成你真正看得懂的自我说明。</p>
+                <span className="path-arrow">进入蓝图 <span>↗</span></span>
+              </Link>
+              <Link className="path-card reveal" data-no="02" href="/compatibility">
+                <span className="tag">RELATIONSHIP</span><h3>关系解码</h3><p>从“合不合”转向理解彼此的节奏、需要和沟通方式。</p>
+                <span className="path-arrow">进入关系解码 <span>↗</span></span>
+              </Link>
+              <Link className="path-card reveal" data-no="03" href="/tools">
+                <span className="tag">GROWTH</span><h3>陪伴成长</h3><p>把对自己的理解交给成长工具，再继续落实到教育与行动。</p>
+                <span className="path-arrow">选择成长工具 <span>↗</span></span>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section className="section" id="report">
+          <div className="shell">
+            <div className="preview reveal">
+              <div className="preview-intro">
+                <p className="eyebrow">A FREE FIRST LOOK</p>
+                <h2>先给你三条，真的有用的发现。</h2>
+                <p>不是空泛的性格标签，而是能在生活里被你验证的观察。完整报告再把这些线索连接成一张地图。</p>
+                <Link className="btn btn-light" href="/master-report">查看我的蓝图</Link>
+              </div>
+              <div className="report-card">
+                <div className="report-top">
+                  <div><small>示例 · 一位正在寻找节奏的探索者</small><h3>你的能量更适合“深度之后再行动”</h3></div>
+                  <span className="score">86</span>
+                </div>
+                <div className="signal"><span>独处充电</span><strong>82%</strong><div className="bar"><i style={{ width: "82%" }} /></div></div>
+                <div className="signal"><span>结构化表达</span><strong>74%</strong><div className="bar"><i style={{ width: "74%" }} /></div></div>
+                <div className="signal"><span>关系敏感度</span><strong>68%</strong><div className="bar"><i style={{ width: "68%" }} /></div></div>
+                <p className="sample-note">以上为展示用合成样例，不代表任何真实用户。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="quote-band">
+          <div className="shell quote reveal">
+            <p className="eyebrow">THE POINT IS NOT TO PREDICT YOU</p>
+            <blockquote>{dailyQuote?.quote || "真正重要的，不是“你是什么”，而是当你更清楚自己之后，能不能更温柔、更准确地与人相处。"}</blockquote>
+            <cite>— {dailyQuote ? `金刚老师 · ${dailyQuote.source}` : "SoulCode · 灵魂解码"}</cite>
+          </div>
+        </section>
+
+        <section className="section tools-section" id="tools">
+          <div className="shell">
+            <div className="section-head reveal">
+              <div><p className="eyebrow">ONE QUESTION AT A TIME</p><h2>当你有了具体问题，再选择工具。</h2></div>
+              <p>这些工具不是彼此竞争的入口，而是生命蓝图之后的不同观察角度。</p>
+            </div>
+            <div className="tool-grid">
+              {selfTools.map((tool) => (
+                <Link className="tool-card reveal" href={tool.href} key={tool.href}>
+                  <span className="tool-index">0{selfTools.indexOf(tool) + 1}</span>
+                  <strong>{tool.name}</strong><span>{tool.description}</span><b>↗</b>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="section ecosystem" id="ecosystem">
+          <div className="shell">
+            <div className="section-head reveal">
+              <div><p className="eyebrow">FROM SEEING TO LIVING</p><h2>一份画像，三种继续。</h2></div>
+              <p>三个网站不再互相争夺导航位置，而是在你真正需要下一步时彼此接力。</p>
+            </div>
+            <div className="ecosystem-grid">
+              <div className="eco-card reveal"><span className="eco-mark">WHO</span><h3>SoulCode · 灵魂解码</h3><p>看清自己、孩子、伴侣或伙伴是谁。建立生命蓝图，进入关系解码。</p><div className="pill-row"><span>生命蓝图</span><span>关系解码</span></div></div>
+              <a className="eco-card stella reveal" href="https://www.stella-aiedu.com/" target="_blank" rel="noreferrer"><span className="eco-mark">HOW</span><h3>Stella · 教育智囊</h3><p>把对孩子的理解，变成父母能够实践的沟通、反思与教育行动。</p><div className="pill-row"><span>家长课程</span><span>成长工具</span></div></a>
+              <a className="eco-card jianji reveal" href="https://jianjixueyuan.com/" target="_blank" rel="noreferrer"><span className="eco-mark">DO</span><h3>见己学园 · Jianji</h3><p>把孩子的学习画像落实为计划、任务、错题复盘和持续成长。</p><div className="pill-row"><span>学习计划</span><span>AI Tutor</span></div></a>
+            </div>
+            <div className="loop-line reveal"><span>看见</span><i>→</i><span>理解</span><i>→</i><span>陪伴</span><i>→</i><span>成长</span></div>
+          </div>
+        </section>
+
+        <section className="section about-section" id="about">
+          <div className="shell about-layout reveal">
+            <div className="about-mark" aria-hidden="true">◎</div>
+            <div><p className="eyebrow">ABOUT SOULCODE</p><h2>先见己，后见世界和众生。</h2><p>2016 年起深入研习心理学人格理论、东方传统文化与人类图体系。心理学为基、人类图为骨、传统文化为脉，让多个维度彼此印证，呈现一份真正完整的自我认知报告。</p></div>
+          </div>
+        </section>
+      </main>
     </>
   );
 }
