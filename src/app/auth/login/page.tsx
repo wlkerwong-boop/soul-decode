@@ -8,7 +8,7 @@ export const metadata = {
 export default function LoginPage() {
   return (
     <div className="gradient-bg min-h-screen">
-      <main className="min-h-screen flex items-center justify-center px-4 py-16">
+      <main className="min-h-screen flex items-center justify-center px-4 py-16 pt-nav">
         <EmailAuthForm mode="login" />
       </main>
     </div>

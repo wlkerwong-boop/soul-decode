@@ -32,8 +32,8 @@ export default function MBTIPage() {
 
   if (showStart) {
     return (
-      <div className="relative min-h-screen">
-        <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
+      <div className="inner-page gradient-bg relative min-h-screen">
+        <div className="relative z-10 min-h-screen flex items-center justify-center px-6 pt-nav pb-12">
           <div className="max-w-2xl text-center">
             <span className="tag-pill text-xs tracking-widest mb-6 inline-block">心理学测评</span>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-6">
@@ -65,12 +65,12 @@ export default function MBTIPage() {
   const q = mbtiQuestions[current];
 
   return (
-    <div className="relative min-h-screen">
+    <div className="inner-page gradient-bg relative min-h-screen">
       <div className="relative z-10 min-h-screen flex flex-col">
         <div className="w-full h-1 bg-black/30">
           <div className="h-full bg-[var(--text-accent)] transition-all duration-300" style={{ width: progress + '%' }} />
         </div>
-        <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="flex-1 flex items-center justify-center px-6 pt-nav pb-12">
           <div className="max-w-2xl w-full">
             <div className="text-center mb-6">
               <span className="text-sm text-[var(--text-secondary)]">第 {current + 1} / {total} 题</span>

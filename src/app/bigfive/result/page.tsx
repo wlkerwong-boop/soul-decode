@@ -187,91 +187,87 @@ export default function BigFiveResultPage() {
   if (!scores) return null;
 
   return (
-    <div className="gradient-bg min-h-screen px-4 py-8 md:py-12">
-      <div className="max-w-3xl mx-auto">
+    <div className="inner-page gradient-bg min-h-screen px-4 pt-nav pb-16 md:pb-24">
+      <div className="inner-page-container max-w-3xl mx-auto">
         {/* 标题 */}
-        <div className="text-center mb-8">
-          <span className="tag-pill text-xs tracking-widest mb-4 inline-block">IPIP-50 · 大五人格</span>
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">你的<span className="gradient-text">人格画像</span></h1>
-          <p className="text-sm text-[var(--text-secondary)]">基于国际公认的五因素模型 · 科学自我认知</p>
+        <div className="inner-page-header text-center mb-10 md:mb-14">
+          <span className="inner-page-eyebrow">IPIP-50 · 大五人格</span>
+          <h1 className="inner-page-title">你的<span className="inner-page-title-accent">人格画像</span></h1>
+          <p className="inner-page-lead">基于国际公认的五因素模型，整理一份可阅读、可验证的性格观察</p>
         </div>
 
         {/* 雷达图 */}
-        <div className="card-jade p-4 md:p-6 mb-8 flex justify-center">
+        <section className="inner-page-card inner-page-chart mb-10 md:mb-12" aria-labelledby="bigfive-chart-title">
+          <div className="inner-page-section-label" id="bigfive-chart-title">五维轮廓</div>
           <RadarChart scores={scores} />
-        </div>
+          <p className="inner-page-caption">分数呈现的是倾向，不是固定的标签。你可以把它当作一张自我观察的起点。</p>
+        </section>
 
         {/* 五维度卡片 */}
-        <div className="space-y-4 mb-10">
+        <section className="space-y-5 mb-12" aria-labelledby="bigfive-dimensions-title">
+          <div className="inner-page-section-heading">
+            <div>
+              <span className="inner-page-eyebrow">FIVE DIMENSIONS</span>
+              <h2 id="bigfive-dimensions-title">逐项看懂你的倾向</h2>
+            </div>
+            <span className="inner-page-section-note">10–50 分</span>
+          </div>
           {results.map((r) => (
-            <div key={r.dimension} className="card-jade p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <span className="text-sm font-bold text-[var(--text-primary)]">{r.label}</span>
-                  <span className="text-xs text-[var(--text-tertiary)] ml-2">{r.labelEn}</span>
+            <article key={r.dimension} className="inner-page-card inner-page-score-card">
+              <div className="inner-page-score-head">
+                <div className="min-w-0">
+                  <div className="inner-page-score-name">
+                    <span>{r.label}</span>
+                    <span className="inner-page-score-en">{r.labelEn}</span>
+                  </div>
+                  <p className="inner-page-score-kicker">人格维度 · {r.dimension}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold gradient-text">{r.score}</span>
-                  <span className="text-xs text-[var(--text-secondary)]">/ 50</span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                    r.level === '高' ? 'bg-emerald-500/15 text-emerald-400' :
-                    r.level === '中高' ? 'bg-emerald-500/10 text-emerald-500' :
-                    r.level === '中等' ? 'bg-blue-500/10 text-blue-400' :
-                    r.level === '中低' ? 'bg-amber-500/10 text-amber-400' :
-                    'bg-orange-500/10 text-orange-400'
-                  }`}>
+                <div className="inner-page-score-value">
+                  <span className="inner-page-score-number">{r.score}</span>
+                  <span className="inner-page-score-total">/ 50</span>
+                  <span className={`inner-page-level level-${r.level}`
+                  }>
                     {r.level}
                   </span>
                 </div>
               </div>
 
               {/* 分数条 */}
-              <div className="w-full h-1.5 rounded-full bg-[var(--border-color)] mb-3 overflow-hidden">
+              <div className="inner-page-progress" aria-label={`${r.label} ${r.score} 分`}>
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[var(--color-primary)] to-emerald-500 transition-all duration-700"
+                  className="inner-page-progress-fill"
                   style={{ width: `${((r.score - 10) / 40) * 100}%` }}
                 />
               </div>
 
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-                {r.description}
-              </p>
-            </div>
+              <p className="inner-page-score-description">{r.description}</p>
+            </article>
           ))}
-        </div>
+        </section>
 
         {/* 双轨印证引导 */}
-        <div className="card-jade p-6 mb-10 bg-gradient-to-br from-[var(--color-primary)]/8 to-transparent">
-          <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
-            <span className="text-3xl shrink-0">🔮</span>
-            <div className="flex-1">
-              <h3 className="text-base font-bold text-[var(--text-primary)] mb-1">与你的命盘交叉对照</h3>
-              <p className="text-sm text-[var(--text-secondary)]">
-                大五人格从心理学维度刻画你的性格基底，七系统命盘从东方智慧给出命运底色——二者交叉印证，看见更完整的自己。
-              </p>
-            </div>
-            <Link
-              href="/master-report"
-              className="shrink-0 px-5 py-2.5 rounded-lg bg-gradient-to-r from-[var(--color-primary)] to-emerald-600 text-white font-semibold text-sm hover:shadow-lg transition-all whitespace-nowrap"
-            >
-              生成命盘报告 →
-            </Link>
+        <section className="inner-page-card inner-page-next-step mb-12" aria-labelledby="bigfive-next-title">
+          <div className="inner-page-next-mark" aria-hidden="true">↗</div>
+          <div className="flex-1 min-w-0">
+            <span className="inner-page-eyebrow">NEXT STEP</span>
+            <h2 id="bigfive-next-title">把一张测评，放回完整的生命蓝图</h2>
+            <p>
+              大五人格帮助你看见心理倾向，生命蓝图再把出生信息、关系方式与行动节奏放在同一张地图里。
+            </p>
           </div>
-        </div>
+          <Link href="/master-report" className="inner-page-button shrink-0">
+            进入生命蓝图 <span aria-hidden="true">→</span>
+          </Link>
+        </section>
 
         {/* 免责声明 */}
-        <div className="text-center mb-8">
-          <p className="text-xs text-[var(--text-tertiary)] leading-relaxed">
-            {BIGFIVE_DISCLAIMER}
-          </p>
+        <div className="inner-page-disclaimer">
+          <p>{BIGFIVE_DISCLAIMER}</p>
         </div>
 
         {/* 操作按钮 */}
-        <div className="text-center">
-          <button
-            onClick={() => router.push('/bigfive')}
-            className="px-6 py-2.5 rounded-lg border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:border-[var(--color-primary)]/40 transition-all"
-          >
+        <div className="inner-page-actions">
+          <button onClick={() => router.push('/bigfive')} className="inner-page-button secondary">
             ← 重新测评
           </button>
         </div>

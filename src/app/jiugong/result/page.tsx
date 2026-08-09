@@ -27,7 +27,7 @@ export default function JiugongResultPage() {
 
   if (!data) {
     return (
-      <main className="gradient-bg min-h-screen px-4 py-16">
+      <main className="inner-page gradient-bg min-h-screen px-4 py-16 pt-nav">
         <div className="mx-auto max-w-md rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)] p-8 text-center shadow-xl">
           <p className="font-serif text-2xl text-[var(--text-primary)]">还没有本次排盘结果</p>
           <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
@@ -45,7 +45,7 @@ export default function JiugongResultPage() {
   }
 
   return (
-    <main className="gradient-bg min-h-screen px-4 py-8 print:bg-white print:px-0 print:py-0">
+    <main className="inner-page gradient-bg min-h-screen px-4 py-8 pt-nav print:bg-white print:px-0 print:py-0">
       <div className="mx-auto max-w-5xl">
         <header className="relative overflow-hidden rounded-[2rem] border border-[var(--border-color)] bg-[var(--bg-card)]/85 px-6 py-9 text-center shadow-xl backdrop-blur sm:px-10">
           <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-[var(--color-primary)]/10 blur-3xl" />

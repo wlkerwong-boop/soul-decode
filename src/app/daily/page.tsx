@@ -47,7 +47,7 @@ export default function DailyPage() {
   };
 
   return (
-    <div className="py-8 md:py-16 px-4 max-w-3xl mx-auto pt-nav">
+    <div className="inner-page py-8 md:py-16 px-4 max-w-3xl mx-auto pt-nav">
       {/* Header */}
       <div className="text-center mb-10">
         <h1 className="text-3xl md:text-4xl font-bold gradient-text mb-2">每日运势</h1>

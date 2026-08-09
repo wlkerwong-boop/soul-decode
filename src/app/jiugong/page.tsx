@@ -40,7 +40,7 @@ export default function JiugongPage() {
   };
 
   return (
-    <div className="gradient-bg min-h-screen flex items-center justify-center px-4 py-12">
+    <div className="inner-page gradient-bg min-h-screen flex items-center justify-center px-4 py-12 pt-nav">
       <div className="max-w-lg w-full">
 
         {/* 标题区 — 对齐 R1 着陆页视觉 */}

@@ -45,7 +45,7 @@ export default function BigFivePage() {
   // ── 开始页 ──
   if (showStart) {
     return (
-      <div className="gradient-bg min-h-screen flex items-center justify-center px-4">
+      <div className="inner-page gradient-bg min-h-screen flex items-center justify-center px-4 pt-nav pb-12">
         <div className="max-w-2xl text-center">
           <span className="tag-pill text-xs tracking-widest mb-6 inline-block">科学心理学测评</span>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight leading-tight mb-4">
@@ -89,7 +89,7 @@ export default function BigFivePage() {
 
   // ── 答题页 ──
   return (
-    <div className="gradient-bg min-h-screen px-4 py-8 md:py-12">
+    <div className="inner-page gradient-bg min-h-screen px-4 pt-nav pb-16 md:pb-20">
       <div className="max-w-2xl mx-auto">
         {/* 进度条 */}
         <div className="mb-8">

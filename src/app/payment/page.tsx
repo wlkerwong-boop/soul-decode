@@ -86,7 +86,7 @@ export default function PaymentPage() {
 
   if (showShare) {
     return (
-      <div className="min-h-[70vh] px-4 py-12 max-w-3xl mx-auto">
+      <div className="inner-page min-h-[70vh] px-4 py-12 pt-nav max-w-3xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold gradient-text mb-2">📸 分享你的报告</h1>
           <p className="text-sm text-[var(--text-secondary)]">保存到相册，分享给朋友</p>
@@ -106,7 +106,7 @@ export default function PaymentPage() {
 
   if (step === 'success') {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center px-4 py-16">
+      <div className="inner-page min-h-[70vh] flex items-center justify-center px-4 py-16 pt-nav">
         <div className="max-w-sm text-center">
           <div className="text-5xl mb-4">🎉</div>
           <h1 className="text-2xl font-bold gradient-text mb-2">{currentPlan?.name || '支付成功'}!</h1>
@@ -140,7 +140,7 @@ export default function PaymentPage() {
 
   if (step === 'fail') {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center px-4 py-16">
+      <div className="inner-page min-h-[70vh] flex items-center justify-center px-4 py-16 pt-nav">
         <div className="max-w-sm text-center">
           <div className="text-5xl mb-4">😅</div>
           <h1 className="text-2xl font-bold mb-2">支付未成功</h1>
@@ -159,7 +159,7 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="min-h-[70vh] px-4 py-8 md:py-16 max-w-3xl mx-auto">
+    <div className="inner-page min-h-[70vh] px-4 py-8 pt-nav md:py-16 max-w-3xl mx-auto">
       <div className="text-center mb-8 md:mb-12">
         <div className="text-4xl mb-3">💎</div>
         <h1 className="text-2xl md:text-3xl font-bold gradient-text mb-2">选择你的方案</h1>

@@ -42,7 +42,7 @@ export default function MyPage() {
   };
 
   return (
-    <div className="py-12 md:py-16 px-4 md:px-6">
+    <div className="inner-page py-12 md:py-16 px-4 md:px-6 pt-nav">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
