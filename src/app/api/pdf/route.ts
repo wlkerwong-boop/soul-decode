@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer, { Browser } from 'puppeteer';
+import { existsSync } from 'node:fs';
 
 const ALLOWED_ORIGIN = 'https://aisoulcode.cn';
 
@@ -15,10 +16,15 @@ function setCors(response: NextResponse, origin: string | null) {
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
 }
 
-/** 启动 Puppeteer Browser（puppeteer 自带 Chromium，无需系统安装） */
+/** 启动 PDF 浏览器：优先复用服务器已有 Chrome，否则回退 Puppeteer 自带浏览器。 */
 async function launchBrowser(): Promise<Browser> {
+  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+    || process.env.CHROME_PATH
+    || (existsSync('/usr/bin/google-chrome') ? '/usr/bin/google-chrome' : undefined);
+
   return puppeteer.launch({
     headless: true,
+    ...(executablePath ? { executablePath } : {}),
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -162,13 +168,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
-  } catch (error: any) {
-    console.error('[pdf] 生成失败:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[pdf] 生成失败:', message);
     const res = NextResponse.json(
       {
         error: 'PDF 生成失败',
-        message: error.message || '未知错误',
-        hint: error.message?.includes('Chrome') || error.message?.includes('chromium')
+        message: message || '未知错误',
+        hint: message.includes('Chrome') || message.includes('chromium')
           ? '服务器未安装 Chromium。请运行: apt-get install -y chromium-browser'
           : undefined,
       },
