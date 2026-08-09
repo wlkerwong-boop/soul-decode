@@ -42,26 +42,27 @@ function PersonForm({ label, pfx, data, setData }: {
   );
 
   return (
-    <div className="space-y-3 p-4 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-color)]">
-      <h3 className="text-sm font-bold text-[var(--text-accent)]">{label}</h3>
-      <div className="grid grid-cols-5 gap-1.5">
+    <div className="soul-editorial-person">
+      <h3 className="soul-editorial-person-title">{label}</h3>
+      <div className="soul-editorial-person-grid grid grid-cols-2 sm:grid-cols-5 gap-2">
         <Sel value={data[pfx+'_year']} set={v=>setData(pfx+'_year',v)} opts={YEARS} ph="年份" />
         <Sel value={data[pfx+'_month']} set={v=>setData(pfx+'_month',v)} opts={MONTHS} ph="月" />
         <Sel value={data[pfx+'_day']} set={v=>setData(pfx+'_day',v)} opts={DAYS} ph="日" />
         <Sel value={data[pfx+'_hour']} set={v=>setData(pfx+'_hour',v)} opts={HOURS} ph="时" />
         <Sel value={data[pfx+'_minute']} set={v=>setData(pfx+'_minute',v)} opts={MINUTES} ph="分" />
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
         <Sel value={continent} set={v=>{setData(pfx+'_continent',v);setData(pfx+'_country','');setData(pfx+'_province','');setData(pfx+'_city','');}} opts={continents} ph="大洲" cls="input-jade text-sm py-2" />
         {continent ? <Sel value={country} set={v=>{setData(pfx+'_country',v);setData(pfx+'_province','');setData(pfx+'_city','');}} opts={continentCountries} ph="国家" cls="input-jade text-sm py-2" /> : <div />}
         {isChina && country ? <Sel value={province} set={v=>{setData(pfx+'_province',v);setData(pfx+'_city','');}} opts={provinces} ph="省份" cls="input-jade text-sm py-2" /> : (country && !isChina) ? <Sel value={city} set={v=>setData(pfx+'_city',v)} opts={cities} ph="城市" cls="input-jade text-sm py-2" /> : <div />}
         {isChina && province ? <Sel value={city} set={v=>setData(pfx+'_city',v)} opts={cities} ph="城市" cls="input-jade text-sm py-2" /> : <div />}
       </div>
-      <div className="flex gap-2">
+      <div className="soul-editorial-person-actions">
         {['男','女'].map(g => (
           <button key={g} onClick={()=>setData(pfx+'_gender',g)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${gender===g ? 'bg-[var(--text-accent)] text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)] hover:bg-opacity-80'}`}>
-            {g==='男'?'👨 男':'👩 女'}
+            className="soul-editorial-gender"
+            data-active={gender===g}>
+            {g}
           </button>
         ))}
       </div>
@@ -158,27 +159,29 @@ export default function HepanPage() {
   const handleRetry = useCallback(() => { submit(); }, [type, form, childrenCount]);
 
   return (
-    <div className="inner-page gradient-bg min-h-screen px-4 py-8 pt-nav">
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2"><span className="gradient-text">关系合盘</span></h1>
-          <p className="text-sm text-[var(--text-secondary)]">八字合婚·人类图合盘·占星比较盘</p>
+    <div className="inner-page soul-editorial-page min-h-screen px-4 py-8 pt-nav">
+      <div className="soul-editorial-shell">
+        <div className="soul-editorial-header">
+          <p className="soul-editorial-eyebrow">Relationship Reading</p>
+          <h1 className="soul-editorial-title"><span className="gradient-text">关系合盘</span></h1>
+          <p className="soul-editorial-lead">八字合婚 · 人类图合盘 · 占星比较盘</p>
         </div>
 
-        <div className="flex justify-center gap-2 mb-6">
+        <div className="soul-editorial-tabs soul-editorial-tabs--three max-w-xl mx-auto mb-8">
           {[
-            {v:'couple',l:'💑 情侣合盘'},
-            {v:'family',l:'👨‍👩‍👧‍👦 家庭合盘'},
-            {v:'friend',l:'🤝 朋友合盘'},
+            {v:'couple',l:'情侣合盘'},
+            {v:'family',l:'家庭合盘'},
+            {v:'friend',l:'朋友合盘'},
           ].map(t=>(
             <button key={t.v} onClick={()=>setType(t.v)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${type===t.v ? 'bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)] border border-[var(--border-color)]'}`}>
+              className="soul-editorial-tab"
+              data-active={type===t.v}>
               {t.l}
             </button>
           ))}
         </div>
 
-        <div className="card-jade p-6 space-y-4">
+        <div className="soul-editorial-form space-y-6 max-w-4xl mx-auto">
           {type === 'couple' && (
             <><PersonForm label="你" pfx="a" data={form} setData={setData} /><PersonForm label="对方" pfx="b" data={form} setData={setData} /></>
           )}
@@ -213,7 +216,7 @@ export default function HepanPage() {
 
           <button onClick={submit} disabled={loading||!(canSubmit('a')||canSubmit('m'))}
             title={type==='family'&&childrenCount===0?'请先添加至少一个孩子':undefined}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-bold text-base hover:shadow-lg transition-all disabled:opacity-40">
+            className="soul-editorial-button w-full mt-2">
             {loading ? '⌛ 正在合盘...' : '✦ 生成合盘报告'}
           </button>
           {error && !loading && !isStreaming && <p className="text-red-400 text-sm text-center">{error}</p>}
@@ -248,9 +251,10 @@ export default function HepanPage() {
         )}
 
         {report && (
-          <div className="card-jade p-6 mt-6">
-            <h2 className="text-xl font-bold mb-4">📜 合盘解读</h2>
-            <div className="prose prose-sm md:prose-base prose-invert whitespace-pre-wrap leading-relaxed">
+          <div className="soul-editorial-surface p-6 md:p-8 mt-10 max-w-4xl mx-auto">
+            <p className="soul-editorial-section-label mb-2">Reading</p>
+            <h2 className="text-2xl font-semibold mb-5">合盘解读</h2>
+            <div className="prose prose-sm md:prose-base whitespace-pre-wrap leading-relaxed">
               {report.split('\n').map((line, i) => (<p key={i} className="mb-3">{line || ' '}</p>))}
             </div>
           </div>
@@ -258,8 +262,8 @@ export default function HepanPage() {
 
         {/* ── R4: 下一步 CTA ── */}
         {report && (
-          <div className="card-jade p-6 mt-6 text-center">
-            <div className="text-3xl mb-3">🏫</div>
+          <div className="soul-editorial-surface p-6 md:p-8 mt-6 text-center max-w-4xl mx-auto">
+            <div className="text-2xl mb-3">✦</div>
             <h3 className="text-lg font-bold mb-2">见己学园 · 家庭成长助手</h3>
             <p className="text-sm text-[var(--text-secondary)] mb-4 max-w-lg mx-auto">
               即将上线：个性化学习方案、成长图谱追踪、家长课程匹配。三站联动，从看清孩子到陪好孩子。

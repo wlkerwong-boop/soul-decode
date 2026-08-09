@@ -213,50 +213,51 @@ export default function HumanDesignPage() {
   };
 
   return (
-    <div className="inner-page py-8 md:py-16 px-4 max-w-5xl mx-auto pt-nav">
-      <div className="text-center mb-12 md:mb-16">
-        <p className="text-[10px] md:text-[11px] tracking-[0.4em] uppercase text-[var(--text-accent)] opacity-70 mb-4 font-medium">Human Design</p>
-        <h1 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight text-[var(--text-primary)]">
+    <div className="inner-page soul-editorial-page py-8 md:py-16 px-4 mx-auto pt-nav">
+      <div className="soul-editorial-shell">
+      <div className="soul-editorial-header">
+        <p className="soul-editorial-eyebrow">Human Design</p>
+        <h1 className="soul-editorial-title">
           人类图 · <span className="gradient-text">Human Design</span>
         </h1>
-        <p className="text-sm md:text-base text-[var(--text-secondary)] opacity-90">输入出生信息，生成你的专属能量地图</p>
+        <p className="soul-editorial-lead">输入出生信息，生成你的专属能量地图</p>
       </div>
 
       {!hd && (
-        <div className="grid md:grid-cols-5 gap-6 md:gap-12 items-start max-w-4xl mx-auto mb-10">
-          <div className="md:col-span-2 hidden md:block pt-3">
-            <h2 className="text-2xl font-bold text-[var(--text-primary)] leading-snug mb-5">
+        <div className="soul-editorial-grid mb-10">
+          <div className="soul-editorial-intro hidden md:block">
+            <p className="soul-editorial-section-label">你的出生配置</p>
+            <h2>
               你的出厂设定，<br />一生的<span className="gradient-text">能量地图</span>
             </h2>
-            <p className="text-sm text-[var(--text-secondary)] opacity-80 leading-loose mb-7">
+            <p>
               人类图融合占星、易经、卡巴拉与脉轮系统，揭示你的类型、人生角色与内在权威——你与生俱来的决策方式与天赋通道。
             </p>
-            <div className="flex flex-wrap gap-2.5 mb-9">
+            <div className="soul-editorial-tags">
               {['类型','人生角色','内在权威','天赋通道','中心定义'].map(s => (
-                <span key={s} className="px-3.5 py-1.5 rounded-full bg-[var(--bg-highlight)] border border-[var(--border-accent)] text-xs text-[var(--text-accent)] opacity-90">
+                <span key={s} className="soul-editorial-tag">
                   {s}
                 </span>
               ))}
             </div>
-            <div className="flex items-center gap-2.5 text-xs text-[var(--text-tertiary)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--text-accent)] opacity-70" />
+            <div className="soul-editorial-privacy">
               出生信息仅用于排盘，绝不外泄
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="md:col-span-3 card-jade p-7 md:p-10 space-y-6">
+          <form onSubmit={handleSubmit} className="soul-editorial-form space-y-6">
           <div>
-            <label className="block text-sm text-[var(--text-secondary)] mb-2 font-medium">出生日期 *</label>
+            <label className="soul-editorial-form-label">出生日期 *</label>
             <div className="grid grid-cols-3 gap-3">
-              <select className="input-jade" value={form.year} onChange={e => setForm(p => ({...p, year: e.target.value}))} required>
+              <select className="input-jade soul-editorial-field" value={form.year} onChange={e => setForm(p => ({...p, year: e.target.value}))} required>
                 <option value="">年</option>
                 {years.map(y => <option key={y} value={y}>{y}</option>)}
               </select>
-              <select className="input-jade" value={form.month} onChange={e => setForm(p => ({...p, month: e.target.value}))} required>
+              <select className="input-jade soul-editorial-field" value={form.month} onChange={e => setForm(p => ({...p, month: e.target.value}))} required>
                 <option value="">月</option>
                 {[...Array(12)].map((_, i) => <option key={i+1} value={String(i+1)}>{i+1}月</option>)}
               </select>
-              <select className="input-jade" value={form.day} onChange={e => setForm(p => ({...p, day: e.target.value}))} required>
+              <select className="input-jade soul-editorial-field" value={form.day} onChange={e => setForm(p => ({...p, day: e.target.value}))} required>
                 <option value="">日</option>
                 {[...Array(31)].map((_, i) => <option key={i+1} value={String(i+1)}>{i+1}日</option>)}
               </select>
@@ -264,15 +265,15 @@ export default function HumanDesignPage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm text-[var(--text-secondary)] mb-2 font-medium">出生时间</label>
-              <select className="input-jade" value={form.hour} onChange={e => setForm(p => ({...p, hour: e.target.value}))}>
+              <label className="soul-editorial-form-label">出生时间</label>
+              <select className="input-jade soul-editorial-field" value={form.hour} onChange={e => setForm(p => ({...p, hour: e.target.value}))}>
                 <option value="">不确定</option>
                 {[...Array(24)].map((_, i) => <option key={i} value={String(i).padStart(2,'0')}>{String(i).padStart(2,'0')}:00</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm text-[var(--text-secondary)] mb-2 font-medium">时区</label>
-              <select className="input-jade" value={form.timezone} onChange={e => setForm(p => ({...p, timezone: e.target.value}))}>
+              <label className="soul-editorial-form-label">时区</label>
+              <select className="input-jade soul-editorial-field" value={form.timezone} onChange={e => setForm(p => ({...p, timezone: e.target.value}))}>
                 <option value="Asia/Shanghai">中国标准时间</option>
                 <option value="America/Los_Angeles">美国洛杉矶</option>
                 <option value="America/New_York">美国纽约</option>
@@ -284,14 +285,14 @@ export default function HumanDesignPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm text-[var(--text-secondary)] mb-2 font-medium">出生地点</label>
-            <select className="input-jade" value={form.location} onChange={e => setForm(p => ({...p, location: e.target.value}))}>
+            <label className="soul-editorial-form-label">出生地点</label>
+            <select className="input-jade soul-editorial-field" value={form.location} onChange={e => setForm(p => ({...p, location: e.target.value}))}>
               <option value="">选择省份</option>
               {PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
           {error && <div className="text-sm text-red-500">{error}</div>}
-          <button type="submit" className="btn-jade w-full py-3.5 rounded-2xl" disabled={loading}>
+          <button type="submit" className="soul-editorial-button w-full" disabled={loading}>
             {loading ? '计算中...' : '✦ 生成我的人类图'}
           </button>
         </form>
@@ -534,6 +535,7 @@ export default function HumanDesignPage() {
 
         </div>
       )}
+      </div>
     </div>
   );
 }
