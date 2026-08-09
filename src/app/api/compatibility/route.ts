@@ -7,6 +7,7 @@
 import { NextRequest } from 'next/server';
 import { calculateBodygraph } from '@/lib/hd';
 import { getBirthCoords, CITY_TZ } from '@/data/cities';
+import { takeSseLines } from '@/lib/sse';
 import { calculateReportBazi } from '@/lib/report-depth';
 import {
   buildCompatibilitySegments,
@@ -126,8 +127,9 @@ export async function POST(request: NextRequest) {
               const { done, value } = await reader.read();
               if (done) break;
               buffer += decoder.decode(value, { stream: true });
-              const lines = buffer.split('\n');
-              buffer = lines.pop() || '';
+              const parsedLines = takeSseLines(buffer);
+              const lines = parsedLines.lines;
+              buffer = parsedLines.remainder;
               for (const line of lines) {
                 const text = line.trim();
                 if (!text.startsWith('data: ')) continue;
@@ -139,6 +141,17 @@ export async function POST(request: NextRequest) {
                   if (content) controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
                 } catch {}
               }
+            }
+            for (const line of takeSseLines(buffer, true).lines) {
+              const text = line.trim();
+              if (!text.startsWith('data: ')) continue;
+              const payload = text.slice(6);
+              if (payload === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(payload);
+                const content = parsed.choices?.[0]?.delta?.content || '';
+                if (content) controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
+              } catch {}
             }
           }
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));

@@ -3,6 +3,7 @@ import { NextRequest } from 'next/server';
 import { getBirthCoords } from '@/data/cities';
 import { calculateBodygraph } from '@/lib/hd';
 import { calcPlanetPositions } from '@/lib/astrology';
+import { takeSseLines } from '@/lib/sse';
 import {
   buildPersonalReportSegments,
   calculateReportBazi,
@@ -165,8 +166,9 @@ export async function POST(req: NextRequest) {
             const { done, value } = await reader.read();
             if (done) break;
             buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
+            const parsedLines = takeSseLines(buffer);
+            const lines = parsedLines.lines;
+            buffer = parsedLines.remainder;
             for (const line of lines) {
               if (!line.startsWith('data: ')) continue;
               const payload = line.slice(6).trim();
@@ -180,6 +182,19 @@ export async function POST(req: NextRequest) {
                 }
               } catch {}
             }
+          }
+          for (const line of takeSseLines(buffer, true).lines) {
+            if (!line.startsWith('data: ')) continue;
+            const payload = line.slice(6).trim();
+            if (payload === '[DONE]') continue;
+            try {
+              const parsed = JSON.parse(payload);
+              const content = parsed.choices?.[0]?.delta?.content;
+              if (content) {
+                reportText += content;
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
+              }
+            } catch {}
           }
         }
 
