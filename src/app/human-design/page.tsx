@@ -114,16 +114,16 @@ const CHANNEL_DESC: Record<string, string> = {
 };
 
 const PROFILE_DESC: Record<string, {conscious:string,unconscious:string,desc:string}> = {
-  '1/3': {conscious:'研究者',unconscious:'实验者',desc:'你生来就需要深入研究和亲身体验。只有当你充分理解并亲手尝试过，你才能真正相信。你的内在有着实验精神，不怕试错，这是你成长的必经之路。'},
-  '1/4': {conscious:'研究者',unconscious:'社交者',desc:'你通过深入研究建立坚实的知识基础，然后通过社交网络分享给需要的人。你的朋友和人脉是你价值的放大器，你的知识为他人所用。'},
-  '2/4': {conscious:'隐士',unconscious:'社交者',desc:'你天生就有某种才华，但你自己往往不觉得它有多特别。这个天赋需要被他人发现和邀请才能充分发挥。你独处时充电，社交时发光。'},
-  '3/4': {conscious:'实验者',unconscious:'社交者',desc:'你通过不断地尝试、犯错、学习来成长。每一次失败都是宝贵的数据。你对新鲜事物充满好奇，通过广泛的人脉传递你的经验。'},
-  '4/1': {conscious:'社交者',unconscious:'研究者',desc:'你通过人脉网络传播你深入研究的成果。你的朋友就是你的机遇。你对认定的领域有超乎常人的专注和深度。'},
-  '4/6': {conscious:'社交者',unconscious:'人生典范',desc:'你生来就是要成为他人的榜样。前半生你可能在试错中摸索，但30岁之后，你的人生经验和智慧会成为他人的指路明灯。'},
-  '5/1': {conscious:'异端者',unconscious:'研究者',desc:'你天生就是解决问题的专家。别人有难题时会自然来找你。你的知识储备为实践服务，你的答案总是实用而有效。'},
-  '5/2': {conscious:'异端者',unconscious:'隐士',desc:'你的天赋在关键时刻会被召唤出来。平时你可能喜欢独处，但当问题出现时，你能给出超乎寻常的解决方案。'},
-  '6/2': {conscious:'人生典范',unconscious:'隐士',desc:'你像一个活在屋顶上的观察者。前30年你在高处俯瞰人生，积累智慧和经验。之后你被邀请下来展示你的领悟，成为他人的榜样。'},
-  '6/3': {conscious:'人生典范',unconscious:'实验者',desc:'你的人生是一本丰富的教科书。通过大量的经历和试错，你最终会提炼出宝贵的人生智慧，并愿意与他人坦诚分享。'},
+  '1/3': {conscious:'研究者',unconscious:'实验者',desc:'您生来就需要深入研究和亲身体验。只有当您充分理解并亲手尝试过，您才能真正相信。您的内在有着实验精神，不怕试错，这是您成长的必经之路。'},
+  '1/4': {conscious:'研究者',unconscious:'社交者',desc:'您通过深入研究建立坚实的知识基础，然后通过社交网络分享给需要的人。您的朋友和人脉是您价值的放大器，您的知识为他人所用。'},
+  '2/4': {conscious:'隐士',unconscious:'社交者',desc:'您天生就有某种才华，但您自己往往不觉得它有多特别。这个天赋需要被他人发现和邀请才能充分发挥。您独处时充电，社交时发光。'},
+  '3/4': {conscious:'实验者',unconscious:'社交者',desc:'您通过不断地尝试、犯错、学习来成长。每一次失败都是宝贵的数据。您对新鲜事物充满好奇，通过广泛的人脉传递您的经验。'},
+  '4/1': {conscious:'社交者',unconscious:'研究者',desc:'您通过人脉网络传播您深入研究的成果。您的朋友就是您的机遇。您对认定的领域有超乎常人的专注和深度。'},
+  '4/6': {conscious:'社交者',unconscious:'人生典范',desc:'您生来就是要成为他人的榜样。前半生您可能在试错中摸索，但30岁之后，您的人生经验和智慧会成为他人的指路明灯。'},
+  '5/1': {conscious:'异端者',unconscious:'研究者',desc:'您天生就是解决问题的专家。别人有难题时会自然来找您。您的知识储备为实践服务，您的答案总是实用而有效。'},
+  '5/2': {conscious:'异端者',unconscious:'隐士',desc:'您的天赋在关键时刻会被召唤出来。平时您可能喜欢独处，但当问题出现时，您能给出超乎寻常的解决方案。'},
+  '6/2': {conscious:'人生典范',unconscious:'隐士',desc:'您像一个活在屋顶上的观察者。前30年您在高处俯瞰人生，积累智慧和经验。之后您被邀请下来展示您的领悟，成为他人的榜样。'},
+  '6/3': {conscious:'人生典范',unconscious:'实验者',desc:'您的人生是一本丰富的教科书。通过大量的经历和试错，您最终会提炼出宝贵的人生智慧，并愿意与他人坦诚分享。'},
 };
 
 const currentYear = new Date().getFullYear();
@@ -174,19 +174,19 @@ export default function HumanDesignPage() {
   const ti = hd ? TYPE_INFO[hd.type] : null;
 
   const TYPE_ADVICE: Record<string, {strategyDetail:string,signatureDetail:string,notSelfDetail:string}> = {
-    'Generator': {strategyDetail:'等待事情来找你，用身体感受（荐骨的"嗯哼"回应）来判断是否投入。',signatureDetail:'找到让你满足的事情并持续投入，那是你生命能量的正确流向。',notSelfDetail:'停下来，不要强迫自己做不想做的事。你的挫败感是明确的信号。'},
-    'Manifesting Generator': {strategyDetail:'等待回应，但一旦得到肯定的响应就快速启动。你能同时处理多件事情。',signatureDetail:'满足感来自高效地完成你热爱的事情，同时体验多重成就。',notSelfDetail:'挫败感告诉你正在被催促或做了错误的选择。给自己空间。'},
-    'Projector': {strategyDetail:'不要主动出击。等待正确的认可和邀请，那时你的天赋才会被真正看见和需要。',signatureDetail:'当你被正确的人认可和邀请时的成就感，证明你走在正确的路上。',notSelfDetail:'如果你感到苦涩，说明你又在主动推销自己而不是等待被邀请。退后一步。'},
-    'Manifestor': {strategyDetail:'你可以直接发起行动，但请记得告知相关的人——这会让你的道路顺畅，减少不必要的阻力。',signatureDetail:'内在的平静是你走对路的最可靠信号。如果你感到愤怒，停下来。',notSelfDetail:'愤怒提醒你：要么没有告知他人，要么被阻止了行动。你需要重新获得主动权。'},
-    'Reflector': {strategyDetail:'不要着急下结论。等待完整28天的月亮周期，让事情自然展开和沉淀后再做决定。',signatureDetail:'不要追求常态的满足，允许自己为每一次新的体验感到惊喜。',notSelfDetail:'失望是正常的，你没有义务去反映和满足所有人的期待。给自己时间和空间。'},
+    'Generator': {strategyDetail:'等待事情来找您，用身体感受（荐骨的"嗯哼"回应）来判断是否投入。',signatureDetail:'找到让您满足的事情并持续投入，那是您生命能量的正确流向。',notSelfDetail:'停下来，不要强迫自己做不想做的事。您的挫败感是明确的信号。'},
+    'Manifesting Generator': {strategyDetail:'等待回应，但一旦得到肯定的响应就快速启动。您能同时处理多件事情。',signatureDetail:'满足感来自高效地完成您热爱的事情，同时体验多重成就。',notSelfDetail:'挫败感告诉您正在被催促或做了错误的选择。给自己空间。'},
+    'Projector': {strategyDetail:'不要主动出击。等待正确的认可和邀请，那时您的天赋才会被真正看见和需要。',signatureDetail:'当您被正确的人认可和邀请时的成就感，证明您走在正确的路上。',notSelfDetail:'如果您感到苦涩，说明您又在主动推销自己而不是等待被邀请。退后一步。'},
+    'Manifestor': {strategyDetail:'您可以直接发起行动，但请记得告知相关的人——这会让您的道路顺畅，减少不必要的阻力。',signatureDetail:'内在的平静是您走对路的最可靠信号。如果您感到愤怒，停下来。',notSelfDetail:'愤怒提醒您：要么没有告知他人，要么被阻止了行动。您需要重新获得主动权。'},
+    'Reflector': {strategyDetail:'不要着急下结论。等待完整28天的月亮周期，让事情自然展开和沉淀后再做决定。',signatureDetail:'不要追求常态的满足，允许自己为每一次新的体验感到惊喜。',notSelfDetail:'失望是正常的，您没有义务去反映和满足所有人的期待。给自己时间和空间。'},
   };
 
   const CROSS_DESC: Record<string, string> = {
-    '55/23': '你带着改变世界的频率而来。你的情感深度和表达能力结合，使你能将内在的觉醒转化为外在的影响。你的挑战是在正确的时间被正确的人看见。',
-    '41/9': '你的人生主题是关于新开始和专注。你对新体验的渴望与你专注细节的天赋相结合，使你能在每个新的周期中精确地投入你的能量。',
-    '35/3': '你的人生主题是关于变化和探索。你的好奇心驱使你不断体验新事物，而你的实验精神确保你在每次变化中都能学习和成长。',
-    '56/24': '你的人生主题是关于解惑和传播。你的好奇心驱使你探索生命的奥秘，而你的思考能力使你能够将复杂的概念简化为可分享的智慧。',
-    '28/60': '你的人生主题是关于为意义而战。你在寻找生命的意义，在挣扎的过程中获得深刻的洞见，最终找到属于自己的答案。',
+    '55/23': '您带着改变世界的频率而来。您的情感深度和表达能力结合，使您能将内在的觉醒转化为外在的影响。您的挑战是在正确的时间被正确的人看见。',
+    '41/9': '您的人生主题是关于新开始和专注。您对新体验的渴望与您专注细节的天赋相结合，使您能在每个新的周期中精确地投入您的能量。',
+    '35/3': '您的人生主题是关于变化和探索。您的好奇心驱使您不断体验新事物，而您的实验精神确保您在每次变化中都能学习和成长。',
+    '56/24': '您的人生主题是关于解惑和传播。您的好奇心驱使您探索生命的奥秘，而您的思考能力使您能够将复杂的概念简化为可分享的智慧。',
+    '28/60': '您的人生主题是关于为意义而战。您在寻找生命的意义，在挣扎的过程中获得深刻的洞见，最终找到属于自己的答案。',
   };
 
   const centers = [
@@ -203,13 +203,13 @@ export default function HumanDesignPage() {
 
   const getAuthorityDetail = () => {
     const a = hd?.authority || '';
-    if (a.includes('情绪')) return '你的情绪中心有定义，这意味着你的情绪是一个波动的过程——从高到低，持续变化。正确的决策不是在你感觉好的时候做，也不是在你感觉不好的时候做，而是等到情绪回归"清明"的那一刻。这个过程可能需要数小时到数天不等。关键：不要在情绪波峰或波谷做重要决定。';
-    if (a.includes('荐骨')) return '你的荐骨中心（骶骨）是你最可靠的决策工具。问自己一个是非题，关注腹部的即时身体反应——"嗯哼"表示肯定（温暖、扩张感），"嗯..."表示否定（收缩、停滞感）。这个回应是即时的，但注意不要被头脑的分析干扰。训练自己信任这个身体智慧。';
-    if (a.includes('直觉')) return '你的直觉来自脾中心，它是瞬间的、转瞬即逝的"知道"。这个信号在当下出现，不需要逻辑分析。如果你错过了它，就放下，下一个直觉会在你需要的时候再来。信任你的第一印象和本能反应。';
-    if (a.includes('意志力')) return '你的意志力中心有定义，你的决策来自于内心的渴望和承诺能力。问自己："我真的想这样做吗？我有能力完成吗？"如果两个答案都是肯定的，你就可以依靠你的意志力去实现它。';
-    if (a.includes('自我投射')) return '你需要通过说话来理清自己的思路。找一个信任的人，把问题说出来——在你表达的过程中，答案会自然而然地浮出水面。你的G中心和喉咙中心相连，表达即知晓。';
-    if (a.includes('外在')) return '你无法仅靠自己做出最佳决策。你的头脑可能充满了各种可能性，但你需要借助他人的视角来筛选和确认。找1-2个你信任、了解你的人，把你的情况说出来，听听他们的反馈。';
-    return '作为反映者，你的所有中心都是开放的。你的决策需要完整28天的月亮周期——让月亮经过所有64个闸门之后再回来看你的问题。不要被任何人的催促或时间表影响。';
+    if (a.includes('情绪')) return '您的情绪中心有定义，这意味着您的情绪是一个波动的过程——从高到低，持续变化。正确的决策不是在您感觉好的时候做，也不是在您感觉不好的时候做，而是等到情绪回归"清明"的那一刻。这个过程可能需要数小时到数天不等。关键：不要在情绪波峰或波谷做重要决定。';
+    if (a.includes('荐骨')) return '您的荐骨中心（骶骨）是您最可靠的决策工具。问自己一个是非题，关注腹部的即时身体反应——"嗯哼"表示肯定（温暖、扩张感），"嗯..."表示否定（收缩、停滞感）。这个回应是即时的，但注意不要被头脑的分析干扰。训练自己信任这个身体智慧。';
+    if (a.includes('直觉')) return '您的直觉来自脾中心，它是瞬间的、转瞬即逝的"知道"。这个信号在当下出现，不需要逻辑分析。如果您错过了它，就放下，下一个直觉会在您需要的时候再来。信任您的第一印象和本能反应。';
+    if (a.includes('意志力')) return '您的意志力中心有定义，您的决策来自于内心的渴望和承诺能力。问自己："我真的想这样做吗？我有能力完成吗？"如果两个答案都是肯定的，您就可以依靠您的意志力去实现它。';
+    if (a.includes('自我投射')) return '您需要通过说话来理清自己的思路。找一个信任的人，把问题说出来——在您表达的过程中，答案会自然而然地浮出水面。您的G中心和喉咙中心相连，表达即知晓。';
+    if (a.includes('外在')) return '您无法仅靠自己做出最佳决策。您的头脑可能充满了各种可能性，但您需要借助他人的视角来筛选和确认。找1-2个您信任、了解您的人，把您的情况说出来，听听他们的反馈。';
+    return '作为反映者，您的所有中心都是开放的。您的决策需要完整28天的月亮周期——让月亮经过所有64个闸门之后再回来看您的问题。不要被任何人的催促或时间表影响。';
   };
 
   return (
@@ -220,18 +220,18 @@ export default function HumanDesignPage() {
         <h1 className="soul-editorial-title">
           人类图 · <span className="gradient-text">Human Design</span>
         </h1>
-        <p className="soul-editorial-lead">输入出生信息，生成你的专属能量地图</p>
+        <p className="soul-editorial-lead">输入出生信息，生成您的专属能量地图</p>
       </div>
 
       {!hd && (
         <div className="soul-editorial-grid mb-10">
           <div className="soul-editorial-intro hidden md:block">
-            <p className="soul-editorial-section-label">你的出生配置</p>
+            <p className="soul-editorial-section-label">您的出生配置</p>
             <h2>
-              你的出厂设定，<br />一生的<span className="gradient-text">能量地图</span>
+              您的出厂设定，<br />一生的<span className="gradient-text">能量地图</span>
             </h2>
             <p>
-              人类图融合占星、易经、卡巴拉与脉轮系统，揭示你的类型、人生角色与内在权威——你与生俱来的决策方式与天赋通道。
+              人类图融合占星、易经、卡巴拉与脉轮系统，揭示您的类型、人生角色与内在权威——您与生俱来的决策方式与天赋通道。
             </p>
             <div className="soul-editorial-tags">
               {['类型','人生角色','内在权威','天赋通道','中心定义'].map(s => (
@@ -333,7 +333,7 @@ export default function HumanDesignPage() {
             <div className="bg-gradient-to-r from-[var(--text-accent)]/10 to-transparent p-6 md:p-8 flex items-center gap-6">
               <div className="text-5xl flex-shrink-0">{ti?.emoji || '🧬'}</div>
               <div>
-                <div className="text-sm text-[var(--text-accent)] font-medium mb-1">你的类型</div>
+                <div className="text-sm text-[var(--text-accent)] font-medium mb-1">您的类型</div>
                 <h2 className="text-3xl md:text-4xl font-bold gradient-text mb-2">{hd.type}</h2>
                 <p className="text-sm text-[var(--text-secondary)]">{ti?.desc}</p>
               </div>
@@ -376,19 +376,19 @@ export default function HumanDesignPage() {
               </div>
               <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)]">
                 <div className="text-xs text-[var(--text-accent)] font-medium mb-2">✅ 签名 — 做对事的感觉</div>
-                <p className="text-sm">当你依循策略和内在权威生活时，你会自然体验到<strong> {hd.signature} </strong>。{(TYPE_ADVICE[hd.type] || TYPE_ADVICE['Projector']).signatureDetail}</p>
+                <p className="text-sm">当您依循策略和内在权威生活时，您会自然体验到<strong> {hd.signature} </strong>。{(TYPE_ADVICE[hd.type] || TYPE_ADVICE['Projector']).signatureDetail}</p>
               </div>
               <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)]">
                 <div className="text-xs text-[var(--text-accent)] font-medium mb-2">⚠️ 非自我 — 偏离的信号</div>
-                <p className="text-sm">当你偏离自己的策略时，你会感受到<strong className="text-red-500"> {hd.notSelfTheme} </strong>。这是你内在的警报：{(TYPE_ADVICE[hd.type] || TYPE_ADVICE['Projector']).notSelfDetail}</p>
+                <p className="text-sm">当您偏离自己的策略时，您会感受到<strong className="text-red-500"> {hd.notSelfTheme} </strong>。这是您内在的警报：{(TYPE_ADVICE[hd.type] || TYPE_ADVICE['Projector']).notSelfDetail}</p>
               </div>
             </div>
           </div>
 
           {/* ===== S4: Authority ===== */}
           <div id="hd-s4" className="card-jade p-6">
-            <h3 className="text-lg font-bold gradient-text mb-2">⚖️ 内在权威 — 你正确的决策方式</h3>
-            <p className="text-xs text-[var(--text-secondary)] mb-4">你的内在权威是<strong>{hd.authority}</strong>。这是你做出正确人生决策的可靠内在工具。</p>
+            <h3 className="text-lg font-bold gradient-text mb-2">⚖️ 内在权威 — 您正确的决策方式</h3>
+            <p className="text-xs text-[var(--text-secondary)] mb-4">您的内在权威是<strong>{hd.authority}</strong>。这是您做出正确人生决策的可靠内在工具。</p>
             <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-sm leading-relaxed">
               {getAuthorityDetail()}
             </div>
@@ -396,13 +396,13 @@ export default function HumanDesignPage() {
 
           {/* ===== S5: Profile ===== */}
           <div id="hd-s5" className="card-jade p-6">
-            <h3 className="text-lg font-bold gradient-text mb-2">🎭 人生角色 {hd.profile} — 你与世界互动的方式</h3>
+            <h3 className="text-lg font-bold gradient-text mb-2">🎭 人生角色 {hd.profile} — 您与世界互动的方式</h3>
             {(() => {
               const info = PROFILE_DESC[hd.profile];
               return (
                 <div>
-                  <p className="text-xs text-[var(--text-secondary)] mb-3">意识人格（你认识到的自己）：<strong>{info?.conscious || '—'}</strong> ｜ 设计人格（底层驱动力）：<strong>{info?.unconscious || '—'}</strong></p>
-                  <p className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-sm leading-relaxed">{info?.desc || '你的人生角色组合是独特的。'}</p>
+                  <p className="text-xs text-[var(--text-secondary)] mb-3">意识人格（您认识到的自己）：<strong>{info?.conscious || '—'}</strong> ｜ 设计人格（底层驱动力）：<strong>{info?.unconscious || '—'}</strong></p>
+                  <p className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-sm leading-relaxed">{info?.desc || '您的人生角色组合是独特的。'}</p>
                 </div>
               );
             })()}
@@ -434,7 +434,7 @@ export default function HumanDesignPage() {
           {/* ===== S7: Gates & Channels ===== */}
           <div id="hd-s7" className="card-jade p-6">
             <h3 className="text-lg font-bold gradient-text mb-2">🚪 闸门与通道</h3>
-            <p className="text-xs text-[var(--text-secondary)] mb-4">你激活了 <strong>{hd.activatedGates.length}个闸门</strong> · <strong>{hd.channels.length}条通道</strong></p>
+            <p className="text-xs text-[var(--text-secondary)] mb-4">您激活了 <strong>{hd.activatedGates.length}个闸门</strong> · <strong>{hd.channels.length}条通道</strong></p>
 
             {hd.channels.length > 0 && (
               <div className="mb-6">
@@ -470,14 +470,14 @@ export default function HumanDesignPage() {
           <div id="hd-s8" className="card-jade p-6 text-center" style={{borderColor:'var(--border-accent)'}}>
             <div className="text-3xl mb-2">🎯</div>
             <h3 className="text-lg font-bold gradient-text mb-1">{hd.incarnationCross}</h3>
-            <p className="text-xs text-[var(--text-secondary)] mb-4">你此生的核心主题与方向</p>
+            <p className="text-xs text-[var(--text-secondary)] mb-4">您此生的核心主题与方向</p>
             <p className="max-w-xl mx-auto text-sm text-[var(--text-secondary)] leading-relaxed p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)]">
               {(() => {
                 const cross = hd.incarnationCross;
                 for (const [key, desc] of Object.entries(CROSS_DESC)) {
                   if (cross.includes(key)) return desc;
                 }
-                return '你的轮回交叉代表了你此生的独特使命。结合你的类型、权威和人生角色，你的存在本身就是对他人的贡献。生命的意义在活出自己中自然呈现。';
+                return '您的轮回交叉代表了您此生的独特使命。结合您的类型、权威和人生角色，您的存在本身就是对他人的贡献。生命的意义在活出自己中自然呈现。';
               })()}
             </p>
           </div>
@@ -485,14 +485,14 @@ export default function HumanDesignPage() {
           {/* ===== S9: Signature & Not-Self ===== */}
           <div id="hd-s9" className="grid md:grid-cols-2 gap-4">
             <div className="card-jade p-5 border-l-4" style={{borderLeftColor:'var(--text-accent)'}}>
-              <div className="text-xs text-[var(--text-accent)] font-medium mb-1">✅ 当你正确运作时</div>
+              <div className="text-xs text-[var(--text-accent)] font-medium mb-1">✅ 当您正确运作时</div>
               <div className="text-2xl font-bold gradient-text">{hd.signature}</div>
-              <p className="text-xs text-[var(--text-secondary)] mt-1">这是你依循内在权威和策略生活时的自然状态</p>
+              <p className="text-xs text-[var(--text-secondary)] mt-1">这是您依循内在权威和策略生活时的自然状态</p>
             </div>
             <div className="card-jade p-5 border-l-4" style={{borderLeftColor:'#ef4444'}}>
-              <div className="text-xs text-red-500 font-medium mb-1">⚠️ 当你偏离策略时</div>
+              <div className="text-xs text-red-500 font-medium mb-1">⚠️ 当您偏离策略时</div>
               <div className="text-2xl font-bold text-red-500">{hd.notSelfTheme}</div>
-              <p className="text-xs text-[var(--text-secondary)] mt-1">这是一个信号，提醒你停下来检视是否在正确地做自己</p>
+              <p className="text-xs text-[var(--text-secondary)] mt-1">这是一个信号，提醒您停下来检视是否在正确地做自己</p>
             </div>
           </div>
 
@@ -500,18 +500,18 @@ export default function HumanDesignPage() {
           <div id="hd-s10" className="card-jade p-6">
             <h3 className="text-lg font-bold gradient-text mb-2">🔗 定义类型 — 能量中心的连接方式</h3>
             <p className="text-sm leading-relaxed p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)]">
-              {hd.definition === 'None' && '你的所有中心都是开放的（反映者）。你像一面镜子，反射周围环境的能量。你不需要固守任何身份，你的天赋是在不同环境中做真实的自己。'}
-              {hd.definition === 'Single' && '你所有定义的中心通过通道连接在一起，形成一个完整的能量整体。你的特质是连贯的、一致的。你在做自己时不会被内外拉扯。'}
-              {hd.definition === 'Split' && '你的定义中心形成了两个或多个独立的能量集群。这意味着你内在有不同的"子人格"，在不同的生活领域展现出不同的特质。这不是矛盾，而是丰富。'}
-              {hd.definition === 'Triple Split' && '你的定义中心形成了三个独立的能量集群。你是一个多面向的人，在不同的场合展现出截然不同的面向。这需要你花更多时间整合内在的各个部分。'}
-              {hd.definition === 'Quadruple Split' && '你的定义中心形成了四个独立的能量集群。你拥有极为丰富的内在面向，但这也意味着你很容易被他人影响和改变方向。找到稳定的核心是关键。'}
+              {hd.definition === 'None' && '您的所有中心都是开放的（反映者）。您像一面镜子，反射周围环境的能量。您不需要固守任何身份，您的天赋是在不同环境中做真实的自己。'}
+              {hd.definition === 'Single' && '您所有定义的中心通过通道连接在一起，形成一个完整的能量整体。您的特质是连贯的、一致的。您在做自己时不会被内外拉扯。'}
+              {hd.definition === 'Split' && '您的定义中心形成了两个或多个独立的能量集群。这意味着您内在有不同的"子人格"，在不同的生活领域展现出不同的特质。这不是矛盾，而是丰富。'}
+              {hd.definition === 'Triple Split' && '您的定义中心形成了三个独立的能量集群。您是一个多面向的人，在不同的场合展现出截然不同的面向。这需要您花更多时间整合内在的各个部分。'}
+              {hd.definition === 'Quadruple Split' && '您的定义中心形成了四个独立的能量集群。您拥有极为丰富的内在面向，但这也意味着您很容易被他人影响和改变方向。找到稳定的核心是关键。'}
             </p>
           </div>
 
           {/* ===== AI Interpretation ===== */}
           <div id="hd-interpret" className="card-jade p-6">
             <h3 className="text-lg font-bold gradient-text mb-2">📜 AI 深度解读</h3>
-            <p className="text-xs text-[var(--text-secondary)] mb-4">结合你的类型、权威、中心、闸门，生成个性化的深度文本</p>
+            <p className="text-xs text-[var(--text-secondary)] mb-4">结合您的类型、权威、中心、闸门，生成个性化的深度文本</p>
             {!interp && !interpLoading && (
               <div className="text-center py-6">
                 <button onClick={handleInterpret} className="btn-jade">📜 生成完整解读报告</button>

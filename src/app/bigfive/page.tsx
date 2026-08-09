@@ -54,8 +54,8 @@ export default function BigFivePage() {
             <span className="gradient-text">科学测评</span>
           </h1>
           <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed mb-6 max-w-xl mx-auto">
-            基于国际公认的大五人格模型（IPIP-50），50 道题目科学评估你的五大人格维度。
-            心理学黄金标准，与你的命盘双轨印证。
+            基于国际公认的大五人格模型（IPIP-50），50 道题目科学评估您的五大人格维度。
+            心理学黄金标准，与您的命盘双轨印证。
           </p>
           <div className="grid grid-cols-5 gap-2 md:gap-3 mb-8 max-w-xl mx-auto text-xs md:text-sm">
             {[

@@ -218,7 +218,7 @@ export default function EmailAuthForm({ mode }: EmailAuthFormProps) {
         href="/master-report"
         className="mt-4 flex items-center justify-center w-full rounded-xl border border-[var(--border-accent)] bg-[var(--bg-highlight)] px-5 py-3 text-sm font-semibold text-[var(--text-accent)] hover:opacity-90 transition-opacity"
       >
-        ✦ 无需登录，直接进入人生总览排盘
+        ✦ 先体验人生总览（注册后保存到账号）
       </a>
 
       <div className="mt-6 text-center text-sm text-[var(--text-secondary)]">

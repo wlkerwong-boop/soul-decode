@@ -41,8 +41,8 @@ export default function MBTIPage() {
               <span className="text-[var(--text-accent)]">深度测试</span>
             </h1>
             <p className="text-lg text-[var(--text-secondary)] leading-relaxed mb-8">
-              48道精心设计的选择题，揭示你的性格密码。
-              了解你的能量来源、认知方式、决策模式和生活风格。<br />
+              48道精心设计的选择题，揭示您的性格密码。
+              了解您的能量来源、认知方式、决策模式和生活风格。<br />
               <span className="text-sm opacity-60">约需 5-8 分钟完成</span>
             </p>
             <div className="grid grid-cols-4 gap-4 mb-10 text-sm">

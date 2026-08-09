@@ -7,7 +7,7 @@ import "./homepage.css";
 type DailyQuote = { quote: string; source: string };
 
 const selfTools = [
-  { name: "人类图解析", description: "看见你的能量与决策方式", href: "/human-design" },
+  { name: "人类图解析", description: "看见您的能量与决策方式", href: "/human-design" },
   { name: "大五人格", description: "理解稳定的人格倾向", href: "/bigfive" },
   { name: "MBTI 测评", description: "从一个具体问题开始", href: "/mbti" },
 ];
@@ -83,13 +83,13 @@ export default function HomePage() {
               <p className="eyebrow">A PERSONAL MAP FOR A CLEARER LIFE</p>
               <h1 id="hero-title">先看见自己，<br /><em>再走近彼此。</em></h1>
               <p className="hero-lead">
-                灵魂解码不是把你归类成一个标签，而是把复杂的你，整理成一张可以阅读、可以对话、可以继续成长的生命蓝图。
+                灵魂解码不是把您归类成一个标签，而是把复杂的您，整理成一张可以阅读、可以对话、可以继续成长的生命蓝图。
               </p>
               <div className="actions">
                 <Link className="btn" href="/master-report">开始建立我的蓝图</Link>
                 <a className="btn ghost" href="#who">我想先了解谁？</a>
               </div>
-              <p className="privacy-note">出生信息仅用于生成你的报告 · 结果由你自己保管</p>
+              <p className="privacy-note">出生信息仅用于生成您的报告 · 结果由您自己保管</p>
             </div>
             <div className="orbit reveal" aria-label="生命蓝图视觉示意">
               <span className="orbit-dot dot-a" />
@@ -97,7 +97,7 @@ export default function HomePage() {
               <span className="orbit-dot dot-c" />
               <div className="orbit-core">
                 <strong>生命<br />蓝图</strong>
-                <span>一份属于你的清晰说明</span>
+                <span>一份属于您的清晰说明</span>
               </div>
             </div>
           </div>
@@ -108,9 +108,9 @@ export default function HomePage() {
             <div className="section-head reveal">
               <div>
                 <p className="eyebrow">ONE PROFILE · MANY QUESTIONS</p>
-                <h2>你现在最想了解谁？</h2>
+                <h2>您现在最想了解谁？</h2>
               </div>
-              <p>不用先选择八字、人类图或人格测评。先从你真正关心的人开始，系统会在后台选择合适的分析依据。</p>
+              <p>不用先选择八字、人类图或人格测评。先从您真正关心的人开始，系统会在后台选择合适的分析依据。</p>
             </div>
             <div className="who-grid">
               <Link className="who-card reveal" href="/master-report">
@@ -136,11 +136,11 @@ export default function HomePage() {
                 <p className="eyebrow">A QUIETLY DEEPER JOURNEY</p>
                 <h2>从一张卡，走向三条路。</h2>
               </div>
-              <p>免费体验让你先获得具体洞察；完整报告、关系解码和成长工具，再把理解变成下一步。</p>
+              <p>免费体验让您先获得具体洞察；完整报告、关系解码和成长工具，再把理解变成下一步。</p>
             </div>
             <div className="path-grid">
               <Link className="path-card reveal" data-no="01" href="/master-report">
-                <span className="tag">SELF</span><h3>生命蓝图</h3><p>把多套分析体系翻译成你真正看得懂的自我说明。</p>
+                <span className="tag">SELF</span><h3>生命蓝图</h3><p>把多套分析体系翻译成您真正看得懂的自我说明。</p>
                 <span className="path-arrow">进入蓝图 <span>↗</span></span>
               </Link>
               <Link className="path-card reveal" data-no="02" href="/compatibility">
@@ -160,13 +160,13 @@ export default function HomePage() {
             <div className="preview reveal">
               <div className="preview-intro">
                 <p className="eyebrow">A FREE FIRST LOOK</p>
-                <h2>先给你三条，真的有用的发现。</h2>
-                <p>不是空泛的性格标签，而是能在生活里被你验证的观察。完整报告再把这些线索连接成一张地图。</p>
+                <h2>先给您三条，真的有用的发现。</h2>
+                <p>不是空泛的性格标签，而是能在生活里被您验证的观察。完整报告再把这些线索连接成一张地图。</p>
                 <Link className="btn btn-light" href="/master-report">查看我的蓝图</Link>
               </div>
               <div className="report-card">
                 <div className="report-top">
-                  <div><small>示例 · 一位正在寻找节奏的探索者</small><h3>你的能量更适合“深度之后再行动”</h3></div>
+                  <div><small>示例 · 一位正在寻找节奏的探索者</small><h3>您的能量更适合“深度之后再行动”</h3></div>
                   <span className="score">86</span>
                 </div>
                 <div className="signal"><span>独处充电</span><strong>82%</strong><div className="bar"><i style={{ width: "82%" }} /></div></div>
@@ -181,7 +181,7 @@ export default function HomePage() {
         <section className="quote-band">
           <div className="shell quote reveal">
             <p className="eyebrow">THE POINT IS NOT TO PREDICT YOU</p>
-            <blockquote>{dailyQuote?.quote || "真正重要的，不是“你是什么”，而是当你更清楚自己之后，能不能更温柔、更准确地与人相处。"}</blockquote>
+              <blockquote>{dailyQuote?.quote || "真正重要的，不是“您是什么”，而是当您更清楚自己之后，能不能更温柔、更准确地与人相处。"}</blockquote>
             <cite>— {dailyQuote ? `金刚老师 · ${dailyQuote.source}` : "SoulCode · 灵魂解码"}</cite>
           </div>
         </section>
@@ -189,7 +189,7 @@ export default function HomePage() {
         <section className="section tools-section" id="tools">
           <div className="shell">
             <div className="section-head reveal">
-              <div><p className="eyebrow">ONE QUESTION AT A TIME</p><h2>当你有了具体问题，再选择工具。</h2></div>
+              <div><p className="eyebrow">ONE QUESTION AT A TIME</p><h2>当您有了具体问题，再选择工具。</h2></div>
               <p>这些工具不是彼此竞争的入口，而是生命蓝图之后的不同观察角度。</p>
             </div>
             <div className="tool-grid">
@@ -207,7 +207,7 @@ export default function HomePage() {
           <div className="shell">
             <div className="section-head reveal">
               <div><p className="eyebrow">FROM SEEING TO LIVING</p><h2>一份画像，三种继续。</h2></div>
-              <p>三个网站不再互相争夺导航位置，而是在你真正需要下一步时彼此接力。</p>
+              <p>三个网站不再互相争夺导航位置，而是在您真正需要下一步时彼此接力。</p>
             </div>
             <div className="ecosystem-grid">
               <div className="eco-card reveal"><span className="eco-mark">WHO</span><h3>SoulCode · 灵魂解码</h3><p>看清自己、孩子、伴侣或伙伴是谁。建立生命蓝图，进入关系解码。</p><div className="pill-row"><span>生命蓝图</span><span>关系解码</span></div></div>

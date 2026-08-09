@@ -71,7 +71,7 @@ export default function ShareReferral() {
         {/* Share section */}
         {shareCode ? (
           <div>
-            <p className="text-xs text-[var(--text-secondary)] mb-2">你的分享码：</p>
+            <p className="text-xs text-[var(--text-secondary)] mb-2">您的分享码：</p>
             <div className="flex gap-2">
               <div className="flex-1 px-4 py-2.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-accent)] text-center font-mono font-bold text-lg tracking-widest text-[var(--text-primary)]">
                 {shareCode}

@@ -217,7 +217,7 @@ export default function MasterPage() {
           <h1 className="soul-editorial-title">
             人生<span className="gradient-text">总览</span>
           </h1>
-          <p className="soul-editorial-lead">一次输入 · 七个维度交叉印证，看见完整的你</p>
+          <p className="soul-editorial-lead">一次输入 · 七个维度交叉印证，看见完整的您</p>
           {(report || data) && !showQuickInput && (
             <button
               type="button"
@@ -263,7 +263,7 @@ export default function MasterPage() {
                 七套古老智慧，<br />交叉印证<span className="gradient-text">同一件事</span>
               </h2>
               <p>
-                你的出生信息将同时经由七个系统运算——东方命理与西方能量学彼此校验，输出一份互为印证的完整报告。
+                您的出生信息将同时经由七个系统运算——东方命理与西方能量学彼此校验，输出一份互为印证的完整报告。
               </p>
               <div className="soul-editorial-tags">
                 {['八字','人类图','占星','紫微斗数','五运六气','流年','人生规划'].map(s => (
@@ -382,7 +382,7 @@ export default function MasterPage() {
           <div className="max-w-lg mx-auto mb-8">
             {data.hd && (
               <div className="card-jade p-6 text-center mb-6">
-                <div className="text-sm text-[var(--text-tertiary)] mb-2">你的出厂配置预览</div>
+                <div className="text-sm text-[var(--text-tertiary)] mb-2">您的出厂配置预览</div>
                 <div className="print-hidden mb-4">
                   <BodygraphSVG definedCenters={data.hd.definedCenters||[]} activatedGates={data.hd.activatedGates||[]} channels={data.hd.channels||[]} centerDefinition={{}} />
                 </div>
@@ -393,14 +393,14 @@ export default function MasterPage() {
                   人生角色 {data.hd.profile} · {data.hd.authority}
                 </p>
                 <p className="text-xs text-[var(--text-tertiary)] mt-3">
-                  这只是人类图系统的冰山一角——你的完整报告涵盖 7 大古老智慧系统，含深度图文解读。
+                  这只是人类图系统的冰山一角——您的完整报告涵盖 7 大古老智慧系统，含深度图文解读。
                 </p>
               </div>
             )}
 
             <div className="text-center">
               <p className="text-sm text-[var(--text-secondary)] mb-3">
-                这只是你 7 个系统中的 <strong>1 个的 1/10</strong>
+                这只是您 7 个系统中的 <strong>1 个的 1/10</strong>
               </p>
               <button onClick={() => setShowFullReport(true)}
                 className="px-8 py-4 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-semibold text-base hover:shadow-lg transition-all transform hover:scale-105">
@@ -495,6 +495,50 @@ export default function MasterPage() {
                         clone.querySelectorAll('script').forEach(s => s.remove());
                         // 移除不需要的元素
                         clone.querySelectorAll('.no-print, nav, .voice-reader-btn').forEach(el => el.remove());
+                        // page.setContent() 使用 about:blank，必须把页面资源改成绝对地址，
+                        // 否则本地字体和样式会加载失败，中文在 PDF 中会变成空白方框。
+                        const head = clone.querySelector('head');
+                        if (head) {
+                          const base = document.createElement('base');
+                          base.href = `${window.location.origin}/`;
+                          head.prepend(base);
+                        }
+                        clone.querySelectorAll<HTMLLinkElement>('link[href]').forEach((link) => {
+                          const href = link.getAttribute('href');
+                          if (href) link.setAttribute('href', new URL(href, window.location.href).href);
+                        });
+                        if (!clone.querySelector('meta[charset]') && head) {
+                          const charset = document.createElement('meta');
+                          charset.setAttribute('charset', 'utf-8');
+                          head.prepend(charset);
+                        }
+                        // 将样式表内联到 PDF 文档，并把其中的字体/图片 URL 改成绝对地址。
+                        // 这样 Puppeteer 在 about:blank 中也能完整保留内页排版。
+                        const stylesheetLinks = Array.from(
+                          clone.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"][href]')
+                        );
+                        await Promise.all(stylesheetLinks.map(async (link) => {
+                          const href = link.getAttribute('href');
+                          if (!href) return;
+                          const absoluteHref = new URL(href, window.location.href).href;
+                          try {
+                            const cssResponse = await fetch(absoluteHref);
+                            if (!cssResponse.ok) return;
+                            const cssText = await cssResponse.text();
+                            const inlinedCss = cssText.replace(/url\(([^)]+)\)/g, (match, rawValue) => {
+                              const raw = String(rawValue).trim();
+                              const quote = raw.startsWith('"') || raw.startsWith("'") ? raw[0] : '';
+                              const value = quote ? raw.slice(1, -1) : raw;
+                              if (/^(data:|https?:|blob:|#)/i.test(value)) return match;
+                              return `url("${new URL(value, absoluteHref).href}")`;
+                            });
+                            const style = document.createElement('style');
+                            style.textContent = inlinedCss;
+                            link.replaceWith(style);
+                          } catch {
+                            // 保留绝对地址的 link 作为回退，避免单个样式表阻断 PDF。
+                          }
+                        }));
                         const html = '<!DOCTYPE html>' + clone.outerHTML;
                         const resp = await fetch('/api/pdf', {
                           method: 'POST',

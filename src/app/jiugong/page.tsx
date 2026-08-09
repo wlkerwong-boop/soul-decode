@@ -53,7 +53,7 @@ export default function JiugongPage() {
             九宫<span className="gradient-text">人生说明书</span>
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mt-2 leading-relaxed">
-            输入姓名与生日，即刻生成你的 13 维度天赋地图、性格密码与 90 年人生节律
+            输入姓名与生日，即刻生成您的 13 维度天赋地图、性格密码与 90 年人生节律
           </p>
         </div>
 
@@ -66,10 +66,10 @@ export default function JiugongPage() {
             </label>
             <input
               value={name} onChange={e => setName(e.target.value)}
-              placeholder="你的本名（如：罗大方）" maxLength={4}
+              placeholder="您的本名（如：罗大方）" maxLength={4}
               className="input-jade text-base py-3 px-4 rounded-xl"
             />
-            <p className="text-[10px] text-[var(--text-tertiary)] mt-1">请使用出生时父母所取的名字，这是你生命蓝图的第一份约定</p>
+            <p className="text-[10px] text-[var(--text-tertiary)] mt-1">请使用出生时父母所取的名字，这是您生命蓝图的第一份约定</p>
           </div>
 
           {/* 出生日期 */}
@@ -111,7 +111,7 @@ export default function JiugongPage() {
             disabled={!valid || loading}
             className="w-full py-3.5 rounded-xl font-semibold text-lg bg-gradient-to-r from-[var(--color-primary)] to-emerald-600 text-white hover:shadow-lg hover:shadow-[var(--color-primary)]/25 hover:-translate-y-0.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
-            {loading ? '⏳ 正在为你绘制人生地图…' : '🔮 查看我的生命蓝图'}
+            {loading ? '⏳ 正在为您绘制人生地图…' : '🔮 查看我的生命蓝图'}
           </button>
 
           {error && (

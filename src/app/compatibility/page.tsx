@@ -183,7 +183,7 @@ export default function HepanPage() {
 
         <div className="soul-editorial-form space-y-6 max-w-4xl mx-auto">
           {type === 'couple' && (
-            <><PersonForm label="你" pfx="a" data={form} setData={setData} /><PersonForm label="对方" pfx="b" data={form} setData={setData} /></>
+            <><PersonForm label="您" pfx="a" data={form} setData={setData} /><PersonForm label="对方" pfx="b" data={form} setData={setData} /></>
           )}
           {type === 'family' && (
             <div className="space-y-3">
@@ -211,7 +211,7 @@ export default function HepanPage() {
             </div>
           )}
           {type === 'friend' && (
-            <><PersonForm label="你" pfx="a" data={form} setData={setData} /><PersonForm label="朋友" pfx="b" data={form} setData={setData} /></>
+            <><PersonForm label="您" pfx="a" data={form} setData={setData} /><PersonForm label="朋友" pfx="b" data={form} setData={setData} /></>
           )}
 
           <button onClick={submit} disabled={loading||!(canSubmit('a')||canSubmit('m'))}

@@ -62,7 +62,7 @@ export default function MBTIResultPage() {
         <div className="max-w-3xl mx-auto">
           {/* Result Header */}
           <div className="inner-page-header text-center mb-12 md:mb-14">
-            <span className="tag-pill text-xs tracking-widest mb-4 inline-block">你的性格类型</span>
+            <span className="tag-pill text-xs tracking-widest mb-4 inline-block">您的性格类型</span>
             <div className="text-6xl font-bold text-[var(--text-accent)] mb-4 tracking-widest">{type}</div>
             <h1 className="inner-page-title mb-2">{info.name}</h1>
             <p className="text-xl text-[var(--text-secondary)]">{info.title}</p>
@@ -99,7 +99,7 @@ export default function MBTIResultPage() {
           <div className="inner-page-card p-6 md:p-8 mb-8">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-bold text-[var(--text-accent)]">性格描述</h2>
-              <TTSReader text={`你的MBTI类型是${type}，${info.name}型，${info.title}。${info.description}。你的座右铭是：${info.motto}。`} label="听描述" />
+              <TTSReader text={`您的MBTI类型是${type}，${info.name}型，${info.title}。${info.description}。您的座右铭是：${info.motto}。`} label="听描述" />
             </div>
             <p className="text-[var(--text-secondary)] leading-relaxed">{info.description}</p>
             <div className="mt-6 text-center">
@@ -115,7 +115,7 @@ export default function MBTIResultPage() {
             </div>
             {!aiContent && !aiLoading && (
               <div className="text-center py-6">
-                <p className="text-sm text-[var(--text-secondary)] mb-4">让AI基于你的测试结果，生成一份深度的性格分析报告</p>
+                <p className="text-sm text-[var(--text-secondary)] mb-4">让AI基于您的测试结果，生成一份深度的性格分析报告</p>
                 <button onClick={generateAIInterpretation} className="px-6 py-3 bg-[var(--text-accent)] text-black font-bold rounded-lg hover:opacity-90 transition-all">
                   生成AI深度解读
                 </button>
@@ -124,7 +124,7 @@ export default function MBTIResultPage() {
             {aiLoading && (
               <div className="text-center py-6">
                 <div className="inline-block w-6 h-6 border-2 border-[var(--text-accent)] border-t-transparent rounded-full animate-spin mb-2" />
-                <p className="text-sm text-[var(--text-secondary)]">AI正在解读你的性格...</p>
+                <p className="text-sm text-[var(--text-secondary)]">AI正在解读您的性格...</p>
               </div>
             )}
             {aiError && (

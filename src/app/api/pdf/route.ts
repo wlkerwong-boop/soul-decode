@@ -110,6 +110,18 @@ export async function POST(req: NextRequest) {
         });
       }
 
+      // 中文字体是异步加载的；先等待字体完成，再生成 PDF。
+      await page.evaluate(async () => {
+        if (document.fonts?.ready) await document.fonts.ready;
+      });
+      await new Promise(resolve => setTimeout(resolve, 400));
+      const fontReady = await page.evaluate(() =>
+        document.fonts ? document.fonts.check('16px "LXGW WenKai"') : true
+      );
+      if (!fontReady) {
+        console.warn('[pdf] LXGW WenKai 未完成加载，将使用系统中文字体回退');
+      }
+
       // 等待图表渲染（SVG 和 Canvas）
       await page.evaluate(() => {
         return new Promise<void>((resolve) => {

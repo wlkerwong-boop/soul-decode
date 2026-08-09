@@ -913,7 +913,7 @@ export default function BirthInputForm() {
                 border: '1px solid rgba(201,169,110,0.15)',
               }}
             >
-              <p className="text-sm text-[var(--text-accent)] mb-1 text-center">☕ 如果这份报告对你有帮助</p>
+              <p className="text-sm text-[var(--text-accent)] mb-1 text-center">☕ 如果这份报告对您有帮助</p>
               <p className="text-xs text-[var(--text-secondary)] mb-4 text-center">
                 打赏一杯咖啡，支持我们持续精进算法
               </p>
@@ -944,7 +944,7 @@ export default function BirthInputForm() {
                 }}
               >
                 <p className="text-xs text-[var(--text-secondary)] mb-2">
-                  或者输入朋友给你的免费码
+                  或者输入朋友给您的免费码
                 </p>
                 <div className="flex gap-2 max-w-xs mx-auto">
                   <input

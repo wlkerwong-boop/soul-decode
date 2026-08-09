@@ -24,7 +24,7 @@ describe('jiugong print report', () => {
     expect(tabsSource).toContain('buildRelationshipDetails');
     expect(tabsSource).toContain('个人年度四层关系详解');
     expect(tabsSource).toContain('为什么这样判断');
-    expect(tabsSource).toContain('与你的个人结构如何结合');
+    expect(tabsSource).toContain('与您的个人结构如何结合');
     expect(tabsSource).toContain('行动建议');
   });
 

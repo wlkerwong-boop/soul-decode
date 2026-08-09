@@ -29,7 +29,7 @@ describe('SoulCode homepage production contract', () => {
   it('uses a consistent second-person voice throughout the homepage copy', () => {
     const html = renderToStaticMarkup(<HomePage />);
 
-    expect(html).toContain('你的');
-    expect(html).not.toContain('您的');
+    expect(html).toContain('您的');
+    expect(html).not.toContain('你的');
   });
 });

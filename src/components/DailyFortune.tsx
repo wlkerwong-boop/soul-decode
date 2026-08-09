@@ -65,7 +65,7 @@ export default function DailyFortune({ dayMaster, dayMasterElement, pillars, zod
           <div className="text-center">
             <p className="text-sm text-[var(--text-secondary)] mb-4">
               {dayMaster
-                ? '基于你的八字日主，生成今日专属运势指引'
+                ? '基于您的八字日主，生成今日专属运势指引'
                 : '请先生成八字报告，即可查看每日运势'}
             </p>
             {dayMaster && (

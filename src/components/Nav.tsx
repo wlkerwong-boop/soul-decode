@@ -71,7 +71,10 @@ export default function Nav() {
               )}
             </div>
           ) : (
-            <a href="/auth/login" className="px-4 py-1.5 rounded-lg bg-[var(--text-accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity">登录</a>
+            <div className="flex items-center gap-2">
+              <a href="/auth/login" className="px-3 py-1.5 rounded-lg border border-[var(--border-accent)] text-[var(--text-accent)] text-sm font-medium hover:bg-[var(--bg-highlight)] transition-colors">登录</a>
+              <a href="/auth/register" className="px-4 py-1.5 rounded-lg bg-[var(--text-accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity">注册保存报告</a>
+            </div>
           )}
         </div>
 
@@ -95,7 +98,10 @@ export default function Nav() {
                 <button onClick={handleLogout} className="px-3 py-2 rounded-lg text-sm text-red-500 text-left hover:bg-[var(--bg-highlight)]">退出登录</button>
               </>
             ) : (
-              <a href="/auth/login" className="px-4 py-2 rounded-lg bg-[var(--text-accent)] text-white text-sm font-medium text-center" onClick={() => setMobileNavOpen(false)}>登录</a>
+              <div className="grid grid-cols-2 gap-2">
+                <a href="/auth/login" className="px-4 py-2 rounded-lg border border-[var(--border-accent)] text-[var(--text-accent)] text-sm font-medium text-center" onClick={() => setMobileNavOpen(false)}>登录</a>
+                <a href="/auth/register" className="px-4 py-2 rounded-lg bg-[var(--text-accent)] text-white text-sm font-medium text-center" onClick={() => setMobileNavOpen(false)}>注册保存报告</a>
+              </div>
             )}
           </div>
         </div>

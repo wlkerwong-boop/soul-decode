@@ -192,7 +192,7 @@ export default function BigFiveResultPage() {
         {/* 标题 */}
         <div className="inner-page-header text-center mb-10 md:mb-14">
           <span className="inner-page-eyebrow">IPIP-50 · 大五人格</span>
-          <h1 className="inner-page-title">你的<span className="inner-page-title-accent">人格画像</span></h1>
+          <h1 className="inner-page-title">您的<span className="inner-page-title-accent">人格画像</span></h1>
           <p className="inner-page-lead">基于国际公认的五因素模型，整理一份可阅读、可验证的性格观察</p>
         </div>
 
@@ -200,7 +200,7 @@ export default function BigFiveResultPage() {
         <section className="inner-page-card inner-page-chart mb-10 md:mb-12" aria-labelledby="bigfive-chart-title">
           <div className="inner-page-section-label" id="bigfive-chart-title">五维轮廓</div>
           <RadarChart scores={scores} />
-          <p className="inner-page-caption">分数呈现的是倾向，不是固定的标签。你可以把它当作一张自我观察的起点。</p>
+              <p className="inner-page-caption">分数呈现的是倾向，不是固定的标签。您可以把它当作一张自我观察的起点。</p>
         </section>
 
         {/* 五维度卡片 */}
@@ -208,7 +208,7 @@ export default function BigFiveResultPage() {
           <div className="inner-page-section-heading">
             <div>
               <span className="inner-page-eyebrow">FIVE DIMENSIONS</span>
-              <h2 id="bigfive-dimensions-title">逐项看懂你的倾向</h2>
+              <h2 id="bigfive-dimensions-title">逐项看懂您的倾向</h2>
             </div>
             <span className="inner-page-section-note">10–50 分</span>
           </div>
@@ -252,7 +252,7 @@ export default function BigFiveResultPage() {
             <span className="inner-page-eyebrow">NEXT STEP</span>
             <h2 id="bigfive-next-title">把一张测评，放回完整的生命蓝图</h2>
             <p>
-              大五人格帮助你看见心理倾向，生命蓝图再把出生信息、关系方式与行动节奏放在同一张地图里。
+              大五人格帮助您看见心理倾向，生命蓝图再把出生信息、关系方式与行动节奏放在同一张地图里。
             </p>
           </div>
           <Link href="/master-report" className="inner-page-button shrink-0">
