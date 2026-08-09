@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer, { Browser } from 'puppeteer';
 import { existsSync } from 'node:fs';
+import { isAllowedPdfUrl } from '@/lib/pdf-url-policy';
 
 const ALLOWED_ORIGIN = 'https://aisoulcode.cn';
 
@@ -66,6 +67,15 @@ export async function POST(req: NextRequest) {
     if (!html && !url) {
       const res = NextResponse.json(
         { error: '请提供 html 或 url 参数' },
+        { status: 400 }
+      );
+      setCors(res, origin);
+      return res;
+    }
+
+    if (url && !isAllowedPdfUrl(url)) {
+      const res = NextResponse.json(
+        { error: 'url 只允许访问 SoulCode 自有 HTTPS 页面' },
         { status: 400 }
       );
       setCors(res, origin);
