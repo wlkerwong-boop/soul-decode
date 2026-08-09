@@ -2,14 +2,17 @@
 
 import { getBirthCoords } from '@/data/cities';
 import path from 'path';
-import { createRequire } from 'node:module';
+
+function getRuntimeRequire(): NodeRequire {
+  return (0, eval)('require') as NodeRequire;
+}
 
 // swisseph-wasm 加载（与 hd.ts 同款）：createRequire + 变量调用对 Turbopack 不透明，
 // 避免被改写成带哈希的虚拟外部模块（线上 ERR_MODULE_NOT_FOUND 的根因）。单例缓存。
 let swCache: any = null;
 function getSwisseph() {
   if (!swCache) {
-    const nodeRequire = createRequire(path.join(process.cwd(), 'noop.js'));
+    const nodeRequire = getRuntimeRequire();
     swCache = nodeRequire('@fusionstrings/swisseph-wasm');
   }
   return swCache;
