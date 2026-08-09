@@ -241,7 +241,7 @@ ${liunianResult}
       report,
       data: {
         bazi: baziResult,
-        hd: hdResult ? { type: hdResult.type, profile: hdResult.profile, authority: hdResult.authority, definedCenters: hdResult.definedCenters, activatedGates: hdResult.activatedGates, channels: hdResult.channels } : null,
+        hd: hdResult ? { type: hdResult.type, profile: hdResult.profile, authority: hdResult.authority, strategy: hdResult.strategy, definedCenters: hdResult.definedCenters, activatedGates: hdResult.activatedGates, channels: hdResult.channels } : null,
         ziwei: ziweiResult ? { palaces: ziweiResult.palaces } : null,
         zodiac: zodiacResult,
         wuyun: wuyunResult,

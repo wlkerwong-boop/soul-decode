@@ -433,44 +433,65 @@ export default function MasterPage() {
             </div>
             {/* Charts */}
             {data && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="soul-chart-atlas-grid mb-10">
                 {data.hd && (
-                  <div className="card-jade p-5">
-                    <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">🧬 人类图</h3>
+                  <section className="soul-chart-card soul-chart-card--primary">
+                    <div className="soul-chart-card-heading">
+                      <div><p className="soul-chart-kicker">01 · BODYGRAPH</p><h3>人类图</h3></div>
+                      <span>九大中心</span>
+                    </div>
                     <div className="print-hidden">
                       <BodygraphSVG definedCenters={data.hd.definedCenters||[]} activatedGates={data.hd.activatedGates||[]} channels={data.hd.channels||[]} centerDefinition={{}} />
                     </div>
                     <div className="print-only">
                       <BodygraphSVG print={true} definedCenters={data.hd.definedCenters||[]} activatedGates={data.hd.activatedGates||[]} channels={data.hd.channels||[]} centerDefinition={{}} />
                     </div>
-                    <p className="text-sm text-[var(--text-secondary)] mt-3 text-center">{data.hd.type} · {data.hd.profile} · {data.hd.authority}</p>
-                  </div>
+                    <div className="soul-chart-summary-grid">
+                      {[
+                        ['类型', data.hd.type], ['策略', data.hd.strategy], ['内在权威', data.hd.authority],
+                        ['人生角色', data.hd.profile], ['定义', data.hd.definition],
+                      ].filter(([, value]) => value).map(([label, value]) => (
+                        <div key={label} className="soul-chart-summary-item"><span>{label}</span><strong>{value}</strong></div>
+                      ))}
+                    </div>
+                  </section>
                 )}
                 {data.bazi && (
-                  <div className="card-jade p-5">
-                    <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">🀄 八字四柱</h3>
+                  <section className="soul-chart-card soul-chart-card--primary">
+                    <div className="soul-chart-card-heading">
+                      <div><p className="soul-chart-kicker">02 · FOUR PILLARS</p><h3>八字四柱</h3></div>
+                      <span>日主 · 五行</span>
+                    </div>
                     <BaziChart
                       pillars={data.bazi.pillars || []}
                       dayMaster={data.bazi.dayMaster || ''}
                       elements={data.bazi.ganElements || []}
                       elementDistribution={data.bazi.elementDistribution || {}}
                     />
-                  </div>
+                  </section>
                 )}
                 {data.ziwei && (
-                  <div className="card-jade p-5">
-                    <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">⭐ 紫微斗数</h3>
+                  <section className="soul-chart-card soul-chart-card--secondary">
+                    <div className="soul-chart-card-heading">
+                      <div><p className="soul-chart-kicker">03 · TWELVE PALACES</p><h3>紫微斗数</h3></div>
+                      <span>命宫图谱</span>
+                    </div>
                     <ZiWeiChart palaces={data.ziwei.palaces||[]} horoscope={data.ziwei.horoscope||null} />
-                  </div>
+                  </section>
                 )}
                 {data.wuyun && (
-                  <div className="card-jade p-5">
-                    <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">🌊 五运六气</h3>
-                    <div className="text-sm text-[var(--text-secondary)] space-y-2">
-                      <p>出生年运：{data.wuyun.wuyun}</p>
-                      <p>出生气化：{data.wuyun.liuqi}</p>
+                  <section className="soul-chart-card soul-chart-card--secondary soul-wuyun-card">
+                    <div className="soul-chart-card-heading">
+                      <div><p className="soul-chart-kicker">04 · SEASONAL RHYTHM</p><h3>五运六气</h3></div>
+                      <span>出生节律</span>
                     </div>
-                  </div>
+                    <div className="soul-wuyun-orbit" aria-hidden="true"><span /><i /><b /></div>
+                    <div className="soul-wuyun-values">
+                      <div><span>出生年运</span><strong>{data.wuyun.wuyun || '—'}</strong></div>
+                      <div><span>出生气化</span><strong>{data.wuyun.liuqi || '—'}</strong></div>
+                    </div>
+                    <p className="soul-wuyun-note">以出生年份对应的运气信息作为报告中的节律观察入口。</p>
+                  </section>
                 )}
               </div>
             )}

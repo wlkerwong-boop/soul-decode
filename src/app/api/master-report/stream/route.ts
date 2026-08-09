@@ -207,7 +207,7 @@ export async function POST(req: NextRequest) {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({
           done: true,
           bazi: baziResult,
-          hd: hdResult ? { type: hdResult.type, profile: hdResult.profile, authority: hdResult.authority, definedCenters: hdResult.definedCenters, channels: hdResult.channels, activatedGates: hdResult.activatedGates } : null,
+          hd: hdResult ? { type: hdResult.type, profile: hdResult.profile, authority: hdResult.authority, strategy: hdResult.strategy, definedCenters: hdResult.definedCenters, channels: hdResult.channels, activatedGates: hdResult.activatedGates } : null,
           ziwei: ziweiResult ? { palaces: ziweiResult.palaces, horoscope: ziweiResult.horoscope, sihua: ziweiResult.sihua } : null,
           zodiac: astrologyResult,
           wuyun: wuyunResult,
