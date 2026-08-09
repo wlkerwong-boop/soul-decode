@@ -4,6 +4,7 @@ import {
   calculateReportBazi,
   calculateWuyunLiuqi,
   formatElementDistribution,
+  appendPersonalReportDisclaimer,
 } from './report-depth';
 
 const adultContext = {
@@ -48,6 +49,12 @@ describe('personal report prompt', () => {
     expect(full).toContain('18-58');
     expect(full).toContain('紫微');
     expect(full).toContain('命理是地图不是判决书');
+  });
+
+  it('appends a deterministic disclaimer when model output omits one', () => {
+    const result = appendPersonalReportDisclaimer('正文内容');
+    expect(result).toContain('仅供自我观察、个人成长与关系沟通参考');
+    expect(appendPersonalReportDisclaimer(result)).toBe(result);
   });
 
   it('switches minors to parent-facing growth and education guidance', () => {

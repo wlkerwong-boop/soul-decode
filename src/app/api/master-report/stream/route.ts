@@ -8,6 +8,7 @@ import {
   calculateReportBazi,
   calculateWuyunLiuqi,
   PERSONAL_REPORT_SYSTEM_PROMPT,
+  appendPersonalReportDisclaimer,
 } from '@/lib/report-depth';
 
 async function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
@@ -133,6 +134,7 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
+        let reportText = '';
         for (const segment of reportSegments) {
           const res = await fetch(`${baseUrl}/chat/completions`, {
             method: 'POST',
@@ -172,10 +174,18 @@ export async function POST(req: NextRequest) {
               try {
                 const parsed = JSON.parse(payload);
                 const content = parsed.choices?.[0]?.delta?.content;
-                if (content) controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
+                if (content) {
+                  reportText += content;
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
+                }
               } catch {}
             }
           }
+        }
+
+        const safeReportText = appendPersonalReportDisclaimer(reportText);
+        if (safeReportText !== reportText) {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: safeReportText.slice(reportText.length) })}\n\n`));
         }
 
         // Send final data payload

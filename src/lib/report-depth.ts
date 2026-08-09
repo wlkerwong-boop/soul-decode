@@ -99,7 +99,16 @@ export const PERSONAL_REPORT_SYSTEM_PROMPT = `你是严谨而温暖的生命蓝�
 3. 第二人称、口语化且有专业密度；禁止“你很有魅力”一类无数据空话。
 4. 所有建议必须落到动作、时辰、频次或可直接练习的话术。
 5. 命理只作自我观察，不替代医疗、法律或财务建议。
-6. 最终全文目标为6000-10000个中文字符。你只写本次指定章节，不重复前段，不预写后段。`;
+6. 最终全文目标为6000-10000个中文字符。你只写本次指定章节，不重复前段，不预写后段。
+7. 正文必须包含“使用边界与免责声明”小节，明确本报告仅供自我观察、个人成长与关系沟通参考，不构成医疗、法律、教育或投资建议。`;
+
+export const PERSONAL_REPORT_DISCLAIMER =
+  '\n\n---\n\n## 使用边界与免责声明\n\n本报告仅供自我观察、个人成长与关系沟通参考，不构成医疗、法律、教育或投资建议。';
+
+export function appendPersonalReportDisclaimer(report: string) {
+  if (report.includes('免责声明') || report.includes('仅供自我观察')) return report;
+  return `${report.trimEnd()}${PERSONAL_REPORT_DISCLAIMER}`;
+}
 
 export function buildPersonalReportSegments(context: PersonalReportContext): ReportSegment[] {
   const data = serializeContext(context);
