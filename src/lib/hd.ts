@@ -1,9 +1,12 @@
-// HD 引擎装载（v6.6 分钟级）：@fusionstrings/swisseph-wasm 首次 require 时同步初始化（数秒），
+// HD 引擎装载（v6.6 分钟级）：本地 CJS 引擎首次动态加载时初始化（数秒），
 // 采用 report-api 同款 hdReady 模式：首次调用触发后台加载并等待就绪，失败则降级返回 null。
 import path from 'path';
+import { pathToFileURL } from 'node:url';
 
-function getRuntimeRequire(): NodeRequire {
-  return (0, eval)('require') as NodeRequire;
+type RuntimeImport = <T = unknown>(specifier: string) => Promise<T>;
+
+function getRuntimeImport(): RuntimeImport {
+  return new Function('specifier', 'return import(specifier)') as RuntimeImport;
 }
 
 let hdMod: any = null;
@@ -16,14 +19,15 @@ export function ensureHdEngine(): Promise<boolean> {
   if (hdError) return Promise.resolve(false);
   if (!loading) {
     loading = new Promise<boolean>((resolve) => {
-      setImmediate(() => {
+      setImmediate(async () => {
         try {
-          // createRequire + 计算路径：对 Turbopack 完全不透明 → 裸 Node 解析，
-          // 引擎 cjs 内部的包引用按 Node 原生方式解析 node_modules
-          // （字面量/可推断的 require 会被打进 bundle，包名被改写成带哈希的
-          // 虚拟外部模块，或构建期报 "server relative imports" 错误）
-          const nodeRequire = getRuntimeRequire();
-          hdMod = nodeRequire(path.join(process.cwd(), 'src', 'lib', 'hd-engine-v6.cjs'));
+          // 通过未被构建器静态分析的动态 import，在 Node 运行时加载本地 CJS 引擎。
+          // 这样同时兼容 Webpack 与 Turbopack，避免 require 被编译为 void 0，
+          // 也避免把引擎内部依赖改写成带哈希的虚拟外部模块。
+          const loaded = await getRuntimeImport()(
+            pathToFileURL(path.join(process.cwd(), 'src', 'lib', 'hd-engine-v6.cjs')).href,
+          );
+          hdMod = (loaded as { default?: unknown }).default ?? loaded;
           hdReady = true;
         } catch (e: any) {
           hdError = e?.message || String(e);

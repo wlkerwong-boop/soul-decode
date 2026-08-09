@@ -1,21 +1,26 @@
 // 星座与占星模块 — swisseph-wasm 精确版
 
 import { getBirthCoords } from '@/data/cities';
-import path from 'path';
 
-function getRuntimeRequire(): NodeRequire {
-  return (0, eval)('require') as NodeRequire;
+type RuntimeImport = <T = unknown>(specifier: string) => Promise<T>;
+
+function getRuntimeImport(): RuntimeImport {
+  return new Function('specifier', 'return import(specifier)') as RuntimeImport;
 }
 
-// swisseph-wasm 加载（与 hd.ts 同款）：createRequire + 变量调用对 Turbopack 不透明，
-// 避免被改写成带哈希的虚拟外部模块（线上 ERR_MODULE_NOT_FOUND 的根因）。单例缓存。
+// swisseph-wasm 加载（与 hd.ts 同款）：运行时动态 import，避免被构建器改写成
+// 带哈希的虚拟外部模块（线上 ERR_MODULE_NOT_FOUND 的根因）。单例缓存。
 let swCache: any = null;
-function getSwisseph() {
-  if (!swCache) {
-    const nodeRequire = getRuntimeRequire();
-    swCache = nodeRequire('@fusionstrings/swisseph-wasm');
+let swLoading: Promise<any> | null = null;
+async function getSwisseph() {
+  if (swCache) return swCache;
+  if (!swLoading) {
+    swLoading = getRuntimeImport()('@fusionstrings/swisseph-wasm').then((loaded) => {
+      swCache = (loaded as { default?: unknown }).default ?? loaded;
+      return swCache;
+    });
   }
-  return swCache;
+  return swLoading;
 }
 
 export interface ZodiacInfo {
@@ -113,7 +118,7 @@ export async function calcPlanetPositions(
   const fallbackSign = getZodiacByDate(month, day)?.name || '双子';
 
   try {
-    const swisseph = getSwisseph();
+    const swisseph = await getSwisseph();
 
     // 计算儒略日（UTC）
     const jd = swisseph.swe_julday(year, month, day, hour + minute / 60, 1);
