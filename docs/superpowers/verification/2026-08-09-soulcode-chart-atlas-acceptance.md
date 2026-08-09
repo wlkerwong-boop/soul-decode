@@ -41,12 +41,14 @@
 
 | 检查项 | 结果 | 记录 |
 |---|---|---|
-| Vercel 生产构建 | 通过 | 部署 `dpl_Er1x6LfgEJ3bSUWMTJ5KzEntUBk1`，状态 `READY` |
-| 生产域名 | 通过 | `https://aisoulcode.cn` 已完成别名切换，首页 HTTP 200 |
+| 阿里云生产构建 | 通过 | 本地 Next.js 16.3.0 构建成功，服务器 `BUILD_ID=a19RsIMM-vCkZg3cGJPvk` |
+| 阿里云部署备份 | 通过 | `/root/soulcode-backups/soulcode-pre-chart-atlas-20260810-005447.tar.gz` |
+| 阿里云 PM2 主站 | 通过 | `/root/soulcode`、端口 3005，`soulcode` 在线；仅该进程重启一次 |
+| 生产域名 | 通过 | `https://aisoulcode.cn` 由阿里云服务器 `47.102.142.225` 返回 HTTP 200 |
 | 桌面端线上打开 | 通过 | 1280px 视口打开首页，HTTP 200，无横向溢出 |
 | 手机端线上打开 | 通过 | 390px 视口打开 `/master-report`，HTTP 200，`scrollWidth=390`，无横向溢出 |
 | 线上实际 AI 报告生成 | 未完成 | 本轮未重复等待完整 AI 报告，不将报告速度和完整 PDF 链路标记为通过 |
 
 ## 结论更新
 
-当前已按师兄确认上线本轮图表改版。人类图图片的进一步专业化替换、真实 AI 报告速度优化、完整报告 PDF 正文与打印复验，保留为后续独立任务，不影响本次生产版本上线。
+当前已按师兄确认将本轮图表改版部署到阿里云生产环境；Vercel 不作为 SoulCode 正式访问入口。人类图图片的进一步专业化替换、真实 AI 报告速度优化、完整报告 PDF 正文与打印复验，保留为后续独立任务，不影响本次生产版本上线。
