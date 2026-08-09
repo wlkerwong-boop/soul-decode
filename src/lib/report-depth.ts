@@ -106,7 +106,7 @@ export const PERSONAL_REPORT_DISCLAIMER =
   '\n\n---\n\n## 使用边界与免责声明\n\n本报告仅供自我观察、个人成长与关系沟通参考，不构成医疗、法律、教育或投资建议。';
 
 export function appendPersonalReportDisclaimer(report: string) {
-  if (report.includes('免责声明') || report.includes('仅供自我观察')) return report;
+  if (report.includes('本报告仅供自我观察、个人成长与关系沟通参考')) return report;
   return `${report.trimEnd()}${PERSONAL_REPORT_DISCLAIMER}`;
 }
 

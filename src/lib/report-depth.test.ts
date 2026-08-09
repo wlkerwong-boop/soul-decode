@@ -55,6 +55,7 @@ describe('personal report prompt', () => {
     const result = appendPersonalReportDisclaimer('正文内容');
     expect(result).toContain('仅供自我观察、个人成长与关系沟通参考');
     expect(appendPersonalReportDisclaimer(result)).toBe(result);
+    expect(appendPersonalReportDisclaimer('已有免责声明，但没有标准句')).toContain('仅供自我观察、个人成长与关系沟通参考');
   });
 
   it('switches minors to parent-facing growth and education guidance', () => {
