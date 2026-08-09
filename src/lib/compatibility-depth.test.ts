@@ -27,6 +27,7 @@ describe('compatibility depth prompt', () => {
     expect(full).toContain('关系密码');
     expect(full).toContain('相处密钥');
     expect(full).toContain('家庭实践建议');
+    expect(full).toContain('仅供自我观察与关系沟通参考');
     expect(full).toContain('妈妈也觉得这事没劲');
     expect(full).toContain('18-58');
   });
