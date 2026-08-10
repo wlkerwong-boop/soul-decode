@@ -886,7 +886,9 @@ body {
     color: #1a1a1a !important;
     font-size: 10.5pt !important;
     line-height: 1.7 !important;
-    font-family: "STHeiti", "SimSun", "Noto Sans SC", serif !important;
+    /* PDF 由 Linux Chromium 生成；优先使用随站点内嵌的霞鹜文楷，避免
+       STHeiti/SimSun 在服务器不存在时回退成不含中文的 DejaVu 字体。 */
+    font-family: "LXGW WenKai", "Noto Sans SC", serif !important;
   }
   nav, footer, .btn-jade, .btn-gold, .btn, button,
   select, .print-hidden,

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { inlinePdfFontSources } from './pdf-fonts';
 
@@ -38,5 +39,12 @@ describe('inlinePdfFontSources', () => {
     expect(result).not.toContain('subset-4.woff2');
     expect(result).toContain('subset-5.woff2');
     expect(result).not.toMatch(/subset-5\.woff2[^}]*data:font\/woff2;base64,/);
+  });
+
+  it('keeps the embedded Chinese font as the print override', () => {
+    const css = readFileSync(new URL('../app/globals.css', import.meta.url), 'utf8');
+
+    expect(css).toContain('font-family: "LXGW WenKai", "Noto Sans SC", serif !important;');
+    expect(css).not.toContain('font-family: "STHeiti", "SimSun", "Noto Sans SC", serif !important;');
   });
 });

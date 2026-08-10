@@ -17,7 +17,10 @@ async function calcHD(y: number, m: number, d: number, h: number, mi: number, tz
     const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
     return await calculateBodygraph(ds, ts, tz, lat, lon);
-  } catch { return null; }
+  } catch (error: any) {
+    console.error('HD calc failed:', error?.message || error);
+    return null;
+  }
 }
 
 function calcZiwei(y: number, m: number, d: number, h: number, gender: string) {
