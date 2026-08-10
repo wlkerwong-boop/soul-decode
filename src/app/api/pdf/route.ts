@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import puppeteer, { Browser } from 'puppeteer';
 import { existsSync } from 'node:fs';
 import { isAllowedPdfUrl } from '@/lib/pdf-url-policy';
+import { inlinePdfFontSources } from '@/lib/pdf-fonts';
 
 const ALLOWED_ORIGIN = 'https://aisoulcode.cn';
 
@@ -98,7 +99,9 @@ export async function POST(req: NextRequest) {
 
       if (html) {
         // 直接设置 HTML 内容
-        await page.setContent(html, {
+        // PDF 页面从 about:blank 开始，不能依赖外部字体请求；将本地中文字体
+        // 分片内嵌后再交给 Puppeteer，避免中文在 PDF 中变成方框。
+        await page.setContent(inlinePdfFontSources(html), {
           waitUntil: 'load',
           timeout: 30000,
         });
@@ -161,7 +164,7 @@ export async function POST(req: NextRequest) {
         headerTemplate: '<span></span>',
         footerTemplate: `
           <div style="width:100%;font-size:8px;color:#999;text-align:center;padding:0 15mm;">
-            <span style="float:left;">灵魂解码 · aisoulcode.cn</span>
+            <span style="float:left;">SoulCode · aisoulcode.cn</span>
             <span style="float:right;"><span class="pageNumber"></span> / <span class="totalPages"></span></span>
           </div>
         `,
