@@ -34,6 +34,8 @@ export default function AppNav() {
       <Navbar
         logo={<span className="text-[var(--color-accent)] text-lg font-bold tracking-wider">✦ 灵魂解码</span>}
         links={NAV_LINKS}
+        secondaryCta={!isLoggedIn ? { label: '登录', href: '/auth/login' } : undefined}
+        cta={!isLoggedIn ? { label: '注册保存报告', href: '/auth/register' } : undefined}
       />
 
       {/* Auth controls overlay (right side, inline with navbar) */}
@@ -54,9 +56,7 @@ export default function AppNav() {
               </div>
             )}
           </div>
-        ) : (
-          <a href="/auth/login" className="px-4 py-1.5 rounded-[var(--radius-full)] bg-[var(--color-accent)] text-[var(--color-primary)] text-xs font-medium hover:bg-[var(--color-accent-light)] transition-colors">登录</a>
-        )}
+        ) : null}
       </div>
     </div>
   );
