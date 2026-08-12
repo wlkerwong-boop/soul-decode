@@ -588,6 +588,42 @@ export default function MasterPage() {
                       className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
                       📥 下载PDF
                     </button>
+                    <button onClick={async () => {
+                      const btn = document.activeElement as HTMLButtonElement;
+                      const origText = btn.textContent;
+                      try {
+                        btn.textContent = '⏳ 生成中...';
+                        btn.disabled = true;
+                        const resp = await fetch('/api/word', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            report,
+                            meta: { year, month, day, hour, minute, gender, city, location: isChina ? province : country },
+                          }),
+                        });
+                        if (!resp.ok) {
+                          const err = await resp.json().catch(() => ({ error: `HTTP ${resp.status}` }));
+                          alert('Word 生成失败: ' + (err.error || '未知错误'));
+                          return;
+                        }
+                        const blob = await resp.blob();
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `人生总览_${year || 'report'}.docx`;
+                        a.click();
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                      } catch (e: any) {
+                        alert('Word 生成异常: ' + (e.message || '网络错误'));
+                      } finally {
+                        btn.textContent = origText;
+                        btn.disabled = false;
+                      }
+                    }}
+                      className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                      📝 下载Word
+                    </button>
                     <button onClick={()=>{
                       const b=new Blob([report],{type:'text/plain;charset=utf-8'});
                       const a=document.createElement('a');
