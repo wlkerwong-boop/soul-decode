@@ -12,6 +12,7 @@ import {
   COMPATIBILITY_SYSTEM_PROMPT,
   type CompatibilityMember,
 } from '@/lib/compatibility-depth';
+import { buildLocalCompatibilityReport } from '@/lib/compatibility-fallback';
 
 export const runtime = 'nodejs';
 
@@ -143,8 +144,8 @@ export async function POST(request: NextRequest) {
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
+        let reportText = '';
         try {
-          let reportText = '';
           for (const segment of segments) {
             let segmentText = '';
             let upstreamError = '';
@@ -161,7 +162,7 @@ export async function POST(request: NextRequest) {
                 max_tokens: segment.maxTokens,
                 stream: false,
                 }),
-              signal: AbortSignal.timeout(180000),
+              signal: AbortSignal.timeout(15000),
             });
             if (!response.ok) {
               const detail = await response.text().catch(() => '');
@@ -196,6 +197,7 @@ export async function POST(request: NextRequest) {
                   max_tokens: segment.maxTokens,
                   stream: false,
                 }),
+                signal: AbortSignal.timeout(15000),
               });
               if (!retry.ok) {
                 const detail = await retry.text().catch(() => '');
@@ -216,7 +218,13 @@ export async function POST(request: NextRequest) {
           }
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
         } catch (error: any) {
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: error.message || '中断' })}\n\n`));
+          if (type === 'family' && !reportText.trim()) {
+            const fallback = buildLocalCompatibilityReport(members, 'family');
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: fallback, source: 'structured-fallback' })}\n\n`));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, source: 'structured-fallback' })}\n\n`));
+          } else {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: error.message || '中断' })}\n\n`));
+          }
         } finally {
           controller.close();
         }
