@@ -131,7 +131,10 @@ export const Footer: React.FC<FooterProps> = ({
           <p className="mt-2">
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--color-accent)] transition-colors">粤ICP备2026087672号-2</a>
             {" "}
-            <a href="https://beian.mps.gov.cn/#/query/webSearch?code=44030002015349" target="_blank" rel="noreferrer" className="hover:text-[var(--color-accent)] transition-colors">粤公网安备44030002015349号</a>
+            <a href="https://beian.mps.gov.cn/#/query/webSearch?code=44030002015349" target="_blank" rel="noreferrer" className="hover:text-[var(--color-accent)] transition-colors inline-flex items-center gap-1.5">
+              <img src="/beian.png" alt="公安备案" className="h-4 w-auto inline-block" width={18} height={20} />
+              粤公网安备44030002015349号
+            </a>
           </p>
         </div>
       </div>
