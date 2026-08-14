@@ -15,12 +15,12 @@ const GOLDEN = [
     input: ['2015-01-15', '12:00', 'America/Los_Angeles', 34.05, -118.24],
     expected: null,
   },
-  // ── 全家金标准（K3 最终版 2026-07-21：爸爸/一然/一斐经 myBodyGraph 官方图逐字认证）──
+  // ── 全家金标准（2026-08-15 普光师兄裁决：以最新 MG 口径为准，出生地=真实出生地坐标）──
   // 引擎 v6.6（+南交）被动匹配本基准；禁止改基准迁就引擎
-  // earth: [personality, design] 闸门.爻线，经 _debugGates 断言
+  // 一斐出生地=广东深圳（22.54,114.06），类型以最新口径 Manifesting Generator 为准
   {
-    label: '一斐 2010-12-04 19:20 上海时区',
-    input: ['2010-12-04', '19:20', 'Asia/Shanghai', 25.60, 100.23],
+    label: '一斐 2010-12-04 19:20 深圳',
+    input: ['2010-12-04', '19:20', 'Asia/Shanghai', 22.54, 114.06],
     expected: { type: 'Manifesting Generator', profile: '1/4', authority: '情绪型权威',
       definedCenters: ['Head', 'Ajna', 'Throat', 'G', 'Sacral', 'Solar Plexus', 'Spleen', 'Root'],
       channels: ['18-58', '28-38', '35-36', '4-63', '5-15'] },
@@ -34,23 +34,23 @@ const GOLDEN = [
     earth: ['5.3', '64.6'],
   },
   {
-    label: '一如 2017-07-23 15:10 上海时区',
-    input: ['2017-07-23', '15:10', 'Asia/Shanghai', 25.60, 100.23],
+    label: '一如 2017-07-23 15:10 青岛',
+    input: ['2017-07-23', '15:10', 'Asia/Shanghai', 36.07, 120.38],
     expected: { type: 'Generator', profile: '5/1', authority: '荐骨权威',
       definedCenters: ['Head', 'Ajna', 'Throat', 'Sacral', 'Spleen', 'Root'],
       channels: ['11-56', '20-57', '3-60', '4-63'] },
     earth: ['60.5', '28.1'],
   },
   {
-    label: '爸爸 1982-01-27 02:15 上海时区',
-    input: ['1982-01-27', '02:15', 'Asia/Shanghai', 25.60, 100.23],
+    label: '爸爸 1982-01-27 02:15 茌平(聊城)',
+    input: ['1982-01-27', '02:15', 'Asia/Shanghai', 36.45, 116.00],
     expected: { type: 'Generator', profile: '5/1', authority: '荐骨权威',
       definedCenters: ['Head', 'Ajna', 'Sacral', 'Spleen'], channels: ['24-61', '34-57'] },
     earth: ['31.5', '24.1'],
   },
   {
-    label: '妈妈 1982-10-28 13:30 上海时区',
-    input: ['1982-10-28', '13:30', 'Asia/Shanghai', 25.60, 100.23],
+    label: '妈妈 1982-10-28 13:30 武汉',
+    input: ['1982-10-28', '13:30', 'Asia/Shanghai', 30.59, 114.31],
     expected: { type: 'Generator', profile: '3/5', authority: '荐骨权威',
       definedCenters: ['Sacral', 'Spleen', 'Root'], channels: ['27-50', '28-38', '34-57'] },
     earth: ['27.3', '41.5'],
