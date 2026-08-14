@@ -1,7 +1,7 @@
 // 七系统融合报告 API — 人生总览
 import { NextRequest, NextResponse } from 'next/server';
 import { getBirthCoords } from '@/data/cities';
-import { calculateBodygraph } from '@/lib/hd';
+import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
 import {
   calculateReportBazi,
   calculateWuyunLiuqi as calculateReportWuyunLiuqi,
@@ -21,14 +21,9 @@ function calcBazi(y: number, m: number, d: number, h: number) {
 }
 
 async function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
-  try {
-    const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
-    return await calculateBodygraph(ds, ts, tz, lat, lon);
-  } catch (e: any) {
-    console.error('HD calc failed:', e.message);
-    return null;
-  }
+  const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
+  return calculateBodygraph(ds, ts, tz, lat, lon);
 }
 
 function calcZiwei(y: number, m: number, d: number, h: number, gender: string) {
@@ -123,6 +118,8 @@ export async function POST(req: NextRequest) {
       Promise.resolve(calcZiwei(y, m, d, h, g)),
       Promise.resolve(calcZodiac(y, m, d)),
     ]);
+    // 不允许在人类图失败时继续生成“数据暂缺”的完整报告。
+    assertHumanDesignResult(hdResult);
     
     const wuyunResult = calculateReportWuyunLiuqi(y);
     const liunianResult = calcLiuNian(y, now.getFullYear());
@@ -249,6 +246,7 @@ ${liunianResult}
       },
     });
   } catch (e: any) {
-    return NextResponse.json({ success: false, error: e.message }, { status: 500 });
+    const status = e?.name === 'HumanDesignEngineError' ? 503 : 500;
+    return NextResponse.json({ success: false, error: e.message }, { status });
   }
 }
