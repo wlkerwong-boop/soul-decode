@@ -7,7 +7,6 @@
 import { NextRequest } from 'next/server';
 import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
 import { CITY_TZ } from '@/data/cities';
-import { takeSseLines } from '@/lib/sse';
 import {
   buildCompatibilitySegments,
   COMPATIBILITY_SYSTEM_PROMPT,
@@ -157,57 +156,21 @@ export async function POST(request: NextRequest) {
                 ],
                 temperature: 0.7,
                 max_tokens: segment.maxTokens,
-                stream: true,
-              }),
+                stream: false,
+                }),
+              signal: AbortSignal.timeout(180000),
             });
             if (!response.ok) {
               const detail = await response.text().catch(() => '');
               console.error(`compatibility upstream error ${response.status} ${segment.id}: ${detail.slice(0, 300)}`);
               throw new Error(`AI API 错误 (${response.status}, ${segment.id})`);
             }
-            const reader = response.body?.getReader();
-            if (!reader) throw new Error(`AI无响应 (${segment.id})`);
-            const decoder = new TextDecoder();
-            let buffer = '';
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              buffer += decoder.decode(value, { stream: true });
-              const parsedLines = takeSseLines(buffer);
-              const lines = parsedLines.lines;
-              buffer = parsedLines.remainder;
-              for (const line of lines) {
-                const text = line.trim();
-                if (!text.startsWith('data: ')) continue;
-                const payload = text.slice(6);
-                if (payload === '[DONE]') continue;
-                try {
-                  const parsed = JSON.parse(payload);
-                  if (parsed.error?.message) upstreamError = String(parsed.error.message);
-                  const content = parsed.choices?.[0]?.delta?.content || '';
-                  if (content) {
-                    segmentText += content;
-                    reportText += content;
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
-                  }
-                } catch {}
-              }
-            }
-            for (const line of takeSseLines(buffer, true).lines) {
-              const text = line.trim();
-              if (!text.startsWith('data: ')) continue;
-              const payload = text.slice(6);
-              if (payload === '[DONE]') continue;
-              try {
-                const parsed = JSON.parse(payload);
-                if (parsed.error?.message) upstreamError = String(parsed.error.message);
-                const content = parsed.choices?.[0]?.delta?.content || '';
-                if (content) {
-                  segmentText += content;
-                  reportText += content;
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
-                }
-              } catch {}
+            const payload = await response.json();
+            if (payload.error?.message) upstreamError = String(payload.error.message);
+            segmentText = payload.choices?.[0]?.message?.content || '';
+            if (segmentText) {
+              reportText += segmentText;
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: segmentText })}\n\n`));
             }
 
             // DeepSeek occasionally closes an empty streamed segment. Retry the
