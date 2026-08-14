@@ -101,12 +101,20 @@ export function humanDesignSvg(hd: any): string | null {
 
 const elementColors: Record<string, string> = { 木: '#75A88A', 火: '#D85D4D', 土: '#B98738', 金: '#B5AA98', 水: '#5D87B7' };
 const elementOrder = ['木', '火', '土', '金', '水'];
+const elementByCharacter: Record<string, string> = {
+  甲: '木', 乙: '木', 丙: '火', 丁: '火', 戊: '土', 己: '土', 庚: '金', 辛: '金', 壬: '水', 癸: '水',
+  子: '水', 丑: '土', 寅: '木', 卯: '木', 辰: '土', 巳: '火', 午: '火', 未: '土', 申: '金', 酉: '金', 戌: '土', 亥: '水',
+};
 
 export function baziSvg(bazi: any): string | null {
   if (!bazi) return null;
   const pillars = bazi.pillars || [];
   const elements = bazi.ganElements || bazi.elements || [];
-  const distribution = bazi.elementDistribution || {};
+  const distribution = bazi.elementDistribution || pillars.flatMap((pillar: string) => String(pillar || '').split('')).reduce((out: Record<string, number>, character: string) => {
+    const element = elementByCharacter[character];
+    if (element) out[element] = (out[element] || 0) + 1;
+    return out;
+  }, {});
   const cols = pillars.map((pillar: string, i: number) => {
     const stem = String(pillar || '').slice(0, 1); const branch = String(pillar || '').slice(1, 2); const color = elementColors[elements[i]] || COLORS.gold;
     const x = 36 + i * 134;
