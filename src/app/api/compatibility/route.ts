@@ -20,12 +20,12 @@ function getConfig() {
   const provider = process.env.AI_PROVIDER || 'deepseek';
   const configs: Record<string, { baseUrl: string; apiKey: string; model: string }> = {
     deepseek: {
-      baseUrl: 'https://api.deepseek.com/v1',
+      baseUrl: process.env.AI_BASE_URL || 'https://api.deepseek.com/v1',
       apiKey: process.env.DEEPSEEK_API_KEY || '',
       model: process.env.AI_MODEL || 'deepseek-v4-pro',
     },
     openai: {
-      baseUrl: 'https://api.openai.com/v1',
+      baseUrl: process.env.AI_BASE_URL || 'https://api.openai.com/v1',
       apiKey: process.env.OPENAI_API_KEY || '',
       model: process.env.AI_MODEL || 'gpt-4o-mini',
     },
@@ -145,6 +145,7 @@ export async function POST(request: NextRequest) {
           let reportText = '';
           for (const segment of segments) {
             let segmentText = '';
+            let upstreamError = '';
             const response = await fetch(`${config.baseUrl}/chat/completions`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
@@ -159,7 +160,11 @@ export async function POST(request: NextRequest) {
                 stream: true,
               }),
             });
-            if (!response.ok) throw new Error(`AI API 错误 (${response.status}, ${segment.id})`);
+            if (!response.ok) {
+              const detail = await response.text().catch(() => '');
+              console.error(`compatibility upstream error ${response.status} ${segment.id}: ${detail.slice(0, 300)}`);
+              throw new Error(`AI API 错误 (${response.status}, ${segment.id})`);
+            }
             const reader = response.body?.getReader();
             if (!reader) throw new Error(`AI无响应 (${segment.id})`);
             const decoder = new TextDecoder();
@@ -178,6 +183,7 @@ export async function POST(request: NextRequest) {
                 if (payload === '[DONE]') continue;
                 try {
                   const parsed = JSON.parse(payload);
+                  if (parsed.error?.message) upstreamError = String(parsed.error.message);
                   const content = parsed.choices?.[0]?.delta?.content || '';
                   if (content) {
                     segmentText += content;
@@ -194,6 +200,7 @@ export async function POST(request: NextRequest) {
               if (payload === '[DONE]') continue;
               try {
                 const parsed = JSON.parse(payload);
+                if (parsed.error?.message) upstreamError = String(parsed.error.message);
                 const content = parsed.choices?.[0]?.delta?.content || '';
                 if (content) {
                   segmentText += content;
@@ -206,6 +213,9 @@ export async function POST(request: NextRequest) {
             // DeepSeek occasionally closes an empty streamed segment. Retry the
             // same segment once in non-stream mode instead of falsely reporting
             // a complete family report with only its first half.
+            if (!segmentText.trim() && upstreamError) {
+              throw new Error(`AI返回错误 (${segment.id}): ${upstreamError}`);
+            }
             if (!segmentText.trim()) {
               const retry = await fetch(`${config.baseUrl}/chat/completions`, {
                 method: 'POST',
@@ -221,8 +231,13 @@ export async function POST(request: NextRequest) {
                   stream: false,
                 }),
               });
-              if (!retry.ok) throw new Error(`AI重试失败 (${retry.status}, ${segment.id})`);
+              if (!retry.ok) {
+                const detail = await retry.text().catch(() => '');
+                console.error(`compatibility retry error ${retry.status} ${segment.id}: ${detail.slice(0, 300)}`);
+                throw new Error(`AI重试失败 (${retry.status}, ${segment.id})`);
+              }
               const retryPayload = await retry.json();
+              if (retryPayload.error?.message) throw new Error(`AI重试返回错误 (${segment.id}): ${retryPayload.error.message}`);
               const retryText = retryPayload.choices?.[0]?.message?.content || '';
               if (!retryText.trim()) throw new Error(`AI未返回合盘正文 (${segment.id})`);
               reportText += retryText;
