@@ -77,6 +77,47 @@ export default function MasterPage() {
 
   const charCount = report.length;
 
+  // Word 导出使用当前页面已经验收过的 SVG 图表转成 PNG，保证字体和网页看到的一致。
+  const captureChartImage = async (kind: string) => {
+    const svg = document.querySelector(`section[data-chart-kind="${kind}"] svg`) as SVGSVGElement | null;
+    if (!svg) return undefined;
+    const clone = svg.cloneNode(true) as SVGSVGElement;
+    clone.removeAttribute('class');
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const viewBox = svg.viewBox.baseVal;
+    const width = Math.max(900, Math.round(viewBox.width * 2.2));
+    const height = Math.max(600, Math.round(viewBox.height * (width / viewBox.width)));
+    clone.setAttribute('width', String(width));
+    clone.setAttribute('height', String(height));
+    const xml = new XMLSerializer().serializeToString(clone);
+    const blobUrl = URL.createObjectURL(new Blob([xml], { type: 'image/svg+xml;charset=utf-8' }));
+    try {
+      const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const loaded = new Image();
+        loaded.onload = () => resolve(loaded);
+        loaded.onerror = reject;
+        loaded.src = blobUrl;
+      });
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d');
+      if (!context) return undefined;
+      context.fillStyle = '#FBF8F2';
+      context.fillRect(0, 0, width, height);
+      context.drawImage(image, 0, 0, width, height);
+      return canvas.toDataURL('image/png');
+    } finally {
+      URL.revokeObjectURL(blobUrl);
+    }
+  };
+
+  const captureChartImages = async () => ({
+    humanDesign: await captureChartImage('human-design'),
+    bazi: await captureChartImage('bazi'),
+    ziwei: await captureChartImage('ziwei'),
+  });
+
   // Load saved reports on mount
   useEffect(() => {
     try {
@@ -435,7 +476,7 @@ export default function MasterPage() {
             {data && (
               <div className="soul-chart-atlas-grid mb-10">
                 {data.hd && (
-                  <section className="soul-chart-card soul-chart-card--primary">
+                  <section data-chart-kind="human-design" className="soul-chart-card soul-chart-card--primary">
                     <div className="soul-chart-card-heading">
                       <div><p className="soul-chart-kicker">01 · BODYGRAPH</p><h3>人类图</h3></div>
                       <span>九大中心</span>
@@ -457,7 +498,7 @@ export default function MasterPage() {
                   </section>
                 )}
                 {data.bazi && (
-                  <section className="soul-chart-card soul-chart-card--primary">
+                  <section data-chart-kind="bazi" className="soul-chart-card soul-chart-card--primary">
                     <div className="soul-chart-card-heading">
                       <div><p className="soul-chart-kicker">02 · FOUR PILLARS</p><h3>八字四柱</h3></div>
                       <span>日主 · 五行</span>
@@ -471,7 +512,7 @@ export default function MasterPage() {
                   </section>
                 )}
                 {data.ziwei && (
-                  <section className="soul-chart-card soul-chart-card--secondary">
+                  <section data-chart-kind="ziwei" className="soul-chart-card soul-chart-card--secondary">
                     <div className="soul-chart-card-heading">
                       <div><p className="soul-chart-kicker">03 · TWELVE PALACES</p><h3>紫微斗数</h3></div>
                       <span>命宫图谱</span>
@@ -600,6 +641,7 @@ export default function MasterPage() {
                           body: JSON.stringify({
                             report,
                             meta: { year, month, day, hour, minute, gender, city, location: isChina ? province : country },
+                            charts: { images: await captureChartImages() },
                           }),
                         });
                         if (!resp.ok) {

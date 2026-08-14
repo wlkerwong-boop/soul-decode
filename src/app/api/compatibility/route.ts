@@ -6,9 +6,8 @@
  */
 import { NextRequest } from 'next/server';
 import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
-import { getBirthCoords, CITY_TZ } from '@/data/cities';
+import { CITY_TZ } from '@/data/cities';
 import { takeSseLines } from '@/lib/sse';
-import { calculateReportBazi } from '@/lib/report-depth';
 import {
   buildCompatibilitySegments,
   COMPATIBILITY_SYSTEM_PROMPT,
@@ -32,6 +31,49 @@ function getConfig() {
     },
   };
   return configs[provider] || configs.deepseek;
+}
+
+// 与个人报告服务保持同一套口径：人类图使用出生地当地时间+时区，
+// 八字/紫微先换算为北京时间。旧版合盘直接使用本地时间计算八字，
+// 导致洛杉矶出生者的时柱甚至日柱与个人报告不一致。
+function toBeijingParts(year: number, month: number, day: number, hour: number, minute: number, timezone: string) {
+  const offsets: Record<string, number> = {
+    'America/Los_Angeles': -7,
+    'America/New_York': -4,
+    'Europe/London': 0,
+    'Asia/Tokyo': 9,
+    'Australia/Sydney': 10,
+    'Asia/Shanghai': 8,
+  };
+  const offset = offsets[timezone] ?? 8;
+  const beijingMinutes = hour * 60 + minute + (8 - offset) * 60;
+  const normalized = ((beijingMinutes % 1440) + 1440) % 1440;
+  const dayDelta = Math.floor((beijingMinutes + 1440) / 1440) - 1;
+  return {
+    year,
+    month,
+    day: day + dayDelta,
+    hour: Math.floor(normalized / 60),
+  };
+}
+
+function calculateAuthoritativeBazi(year: number, month: number, day: number, hour: number, minute: number, timezone: string) {
+  const local = toBeijingParts(year, month, day, hour, minute, timezone);
+  const { Solar } = require('lunar-javascript');
+  const lunar = Solar.fromYmdHms(local.year, local.month, local.day, local.hour, 0, 0).getLunar();
+  const pillars = [
+    lunar.getYearInGanZhi(),
+    lunar.getMonthInGanZhi(),
+    lunar.getDayInGanZhi(),
+    lunar.getTimeInGanZhi(),
+  ];
+  const elements: Record<string, string> = { 甲: '木', 乙: '木', 丙: '火', 丁: '火', 戊: '土', 己: '土', 庚: '金', 辛: '金', 壬: '水', 癸: '水', 子: '水', 丑: '土', 寅: '木', 卯: '木', 辰: '土', 巳: '火', 午: '火', 未: '土', 申: '金', 酉: '金', 戌: '土', 亥: '水' };
+  const elementDistribution = [...pillars].flatMap((pillar) => [pillar[0], pillar[1]]).reduce<Record<string, number>>((out, item) => {
+    const element = elements[item];
+    if (element) out[element] = (out[element] || 0) + 1;
+    return out;
+  }, {});
+  return { pillars, elementDistribution };
 }
 
 export async function POST(request: NextRequest) {
@@ -67,19 +109,18 @@ export async function POST(request: NextRequest) {
       const day = parseInt(person.day);
       const hour = parseInt(person.hour) || 12;
       const minute = parseInt(person.minute) || 0;
-      const bazi = calculateReportBazi(year, month, day, hour);
-      const { lat, lon } = getBirthCoords(person.city, person.location);
       const timezone = person.timezone || CITY_TZ[person.city] || 'Asia/Shanghai';
+      const bazi = calculateAuthoritativeBazi(year, month, day, hour, minute, timezone);
       const hd = await calculateBodygraph(
         `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
         `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
         timezone,
-        lat,
-        lon,
+        0,
+        0,
       );
       assertHumanDesignResult(hd);
       return {
-        label: labels[index],
+        label: person.name || labels[index],
         age: currentYear - year,
         bazi: bazi.pillars.join(' '),
         elementDistribution: bazi.elementDistribution,
@@ -101,7 +142,9 @@ export async function POST(request: NextRequest) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
+          let reportText = '';
           for (const segment of segments) {
+            let segmentText = '';
             const response = await fetch(`${config.baseUrl}/chat/completions`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
@@ -136,7 +179,11 @@ export async function POST(request: NextRequest) {
                 try {
                   const parsed = JSON.parse(payload);
                   const content = parsed.choices?.[0]?.delta?.content || '';
-                  if (content) controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
+                  if (content) {
+                    segmentText += content;
+                    reportText += content;
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
+                  }
                 } catch {}
               }
             }
@@ -148,9 +195,43 @@ export async function POST(request: NextRequest) {
               try {
                 const parsed = JSON.parse(payload);
                 const content = parsed.choices?.[0]?.delta?.content || '';
-                if (content) controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
+                if (content) {
+                  segmentText += content;
+                  reportText += content;
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
+                }
               } catch {}
             }
+
+            // DeepSeek occasionally closes an empty streamed segment. Retry the
+            // same segment once in non-stream mode instead of falsely reporting
+            // a complete family report with only its first half.
+            if (!segmentText.trim()) {
+              const retry = await fetch(`${config.baseUrl}/chat/completions`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
+                body: JSON.stringify({
+                  model: config.model,
+                  messages: [
+                    { role: 'system', content: COMPATIBILITY_SYSTEM_PROMPT },
+                    { role: 'user', content: segment.prompt },
+                  ],
+                  temperature: 0.7,
+                  max_tokens: segment.maxTokens,
+                  stream: false,
+                }),
+              });
+              if (!retry.ok) throw new Error(`AI重试失败 (${retry.status}, ${segment.id})`);
+              const retryPayload = await retry.json();
+              const retryText = retryPayload.choices?.[0]?.message?.content || '';
+              if (!retryText.trim()) throw new Error(`AI未返回合盘正文 (${segment.id})`);
+              reportText += retryText;
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: retryText })}\n\n`));
+            }
+          }
+          if (type === 'family' &&
+            (!reportText.includes('## 7.') || !reportText.includes('仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议'))) {
+            throw new Error('家庭合盘报告未完整生成：缺少第7节使用边界或免责声明');
           }
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
         } catch (error: any) {

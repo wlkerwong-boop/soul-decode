@@ -4,6 +4,7 @@ import {
   Document,
   Footer,
   HeadingLevel,
+  ImageRun,
   Packer,
   Paragraph,
   ShadingType,
@@ -13,6 +14,16 @@ import {
   TextRun,
   WidthType,
 } from 'docx';
+
+type ReportChartImages = {
+  humanDesign?: string;
+  bazi?: string;
+  ziwei?: string;
+};
+
+type ReportCharts = {
+  images?: ReportChartImages;
+};
 
 type ReportMeta = {
   year?: string;
@@ -101,8 +112,25 @@ function metadataParagraph(meta: ReportMeta) {
   }) : null;
 }
 
+function imageParagraph(dataUrl: string | undefined, width: number, height: number, altText: string) {
+  if (!dataUrl) return null;
+  const match = dataUrl.match(/^data:image\/(png|jpe?g|gif|bmp);base64,(.+)$/);
+  if (!match) return null;
+  const type = match[1] === 'jpg' || match[1] === 'jpeg' ? 'jpg' : match[1] as 'png' | 'gif' | 'bmp';
+  return new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { before: 100, after: 220 },
+    children: [new ImageRun({
+      type,
+      data: Buffer.from(match[2], 'base64'),
+      transformation: { width, height },
+      altText: { name: altText, description: altText, title: altText },
+    })],
+  });
+}
+
 /** Convert the report markdown to a stable, readable Word document. */
-export async function createWordReportBuffer(report: string, meta: ReportMeta = {}) {
+export async function createWordReportBuffer(report: string, meta: ReportMeta = {}, charts: ReportCharts = {}) {
   const children: (Paragraph | Table)[] = [
     new Paragraph({
       alignment: AlignmentType.CENTER,
@@ -117,6 +145,26 @@ export async function createWordReportBuffer(report: string, meta: ReportMeta = 
   ];
   const metaLine = metadataParagraph(meta);
   if (metaLine) children.push(metaLine);
+
+  // The browser captures the already-rendered, authoritative charts as PNGs.
+  // Keeping images in the request avoids server-side font differences between
+  // macOS and Alibaba Cloud and makes the Word file match the page the user saw.
+  const chartItems: Array<[string, string | undefined, number, number]> = [
+    ['人类图结构图', charts.images?.humanDesign, 330, 355],
+    ['八字四柱图', charts.images?.bazi, 480, 248],
+    ['紫微斗数十二宫图', charts.images?.ziwei, 410, 340],
+  ];
+  for (const [heading, dataUrl, width, height] of chartItems) {
+    const image = imageParagraph(dataUrl, width, height, heading);
+    if (!image) continue;
+    children.push(new Paragraph({
+      heading: HeadingLevel.HEADING_2,
+      pageBreakBefore: true,
+      spacing: { before: 300, after: 100, line: 300 },
+      children: [new TextRun({ text: heading, bold: true, color: COLORS.gold })],
+    }));
+    children.push(image);
+  }
 
   const lines = report.replace(/\r\n/g, '\n').split('\n');
   let index = 0;

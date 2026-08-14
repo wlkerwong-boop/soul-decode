@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     if (!report) return NextResponse.json({ error: '报告内容为空' }, { status: 400 });
     if (report.length > 400_000) return NextResponse.json({ error: '报告内容过长' }, { status: 413 });
 
-    const buffer = await createWordReportBuffer(report, body.meta || {});
+    const buffer = await createWordReportBuffer(report, body.meta || {}, body.charts || {});
     const filename = `人生总览_${body.meta?.year || 'report'}.docx`;
     return new NextResponse(new Uint8Array(buffer), {
       status: 200,
