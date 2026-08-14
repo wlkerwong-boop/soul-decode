@@ -102,7 +102,10 @@ export async function POST(request: NextRequest) {
       ? ['本人', '伴侣', ...Array.from({ length: personList.length - 2 }, (_, i) => `孩子${i + 1}`)]
       : personList.map((_: any, i: number) => i === 0 ? '用户A' : `用户${String.fromCharCode(65 + i)}`);
     const currentYear = new Date().getFullYear();
-    const members: CompatibilityMember[] = await Promise.all(personList.map(async (person: any, index: number) => {
+    // The HD WASM engine is stateful; concurrent calculations can deadlock on
+    // a five-person family request. Calculate one member at a time.
+    const members: CompatibilityMember[] = [];
+    for (const [index, person] of personList.entries()) {
       const year = parseInt(person.year);
       const month = parseInt(person.month);
       const day = parseInt(person.day);
@@ -118,14 +121,14 @@ export async function POST(request: NextRequest) {
         0,
       );
       assertHumanDesignResult(hd);
-      return {
+      members.push({
         label: person.name || labels[index],
         age: currentYear - year,
         bazi: bazi.pillars.join(' '),
         elementDistribution: bazi.elementDistribution,
         hd: hd ? { type: hd.type, profile: hd.profile, authority: hd.authority, channels: hd.channels } : null,
-      };
-    }));
+      });
+    }
 
     const config = getConfig();
     if (!config.apiKey) {
