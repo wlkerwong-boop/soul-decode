@@ -34,8 +34,8 @@ function getConfig() {
 }
 
 // 与个人报告服务保持同一套口径：人类图使用出生地当地时间+时区，
-// 八字/紫微先换算为北京时间。旧版合盘直接使用本地时间计算八字，
-// 导致洛杉矶出生者的时柱甚至日柱与个人报告不一致。
+// 八字/紫微先换算为北京时间；日期字段沿用当前 report-api 生产口径，
+// 只调整时辰，不把跨日后的公历日期写回排盘日期，以保持历史个人报告一致。
 function toBeijingParts(year: number, month: number, day: number, hour: number, minute: number, timezone: string) {
   const offsets: Record<string, number> = {
     'America/Los_Angeles': -7,
@@ -48,11 +48,10 @@ function toBeijingParts(year: number, month: number, day: number, hour: number, 
   const offset = offsets[timezone] ?? 8;
   const beijingMinutes = hour * 60 + minute + (8 - offset) * 60;
   const normalized = ((beijingMinutes % 1440) + 1440) % 1440;
-  const dayDelta = Math.floor((beijingMinutes + 1440) / 1440) - 1;
   return {
     year,
     month,
-    day: day + dayDelta,
+    day,
     hour: Math.floor(normalized / 60),
   };
 }
