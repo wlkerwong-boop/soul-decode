@@ -113,7 +113,7 @@ export const PERSONAL_REPORT_SYSTEM_PROMPT = `你是严谨而温暖的生命蓝�
 纪律：
 1. 每个关键论断必须就近挂至少一个具体数据；优先给出通道编号、宫位主星、日主与五行数量、行星星座。
 2. 主动交叉引用，例如“人类图的X，在八字里对应Y”；至少诚实指出一处系统张力并解释如何整合。
-3. 第二人称、口语化且有专业密度；禁止“你很有魅力”一类无数据空话。
+3. 全篇使用尊称“您”，不要使用“你”；口语化但有专业密度；禁止“您很有魅力”一类无数据空话。
 4. 所有建议必须落到动作、时辰、频次或可直接练习的话术。
 5. 命理只作自我观察，不替代医疗、法律或财务建议。
 6. 最终全文目标为6000-10000个中文字符。你只写本次指定章节，不重复前段，不预写后段。
@@ -122,9 +122,39 @@ export const PERSONAL_REPORT_SYSTEM_PROMPT = `你是严谨而温暖的生命蓝�
 export const PERSONAL_REPORT_DISCLAIMER =
   '\n\n---\n\n## 使用边界与免责声明\n\n本报告仅供自我观察、个人成长与关系沟通参考，不构成医疗、法律、教育或投资建议。';
 
+/** Keep the tone respectful and deterministic across model chunks. */
+export function normalizePersonalReportAudience(report: string) {
+  return report
+    .replace(/你们/g, '您们')
+    .replace(/你的/g, '您的')
+    .replace(/你自己/g, '您自己')
+    .replace(/你/g, '您');
+}
+
+function appendPersonalDataCheck(report: string, context: PersonalReportContext) {
+  const required = [
+    ...context.bazi.pillars,
+    context.hd?.type,
+    context.hd?.profile,
+    context.hd?.authority,
+  ].filter(Boolean) as string[];
+  const missing = required.filter((value) => !report.includes(value));
+  if (!missing.length) return report;
+
+  const hd = context.hd
+    ? `${context.hd.type} · ${context.hd.profile} · ${context.hd.authority} · 通道${(context.hd.channels || []).join('、') || '数据暂缺'}`
+    : '数据暂缺';
+  return `${report.trimEnd()}\n\n## 数据核验卡\n\n为避免解读文字遮蔽原始数据，本报告最后保留一份可复核摘要：\n\n- 八字四柱：${context.bazi.pillars.join(' ')}\n- 日主：${context.bazi.dayMaster}\n- 人类图：${hd}\n- 本次缺少或未在正文完整出现的字段：${missing.join('、')}\n\n若正文叙述与此卡片不一致，请以排盘数据和您本人实际体验为准。`;
+}
+
 export function appendPersonalReportDisclaimer(report: string) {
   if (report.includes('本报告仅供自我观察、个人成长与关系沟通参考')) return report;
   return `${report.trimEnd()}${PERSONAL_REPORT_DISCLAIMER}`;
+}
+
+export function finalizePersonalReport(report: string, context: PersonalReportContext) {
+  const normalized = normalizePersonalReportAudience(report);
+  return appendPersonalReportDisclaimer(appendPersonalDataCheck(normalized, context));
 }
 
 export function buildPersonalReportSegments(context: PersonalReportContext): ReportSegment[] {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildCompatibilityPersonPayload, buildCompatibilitySegments, consumeSseChunk } from './compatibility-depth';
+import { buildCompatibilityPersonPayload, buildCompatibilitySegments, consumeSseChunk, normalizeCompatibilityAudience } from './compatibility-depth';
 
 const members = [
   { label: '家长', age: 44, bazi: '壬戌 庚戌 乙亥 辛巳', elementDistribution: { 木: 1, 金: 0 }, hd: { type: 'Projector', profile: '3/6', authority: 'Splenic', channels: ['18-58'] } },
@@ -38,5 +38,13 @@ describe('compatibility depth prompt', () => {
     const second = consumeSseChunk(first.buffer, '系密码\"}\n\n');
     expect(second.contents).toEqual(['关系密码']);
     expect(second.buffer).toBe('');
+  });
+
+  it('normalizes model language and asks for evidence-linked writing', () => {
+    expect(normalizeCompatibilityAudience('你要先听你的回应，你们再决定。')).toBe('您要先听您的回应，您们再决定。');
+    const full = buildCompatibilitySegments(members, 'family').map(x => x.prompt).join('\n');
+    expect(full).toContain('每个结论后紧跟对应成员和字段');
+    expect(full).toContain('不能用没有证据的性格套话');
+    expect(full).toContain('每一位成员都必须出现一次具体数据作为依据');
   });
 });

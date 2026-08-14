@@ -6,6 +6,8 @@ import {
   calculateWuyunLiuqi,
   formatElementDistribution,
   appendPersonalReportDisclaimer,
+  normalizePersonalReportAudience,
+  finalizePersonalReport,
 } from './report-depth';
 
 const adultContext = {
@@ -63,6 +65,15 @@ describe('personal report prompt', () => {
     expect(result).toContain('仅供自我观察、个人成长与关系沟通参考');
     expect(appendPersonalReportDisclaimer(result)).toBe(result);
     expect(appendPersonalReportDisclaimer('已有免责声明，但没有标准句')).toContain('仅供自我观察、个人成长与关系沟通参考');
+  });
+
+  it('normalizes respectful second-person language and adds a data check card when needed', () => {
+    expect(normalizePersonalReportAudience('你要相信你自己，你们可以慢慢来。')).toBe('您要相信您自己，您们可以慢慢来。');
+    const result = finalizePersonalReport('您是一位观察者。', adultContext);
+    expect(result).toContain('## 数据核验卡');
+    expect(result).toContain('壬戌 庚戌 乙亥 辛巳');
+    expect(result).toContain('Projector · 3/6 · Splenic');
+    expect(result).not.toContain('你');
   });
 
   it('switches minors to parent-facing growth and education guidance', () => {

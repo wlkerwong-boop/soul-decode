@@ -9,7 +9,8 @@ import {
   calculateReportBaziForTimezone,
   calculateWuyunLiuqi,
   PERSONAL_REPORT_SYSTEM_PROMPT,
-  appendPersonalReportDisclaimer,
+  finalizePersonalReport,
+  normalizePersonalReportAudience,
 } from '@/lib/report-depth';
 
 async function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
@@ -185,8 +186,9 @@ export async function POST(req: NextRequest) {
                 const parsed = JSON.parse(payload);
                 const content = parsed.choices?.[0]?.delta?.content;
                 if (content) {
-                  reportText += content;
-                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
+                  const safeContent = normalizePersonalReportAudience(content);
+                  reportText += safeContent;
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: safeContent })}\n\n`));
                 }
               } catch {}
             }
@@ -199,14 +201,27 @@ export async function POST(req: NextRequest) {
               const parsed = JSON.parse(payload);
               const content = parsed.choices?.[0]?.delta?.content;
               if (content) {
-                reportText += content;
-                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
+                const safeContent = normalizePersonalReportAudience(content);
+                reportText += safeContent;
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: safeContent })}\n\n`));
               }
             } catch {}
           }
         }
 
-        const safeReportText = appendPersonalReportDisclaimer(reportText);
+        const reportContext = {
+          age,
+          gender: g,
+          birth: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`,
+          location: [location, body.city].filter(Boolean).join(' ') || '未提供',
+          bazi: baziResult,
+          hd: hdResult,
+          ziwei: ziweiResult,
+          astrology: astrologyResult,
+          wuyun: wuyunResult,
+          liunian: liunianResult,
+        };
+        const safeReportText = finalizePersonalReport(reportText, reportContext);
         if (safeReportText !== reportText) {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: safeReportText.slice(reportText.length) })}\n\n`));
         }

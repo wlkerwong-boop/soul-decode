@@ -10,6 +10,7 @@ import { CITY_TZ } from '@/data/cities';
 import {
   buildCompatibilitySegments,
   COMPATIBILITY_SYSTEM_PROMPT,
+  normalizeCompatibilityAudience,
   type CompatibilityMember,
 } from '@/lib/compatibility-depth';
 import { buildLocalCompatibilityReport } from '@/lib/compatibility-fallback';
@@ -129,7 +130,7 @@ export async function POST(request: NextRequest) {
             }
             const payload = await response.json();
             if (payload.error?.message) upstreamError = String(payload.error.message);
-            segmentText = payload.choices?.[0]?.message?.content || '';
+            segmentText = normalizeCompatibilityAudience(payload.choices?.[0]?.message?.content || '');
             if (segmentText) {
               reportText += segmentText;
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: segmentText })}\n\n`));
@@ -164,7 +165,7 @@ export async function POST(request: NextRequest) {
               }
               const retryPayload = await retry.json();
               if (retryPayload.error?.message) throw new Error(`AI重试返回错误 (${segment.id}): ${retryPayload.error.message}`);
-              const retryText = retryPayload.choices?.[0]?.message?.content || '';
+              const retryText = normalizeCompatibilityAudience(retryPayload.choices?.[0]?.message?.content || '');
               if (!retryText.trim()) throw new Error(`AI未返回合盘正文 (${segment.id})`);
               reportText += retryText;
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: retryText })}\n\n`));
@@ -176,7 +177,7 @@ export async function POST(request: NextRequest) {
           }
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
         } catch (error: any) {
-          if (type === 'family' && !reportText.trim()) {
+          if (type === 'family') {
             const fallback = buildLocalCompatibilityReport(members, 'family');
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: fallback, source: 'structured-fallback' })}\n\n`));
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, source: 'structured-fallback' })}\n\n`));
