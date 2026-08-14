@@ -6,7 +6,7 @@ import { calcPlanetPositions } from '@/lib/astrology';
 import { takeSseLines } from '@/lib/sse';
 import {
   buildPersonalReportSegments,
-  calculateReportBazi,
+  calculateReportBaziForTimezone,
   calculateWuyunLiuqi,
   PERSONAL_REPORT_SYSTEM_PROMPT,
   appendPersonalReportDisclaimer,
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
   const age = now.getFullYear() - y - (now.getMonth() + 1 < m || (now.getMonth() + 1 === m && now.getDate() < d) ? 1 : 0);
 
   // 计算所有数据
-  const baziResult = calculateReportBazi(y, m, d, h);
+  const baziResult = calculateReportBaziForTimezone(y, m, d, h, mi, tz);
   let hdResult: any;
   try {
     hdResult = await calcHD(y, m, d, h, mi, tz, lat, lon);

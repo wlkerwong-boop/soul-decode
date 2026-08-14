@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildPersonalReportSegments,
   calculateReportBazi,
+  calculateReportBaziForTimezone,
   calculateWuyunLiuqi,
   formatElementDistribution,
   appendPersonalReportDisclaimer,
@@ -27,6 +28,12 @@ describe('report data mapping', () => {
     expect(result.elements).toHaveLength(8);
     expect(Object.values(result.elementDistribution).reduce((a, b) => a + b, 0)).toBe(8);
     expect(formatElementDistribution(result.elementDistribution)).not.toContain('数据暂缺');
+  });
+
+  it('uses the same Beijing-calendar conversion for overseas births', () => {
+    const result = calculateReportBaziForTimezone(2015, 6, 4, 19, 45, 'America/Los_Angeles');
+    expect(result.pillars).toEqual(['乙未', '辛巳', '辛亥', '癸巳']);
+    expect(result.beijing.hour).toBe(10);
   });
 
   it('keeps stem separate from the five-movement label', () => {

@@ -1,4 +1,5 @@
 import { Solar } from 'lunar-javascript';
+import { calculateAuthoritativeBazi } from './bazi-authoritative';
 
 export interface ReportSegment {
   id: string;
@@ -49,6 +50,22 @@ export function calculateReportBazi(year: number, month: number, day: number, ho
     elementDistribution,
     dayMaster: `${dayStem}（${stemElements[dayStem]}）`,
   };
+}
+
+/**
+ * Production report entry point. Bazi uses the Beijing calendar clock after
+ * converting the user's local birth time, while Human Design and astrology
+ * continue to use the original local time and timezone.
+ */
+export function calculateReportBaziForTimezone(
+  year: number,
+  month: number,
+  day: number,
+  hour: number,
+  minute = 0,
+  timezone = 'Asia/Shanghai',
+) {
+  return calculateAuthoritativeBazi(year, month, day, hour, minute, timezone);
 }
 
 export function calculateWuyunLiuqi(year: number) {

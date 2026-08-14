@@ -13,6 +13,7 @@ import {
   type CompatibilityMember,
 } from '@/lib/compatibility-depth';
 import { buildLocalCompatibilityReport } from '@/lib/compatibility-fallback';
+import { calculateAuthoritativeBazi } from '@/lib/bazi-authoritative';
 
 export const runtime = 'nodejs';
 
@@ -31,48 +32,6 @@ function getConfig() {
     },
   };
   return configs[provider] || configs.deepseek;
-}
-
-// 与个人报告服务保持同一套口径：人类图使用出生地当地时间+时区，
-// 八字/紫微先换算为北京时间；日期字段沿用当前 report-api 生产口径，
-// 只调整时辰，不把跨日后的公历日期写回排盘日期，以保持历史个人报告一致。
-function toBeijingParts(year: number, month: number, day: number, hour: number, minute: number, timezone: string) {
-  const offsets: Record<string, number> = {
-    'America/Los_Angeles': -7,
-    'America/New_York': -4,
-    'Europe/London': 0,
-    'Asia/Tokyo': 9,
-    'Australia/Sydney': 10,
-    'Asia/Shanghai': 8,
-  };
-  const offset = offsets[timezone] ?? 8;
-  const beijingMinutes = hour * 60 + minute + (8 - offset) * 60;
-  const normalized = ((beijingMinutes % 1440) + 1440) % 1440;
-  return {
-    year,
-    month,
-    day,
-    hour: Math.floor(normalized / 60),
-  };
-}
-
-function calculateAuthoritativeBazi(year: number, month: number, day: number, hour: number, minute: number, timezone: string) {
-  const local = toBeijingParts(year, month, day, hour, minute, timezone);
-  const { Solar } = require('lunar-javascript');
-  const lunar = Solar.fromYmdHms(local.year, local.month, local.day, local.hour, 0, 0).getLunar();
-  const pillars = [
-    lunar.getYearInGanZhi(),
-    lunar.getMonthInGanZhi(),
-    lunar.getDayInGanZhi(),
-    lunar.getTimeInGanZhi(),
-  ];
-  const elements: Record<string, string> = { 甲: '木', 乙: '木', 丙: '火', 丁: '火', 戊: '土', 己: '土', 庚: '金', 辛: '金', 壬: '水', 癸: '水', 子: '水', 丑: '土', 寅: '木', 卯: '木', 辰: '土', 巳: '火', 午: '火', 未: '土', 申: '金', 酉: '金', 戌: '土', 亥: '水' };
-  const elementDistribution = [...pillars].flatMap((pillar) => [pillar[0], pillar[1]]).reduce<Record<string, number>>((out, item) => {
-    const element = elements[item];
-    if (element) out[element] = (out[element] || 0) + 1;
-    return out;
-  }, {});
-  return { pillars, elementDistribution };
 }
 
 export async function POST(request: NextRequest) {

@@ -11,6 +11,7 @@ import {
   Table,
   TableCell,
   TableRow,
+  TableLayoutType,
   TextRun,
   WidthType,
 } from 'docx';
@@ -44,6 +45,13 @@ const COLORS = {
   muted: '776E64',
 };
 
+const REPORT_FONT = {
+  ascii: 'STSong',
+  hAnsi: 'STSong',
+  eastAsia: 'STSong',
+  cs: 'STSong',
+};
+
 const thinBorders = {
   top: { style: BorderStyle.SINGLE, size: 4, color: COLORS.line },
   bottom: { style: BorderStyle.SINGLE, size: 4, color: COLORS.line },
@@ -53,7 +61,14 @@ const thinBorders = {
   insideVertical: { style: BorderStyle.SINGLE, size: 4, color: COLORS.line },
 };
 
+function cleanInlineMarkdown(text: string) {
+  return text
+    .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')
+    .replace(/`([^`]+)`/g, '$1');
+}
+
 function inlineRuns(text: string, bold = false): TextRun[] {
+  text = cleanInlineMarkdown(text);
   const runs: TextRun[] = [];
   const pattern = /(\*\*|__)(.+?)\1/g;
   let last = 0;
@@ -84,16 +99,20 @@ function tableCells(line: string) {
 }
 
 function makeTable(rows: string[][]) {
+  const columnCount = Math.max(...rows.map(row => row.length), 1);
+  const columnWidth = Math.floor(9360 / columnCount);
   return new Table({
-    width: { size: 100, type: WidthType.PERCENTAGE },
+    width: { size: 9360, type: WidthType.DXA },
+    layout: TableLayoutType.FIXED,
     borders: thinBorders,
     rows: rows.map((row, rowIndex) => new TableRow({
       children: row.map((cell) => new TableCell({
         borders: thinBorders,
         shading: rowIndex === 0 ? { type: ShadingType.CLEAR, fill: COLORS.pale } : undefined,
-        width: { size: Math.floor(100 / Math.max(row.length, 1)), type: WidthType.PERCENTAGE },
+        width: { size: columnWidth, type: WidthType.DXA },
+        margins: { top: 90, bottom: 90, left: 120, right: 120 },
         children: [new Paragraph({
-          spacing: { before: 60, after: 60, line: 280 },
+          spacing: { before: 0, after: 70, line: 280 },
           children: inlineRuns(cell, rowIndex === 0),
         })],
       })),
@@ -102,12 +121,13 @@ function makeTable(rows: string[][]) {
 }
 
 function metadataParagraph(meta: ReportMeta) {
-  const birth = [meta.year, meta.month && `${meta.month}月`, meta.day && `${meta.day}日`, meta.hour && `${meta.hour}时${meta.minute || '0'}分`]
-    .filter(Boolean).join('');
-  const place = [meta.location, meta.city].filter(Boolean).join(' ');
+  const birth = meta.year && meta.month && meta.day
+    ? `${meta.year}年${meta.month}月${meta.day}日${meta.hour ? ` ${meta.hour}:${String(meta.minute || '0').padStart(2, '0')}` : ''}`
+    : '';
+  const place = [...new Set([meta.location, meta.city].filter(Boolean))].join(' ');
   const parts = [birth && `出生时间：${birth}`, place && `出生地点：${place}`, meta.gender && `性别：${meta.gender}`].filter(Boolean);
   return parts.length ? new Paragraph({
-    spacing: { before: 0, after: 260, line: 280 },
+    spacing: { before: 0, after: 220, line: 280 },
     children: [new TextRun({ text: parts.join('　·　'), color: COLORS.muted, size: 20 })],
   }) : null;
 }
@@ -140,7 +160,7 @@ export async function createWordReportBuffer(report: string, meta: ReportMeta = 
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 100 },
-      children: [new TextRun({ text: '人生总览报告', bold: true, color: COLORS.ink, size: 42, font: 'Songti SC' })],
+      children: [new TextRun({ text: '人生总览报告', bold: true, color: COLORS.ink, size: 42, font: REPORT_FONT })],
     }),
   ];
   const metaLine = metadataParagraph(meta);
@@ -154,12 +174,19 @@ export async function createWordReportBuffer(report: string, meta: ReportMeta = 
     ['八字四柱图', charts.images?.bazi, 480, 248],
     ['紫微斗数十二宫图', charts.images?.ziwei, 410, 340],
   ];
+  const hasCharts = chartItems.some(([, dataUrl]) => Boolean(dataUrl));
+  if (hasCharts) {
+    children.push(new Paragraph({
+      spacing: { before: 80, after: 120, line: 280 },
+      children: [new TextRun({ text: '图表速览', bold: true, color: COLORS.gold, size: 24 })],
+    }));
+  }
   for (const [heading, dataUrl, width, height] of chartItems) {
     const image = imageParagraph(dataUrl, width, height, heading);
     if (!image) continue;
     children.push(new Paragraph({
       heading: HeadingLevel.HEADING_2,
-      pageBreakBefore: true,
+      keepNext: true,
       spacing: { before: 300, after: 100, line: 300 },
       children: [new TextRun({ text: heading, bold: true, color: COLORS.gold })],
     }));
@@ -172,6 +199,15 @@ export async function createWordReportBuffer(report: string, meta: ReportMeta = 
     const raw = lines[index];
     const line = raw.trim();
     if (!line) { index++; continue; }
+
+    if (/^---+$/.test(line)) {
+      children.push(new Paragraph({
+        spacing: { before: 120, after: 160 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: COLORS.line, space: 1 } },
+      }));
+      index++;
+      continue;
+    }
 
     if (isTableRow(line) && index + 1 < lines.length && isTableDivider(lines[index + 1])) {
       const rows: string[][] = [tableCells(line)];
@@ -190,7 +226,7 @@ export async function createWordReportBuffer(report: string, meta: ReportMeta = 
       const level = Math.min(heading[1].length, 3);
       children.push(new Paragraph({
         heading: level === 1 ? HeadingLevel.HEADING_1 : level === 2 ? HeadingLevel.HEADING_2 : HeadingLevel.HEADING_3,
-        pageBreakBefore: level === 1,
+        keepNext: true,
         spacing: { before: level === 1 ? 360 : 220, after: 100, line: 300 },
         children: [new TextRun({ text: heading[2].replace(/\*\*/g, '').replace(/__/g, ''), bold: true, color: level === 1 ? COLORS.gold : COLORS.ink })],
       }));
@@ -200,6 +236,17 @@ export async function createWordReportBuffer(report: string, meta: ReportMeta = 
 
     const bullet = line.match(/^[-*]\s+(.+)$/);
     const numbered = line.match(/^\d+[.)]\s+(.+)$/);
+    const quote = line.match(/^>\s*(.*)$/);
+    if (quote) {
+      children.push(new Paragraph({
+        shading: { type: ShadingType.CLEAR, fill: COLORS.pale },
+        indent: { left: 220, right: 220 },
+        spacing: { before: 100, after: 180, line: 300 },
+        children: [new TextRun({ text: cleanInlineMarkdown(quote[1]), color: COLORS.muted, italics: true })],
+      }));
+      index++;
+      continue;
+    }
     children.push(new Paragraph({
       style: bullet ? 'List Bullet' : numbered ? 'List Number' : undefined,
       indent: bullet || numbered ? { left: 360, hanging: 180 } : undefined,
@@ -216,12 +263,12 @@ export async function createWordReportBuffer(report: string, meta: ReportMeta = 
     styles: {
       default: {
         document: {
-          run: { font: 'Songti SC', size: 22, color: COLORS.ink },
+          run: { font: REPORT_FONT, size: 22, color: COLORS.ink },
           paragraph: { spacing: { line: 320, after: 120 } },
         },
-        heading1: { run: { font: 'Songti SC', size: 30, bold: true, color: COLORS.gold }, paragraph: { spacing: { before: 360, after: 140 } } },
-        heading2: { run: { font: 'Songti SC', size: 26, bold: true, color: COLORS.ink }, paragraph: { spacing: { before: 240, after: 100 } } },
-        heading3: { run: { font: 'Songti SC', size: 23, bold: true, color: COLORS.gold }, paragraph: { spacing: { before: 180, after: 80 } } },
+        heading1: { run: { font: REPORT_FONT, size: 30, bold: true, color: COLORS.gold }, paragraph: { spacing: { before: 360, after: 140 } } },
+        heading2: { run: { font: REPORT_FONT, size: 26, bold: true, color: COLORS.ink }, paragraph: { spacing: { before: 240, after: 100 } } },
+        heading3: { run: { font: REPORT_FONT, size: 23, bold: true, color: COLORS.gold }, paragraph: { spacing: { before: 180, after: 80 } } },
       },
     },
     sections: [{
