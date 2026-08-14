@@ -1,7 +1,7 @@
 // 流式七系统报告 API — 边生成边返回
 import { NextRequest } from 'next/server';
 import { getBirthCoords } from '@/data/cities';
-import { calculateBodygraph } from '@/lib/hd';
+import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
 import { calcPlanetPositions } from '@/lib/astrology';
 import { takeSseLines } from '@/lib/sse';
 import {
@@ -13,14 +13,9 @@ import {
 } from '@/lib/report-depth';
 
 async function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
-  try {
-    const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
-    return await calculateBodygraph(ds, ts, tz, lat, lon);
-  } catch (error: any) {
-    console.error('HD calc failed:', error?.message || error);
-    return null;
-  }
+  const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
+  return calculateBodygraph(ds, ts, tz, lat, lon);
 }
 
 function calcZiwei(y: number, m: number, d: number, h: number, gender: string) {
@@ -106,7 +101,17 @@ export async function POST(req: NextRequest) {
 
   // 计算所有数据
   const baziResult = calculateReportBazi(y, m, d, h);
-  const hdResult = await calcHD(y, m, d, h, mi, tz, lat, lon);
+  let hdResult: any;
+  try {
+    hdResult = await calcHD(y, m, d, h, mi, tz, lat, lon);
+    assertHumanDesignResult(hdResult);
+  } catch (error: any) {
+    console.error('HD calc failed; report generation stopped:', error?.message || error);
+    return new Response(JSON.stringify({ error: '人类图引擎暂时不可用，请稍后重试。' }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
   const ziweiResult = calcZiwei(y, m, d, h, g);
   const astrologyResult = await calcPlanetPositions(y, m, d, h, mi, lat, lon);
   const wuyunResult = calculateWuyunLiuqi(y);

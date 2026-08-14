@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Solar } from 'lunar-javascript';
 import { getBirthCoords } from '@/data/cities';
-import { calculateBodygraph } from '@/lib/hd';
+import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
 
 export const runtime = 'nodejs';
 
@@ -144,8 +144,9 @@ export async function POST(request: NextRequest) {
     const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
     const hdResult = await calculateBodygraph(ds, ts, tz, lat, lon);
-    // HD 引擎失败时降级：提示词用占位对象、响应 humanDesign 置 null，不再 500
-    const hdSafe = hdResult || { type: '数据暂缺', profile: '—', authority: '—', strategy: '—', signature: '—', notSelfTheme: '—', definedCenters: [], channels: [] };
+    // 人类图是本报告的核心输入，失败时必须停止，不能继续生成缺项报告。
+    assertHumanDesignResult(hdResult);
+    const hdSafe = hdResult;
 
     const prompt = buildPrompt(y, m, d, h, bazi, hdSafe, zodiac, tz);
 

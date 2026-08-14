@@ -5,7 +5,7 @@
  * 包含：五行互补、性格相容、冲突预警、关系时间线
  */
 import { NextRequest } from 'next/server';
-import { calculateBodygraph } from '@/lib/hd';
+import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
 import { getBirthCoords, CITY_TZ } from '@/data/cities';
 import { takeSseLines } from '@/lib/sse';
 import { calculateReportBazi } from '@/lib/report-depth';
@@ -70,16 +70,14 @@ export async function POST(request: NextRequest) {
       const bazi = calculateReportBazi(year, month, day, hour);
       const { lat, lon } = getBirthCoords(person.city, person.location);
       const timezone = person.timezone || CITY_TZ[person.city] || 'Asia/Shanghai';
-      let hd = null;
-      try {
-        hd = await calculateBodygraph(
-          `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
-          `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
-          timezone,
-          lat,
-          lon,
-        );
-      } catch {}
+      const hd = await calculateBodygraph(
+        `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+        `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
+        timezone,
+        lat,
+        lon,
+      );
+      assertHumanDesignResult(hd);
       return {
         label: labels[index],
         age: currentYear - year,
