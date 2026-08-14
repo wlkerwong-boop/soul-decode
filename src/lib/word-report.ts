@@ -112,7 +112,7 @@ export async function createWordReportBuffer(report: string, meta: ReportMeta = 
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 100 },
-      children: [new TextRun({ text: '人生总览报告', bold: true, color: COLORS.ink, size: 42, font: 'STSongti-SC' })],
+      children: [new TextRun({ text: '人生总览报告', bold: true, color: COLORS.ink, size: 42, font: 'Songti SC' })],
     }),
   ];
   const metaLine = metadataParagraph(meta);
@@ -168,12 +168,12 @@ export async function createWordReportBuffer(report: string, meta: ReportMeta = 
     styles: {
       default: {
         document: {
-          run: { font: 'STSongti-SC', size: 22, color: COLORS.ink },
+          run: { font: 'Songti SC', size: 22, color: COLORS.ink },
           paragraph: { spacing: { line: 320, after: 120 } },
         },
-        heading1: { run: { font: 'STSongti-SC', size: 30, bold: true, color: COLORS.gold }, paragraph: { spacing: { before: 360, after: 140 } } },
-        heading2: { run: { font: 'STSongti-SC', size: 26, bold: true, color: COLORS.ink }, paragraph: { spacing: { before: 240, after: 100 } } },
-        heading3: { run: { font: 'STSongti-SC', size: 23, bold: true, color: COLORS.gold }, paragraph: { spacing: { before: 180, after: 80 } } },
+        heading1: { run: { font: 'Songti SC', size: 30, bold: true, color: COLORS.gold }, paragraph: { spacing: { before: 360, after: 140 } } },
+        heading2: { run: { font: 'Songti SC', size: 26, bold: true, color: COLORS.ink }, paragraph: { spacing: { before: 240, after: 100 } } },
+        heading3: { run: { font: 'Songti SC', size: 23, bold: true, color: COLORS.gold }, paragraph: { spacing: { before: 180, after: 80 } } },
       },
     },
     sections: [{
