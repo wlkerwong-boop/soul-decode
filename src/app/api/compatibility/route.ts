@@ -122,9 +122,9 @@ export async function POST(request: NextRequest) {
                 max_tokens: segment.maxTokens,
                 stream: false,
                 }),
-              signal: AbortSignal.timeout(15000),
-            });
-            if (!response.ok) {
+              signal: AbortSignal.timeout(180000),
+              });
+              if (!response.ok) {
               const detail = await response.text().catch(() => '');
               console.error(`compatibility upstream error ${response.status} ${segment.id}: ${detail.slice(0, 300)}`);
               throw new Error(`AI API 错误 (${response.status}, ${segment.id})`);
@@ -158,9 +158,9 @@ export async function POST(request: NextRequest) {
                   max_tokens: segment.maxTokens,
                   stream: false,
                 }),
-                signal: AbortSignal.timeout(15000),
-              });
-              if (!retry.ok) {
+                  signal: AbortSignal.timeout(180000),
+                });
+                if (!retry.ok) {
                 const detail = await retry.text().catch(() => '');
                 console.error(`compatibility retry error ${retry.status} ${segment.id}: ${detail.slice(0, 300)}`);
                 throw new Error(`AI重试失败 (${retry.status}, ${segment.id})`);
