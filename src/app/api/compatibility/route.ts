@@ -24,7 +24,7 @@ function getConfig() {
     deepseek: {
       baseUrl: process.env.AI_BASE_URL || 'https://api.deepseek.com/v1',
       apiKey: process.env.DEEPSEEK_API_KEY || '',
-      model: process.env.AI_MODEL || 'deepseek-v4-pro',
+      model: process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
     },
     openai: {
       baseUrl: process.env.AI_BASE_URL || 'https://api.openai.com/v1',

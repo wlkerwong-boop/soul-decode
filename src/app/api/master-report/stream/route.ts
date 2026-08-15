@@ -133,7 +133,9 @@ export async function POST(req: NextRequest) {
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
   const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
-  const modelName = process.env.AI_MODEL || 'deepseek-v4-pro';
+  // 优先 AI_MODEL，兼容服务器上的 DEEPSEEK_MODEL（生产故障修复 2026-08-15：
+  // 服务器无 AI_MODEL 时曾 fallback 到 deepseek-v4-pro，该模型返回空内容导致报告仅剩核验卡）
+  const modelName = process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
 
   if (!apiKey) {
     return new Response(JSON.stringify({ error: 'API key not configured' }), { status: 500 });

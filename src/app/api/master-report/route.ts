@@ -208,7 +208,7 @@ ${liunianResult}
     if (!report && !apiKey) console.error('master-report: DEEPSEEK_API_KEY 未配置');
     if (!report && apiKey) {
       try {
-        const modelName = process.env.AI_MODEL || 'deepseek-v4-pro';
+        const modelName = process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
         const res = await fetch(`${baseUrl}/chat/completions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },

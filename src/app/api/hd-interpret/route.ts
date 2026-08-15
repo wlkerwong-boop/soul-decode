@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     const prompt = buildHDPrompt(hd);
     const apiKey = process.env.DEEPSEEK_API_KEY;
     const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
-    const model = process.env.AI_MODEL || 'deepseek-v4-pro';
+    const model = process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
     let interpretation = '';
     let aiUsed = false;
 
