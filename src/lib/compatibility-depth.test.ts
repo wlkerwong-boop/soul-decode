@@ -20,12 +20,12 @@ describe('compatibility depth prompt', () => {
     });
   });
 
-  it('includes declarations, energy comparison, relationship passwords and practice', () => {
+  it('includes declarations, energy comparison, shared imprints and practice', () => {
     const full = buildCompatibilitySegments(members, 'family').map(x => x.prompt).join('\n');
     expect(full).toContain('排盘数据声明');
     expect(full).toContain('能量结构对照表');
-    expect(full).toContain('关系密码');
-    expect(full).toContain('相处密钥');
+    expect(full).toContain('家族共享印记');
+    expect(full).toContain('十对关系一张网');
     expect(full).toContain('家庭实践建议');
     expect(full).toContain('仅供自我观察与关系沟通参考');
     expect(full).toContain('妈妈也觉得这事没劲');
@@ -43,8 +43,8 @@ describe('compatibility depth prompt', () => {
   it('normalizes model language and asks for evidence-linked writing', () => {
     expect(normalizeCompatibilityAudience('你要先听你的回应，你们再决定。')).toBe('您要先听您的回应，您们再决定。');
     const full = buildCompatibilitySegments(members, 'family').map(x => x.prompt).join('\n');
-    expect(full).toContain('每个结论后紧跟对应成员和字段');
-    expect(full).toContain('不能用没有证据的性格套话');
+    expect(full).toContain('每个论断必须紧跟具体数据');
+    expect(full).toContain('禁止无证据的性格套话');
     expect(full).toContain('每一位成员都必须出现一次具体数据作为依据');
   });
 });
