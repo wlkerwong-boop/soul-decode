@@ -697,7 +697,18 @@ export default function MasterPage() {
                       📝 下载Word
                     </button>
                     <button onClick={()=>{
-                      const b=new Blob([report],{type:'text/plain;charset=utf-8'});
+                      // TXT 导出：去除 markdown 符号，输出干净可读的纯文本
+                      const toPlain = (md: string) => md
+                        .replace(/^#{1,4}\s+/gm, '')
+                        .replace(/\*\*([^*]+)\*\*/g, '$1')
+                        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                        .replace(/`([^`]+)`/g, '$1')
+                        .replace(/^\s*\|[-:|\s]+\|\s*$/gm, '')
+                        .replace(/^\s*\|/gm, '')
+                        .replace(/\|\s*$/gm, '')
+                        .replace(/[ \t]+$/gm, '')
+                        .replace(/\n{3,}/g, '\n\n');
+                      const b=new Blob([toPlain(report)],{type:'text/plain;charset=utf-8'});
                       const a=document.createElement('a');
                       a.href=URL.createObjectURL(b);
                       a.download=`人生总览_${year||''}.txt`;
