@@ -3,8 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getBirthCoords } from '@/data/cities';
 import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
 import {
+  buildPersonalReportSegments,
   calculateReportBazi,
   calculateWuyunLiuqi as calculateReportWuyunLiuqi,
+  PERSONAL_REPORT_SYSTEM_PROMPT,
+  finalizePersonalReport,
 } from '@/lib/report-depth';
 
 function calcBazi(y: number, m: number, d: number, h: number) {
@@ -208,30 +211,61 @@ ${liunianResult}
     if (!report && !apiKey) console.error('master-report: DEEPSEEK_API_KEY 未配置');
     if (!report && apiKey) {
       try {
+        // 与 stream 通道完全一致：三段生成 + finalize（2026-08-16 统一手机/桌面质量）
         const modelName = process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
-        const res = await fetch(`${baseUrl}/chat/completions`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-          body: JSON.stringify({
-            model: modelName,
-...(String(modelName).includes('deepseek') || String(modelName).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
-            messages: [
-              { role: 'system', content: '你是修炼数十年的命理导师，精通八字、人类图、占星、紫微斗数、五运六气、流年、人生规划七大体系。你的报告像长辈跟孩子谈心——温暖、直接、有力。每个数据点转化为具体人生场景。交叉印证。禁止AI套话。字数10000-20000字。**必须完整生成所有章节，不得截断。**\n\n【报告格式要求】\n- 每个系统配表格：八字四柱表、人类图数据表、紫微12宫全表\n- 七系统交叉印证：Markdown表格\n- 流年运势/财富配置/健康养生：Markdown表格\n- 大运分析+时间窗口+言行指引+关键风险提示\n- 最后必须有一句「点睛金句」\n- 报告末尾标注七系统来源' },
-              { role: 'user', content: prompt }
-            ],
-            max_tokens: 24000,
-            temperature: 0.7,
-          }),
-          signal: AbortSignal.timeout(180000),
+        const elMap: Record<string, string> = {甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
+        const elementDistribution: Record<string, number> = {};
+        baziResult.pillars.forEach((p: string) => {
+          [...p].forEach((ch: string) => {
+            const wx = elMap[ch];
+            if (wx) elementDistribution[wx] = (elementDistribution[wx] || 0) + 1;
+          });
         });
-        if (!res.ok) {
-          const errText = await res.text().catch(() => '');
-          console.error(`DeepSeek API error: ${res.status} ${errText.slice(0, 300)}`);
-        } else {
+        const reportContext = {
+          age,
+          gender: g,
+          birth: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`,
+          location: [body.location, body.city].filter(Boolean).join(' ') || '未提供',
+          bazi: { ...baziResult, elementDistribution },
+          hd: hdResult,
+          ziwei: ziweiResult,
+          astrology: zodiacResult,
+          wuyun: wuyunResult,
+          liunian: liunianResult,
+        };
+        const segments = buildPersonalReportSegments(reportContext);
+        let fullReport = '';
+        for (const segment of segments) {
+          const res = await fetch(`${baseUrl}/chat/completions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+            body: JSON.stringify({
+              model: modelName,
+              ...(String(modelName).includes('deepseek') || String(modelName).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
+              messages: [
+                { role: 'system', content: PERSONAL_REPORT_SYSTEM_PROMPT },
+                { role: 'user', content: segment.prompt },
+              ],
+              max_tokens: segment.maxTokens,
+              temperature: 0.7,
+              stream: false,
+            }),
+            signal: AbortSignal.timeout(180000),
+          });
+          if (!res.ok) {
+            const errText = await res.text().catch(() => '');
+            console.error(`DeepSeek API error: ${res.status} ${segment.id} ${errText.slice(0, 200)}`);
+            break;
+          }
           const data = await res.json();
-          report = data.choices?.[0]?.message?.content || '';
+          fullReport += data.choices?.[0]?.message?.content || '';
         }
-      } catch {}
+        if (fullReport.length > 500) {
+          report = finalizePersonalReport(fullReport, reportContext);
+        }
+      } catch (e) {
+        console.error('DeepSeek fallback error:', (e as Error).message);
+      }
     }
 
     return NextResponse.json({
