@@ -133,9 +133,10 @@ export async function POST(req: NextRequest) {
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
   const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
-  // 优先 AI_MODEL，兼容服务器上的 DEEPSEEK_MODEL（生产故障修复 2026-08-15：
-  // 服务器无 AI_MODEL 时曾 fallback 到 deepseek-v4-pro，该模型返回空内容导致报告仅剩核验卡）
-  const modelName = process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
+  // 生产故障修复 2026-08-15：模型名 "deepseek-v4-flash" 在 stream:true + 长输出(max_tokens 3500)
+  // 时返回空内容（HTTP 200 但 0 字），而别名 "deepseek-chat"（路由到同一 v4-flash 引擎）流式长输出正常。
+  // 因此流式端点固定用 deepseek-chat 别名，避免空报告。
+  const modelName = 'deepseek-chat';
 
   if (!apiKey) {
     return new Response(JSON.stringify({ error: 'API key not configured' }), { status: 500 });
