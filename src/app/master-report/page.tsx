@@ -164,7 +164,7 @@ export default function MasterPage() {
     return 'Asia/Shanghai';
   }, [city]);
 
-  const submit = async () => {
+  const submit = async (retryCount = 0) => {
     setLoading(true); setError(''); setReport(''); setData(null); setShowQuickInput(false);
     setIsStreaming(false); setStartTime(Date.now()); setElapsedSeconds(0);
 
@@ -178,7 +178,29 @@ export default function MasterPage() {
       if (!r.ok) { setError('API错误: ' + r.status); setLoading(false); return; }
 
       const reader = r.body?.getReader();
-      if (!reader) { setError('不支持流式读取'); setLoading(false); return; }
+      if (!reader) {
+        // 不支持流式读取（微信内置浏览器/旧内核）：降级到非流式接口（report-api 通道）
+        setError(''); // 清空错误，走降级
+        try {
+          const r2 = await fetch('/api/master-report', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({year, month, day, hour, minute, location:loc, city, gender, timezone:detectedTz}),
+          });
+          const d = await r2.json();
+          if (d.success && d.report) {
+            setReport(d.report);
+            setLoading(false);
+            setIsStreaming(false);
+            saveToHistory(d.report, null);
+          } else {
+            setError(d.error || '生成失败，请重试'); setLoading(false);
+          }
+        } catch (e2: any) {
+          setError(e2.message || '生成失败，请重试'); setLoading(false);
+        }
+        return;
+      }
 
       const decoder = new TextDecoder();
       let buffer = '';
@@ -217,7 +239,15 @@ export default function MasterPage() {
           }
         }
       }
-    } catch (e: any) { setError(e.message||'网络错误'); setLoading(false); setIsStreaming(false); }
+    } catch (e: any) {
+      // 断线自动重试（最多 2 次，间隔 1.5s；已收到部分内容也重试——宁可重新生成也不交付半份）
+      if (retryCount < 2) {
+        console.log('report stream retry #' + (retryCount + 1), e?.message || '');
+        setTimeout(() => submit(retryCount + 1), 1500);
+        return;
+      }
+      setError('网络中断，请点击"重试"按钮重新生成'); setLoading(false); setIsStreaming(false);
+    }
     // 流式自然结束
     if (!error) { setLoading(false); setIsStreaming(false); }
   };
@@ -406,7 +436,7 @@ export default function MasterPage() {
               </details>
 
               {/* CTA */}
-              <button onClick={submit} disabled={!quickFilled||loading}
+              <button onClick={() => submit()} disabled={!quickFilled||loading}
                 className="soul-editorial-button w-full mt-8">
                 {loading ? '⌛ 正在排盘中...' : '✦ 免费排盘，查看我的出厂配置'}
               </button>

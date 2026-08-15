@@ -99,6 +99,11 @@ export async function POST(req: NextRequest) {
   const g = gender === '女' ? '女' : '男';
   const now = new Date();
   const age = now.getFullYear() - y - (now.getMonth() + 1 < m || (now.getMonth() + 1 === m && now.getDate() < d) ? 1 : 0);
+  // 生成日志（监控用）：时间/IP/出生地/结果/字数，输出到 pm2 out.log
+  const clientIp = (req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '').split(',')[0].trim() || 'unknown';
+  const startedAt = Date.now();
+  const logLine = (status: string, extra = '') =>
+    console.log(`[report-gen] ${new Date().toISOString()} ip=${clientIp} city=${body.city || '?'} y=${y}-${m}-${d} ${g} status=${status} ${extra} ${Math.round((Date.now() - startedAt) / 1000)}s`);
 
   // 计算所有数据
   const baziResult = calculateReportBaziForTimezone(y, m, d, h, mi, tz);
@@ -233,6 +238,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Send final data payload
+        logLine('success', `chars=${safeReportText.length}`);
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({
           done: true,
           bazi: baziResult,
@@ -244,6 +250,7 @@ export async function POST(req: NextRequest) {
         })}\n\n`));
         controller.close();
       } catch (e: any) {
+        logLine('error', `err=${(e?.message || 'unknown').slice(0, 80)}`);
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: e.message || 'Stream error' })}\n\n`));
         controller.close();
       }
