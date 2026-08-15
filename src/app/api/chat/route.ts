@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         model: config.model,
+...(String(config.model).includes('deepseek') || String(config.model).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
         messages,
         temperature: 0.8,
         max_tokens: 2000,

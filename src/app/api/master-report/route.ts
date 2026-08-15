@@ -214,6 +214,7 @@ ${liunianResult}
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
           body: JSON.stringify({
             model: modelName,
+...(String(modelName).includes('deepseek') || String(modelName).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
             messages: [
               { role: 'system', content: '你是修炼数十年的命理导师，精通八字、人类图、占星、紫微斗数、五运六气、流年、人生规划七大体系。你的报告像长辈跟孩子谈心——温暖、直接、有力。每个数据点转化为具体人生场景。交叉印证。禁止AI套话。字数10000-20000字。**必须完整生成所有章节，不得截断。**\n\n【报告格式要求】\n- 每个系统配表格：八字四柱表、人类图数据表、紫微12宫全表\n- 七系统交叉印证：Markdown表格\n- 流年运势/财富配置/健康养生：Markdown表格\n- 大运分析+时间窗口+言行指引+关键风险提示\n- 最后必须有一句「点睛金句」\n- 报告末尾标注七系统来源' },
               { role: 'user', content: prompt }

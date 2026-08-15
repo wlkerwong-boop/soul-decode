@@ -46,6 +46,7 @@ ${userDesc}
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body: JSON.stringify({
         model,
+        ...(String(model).includes('deepseek') || String(model).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
         messages: [
           { role: 'system', content: '你是资深中医手诊医师，精通望诊辨证，善于通过手部特征判断体质和脏腑状态。你的建议温和、实用、专业。' },
           { role: 'user', content: prompt }

@@ -164,6 +164,7 @@ export async function POST(request: NextRequest) {
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
           body: JSON.stringify({
             model,
+            ...(String(model).includes('deepseek') || String(model).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
             messages: [
               { role: 'system', content: '你是顶级的三系统命理导师，融合八字、人类图、占星三大体系给出来访者的人生指导。你的语言温暖、精准、有深度。' },
               { role: 'user', content: prompt }

@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
           body: JSON.stringify({
             model,
+            ...(String(model).includes('deepseek') || String(model).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
             messages: [
               { role: 'system', content: '你是顶尖的人类图导师，严格基于Ra Uru Hu原始体系。你的解读温暖、精准、有深度，帮助来访者理解自己的能量设计并活出真实的自己。' },
               { role: 'user', content: prompt }

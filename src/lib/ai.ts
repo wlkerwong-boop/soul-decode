@@ -59,6 +59,7 @@ export async function generateModule(
     },
     body: JSON.stringify({
       model: config.model,
+...(String(config.model).includes('deepseek') || String(config.model).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userContext },
@@ -177,6 +178,7 @@ ${userContext}
     },
     body: JSON.stringify({
       model: config.model,
+...(String(config.model).includes('deepseek') || String(config.model).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
       messages: [
         { role: 'system', content: MASTER_SYSTEM_PROMPT },
         { role: 'user', content: fullPrompt },
