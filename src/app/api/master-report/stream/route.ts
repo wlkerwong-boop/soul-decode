@@ -133,10 +133,11 @@ export async function POST(req: NextRequest) {
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
   const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
-  // 生产故障修复 2026-08-15：模型名 "deepseek-v4-flash" 在 stream:true + 长输出(max_tokens 3500)
-  // 时返回空内容（HTTP 200 但 0 字），而别名 "deepseek-chat"（路由到同一 v4-flash 引擎）流式长输出正常。
-  // 因此流式端点固定用 deepseek-chat 别名，避免空报告。
-  const modelName = 'deepseek-chat';
+  // 生产故障修复 2026-08-15（根因）：DeepSeek V4 系列默认开启 thinking 模式，
+  // 思考链会吃光 max_tokens（3500）导致正文 content 输出 0 字（HTTP 200 但空报告）。
+  // 正确做法：官方模型名 deepseek-v4-flash + 显式关闭 thinking。
+  // （勿用 deepseek-chat 别名：2026-07-24 曾被 DeepSeek 废弃返回 400，随时可能再变。）
+  const modelName = process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
 
   if (!apiKey) {
     return new Response(JSON.stringify({ error: 'API key not configured' }), { status: 500 });
@@ -161,6 +162,8 @@ export async function POST(req: NextRequest) {
               max_tokens: segment.maxTokens,
               temperature: 0.65,
               stream: true,
+              // V4 默认 thinking 会吃光 max_tokens 导致正文为空，报告场景显式关闭
+              thinking: { type: 'disabled' },
             }),
           });
 
