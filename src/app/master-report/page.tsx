@@ -257,11 +257,27 @@ export default function MasterPage() {
   const allFilled = year && month && day && continent && country && city;
   const quickFilled = year && month && day && continent && country && city;
 
-  const reportHtml = useMemo(() => {
-    if (!report) return '';
-    try { return marked(report, { breaks: true, gfm: true }) as string; }
-    catch { return report; }
+  // 报告分章渲染：按 "## " 标题切分，每章独立渲染（增量构建 DOM，避免 2 万字一次性
+  // 渲染导致安卓 Chrome"页面未响应"崩溃 reload/back——2026-08-16 修复）
+  const reportSections = useMemo(() => {
+    if (!report) return [];
+    return report.split(/^(?=## )/m).filter((s: string) => s.trim().length > 0);
   }, [report]);
+  const [visibleChapters, setVisibleChapters] = useState(3);
+  // 生成过程中自动展开所有已生成章节（增量渲染，不阻塞主线程）
+  useEffect(() => {
+    if (isStreaming && reportSections.length > visibleChapters) {
+      setVisibleChapters(reportSections.length);
+    }
+  }, [reportSections.length, isStreaming]);
+  const chapterHtml = useMemo(() => {
+    const out: string[] = [];
+    for (let i = 0; i < Math.min(visibleChapters, reportSections.length); i++) {
+      try { out.push(marked(reportSections[i], { breaks: true, gfm: true }) as string); }
+      catch { out.push(reportSections[i]); }
+    }
+    return out;
+  }, [reportSections, visibleChapters]);
 
   // ── R2: 骨架结果 ──
   const showSkeleton = data && !showFullReport;
@@ -719,9 +735,20 @@ export default function MasterPage() {
                     </button>
                   </div>
                 </div>
-                <div className="report-content prose prose-sm md:prose-base max-w-none leading-relaxed"
-                  style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}
-                  dangerouslySetInnerHTML={{ __html: reportHtml }} />
+                <div className="report-content prose prose-sm md:prose-base max-w-none leading-relaxed">
+                  {chapterHtml.map((html, i) => (
+                    <div key={i} style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}
+                      dangerouslySetInnerHTML={{ __html: html }} />
+                  ))}
+                  {visibleChapters < reportSections.length && (
+                    <div className="text-center mt-6">
+                      <button onClick={() => setVisibleChapters(v => v + 3)}
+                        className="px-6 py-2.5 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                        📖 继续阅读（剩余 {reportSections.length - visibleChapters} 章）
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* ── R4: 下一步 CTA ── */}
@@ -763,7 +790,7 @@ export default function MasterPage() {
                         alert('该报告数据已失效，已为您移除，请重新生成。');
                         return;
                       }
-                      setReport(r.report); setData(r.data); setShowQuickInput(false); setShowFullReport(true); setShowHistory(false);
+                      setReport(r.report); setData(r.data); setShowQuickInput(false); setShowFullReport(true); setShowHistory(false); setVisibleChapters(3);
                     }}>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium text-[var(--text-primary)] truncate">{r.name}</div>

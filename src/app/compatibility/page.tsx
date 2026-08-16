@@ -74,12 +74,18 @@ export default function HepanPage() {
   const [type, setType] = useState('couple');
   const [form, setForm] = useState<Record<string,string>>({});
   const [report, setReport] = useState('');
+  const [visibleChapters, setVisibleChapters] = useState(3);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [childrenCount, setChildrenCount] = useState(0);
 
   // ── 等待体验 ──
   const [isStreaming, setIsStreaming] = useState(false);
+  // 生成过程中自动展开所有已生成章节（增量渲染，不阻塞主线程）
+  useEffect(() => {
+    const sections = report.split(/^(?=## )/m).filter((s: string) => s.trim());
+    if (isStreaming && sections.length > visibleChapters) setVisibleChapters(sections.length);
+  }, [report, isStreaming]);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -347,8 +353,20 @@ export default function HepanPage() {
               </div>
             </div>
             <h2 className="text-2xl font-semibold mb-5">合盘解读</h2>
-            <div className="prose prose-sm md:prose-base whitespace-pre-wrap leading-relaxed" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}>
-              {report.split('\n').map((line, i) => (<p key={i} className="mb-3">{line || ' '}</p>))}
+            <div className="prose prose-sm md:prose-base whitespace-pre-wrap leading-relaxed">
+              {report.split(/^(?=## )/m).filter((s: string) => s.trim()).slice(0, visibleChapters).map((section, i) => (
+                <div key={i} style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}>
+                  {section.split('\n').map((line, j) => (<p key={j} className="mb-3">{line || ' '}</p>))}
+                </div>
+              ))}
+              {visibleChapters < report.split(/^(?=## )/m).filter((s: string) => s.trim()).length && (
+                <div className="text-center mt-6">
+                  <button onClick={() => setVisibleChapters(v => v + 3)}
+                    className="px-6 py-2.5 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                    📖 继续阅读（剩余 {report.split(/^(?=## )/m).filter((s: string) => s.trim()).length - visibleChapters} 章）
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
