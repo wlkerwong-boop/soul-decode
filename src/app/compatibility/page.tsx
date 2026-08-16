@@ -252,9 +252,102 @@ export default function HepanPage() {
 
         {report && (
           <div className="soul-editorial-surface p-6 md:p-8 mt-10 max-w-4xl mx-auto">
-            <p className="soul-editorial-section-label mb-2">Reading</p>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+              <p className="soul-editorial-section-label">Reading</p>
+              <div className="flex gap-2 flex-wrap">
+                <button onClick={() => {
+                  const toPlain = (md: string) => md
+                    .replace(/^#{1,4}\s+/gm, '')
+                    .replace(/\*\*([^*]+)\*\*/g, '$1')
+                    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                    .replace(/`([^`]+)`/g, '$1')
+                    .replace(/^\s*\|[-:|\s]+\|\s*$/gm, '')
+                    .replace(/^\s*\|/gm, '')
+                    .replace(/\|\s*$/gm, '')
+                    .replace(/\n{3,}/g, '\n\n');
+                  const b = new Blob([toPlain(report)], { type: 'text/plain;charset=utf-8' });
+                  const a = document.createElement('a');
+                  a.href = URL.createObjectURL(b);
+                  a.download = '家庭合盘.txt';
+                  a.click();
+                }}
+                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                  📄 下载TXT
+                </button>
+                <button onClick={async () => {
+                  const btn = document.activeElement as HTMLButtonElement;
+                  const origText = btn.textContent;
+                  try {
+                    btn.textContent = '⏳ 生成中...';
+                    btn.disabled = true;
+                    const resp = await fetch('/api/word', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ report, meta: { year: '合盘', location: '家庭合盘' }, charts: { images: {} } }),
+                    });
+                    if (!resp.ok) { alert('Word 生成失败'); return; }
+                    const blob = await resp.blob();
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = '家庭合盘.docx';
+                    a.click();
+                    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+                  } catch (e: any) {
+                    alert('Word 生成异常: ' + (e.message || '网络错误'));
+                  } finally {
+                    btn.textContent = origText;
+                    btn.disabled = false;
+                  }
+                }}
+                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                  📝 下载Word
+                </button>
+                <button onClick={async () => {
+                  const btn = document.activeElement as HTMLButtonElement;
+                  const origText = btn.textContent;
+                  try {
+                    btn.textContent = '⏳ 生成中...';
+                    btn.disabled = true;
+                    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+                      <link rel="stylesheet" href="/fonts/lxgwwenkai/lxgwwenkai-regular.css">
+                      <style>
+                        body { font-family: 'LXGW WenKai', serif; color: #2B2620; padding: 24px; line-height: 1.9; }
+                        h1 { color: #A8843C; font-size: 22px; border-bottom: 2px solid #E6D9C5; padding-bottom: 8px; }
+                        h2 { color: #A8843C; font-size: 17px; margin-top: 24px; }
+                        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+                        th { background: #F7F0E4; color: #A8843C; }
+                        td, th { border: 1px solid #E6D9C5; padding: 6px 8px; font-size: 12px; }
+                        p { margin: 8px 0; }
+                      </style></head><body>
+                      <h1>家庭合盘报告</h1>
+                      <pre style="white-space:pre-wrap;font-family:'LXGW WenKai',serif;font-size:13px;">${report.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+                    </body></html>`;
+                    const resp = await fetch('/api/pdf', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ html }),
+                    });
+                    if (!resp.ok) { alert('PDF 生成失败'); return; }
+                    const blob = await resp.blob();
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = '家庭合盘.pdf';
+                    a.click();
+                    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+                  } catch (e: any) {
+                    alert('PDF 生成异常: ' + (e.message || '网络错误'));
+                  } finally {
+                    btn.textContent = origText;
+                    btn.disabled = false;
+                  }
+                }}
+                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                  📥 下载PDF
+                </button>
+              </div>
+            </div>
             <h2 className="text-2xl font-semibold mb-5">合盘解读</h2>
-            <div className="prose prose-sm md:prose-base whitespace-pre-wrap leading-relaxed">
+            <div className="prose prose-sm md:prose-base whitespace-pre-wrap leading-relaxed" style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}>
               {report.split('\n').map((line, i) => (<p key={i} className="mb-3">{line || ' '}</p>))}
             </div>
           </div>

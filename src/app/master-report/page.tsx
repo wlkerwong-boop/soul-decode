@@ -720,6 +720,7 @@ export default function MasterPage() {
                   </div>
                 </div>
                 <div className="report-content prose prose-sm md:prose-base max-w-none leading-relaxed"
+                  style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 800px' }}
                   dangerouslySetInnerHTML={{ __html: reportHtml }} />
               </div>
 
@@ -753,7 +754,17 @@ export default function MasterPage() {
                 {savedReports.map((r: any) => (
                   <div key={r.id}
                     className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-highlight)] hover:bg-[var(--bg-card)] transition-colors cursor-pointer group"
-                    onClick={() => { setReport(r.report); setData(r.data); setShowQuickInput(false); setShowFullReport(true); setShowHistory(false); }}>
+                    onClick={() => {
+                      if (!r.report || r.report.length < 100) {
+                        // 报告数据损坏/被清空：提示并移除该条，避免渲染崩溃（手机 Safari reload 问题）
+                        const updated = savedReports.filter((x: any) => x.id !== r.id);
+                        setSavedReports(updated);
+                        try { localStorage.setItem('master_report_history', JSON.stringify(updated)); } catch {}
+                        alert('该报告数据已失效，已为您移除，请重新生成。');
+                        return;
+                      }
+                      setReport(r.report); setData(r.data); setShowQuickInput(false); setShowFullReport(true); setShowHistory(false);
+                    }}>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium text-[var(--text-primary)] truncate">{r.name}</div>
                       <div className="text-xs text-[var(--text-tertiary)] mt-0.5">
