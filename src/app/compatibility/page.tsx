@@ -81,11 +81,8 @@ export default function HepanPage() {
 
   // ── 等待体验 ──
   const [isStreaming, setIsStreaming] = useState(false);
-  // 生成过程中自动展开所有已生成章节（增量渲染，不阻塞主线程）
-  useEffect(() => {
-    const sections = report.split(/^(?=## )/m).filter((s: string) => s.trim());
-    if (isStreaming && sections.length > visibleChapters) setVisibleChapters(sections.length);
-  }, [report, isStreaming]);
+  // 注：任何时刻只渲染前 visibleChapters 章（生成中也不自动展开全部），
+  // 避免旧内核（微信X5/安卓自带浏览器）2万字 DOM 布局卡死触发 reload/back。
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);

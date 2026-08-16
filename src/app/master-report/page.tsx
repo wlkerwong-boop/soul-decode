@@ -264,12 +264,9 @@ export default function MasterPage() {
     return report.split(/^(?=## )/m).filter((s: string) => s.trim().length > 0);
   }, [report]);
   const [visibleChapters, setVisibleChapters] = useState(3);
-  // 生成过程中自动展开所有已生成章节（增量渲染，不阻塞主线程）
-  useEffect(() => {
-    if (isStreaming && reportSections.length > visibleChapters) {
-      setVisibleChapters(reportSections.length);
-    }
-  }, [reportSections.length, isStreaming]);
+  // 注：任何时刻只渲染前 visibleChapters 章（生成中也不自动展开全部）。
+  // 2026-08-16 修复：旧内核（微信X5/安卓自带浏览器）在生成结束时若已展开全部
+  // 章节，2万字 DOM 一次性布局会卡死页面并触发 reload/back。统一"前3章+继续阅读"。
   const chapterHtml = useMemo(() => {
     const out: string[] = [];
     for (let i = 0; i < Math.min(visibleChapters, reportSections.length); i++) {
