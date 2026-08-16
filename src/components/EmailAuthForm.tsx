@@ -15,11 +15,13 @@ interface EmailAuthFormProps {
 
 export default function EmailAuthForm({ mode }: EmailAuthFormProps) {
   const router = useRouter();
-  // 登录/注册成功后回跳的页面（仅允许站内路径，防止外链跳转）
+  // 登录/注册成功后回跳的页面（仅允许站内路径，防止外链跳转；测试环境 /staging 下自动带前缀）
   const getNext = () => {
     if (typeof window === 'undefined') return null;
+    const base = window.location.pathname.startsWith('/staging') ? '/staging' : '';
     const next = new URLSearchParams(window.location.search).get('next');
-    return next && next.startsWith('/') && !next.startsWith('//') ? next : null;
+    if (next && next.startsWith('/') && !next.startsWith('//')) return next;
+    return base ? base + '/my' : null;
   };
   const {
     login,
@@ -177,6 +179,16 @@ export default function EmailAuthForm({ mode }: EmailAuthFormProps) {
             className="input-jade"
             required
           />
+          {!isRegister && (
+            <div className="flex justify-end -mt-1">
+              <a
+                href={`${typeof window !== 'undefined' && window.location.pathname.startsWith('/staging') ? '/staging' : ''}/auth/forgot`}
+                className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-colors"
+              >
+                忘记密码？
+              </a>
+            </div>
+          )}
         </div>
 
         {isRegister && (

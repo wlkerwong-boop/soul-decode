@@ -200,7 +200,10 @@ export default function MasterPage() {
           year, month, day, hour, minute, continent, country, province, city, gender,
         }));
       } catch {}
-      router.push('/auth/login?next=/master-report');
+      // 测试环境（/staging 子路径）下跳转需带前缀，否则会丢失路径
+      const base = typeof window !== 'undefined' && window.location.pathname.startsWith('/staging') ? '/staging' : '';
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/master-report';
+      router.push(`${base}/auth/login?next=${encodeURIComponent(currentPath)}`);
       return;
     }
     setLoading(true); setError(''); setReport(''); setData(null); setShowQuickInput(false);

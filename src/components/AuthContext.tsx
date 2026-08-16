@@ -29,6 +29,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<AuthResult>;
   register: (email: string, password: string, nickname: string) => Promise<AuthResult>;
   resendVerification: (email: string) => Promise<AuthResult>;
+  resetPassword: (email: string) => Promise<AuthResult>;
   logout: () => Promise<void>;
   updateNickname: (nickname: string) => Promise<AuthResult>;
 }
@@ -141,6 +142,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, [supabase]);
 
+  // 忘记密码：发送密码重置邮件（链接指向当前域名下的重置密码页）
+  const resetPassword = useCallback(async (email: string): Promise<AuthResult> => {
+    if (!supabase) return { ok: false, message: '登录服务尚未配置' };
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const { error } = await supabase.auth.resetPasswordForEmail(normalizeEmail(email), {
+      redirectTo: `${origin}/auth/reset-password`,
+    });
+    return error
+      ? { ok: false, message: translateAuthError(error.message || error.code || '') }
+      : { ok: true };
+  }, [supabase]);
+
   const updateNickname = useCallback(async (nickname: string): Promise<AuthResult> => {
     const trimmed = nickname.trim();
     if (!supabase || !user || trimmed.length < 2 || trimmed.length > 20) {
@@ -169,6 +182,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         resendVerification,
+        resetPassword,
         logout,
         updateNickname,
       }}
