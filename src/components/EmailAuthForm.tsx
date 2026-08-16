@@ -15,6 +15,12 @@ interface EmailAuthFormProps {
 
 export default function EmailAuthForm({ mode }: EmailAuthFormProps) {
   const router = useRouter();
+  // 登录/注册成功后回跳的页面（仅允许站内路径，防止外链跳转）
+  const getNext = () => {
+    if (typeof window === 'undefined') return null;
+    const next = new URLSearchParams(window.location.search).get('next');
+    return next && next.startsWith('/') && !next.startsWith('//') ? next : null;
+  };
   const {
     login,
     register,
@@ -39,7 +45,7 @@ export default function EmailAuthForm({ mode }: EmailAuthFormProps) {
   }, []);
 
   useEffect(() => {
-    if (isLoggedIn && !awaitingVerification) router.replace('/my');
+    if (isLoggedIn && !awaitingVerification) router.replace(getNext() || '/my');
   }, [awaitingVerification, isLoggedIn, router]);
 
   const handleSubmit = async (event: FormEvent) => {
@@ -83,7 +89,7 @@ export default function EmailAuthForm({ mode }: EmailAuthFormProps) {
       setNotice(`验证邮件已发送至 ${normalizeEmail(email)}，请点击邮件中的链接完成注册`);
       return;
     }
-    router.push('/my');
+    router.push(getNext() || '/my');
   };
 
   const handleResend = async () => {

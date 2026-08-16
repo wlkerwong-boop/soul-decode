@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/components/AuthContext';
 import VoiceReader from '@/components/VoiceReader';
 import BodygraphSVG from '@/components/BodygraphSVG';
 import BaziChart from '@/components/BaziChart';
@@ -17,6 +19,8 @@ const HOURS = Array.from({length:24},(_,i)=>i);
 const MINUTES = Array.from({length:60},(_,i)=>i);
 
 export default function MasterPage() {
+  const router = useRouter();
+  const { isLoggedIn } = useAuth();
   const [year, setYear] = useState(''); const [month, setMonth] = useState('');
   const [day, setDay] = useState(''); const [hour, setHour] = useState(''); const [minute, setMinute] = useState('0');
   const [continent, setContinent] = useState(''); const [country, setCountry] = useState('');
@@ -126,6 +130,30 @@ export default function MasterPage() {
     } catch {}
   }, []);
 
+  // ── 登录门禁：未登录点排盘 → 暂存表单 → 去登录；登录回来自动恢复 ──
+  const [restoredNotice, setRestoredNotice] = useState('');
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    try {
+      const raw = sessionStorage.getItem('soul_pending_scan');
+      if (raw) {
+        const p = JSON.parse(raw);
+        if (p.year) setYear(p.year);
+        if (p.month) setMonth(p.month);
+        if (p.day) setDay(p.day);
+        if (p.hour) setHour(p.hour);
+        if (p.minute) setMinute(p.minute);
+        if (p.continent) setContinent(p.continent);
+        if (p.country) setCountry(p.country);
+        if (p.province) setProvince(p.province);
+        if (p.city) setCity(p.city);
+        if (p.gender) setGender(p.gender);
+        sessionStorage.removeItem('soul_pending_scan');
+        setRestoredNotice('✅ 登录成功，已恢复您填写的出生信息，请点击下方按钮开始排盘');
+      }
+    } catch {}
+  }, [isLoggedIn]);
+
   // Extract name from report for auto-labeling
   const extractName = (r: string) => {
     const m = r.match(/^.{0,20}(?:你|您)(?:今年)?(\d+)岁/);
@@ -165,6 +193,16 @@ export default function MasterPage() {
   }, [city]);
 
   const submit = async (retryCount = 0) => {
+    // ── 登录门禁：未登录必须先注册/登录才能测评生成 ──
+    if (!isLoggedIn) {
+      try {
+        sessionStorage.setItem('soul_pending_scan', JSON.stringify({
+          year, month, day, hour, minute, continent, country, province, city, gender,
+        }));
+      } catch {}
+      router.push('/auth/login?next=/master-report');
+      return;
+    }
     setLoading(true); setError(''); setReport(''); setData(null); setShowQuickInput(false);
     setIsStreaming(false); setStartTime(Date.now()); setElapsedSeconds(0);
 
@@ -252,7 +290,7 @@ export default function MasterPage() {
     if (!error) { setLoading(false); setIsStreaming(false); }
   };
 
-  const handleRetry = useCallback(() => { submit(); }, [year, month, day, hour, minute, continent, country, province, city, gender]);
+  const handleRetry = useCallback(() => { submit(); }, [year, month, day, hour, minute, continent, country, province, city, gender, isLoggedIn]);
 
   const allFilled = year && month && day && continent && country && city;
   const quickFilled = year && month && day && continent && country && city;
@@ -363,6 +401,20 @@ export default function MasterPage() {
 
             {/* 右：表单卡 */}
             <div className="soul-editorial-form report-form">
+              {/* 00 输入前必读 */}
+              <div className="mb-5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-highlight)]/60 p-3.5 space-y-2 text-xs leading-relaxed">
+                <p className="font-semibold text-[var(--text-primary)]">📌 测评前请先看这 3 条</p>
+                <p className="text-[var(--text-secondary)]">📅 <strong>出生日期请填阳历（公历）</strong>；阴历（农历）出生的朋友，请先换算成阳历再填写</p>
+                <p className="text-[var(--text-secondary)]">📜 报告共 7 个章节，会<strong>一段一段逐章生成</strong>，约需 3-5 分钟，生成过程中请勿关闭页面</p>
+                <p className="text-[var(--text-secondary)]">📱 建议使用手机<strong>自带浏览器</strong>（Safari / Chrome）打开本页测评；在微信内直接打开可能出现显示异常，可点右上角"在浏览器打开"</p>
+              </div>
+
+              {restoredNotice && (
+                <div className="mb-4 rounded-lg border border-emerald-700/40 bg-emerald-900/20 p-3 text-xs text-emerald-200">
+                  {restoredNotice}
+                </div>
+              )}
+
               {/* 01 基本信息 */}
               <div className="soul-editorial-form-section">
               <p className="soul-editorial-form-label">基本信息</p>
@@ -378,7 +430,7 @@ export default function MasterPage() {
               {/* 02 出生时间 */}
               <div className="soul-editorial-form-section">
               <p className="soul-editorial-form-label">出生时间</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
                 <select value={year} onChange={e=>setYear(e.target.value)}
                   className="input-jade soul-editorial-field px-3">
                   <option value="">年份</option>
@@ -399,7 +451,14 @@ export default function MasterPage() {
                   <option value="">时</option>
                   {HOURS.map(h=><option key={h} value={h}>{h}</option>)}
                 </select>
+                <select value={minute} onChange={e=>setMinute(e.target.value)}
+                  className="input-jade soul-editorial-field px-3">
+                  {MINUTES.map(m=><option key={m} value={m}>{m}分</option>)}
+                </select>
               </div>
+              <p className="text-xs text-[var(--text-tertiary)] mt-2">
+                分钟不记得可跳过（默认 0 分），记得越精确排盘越准；时区会随出生城市自动匹配
+              </p>
               </div>
 
               {/* 03 出生地点 */}
@@ -434,19 +493,6 @@ export default function MasterPage() {
                 )}
               </div>
               </div>
-
-              {/* 04 精确时间（可选） */}
-              <details className="soul-editorial-form-section text-sm text-[var(--text-tertiary)]">
-                <summary className="cursor-pointer py-1 hover:text-[var(--text-secondary)] transition-colors">精确时间（可选）</summary>
-                <div className="flex items-center gap-2 mt-3">
-                  <span>分钟：</span>
-                  <select value={minute} onChange={e=>setMinute(e.target.value)}
-                    className="input-jade soul-editorial-field px-3">
-                    {MINUTES.map(m=><option key={m} value={m}>{m}分</option>)}
-                  </select>
-                  <span className="ml-auto">时区：{city ? detectedTz : '选择城市后自动匹配'}</span>
-                </div>
-              </details>
 
               {/* CTA */}
               <button onClick={() => submit()} disabled={!quickFilled||loading}
