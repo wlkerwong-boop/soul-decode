@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildPersonalReportDataDeclaration,
   buildPersonalReportSegments,
   calculateReportBazi,
   calculateReportBaziForTimezone,
@@ -51,13 +52,21 @@ describe('personal report prompt', () => {
     const segments = buildPersonalReportSegments(adultContext);
     expect(segments).toHaveLength(3);
     const full = segments.map(segment => segment.prompt).join('\n');
-    for (const heading of ['排盘数据声明', '核心命盘总览', '交叉印证', '此刻的人生', '天赋与方向', '健康与情绪养护', '实践纲领', '最终寄语']) {
+    // K3 加固条款：## 0 声明节由引擎注入，AI 段只提示"已生成"、不再被要求撰写数据列表
+    expect(full).toContain('已由系统依据排盘数据直接生成');
+    expect(full).not.toContain('逐条列出出生信息');
+    expect(full).not.toContain('逐条列出');
+    for (const heading of ['核心命盘总览', '交叉印证', '此刻的人生', '天赋与方向', '健康与情绪养护', '实践纲领', '最终寄语']) {
       expect(full).toContain(heading);
     }
     expect(full).toContain('6000-10000');
     expect(full).toContain('18-58');
     expect(full).toContain('紫微');
-    expect(full).toContain('命理是地图不是判决书');
+    // 声明节由引擎注入，含原「命理是地图不是判决书」表述
+    const declaration = buildPersonalReportDataDeclaration(adultContext);
+    expect(declaration).toContain('排盘数据声明');
+    expect(declaration).toContain('命理是地图不是判决书');
+    expect(declaration).toContain('18-58');
   });
 
   it('appends a deterministic disclaimer when model output omits one', () => {

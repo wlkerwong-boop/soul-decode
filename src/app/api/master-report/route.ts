@@ -1,15 +1,20 @@
 // 七系统融合报告 API — 人生总览
 import { NextRequest, NextResponse } from 'next/server';
+import { createRequire } from 'node:module';
 import { getBirthCoords } from '@/data/cities';
 import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
 import { describeChannels } from '@/lib/hd-channels-map';
 import {
   buildPersonalReportSegments,
+  buildPersonalReportDataDeclaration,
   calculateReportBazi,
   calculateWuyunLiuqi as calculateReportWuyunLiuqi,
   PERSONAL_REPORT_SYSTEM_PROMPT,
   finalizePersonalReport,
 } from '@/lib/report-depth';
+
+const require = createRequire(import.meta.url);
+const { assertReportVerified } = require('../lib/verify-report-core.mjs');
 
 function calcBazi(y: number, m: number, d: number, h: number) {
   const { Solar } = require('lunar-javascript');
@@ -264,10 +269,24 @@ ${liunianResult}
           fullReport += data.choices?.[0]?.message?.content || '';
         }
         if (fullReport.length > 500) {
-          report = finalizePersonalReport(fullReport, reportContext);
+          // 引擎注入「## 0. 排盘数据声明」节（K3 加固条款：AI 不写数字/列表）
+          report = `${buildPersonalReportDataDeclaration(reportContext)}\n${finalizePersonalReport(fullReport, reportContext)}`;
         }
       } catch (e) {
         console.error('DeepSeek fallback error:', (e as Error).message);
+      }
+    }
+
+    // 事实层护栏（任务3 fail-closed）：校验不过 → 报错重生成，禁止带病交付
+    if (report) {
+      try {
+        assertReportVerified(report, {
+          hd: hdResult,
+          bazi: baziResult,
+        });
+      } catch (verifyError: any) {
+        console.error('报告事实层校验未通过，拒绝交付:', verifyError?.issues?.map((i: any) => i.message).join('; ') || verifyError?.message);
+        return NextResponse.json({ success: false, error: verifyError?.message || '报告事实层校验未通过' }, { status: 422 });
       }
     }
 

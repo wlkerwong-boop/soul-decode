@@ -1,17 +1,22 @@
 // 流式七系统报告 API — 边生成边返回
 import { NextRequest } from 'next/server';
+import { createRequire } from 'node:module';
 import { getBirthCoords } from '@/data/cities';
 import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
 import { calcPlanetPositions } from '@/lib/astrology';
 import { takeSseLines } from '@/lib/sse';
 import {
   buildPersonalReportSegments,
+  buildPersonalReportDataDeclaration,
   calculateReportBaziForTimezone,
   calculateWuyunLiuqi,
   PERSONAL_REPORT_SYSTEM_PROMPT,
   finalizePersonalReport,
   normalizePersonalReportAudience,
 } from '@/lib/report-depth';
+
+const require = createRequire(import.meta.url);
+const { assertReportVerified } = require('../lib/verify-report-core.mjs');
 
 async function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
   const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
@@ -123,7 +128,7 @@ export async function POST(req: NextRequest) {
   const wuyunResult = calculateWuyunLiuqi(y);
   const liunianResult = calcLiuNian(y);
 
-  const reportSegments = buildPersonalReportSegments({
+  const reportContext = {
     age,
     gender: g,
     birth: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`,
@@ -134,7 +139,8 @@ export async function POST(req: NextRequest) {
     astrology: astrologyResult,
     wuyun: wuyunResult,
     liunian: liunianResult,
-  });
+  };
+  const reportSegments = buildPersonalReportSegments(reportContext);
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
   const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
@@ -154,6 +160,10 @@ export async function POST(req: NextRequest) {
     async start(controller) {
       try {
         let reportText = '';
+        // K3 加固条款：引擎注入「## 0. 排盘数据声明」节，AI 只写第 1 节起叙事
+        const declaration = buildPersonalReportDataDeclaration(reportContext);
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: declaration })}\n\n`));
+        reportText += declaration;
         for (const segment of reportSegments) {
           const res = await fetch(`${baseUrl}/chat/completions`, {
             method: 'POST',
@@ -220,21 +230,22 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        const reportContext = {
-          age,
-          gender: g,
-          birth: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`,
-          location: [location, body.city].filter(Boolean).join(' ') || '未提供',
-          bazi: baziResult,
-          hd: hdResult,
-          ziwei: ziweiResult,
-          astrology: astrologyResult,
-          wuyun: wuyunResult,
-          liunian: liunianResult,
-        };
+        // reportContext 由外层（127 行）统一构造，此处复用（含声明节注入）
         const safeReportText = finalizePersonalReport(reportText, reportContext);
         if (safeReportText !== reportText) {
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: safeReportText.slice(reportText.length) })}\n\n`));
+        }
+
+        // 事实层护栏（任务3 fail-closed）：流式已发出内容无法撤回，
+        // 校验失败时在 done 帧前补发 verify_error，客户端应判失败不落盘
+        try {
+          assertReportVerified(safeReportText, { hd: hdResult, bazi: baziResult });
+        } catch (verifyError: any) {
+          logLine('verify-fail', `issues=${(verifyError?.issues || []).map((i: any) => i.rule).join(',')}`);
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+            verify_error: verifyError?.message || '报告事实层校验未通过',
+            issues: verifyError?.issues || [],
+          })}\n\n`));
         }
 
         // Send final data payload

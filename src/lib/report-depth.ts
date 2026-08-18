@@ -109,6 +109,35 @@ function serializeContext(context: PersonalReportContext) {
 流年：${context.liunian}`;
 }
 
+/**
+ * 引擎注入的「## 0. 排盘数据声明」节（K3 加固条款 §三·五）。
+ * 所有数字/列表由代码从计算 JSON 直接拼装，禁止 AI 撰写任何数据；
+ * AI 只写第 1 节起的叙事，本声明节由调用方在报告最前注入。
+ */
+export function buildPersonalReportDataDeclaration(context: PersonalReportContext): string {
+  const hd = context.hd
+    ? `类型：${context.hd.type}｜人生角色：${context.hd.profile}｜内在权威：${context.hd.authority}｜策略：${context.hd.strategy}｜签名：${context.hd.signature || '—'}｜非自我主题：${context.hd.notSelfTheme || '—'}｜通道：${describeChannels(context.hd.channels)}｜定义中心：${(context.hd.definedCenters || []).join('、') || '无'}`
+    : '数据暂缺';
+  const ziwei = context.ziwei
+    ? context.ziwei.palaces.map((palace: any) => `${palace.name}宫：${(palace.stars || []).slice(0, 5).join('、') || '无主星'}`).join('；')
+    : '数据暂缺';
+  const planets = context.astrology?.planets?.map((planet: any) => `${planet.name}${planet.sign}座${planet.degree}°`).join('、') || context.astrology?.zodiac || '数据暂缺';
+  return [
+    '## 0. 排盘数据声明',
+    '',
+    `- 出生：${context.birth}｜出生地：${context.location}｜当前年龄：${context.age}岁｜性别：${context.gender}`,
+    `- 八字四柱：${context.bazi.pillars.join(' ')}｜日主：${context.bazi.dayMaster}｜五行：${formatElementDistribution(context.bazi.elementDistribution)}`,
+    `- 人类图：${hd}`,
+    `- 紫微斗数：${ziwei}`,
+    `- 占星：${context.astrology?.zodiac || ''}｜${planets}`,
+    `- 五运六气：${context.wuyun.description}`,
+    `- 流年：${context.liunian}`,
+    '',
+    '> 本声明节由系统依据排盘数据直接生成，以下解读均以此为准。命理是地图不是判决书，七分天性三分环境，与真人不符之处以真人为准。',
+    '',
+  ].join('\n');
+}
+
 export const PERSONAL_REPORT_SYSTEM_PROMPT = `你是严谨而温暖的生命蓝图解读者。你必须只依据输入的真实排盘数据写作，不补造通道、宫星、十神、行星、年龄节点或医学结论。
 
 纪律：
@@ -173,7 +202,7 @@ export function buildPersonalReportSegments(context: PersonalReportContext): Rep
       // 2200-3200 中文字 ≈ 3300-4800 token（含 markdown/表格），3500 会被截断。
       // 2026-08-15 修复：提到 6000，并禁止本段写免责声明/收尾语（finalize 统一追加）。
       maxTokens: 6000,
-      prompt: `这是三段报告的第1段。只输出以下三章，约2200-3200字：\n\n## 0. 排盘数据声明\n逐条列出出生信息、八字四柱与五行、人类图类型/角色/权威/通道、紫微命宫主星、占星行星星座、五运六气。末尾原样写：命理是地图不是判决书，七分天性三分环境，与真人不符之处以真人为准。\n\n## 1. 核心命盘总览\n用“系统 × 关键数据 × 一句话主题”的七行表格；收尾以“七个系统说的是同一个人：”给出综合画像。\n\n## 2. 交叉印证\n提炼3-5个核心特质。每个特质必须并列至少三个系统的具体证据，并写“给你的提醒”：阴影面 + 一句可执行动作。至少写一处系统矛盾及整合解释。\n\n**本段结束时直接结束，禁止写免责声明、禁止写任何收尾语或总结——后续章节会继续。**${shared}`,
+      prompt: `这是三段报告的第1段。**注意：「## 0. 排盘数据声明」已由系统依据排盘数据直接生成在报告开头，禁止你重复输出或改写任何排盘数字、列表、通道连接**。只输出以下两章，约2200-3200字：\n\n## 1. 核心命盘总览\n用“系统 × 关键数据 × 一句话主题”的七行表格；收尾以“七个系统说的是同一个人：”给出综合画像。\n\n## 2. 交叉印证\n提炼3-5个核心特质。每个特质必须并列至少三个系统的具体证据，并写“给你的提醒”：阴影面 + 一句可执行动作。至少写一处系统矛盾及整合解释。\n\n**本段结束时直接结束，禁止写免责声明、禁止写任何收尾语或总结——后续章节会继续。**${shared}`,
     },
     {
       id: 'direction',

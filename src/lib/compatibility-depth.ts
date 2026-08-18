@@ -67,6 +67,29 @@ function memberData(members: CompatibilityMember[]) {
 - 人类图：${member.hd ? `类型${member.hd.type}；角色${member.hd.profile}；权威${member.hd.authority}；关键通道${describeChannels(member.hd.channels)}` : '数据暂缺'}`).join('\n\n');
 }
 
+/**
+ * 引擎注入的「## 0. 家庭排盘数据声明」节（K3 加固条款 §三·五，与个人报告同规）。
+ * 所有数字/列表由代码从计算 JSON 直接拼装，禁止 AI 撰写；AI 只写第 1 节起叙事。
+ */
+export function buildFamilyDataDeclaration(members: CompatibilityMember[], type: string): string {
+  const family = type === 'family';
+  const heading = family ? '家庭排盘数据声明' : '双方排盘数据声明';
+  const rows = members.map((member) => {
+    const hd = member.hd
+      ? `类型：${member.hd.type}｜角色：${member.hd.profile}｜权威：${member.hd.authority}｜关键通道：${describeChannels(member.hd.channels)}`
+      : '数据暂缺';
+    return `- **${member.label}**（${member.age}岁）：八字 ${member.bazi}｜五行 ${JSON.stringify(member.elementDistribution)}｜人类图 ${hd}`;
+  }).join('\n');
+  return [
+    `## 0. ${heading}`,
+    '',
+    rows,
+    '',
+    '> 本声明节由系统依据排盘数据直接生成，以下解读均以此为准。',
+    '',
+  ].join('\n');
+}
+
 export function buildCompatibilitySegments(members: CompatibilityMember[], type: string): ReportSegment[] {
   const family = type === 'family';
   const data = memberData(members);
@@ -74,7 +97,7 @@ export function buildCompatibilitySegments(members: CompatibilityMember[], type:
     {
       id: 'compat-foundation',
       maxTokens: 6500,
-      prompt: `输出家庭合盘报告第1段，约2500-3500字。全篇使用“您”，不要使用“你”。这是“人生传记”式的家庭合盘：把数据编织成这个家独有的故事，而不是罗列数据。每个论断必须紧跟具体数据（成员+字段），禁止无证据的性格套话。\n\n## 0. 家庭排盘数据声明\n逐人列出八字与人类图数据（类型/角色/权威/关键通道）。\n\n## 1. 能量结构对照表\n表头：成员、类型、角色、权威、关键通道、五行重心。\n\n## 2. 一眼看懂这个家（家族能量生态）\n用一两句凝练的话概括这个家的整体气质。然后分别解读：①类型组合（几台“发动机”几个“眼睛”——能量型与非能量型的配比意味着什么）；②权威组合（几个荐骨/情绪/直觉——这个家该用什么方式做决定）；③角色分布（5爻/1爻/3爻等各几人，意味着什么家传课题）。\n\n## 3. 写在血脉里的密码（家族共享印记）\n挖掘至少4组“印记”，每一组必须跨系统验证：①共享通道（如父母同有34-57=定海神针；母女共享28-38=意义之火；姐妹共享4-63=为什么联盟），写明通道名+共享成员+对这个家的意义；②相同日柱/生肖/天干（如两姐妹同日柱=同款内核）；③紫微同构（如一人命宫主星=另一人财帛/官禄宫主星=事业互补；夫妻宫位呼应）；④同爻线/同角色课题。每组印记写成“这个家的饭桌上”可感知的具体画面。\n\n【数据】\n${data}`,
+      prompt: `输出家庭合盘报告第1段，约2500-3500字。全篇使用“您”，不要使用“你”。这是“人生传记”式的家庭合盘：把数据编织成这个家独有的故事，而不是罗列数据。每个论断必须紧跟具体数据（成员+字段），禁止无证据的性格套话。**注意：「## 0. 家庭排盘数据声明」已由系统依据排盘数据直接生成在报告开头，禁止你重复输出或改写任何排盘数字、列表、通道连接**。\n\n## 1. 能量结构对照表\n表头：成员、类型、角色、权威、关键通道、五行重心。\n\n## 2. 一眼看懂这个家（家族能量生态）\n用一两句凝练的话概括这个家的整体气质。然后分别解读：①类型组合（几台“发动机”几个“眼睛”——能量型与非能量型的配比意味着什么）；②权威组合（几个荐骨/情绪/直觉——这个家该用什么方式做决定）；③角色分布（5爻/1爻/3爻等各几人，意味着什么家传课题）。\n\n## 3. 写在血脉里的密码（家族共享印记）\n挖掘至少4组“印记”，每一组必须跨系统验证：①共享通道（如父母同有34-57=定海神针；母女共享28-38=意义之火；姐妹共享4-63=为什么联盟），写明通道名+共享成员+对这个家的意义；②相同日柱/生肖/天干（如两姐妹同日柱=同款内核）；③紫微同构（如一人命宫主星=另一人财帛/官禄宫主星=事业互补；夫妻宫位呼应）；④同爻线/同角色课题。每组印记写成“这个家的饭桌上”可感知的具体画面。\n\n【数据】\n${data}`,
     },
     {
       id: 'compat-practice',

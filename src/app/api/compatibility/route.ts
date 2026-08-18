@@ -5,16 +5,21 @@
  * 包含：五行互补、性格相容、冲突预警、关系时间线
  */
 import { NextRequest } from 'next/server';
+import { createRequire } from 'node:module';
 import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
 import { CITY_TZ } from '@/data/cities';
 import {
   buildCompatibilitySegments,
+  buildFamilyDataDeclaration,
   COMPATIBILITY_SYSTEM_PROMPT,
   normalizeCompatibilityAudience,
   type CompatibilityMember,
 } from '@/lib/compatibility-depth';
 import { buildLocalCompatibilityReport } from '@/lib/compatibility-fallback';
 import { calculateAuthoritativeBazi } from '@/lib/bazi-authoritative';
+
+const require = createRequire(import.meta.url);
+const { assertReportVerified } = require('../lib/verify-report-core.mjs');
 
 export const runtime = 'nodejs';
 
@@ -105,6 +110,10 @@ export async function POST(request: NextRequest) {
       async start(controller) {
         let reportText = '';
         try {
+          // K3 加固条款：引擎注入「## 0. 排盘数据声明」节，AI 只写第 1 节起叙事
+          const declaration = buildFamilyDataDeclaration(members, type || 'couple');
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: declaration })}\n\n`));
+          reportText += declaration;
           for (const segment of segments) {
             let segmentText = '';
             let upstreamError = '';
@@ -176,6 +185,20 @@ export async function POST(request: NextRequest) {
           if (type === 'family' &&
             (!reportText.includes('## 7.') || !reportText.includes('仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议'))) {
             throw new Error('家庭合盘报告未完整生成：缺少第7节使用边界或免责声明');
+          }
+          // 事实层护栏（任务3 fail-closed）：流式已发出内容无法撤回，
+          // 校验失败时在 done 帧前补发 verify_error，客户端应判失败不落盘
+          try {
+            assertReportVerified(reportText, {
+              hd: { channels: members.flatMap((member) => member.hd?.channels || []) },
+              bazi: { pillars: members.map((member) => member.bazi.split(' ')).flat() },
+            });
+          } catch (verifyError: any) {
+            console.error('合盘报告事实层校验未通过:', (verifyError?.issues || []).map((i: any) => i.message).join('; '));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              verify_error: verifyError?.message || '报告事实层校验未通过',
+              issues: verifyError?.issues || [],
+            })}\n\n`));
           }
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
         } catch (error: any) {

@@ -1,0 +1,208 @@
+/**
+ * verify-report-core.mjs — 报告事实层校验核心（P0 任务3 + K3 加固 §三·五）
+ *
+ * 单份实现，两个入口共用：
+ *  - scripts/verify-report.mjs（CLI：验收/人工扫描）
+ *  - 报告生成 route（fail-closed：校验不过 → 报错重生成，禁止带病交付）
+ *
+ * 校验规则：
+ *  V1 声明通道条数 == 实际列出条数（病灶#1）
+ *  V2 每条通道的中心连接与 hd-channels-map 一致（病灶#2）；通道不得写成"爻"（病灶#3）
+ *  V3 定义状态不得自相矛盾（病灶#4）
+ *  V4 个人报告 vs 引擎真值逐字段一致（type/profile/authority/channels/八字四柱，T1 跨轨）
+ *  V5 年柱符合立春派口径（病灶#5）
+ *  V6（加固）「## 0. 排盘数据声明」节与引擎 JSON 恒等（通道带中心映射 + 四柱齐全）
+ *
+ * 真数据纪律：核心只做纯文本/数据比对，不含任何真实出生数据。
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const MAP_PATH = path.resolve(__dirname, '../data/hd-channels-map.json');
+
+// ---------- 通道映射表装载 ----------
+const channelMap = JSON.parse(fs.readFileSync(MAP_PATH, 'utf-8'));
+const ENTRIES = channelMap.channels;
+
+/** 闸门号对 → 条目（双向归一化） */
+const BY_GATE_PAIR = new Map();
+for (const entry of ENTRIES) {
+  const a = Math.min(entry.gateA, entry.gateB);
+  const b = Math.max(entry.gateA, entry.gateB);
+  BY_GATE_PAIR.set(`${a}-${b}`, entry);
+}
+
+function normalizeChannelKey(key) {
+  if (typeof key !== 'string') return null;
+  const parts = key.split('-').map((n) => parseInt(n, 10));
+  if (parts.length !== 2 || parts.some((n) => Number.isNaN(n))) return null;
+  return `${Math.min(parts[0], parts[1])}-${Math.max(parts[0], parts[1])}`;
+}
+
+function lookupChannel(key) {
+  const normalized = normalizeChannelKey(key);
+  if (!normalized) return null;
+  return BY_GATE_PAIR.get(normalized) || null;
+}
+
+// 中心名英文 → 映射表中文（V2 用）
+const CENTER_EN_CN = {
+  'Head': '头脑/Head', 'Ajna': '逻辑/Ajna', 'Throat': '喉咙', 'G': 'G',
+  'Ego': '意志力', 'Sacral': '荐骨', 'Solar Plexus': '情绪', 'Spleen': '脾', 'Root': '根部',
+};
+
+// ---------- 核心校验 ----------
+
+/** 返回 issues 数组；空数组 = 通过 */
+export function verifyReportText(reportText, truth = null) {
+  const issues = [];
+  const fail = (rule, message, evidence = '') => issues.push({ rule, message, evidence });
+
+  // ---- V1 通道条数 ----
+  const declaredMatches = [...reportText.matchAll(/(?:定义通道|激活通道|通道)[共]?\s*(\d+)\s*条/g)];
+  const listedChannels = new Set();
+  const listedPattern = /(\d{1,2}-\d{1,2})/g;
+  let m;
+  while ((m = listedPattern.exec(reportText)) !== null) {
+    const [a, b] = m[1].split('-').map(Number);
+    if (a >= 1 && a <= 64 && b >= 1 && b <= 64) listedChannels.add(m[1]);
+  }
+  for (const dm of declaredMatches) {
+    const declared = parseInt(dm[1], 10);
+    const actual = truth?.hd?.channels?.length ?? listedChannels.size;
+    if (declared !== actual) {
+      fail('V1', `通道条数声明 ${declared} 条 ≠ 实际 ${actual} 条`,
+        `声明位置: "${dm[0]}"；实际列表: ${[...listedChannels].join(', ') || '(空)'}`);
+    }
+  }
+
+  // ---- V2 通道-中心连接 + 爻误写 ----
+  const connectPattern = /(\d{1,2}-\d{1,2})\s*通道?\s*(?:连接|连到|连通|连|↔)\s*(?:([\u4e00-\u9fff/]+)中心?)\s*(?:与|和|↔|及)?\s*([\u4e00-\u9fff/]+)中心?/g;
+  while ((m = connectPattern.exec(reportText)) !== null) {
+    const entry = lookupChannel(m[1]);
+    if (!entry) { fail('V2', `通道 ${m[1]} 不在映射表内`, m[0]); continue; }
+    const gotCenters = [m[2], m[3]].map((c) => (c || '').replace(/中心/g, '').trim());
+    const expected = new Set([entry.centerA.replace(/[（(].*?[)）]/g, ''), entry.centerB.replace(/[（(].*?[)）]/g, '')]);
+    const expectedCn = new Set([...expected].map((c) => CENTER_EN_CN[c] || c));
+    const ok = gotCenters.every((c) => expected.has(c) || expectedCn.has(c));
+    if (!ok) {
+      fail('V2', `通道 ${m[1]} 中心连接错误: 报告 ${gotCenters.join('/')}，映射表应为 ${[...expectedCn].join('/')}`, `原文: "${m[0]}"`);
+    }
+  }
+  const linePattern = /(\d{1,2})\s*爻\s*(?:连接|连到|连)\s*[A-Za-z\u4e00-\u9fff]+/g;
+  while ((m = linePattern.exec(reportText)) !== null) {
+    fail('V3b', `通道描述把闸门写成"爻": "${m[0]}"`, '通道连的是闸门不是爻');
+  }
+
+  // ---- V3 定义状态自相矛盾 ----
+  const contradictionPatterns = /未(?:被)?完全定义|未定义|未被定义/;
+  const defRe = /定义通道/g;
+  while ((m = defRe.exec(reportText)) !== null) {
+    const ctx = reportText.slice(Math.max(0, m.index - 100), m.index + 200);
+    if (contradictionPatterns.test(ctx)) {
+      fail('V3', '定义状态自相矛盾: 定义通道附近出现"未完全定义/未定义"', ctx.slice(0, 120) + '…');
+    }
+  }
+
+  // ---- V4 跨轨一致性（引擎真值） ----
+  if (truth) {
+    const t = truth.hd || truth;
+    const typeCandidates = ['Manifesting Generator', 'Generator', 'Projector', 'Manifestor', 'Reflector'];
+    const foundTypes = typeCandidates.filter((tp) => reportText.includes(tp));
+    if (t.type && foundTypes.length && !reportText.includes(t.type)) {
+      fail('V4', `人类图类型与引擎不一致: 报告含 ${foundTypes.join('/')}，引擎=${t.type}`);
+    }
+    if (t.profile && !reportText.includes(t.profile)) {
+      fail('V4', `人生角色与引擎不一致: 报告缺 ${t.profile}`);
+    }
+    if (t.authority && !reportText.includes(t.authority)) {
+      fail('V4', `内在权威与引擎不一致: 报告缺 "${t.authority}"`);
+    }
+    if (Array.isArray(t.channels)) {
+      for (const ch of t.channels) {
+        const variants = [ch, ch.split('-').reverse().join('-')];
+        if (!variants.some((v) => reportText.includes(v))) {
+          fail('V4', `通道 ${ch} 未在报告中出现（引擎真值）`);
+        }
+      }
+    }
+    if (t.bazi?.pillars) {
+      for (const pillar of t.bazi.pillars) {
+        if (!reportText.includes(pillar)) {
+          fail('V4', `八字四柱 ${pillar} 未在报告中出现（引擎真值）`);
+        }
+      }
+    }
+  }
+
+  // ---- V5 立春派年柱 ----
+  const expectYear = truth?.bazi?.pillars?.[0] || truth?.expectedYear;
+  if (expectYear && !reportText.includes(expectYear)) {
+    fail('V5', `年柱与立春派口径不一致: 报告未含 ${expectYear}（金标准）`);
+  }
+  const contradict = truth?.bazi?.contradictYear;
+  if (contradict && reportText.includes(contradict)) {
+    fail('V5', `年柱出现春节派口径 ${contradict}（应为 ${expectYear}）`);
+  }
+
+  // ---- V6（加固）声明节 vs 引擎 JSON ----
+  if (truth) {
+    const sec = reportText.match(/##\s*0[.、．]\s*排盘数据声明([\s\S]*?)(?=##\s*1[.、．]|$)/);
+    if (!sec) { fail('V6', '报告缺少「## 0. 排盘数据声明」节（应引擎注入）'); }
+    else {
+      const section = sec[1];
+      const t = truth.hd || truth;
+      if (Array.isArray(t.channels)) {
+        for (const ch of t.channels) {
+          const entry = lookupChannel(ch);
+          if (!entry) continue;
+          const expectText = `${ch}（${entry.gateA}(${entry.centerA}) ↔ ${entry.gateB}(${entry.centerB})`;
+          const expectTextAlt = `${ch.split('-').reverse().join('-')}（${entry.gateB}(${entry.centerB}) ↔ ${entry.gateA}(${entry.centerA})`;
+          if (!section.includes(expectText) && !section.includes(expectTextAlt)) {
+            fail('V6', `声明节通道 ${ch} 未带映射表中心描述`, `期望 "${expectText}"`);
+          }
+        }
+      }
+      if (t.bazi?.pillars) {
+        for (const pillar of t.bazi.pillars) {
+          if (!section.includes(pillar)) fail('V6', `声明节缺八字四柱 ${pillar}`);
+        }
+      }
+    }
+  }
+
+  return issues;
+}
+
+/** 便捷入口：给 route 用，抛出带 issues 的错误 */
+export function assertReportVerified(reportText, truth = null) {
+  const issues = verifyReportText(reportText, truth);
+  if (issues.length) {
+    const err = new Error(`报告事实层校验未通过（${issues.length} 处），禁止带病交付`);
+    err.issues = issues;
+    err.name = 'ReportVerifyError';
+    throw err;
+  }
+  return true;
+}
+
+/** 内置病灶样本自检（证明脚本有效） */
+export function runDefectSamples() {
+  const samples = [
+    ['病灶#1 通道条数', '## 0. 排盘数据声明\n激活通道共 6 条：10-34、23-43、35-36、4-63、5-15。', /V1/],
+    ['病灶#2 中心连接', '35-36 通道连接情绪中心与脾中心，象征无常与危机。', /V2/],
+    ['病灶#3 爻误写', '20 爻连接 Throat、57 爻连接 Spleen，构成脑波通道。', /V3b/],
+    ['病灶#4 定义矛盾', '您有定义通道：24-61、34-57。不过这两条通道都未被完全定义。', /V3/],
+  ];
+  let pass = 0;
+  for (const [name, text, rule] of samples) {
+    const issues = verifyReportText(text);
+    const hit = issues.some((i) => rule.test(i.rule));
+    console.log(`${hit ? '✓' : '✗'} ${name}: ${hit ? '扫出病灶' : '漏检!'}`);
+    if (hit) pass++;
+  }
+  console.log(`病灶样本自检: ${pass}/${samples.length} 命中（V5 用真实锚点数据在服务器侧跑）`);
+  return pass === samples.length;
+}
