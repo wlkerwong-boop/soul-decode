@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getBirthCoords } from '@/data/cities';
 import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
+import { describeChannels } from '@/lib/hd-channels-map';
 import {
   buildPersonalReportSegments,
   calculateReportBazi,
@@ -14,8 +15,10 @@ function calcBazi(y: number, m: number, d: number, h: number) {
   const { Solar } = require('lunar-javascript');
   const solar = Solar.fromYmdHms(y, m, d, h, 0, 0);
   const lunar = solar.getLunar();
+  // 立春派统一：getYearInGanZhiExact()（节气换年）。旧实现 getYearInGanZhi() 按春节换年，
+  // 对 1982-01-27 会得壬戌（错），Exact 版得辛酉（K3 裁决口径，病灶#5 根因）。
   const pillars = [
-    lunar.getYearInGanZhi(), lunar.getMonthInGanZhi(),
+    lunar.getYearInGanZhiExact(), lunar.getMonthInGanZhiExact(),
     lunar.getDayInGanZhi(), lunar.getTimeInGanZhi()
   ];
   const dayMaster = lunar.getDayGan();
@@ -133,7 +136,7 @@ export async function POST(req: NextRequest) {
 【报告格式要求-严格按以下执行】
 - 开头段：直接称呼用户（如"您今年53岁"），简述核心命盘，自然引入
 - 每个系统数据需配表格：八字四柱表（天干/地支/十神/藏干/纳音）、人类图数据表（类型/角色/权威/中心/通道/闸门）、紫微12宫全表（含辅星和意义列）
-- 通道描述要详细：每条通道写Gate名称+功能说明，标注引用来源如[(Human Design HD)](https://humandesignhd.com) 或 [(Free Quantum Human Design)](https://freehumandesignchart.com)
+- 通道描述要详细：每条通道写Gate名称+两端中心，**连接关系只准引用数据中映射表给出的"X(中心) ↔ Y(中心)"字段**，禁止自行改写或补造；标注引用来源如[(Human Design HD)](https://humandesignhd.com) 或 [(Free Quantum Human Design)](https://freehumandesignchart.com)
 - 紫微部分标注特定格局名称（如"七杀朝斗""紫府同宫"）
 - 占星部分引用经典组合描述（如太阳天秤+上升狮子="优雅的君主"）
 - 七系统交叉印证：Markdown表格，横轴为八字/人类图/占星/紫微，纵轴为核心本质/能量模式/人际/事业/挑战/优势。每格加粗核心词
@@ -160,7 +163,7 @@ ${hdResult ? `【二、人类图】
 内在权威：${hdResult.authority}
 策略：${hdResult.strategy} | 签名：${hdResult.signature} | 非自我：${hdResult.notSelfTheme}
 定义中心：${(hdResult.definedCenters||[]).join('、')||'无'} | 未定义：${(hdResult.undefinedCenters||[]).join('、')||'无'}
-通道：${(hdResult.channels||[]).join('、')||'无'}
+通道：${describeChannels(hdResult.channels)}
 激活闸门：${(hdResult.activatedGates||[]).join('、')||'无'}` : '【二、人类图】数据暂缺'}
 
 ${ziweiResult ? `【三、紫微斗数】
