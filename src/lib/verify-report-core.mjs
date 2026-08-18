@@ -11,7 +11,8 @@
  *  V3 定义状态不得自相矛盾（病灶#4）
  *  V4 个人报告 vs 引擎真值逐字段一致（type/profile/authority/channels/八字四柱，T1 跨轨）
  *  V5 年柱符合立春派口径（病灶#5）
- *  V6（加固）「## 0. 排盘数据声明」节与引擎 JSON 恒等（通道带中心映射 + 四柱齐全）
+ *  V6（加固）「## 0. 排盘数据声明」节与引擎 JSON 恒等（通道带中心映射 + 四柱齐全；
+ *      标题兼容个人/家庭/双方三种；全报告必须恰好 1 次引擎注入声明节，且含注入标记，防 AI 重复写）
  *
  * 真数据纪律：核心只做纯文本/数据比对，不含任何真实出生数据。
  */
@@ -158,10 +159,21 @@ export function verifyReportText(reportText, truth = null) {
 
   // ---- V6（加固）声明节 vs 引擎 JSON ----
   if (truth) {
-    const sec = reportText.match(/##\s*0[.、．]\s*排盘数据声明([\s\S]*?)(?=##\s*1[.、．]|$)/);
-    if (!sec) { fail('V6', '报告缺少「## 0. 排盘数据声明」节（应引擎注入）'); }
-    else {
-      const section = sec[1];
+    // 兼容个人（排盘数据声明）/家庭（家庭排盘数据声明）/双人（双方排盘数据声明）三种标题
+    const headingRe = /##\s*0[.、．]\s*(?:家庭排盘数据声明|双方排盘数据声明|排盘数据声明)/g;
+    const headings = [...reportText.matchAll(headingRe)];
+    if (headings.length === 0) {
+      fail('V6', '报告缺少「## 0. 排盘数据声明」节（应引擎注入）');
+    } else {
+      if (headings.length > 1) {
+        fail('V6', `声明节出现 ${headings.length} 次（应恰好 1 次引擎注入；AI 重复写声明节 = 违反 K3 加固条款 ①）`,
+          headings.map((h) => `位置 ${h.index}: "${h[0]}"`).join('；'));
+      }
+      const sec = reportText.match(/##\s*0[.、．]\s*(?:家庭排盘数据声明|双方排盘数据声明|排盘数据声明)([\s\S]*?)(?=##\s*1[.、．]|$)/);
+      const section = sec ? sec[1] : '';
+      if (!section.includes('由系统依据排盘数据直接生成')) {
+        fail('V6', '声明节缺少引擎注入标记「由系统依据排盘数据直接生成」（疑似 AI 重写版声明节）');
+      }
       const t = truth.hd || truth;
       if (Array.isArray(t.channels)) {
         for (const ch of t.channels) {
