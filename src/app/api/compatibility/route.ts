@@ -19,7 +19,7 @@ import { buildLocalCompatibilityReport } from '@/lib/compatibility-fallback';
 import { calculateAuthoritativeBazi } from '@/lib/bazi-authoritative';
 
 const require = createRequire(import.meta.url);
-const { assertReportVerified } = require('../lib/verify-report-core.mjs');
+const { assertReportVerified } = require('../../../lib/verify-report-core.mjs');
 
 export const runtime = 'nodejs';
 

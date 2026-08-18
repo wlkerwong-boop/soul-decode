@@ -14,7 +14,7 @@ import {
 } from '@/lib/report-depth';
 
 const require = createRequire(import.meta.url);
-const { assertReportVerified } = require('../lib/verify-report-core.mjs');
+const { assertReportVerified } = require('../../../lib/verify-report-core.mjs');
 
 function calcBazi(y: number, m: number, d: number, h: number) {
   const { Solar } = require('lunar-javascript');

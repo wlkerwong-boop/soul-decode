@@ -20,7 +20,16 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const MAP_PATH = path.resolve(__dirname, '../data/hd-channels-map.json');
+// 打包进 .next 后 __dirname 指向产物目录（源相对路径失效），按候选链回退到进程 cwd 的仓库路径
+// （pm2 以 cwd=/root/soulcode 运行，部署时 git pull 后 src/data/ 在仓库内）。CLI/vitest 走源路径。
+const MAP_CANDIDATES = [
+  path.resolve(__dirname, '../data/hd-channels-map.json'),
+  path.resolve(process.cwd(), 'src/data/hd-channels-map.json'),
+];
+const MAP_PATH = MAP_CANDIDATES.find((p) => fs.existsSync(p));
+if (!MAP_PATH) {
+  throw new Error(`verify-report-core: 找不到 hd-channels-map.json（候选: ${MAP_CANDIDATES.join(', ')}）`);
+}
 
 // ---------- 通道映射表装载 ----------
 const channelMap = JSON.parse(fs.readFileSync(MAP_PATH, 'utf-8'));

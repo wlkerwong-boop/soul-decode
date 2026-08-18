@@ -16,7 +16,7 @@ import {
 } from '@/lib/report-depth';
 
 const require = createRequire(import.meta.url);
-const { assertReportVerified } = require('../lib/verify-report-core.mjs');
+const { assertReportVerified } = require('../../../../lib/verify-report-core.mjs');
 
 async function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
   const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
