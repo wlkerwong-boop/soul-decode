@@ -1,4 +1,5 @@
 import type { ReportSegment } from './report-depth';
+import { describeChannels } from './hd-channels-map';
 
 export interface CompatibilityMember {
   label: string;
@@ -13,7 +14,7 @@ export interface CompatibilityMember {
   } | null;
 }
 
-export const COMPATIBILITY_SYSTEM_PROMPT = `你是严谨的关系解码者。全篇使用尊称“您”，不要使用“你”。只依据提供的排盘数据，不编造共享通道、宫位、星座或事件。关系报告不是给关系打分，而是帮助每个人看见互动模式。每个论断挂具体数据；指出互补，也诚实指出张力；建议必须给出可直接说出口的话术或可执行的家庭动作。报告最后必须明确写出“仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议”。`;
+export const COMPATIBILITY_SYSTEM_PROMPT = `你是严谨的关系解码者。全篇使用尊称“您”，不要使用“你”。只依据提供的排盘数据，不编造共享通道、宫位、星座或事件。关系报告不是给关系打分，而是帮助每个人看见互动模式。每个论断挂具体数据；指出互补，也诚实指出张力；建议必须给出可直接说出口的话术或可执行的家庭动作。通道与中心的连接关系只准引用数据声明中映射表给出的“X(中心) ↔ Y(中心)”字段，禁止自行改写或补造任何通道-中心连接。报告最后必须明确写出“仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议”。`;
 
 export function normalizeCompatibilityAudience(report: string) {
   return report
@@ -63,7 +64,7 @@ function memberData(members: CompatibilityMember[]) {
   return members.map(member => `${member.label}（${member.age}岁）
 - 八字：${member.bazi}
 - 五行：${JSON.stringify(member.elementDistribution)}
-- 人类图：${member.hd ? `类型${member.hd.type}；角色${member.hd.profile}；权威${member.hd.authority}；关键通道${(member.hd.channels || []).join('、') || '无完整通道'}` : '数据暂缺'}`).join('\n\n');
+- 人类图：${member.hd ? `类型${member.hd.type}；角色${member.hd.profile}；权威${member.hd.authority}；关键通道${describeChannels(member.hd.channels)}` : '数据暂缺'}`).join('\n\n');
 }
 
 export function buildCompatibilitySegments(members: CompatibilityMember[], type: string): ReportSegment[] {

@@ -1,4 +1,5 @@
 import type { CompatibilityMember } from './compatibility-depth';
+import { describeChannels } from './hd-channels-map';
 
 const elementOrder = ['木', '火', '土', '金', '水'];
 
@@ -14,7 +15,7 @@ function memberData(member: CompatibilityMember) {
     type: hd?.type || '数据暂缺',
     profile: hd?.profile || '数据暂缺',
     authority: hd?.authority || '数据暂缺',
-    channels: hd?.channels?.join('、') || '无完整通道',
+    channels: hd?.channels ? describeChannels(hd.channels) : '无完整通道',
     elements: elementText(member.elementDistribution),
   };
 }

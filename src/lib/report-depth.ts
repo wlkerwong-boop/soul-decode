@@ -1,5 +1,6 @@
 import { Solar } from 'lunar-javascript';
 import { calculateAuthoritativeBazi } from './bazi-authoritative';
+import { describeChannels } from './hd-channels-map';
 
 export interface ReportSegment {
   id: string;
@@ -93,7 +94,7 @@ export function formatElementDistribution(distribution: Record<string, number>) 
 
 function serializeContext(context: PersonalReportContext) {
   const hd = context.hd
-    ? `类型${context.hd.type}；角色${context.hd.profile}；权威${context.hd.authority}；策略${context.hd.strategy}；通道${(context.hd.channels || []).join('、') || '无完整通道'}；定义中心${(context.hd.definedCenters || []).join('、') || '无'}`
+    ? `类型${context.hd.type}；角色${context.hd.profile}；权威${context.hd.authority}；策略${context.hd.strategy}；通道${describeChannels(context.hd.channels)}；定义中心${(context.hd.definedCenters || []).join('、') || '无'}`
     : '数据暂缺';
   const ziwei = context.ziwei
     ? context.ziwei.palaces.map((palace: any) => `${palace.name}：${(palace.stars || []).slice(0, 5).join('、') || '无主星'}`).join('；')
@@ -117,7 +118,8 @@ export const PERSONAL_REPORT_SYSTEM_PROMPT = `你是严谨而温暖的生命蓝�
 4. 所有建议必须落到动作、时辰、频次或可直接练习的话术。
 5. 命理只作自我观察，不替代医疗、法律或财务建议。
 6. 最终全文目标为6000-10000个中文字符。你只写本次指定章节，不重复前段，不预写后段。
-7. 正文必须包含“使用边界与免责声明”小节，明确本报告仅供自我观察、个人成长与关系沟通参考，不构成医疗、法律、教育或投资建议。`;
+7. 正文必须包含“使用边界与免责声明”小节，明确本报告仅供自我观察、个人成长与关系沟通参考，不构成医疗、法律、教育或投资建议。
+8. 通道与中心的连接关系**只准引用数据声明中映射表给出的“X(中心) ↔ Y(中心)”字段**，禁止自行改写或补造任何通道-中心连接；映射表缺项的通道只写编号，不描述连接。`;
 
 export const PERSONAL_REPORT_DISCLAIMER =
   '\n\n---\n\n## 使用边界与免责声明\n\n本报告仅供自我观察、个人成长与关系沟通参考，不构成医疗、法律、教育或投资建议。';
@@ -142,7 +144,7 @@ function appendPersonalDataCheck(report: string, context: PersonalReportContext)
   if (!missing.length) return report;
 
   const hd = context.hd
-    ? `${context.hd.type} · ${context.hd.profile} · ${context.hd.authority} · 通道${(context.hd.channels || []).join('、') || '数据暂缺'}`
+    ? `${context.hd.type} · ${context.hd.profile} · ${context.hd.authority} · 通道${describeChannels(context.hd.channels)}`
     : '数据暂缺';
   return `${report.trimEnd()}\n\n## 数据核验卡\n\n为避免解读文字遮蔽原始数据，本报告最后保留一份可复核摘要：\n\n- 八字四柱：${context.bazi.pillars.join(' ')}\n- 日主：${context.bazi.dayMaster}\n- 人类图：${hd}\n- 本次缺少或未在正文完整出现的字段：${missing.join('、')}\n\n若正文叙述与此卡片不一致，请以排盘数据和您本人实际体验为准。`;
 }

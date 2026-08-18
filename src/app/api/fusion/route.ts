@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Solar } from 'lunar-javascript';
 import { getBirthCoords } from '@/data/cities';
 import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
+import { describeChannels } from '@/lib/hd-channels-map';
 
 export const runtime = 'nodejs';
 
@@ -75,6 +76,7 @@ function buildPrompt(
 - 三系统要真正融合，找到内在联系，不要分三段机械罗列
 - 每部分给出具体的、可操作的建议
 - 最后给出一句非常点睛的话，让人读完后反复回味
+- 通道与中心的连接关系只准引用数据中映射表给出的“X(中心) ↔ Y(中心)”字段，禁止自行改写或补造任何通道-中心连接
 
 【用户数据】
 - 出生：${y}年${m}月${d}日 ${String(h).padStart(2,'0')}时${tz && tz !== 'Asia/Shanghai' ? '（出生地当地时间，时区：'+tz+'）' : ''}（当前日期：${now.getFullYear()}年${now.getMonth()+1}月，当前${age}岁）
@@ -83,7 +85,7 @@ function buildPrompt(
     - 人类图：${hd.type}（类型），人生角色${hd.profile}，内在权威${hd.authority}
     - 策略：${hd.strategy} | 签名：${hd.signature} | 非自我：${hd.notSelfTheme}
     - 定义中心：${(hd.definedCenters||[]).join('、') || '无'}
-    - 激活通道：${(hd.channels||[]).join('、') || '无'}
+    - 激活通道：${describeChannels(hd.channels)}
     - 太阳星座：${zodiac}
 
     【报告要求】
