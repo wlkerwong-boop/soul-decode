@@ -53,7 +53,7 @@ export default function JiugongPage() {
             九宫<span className="gradient-text">人生说明书</span>
           </h1>
           <p className="text-sm text-[var(--text-secondary)] mt-2 leading-relaxed">
-            输入姓名与生日，即刻生成您的 13 维度天赋地图、性格密码与 90 年人生节律
+            输入姓名与生日，即刻生成六章完整人生说明书：命盘格局、人格特质、婚姻财运与 90 年人生节律
           </p>
         </div>
 
@@ -111,7 +111,7 @@ export default function JiugongPage() {
             disabled={!valid || loading}
             className="w-full py-3.5 rounded-xl font-semibold text-lg bg-gradient-to-r from-[var(--color-primary)] to-emerald-600 text-white hover:shadow-lg hover:shadow-[var(--color-primary)]/25 hover:-translate-y-0.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
           >
-            {loading ? '⏳ 正在为您绘制人生地图…' : '🔮 查看我的生命蓝图'}
+            {loading ? '⏳ 正在为您绘制人生地图…' : '🔮 生成我的九宫人生说明书'}
           </button>
 
           {error && (

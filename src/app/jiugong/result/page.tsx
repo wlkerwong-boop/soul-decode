@@ -56,7 +56,7 @@ export default function JiugongResultPage() {
             {data.name}的九宫人生趋势报告
           </h1>
           <p className="mx-auto mt-3 max-w-2xl text-xs leading-6 text-[var(--text-secondary)]">
-            程天相九宫学理 · 康熙正体笔画 · 特质、环境与经营三位一体
+            程天相九宫学理 · 康熙正体笔画 · 六章完整人生说明书
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-2 text-[11px] text-[var(--text-tertiary)]">
             <span className="rounded-full border border-[var(--border-color)] px-3 py-1">
@@ -72,10 +72,18 @@ export default function JiugongResultPage() {
           <button
             type="button"
             onClick={() => window.print()}
-            className="mt-6 rounded-xl bg-[var(--text-primary)] px-5 py-2.5 text-xs font-semibold text-[var(--bg-card)] transition-transform hover:-translate-y-0.5 print:hidden"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--text-primary)] px-6 py-3 text-xs font-semibold text-[var(--bg-card)] transition-transform hover:-translate-y-0.5 print:hidden"
           >
-            打印 / 保存 PDF
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            下载 PDF 报告
           </button>
+          <p className="mt-3 text-[10px] leading-4 text-[var(--text-tertiary)] print:hidden">
+            完整六章报告 · 保存为 PDF 后适合打印与分享
+          </p>
         </header>
 
         <div className="mt-5">

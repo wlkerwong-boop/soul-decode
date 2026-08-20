@@ -1,5 +1,11 @@
 // 九宫学理 · 引擎 v6 — 复姓天格+1, 详细数据来自jiugong-data.ts
 import { JU_FULL, XINGYUN as XYN, MGT_FULL, ENERGY_FULL, SUIZHI_FULL, WX_CHAR_FULL, XIANG_STRATEGY_FULL } from './jiugong-data';
+import {
+  JU_INDEX, ZHI_FULL, MARRIAGE_TEMPLATES, MARRIAGE_BREAK, PERS_ACTION,
+  STAR_TABLE as STAR_TABLE_V2, STAR_FORTUNE_FULL, FOUR_GRID_CE, GUAXIAN_FANXIANG,
+  LIUNIAN_DETAIL, CAREER_DIR, CAREER_HEALTH, SUB_SUPPORT, ARROW_TEXT,
+  CAIKU_FULL, CAIKU_JIA3, CAIKU_JIA3_NOTE, CAIGONG_XIE, CAIGONG_XIE_NOTE,
+} from './jiugong-data-v2';
 import kangxiData from './data/kangxi-strokes.json';
 
 let kangxi: Map<string,number> | null = null;
@@ -110,6 +116,21 @@ export interface JiugongFull {
     outerQi:string;outerEnergy:string;
     ageStar:string;ageStarDesc:string;
   }[];
+  // ── v2 增量（2026-08-20 移植老唐 v2.0）──
+  marriageSub?:string;                 // 双象细分：平双/阴阳双
+  marriageBreakKey?:string;            // 破象克型（如水克火）
+  marriageFull?:{总述?:string;缘起?:string;缘续?:string;缘灭?:string;建议?:string;要点?:string[];别名?:string;注意?:string};
+  zhiMeaning?:string;zhiCaution?:string;zhiTips?:number[];           // 质三段式
+  xingyunPoints?:string[];xingyunTrait?:string;xingyunMeaning?:string;xingyunCaution?:string;xingyunTips?:string;
+  careerDir?:{达人:string;特质:string;职业:string};careerHealth?:string;  // 事业趋向
+  arrowUp?:string;arrowDown?:string;arrowSummary?:string;             // 上下助力（箭头法）
+  subSupportNum?:number;subSupport?:{要点:string;说明:string};        // 属下助力（地格合并数）
+  mainFuncAction?:string;mainFuncMethod?:string;                     // 动作力/处事方法
+  liunianState?:string;liunianDetail?:{副名:string;磁场?:string;动能?:string;生命力?:string;心态?:string;发展现象?:string;运用法则?:string};
+  guaName?:string;guaKoujue?:string;guaJiedu?:string;guaPositive?:string;guaReverse?:string;guaShixu?:boolean;
+  upperCaution?:string;upperNote?:string;selfCaution?:string;selfNote?:string;lowerCaution?:string;lowerNote?:string;outerCaution?:string;outerNote?:string;
+  caiKuFull?:{类型:string;描述:string;详解:string[]};caiKuJia3?:string[];caiKuJia3Note?:string;
+  caigongXie?:string[];caigongXieNote?:string;
 }
 
 export interface JiugongInput {
@@ -161,13 +182,22 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
   const mainFunc=gen===1||gen===3?'主功能':'副功能';
   const mainFuncDesc=mainFunc==='主功能'?'主动性强、勤劳踏实、白手起家，适合操作流年':'善用头脑、人际关系、机会点，需要合作不能独闯';
   
-  // 财富
-  const pdiff=Math.abs(ren-di);const pnum=pdiff>4?(Math.min(ren,di)+9)-Math.max(ren,di):pdiff;
+  // 财富（v2 修正：先数字根再差，防差>9 时越界为负——老唐 core.analyze_wealth 口径）
+  const rd=dsum(ren), dd=dsum(di);
+  const pdiff=Math.abs(rd-dd);const pnum=pdiff>4?(Math.min(rd,dd)+9)-Math.max(rd,dd):pdiff;
   const PATH_DESC=['局平（名气暗财型）：靠专业成名','加1（能力暗财型）：白手起家，财库最旺','加2（能力正财型）：实力派，不能投机','加3（机运暗财型）：受栽培，赚钱无人知','加4（机运正财型）：人际关系为本，适合组织'];
   const PALACE=gen===0?['库平','从商格，说话婉转']:gen===1||gen===3?['库泄','大方型，钱留不住']:gen===4?['库旺','守财型，企业家标配']:['库破','冲动型，冲动时破财'];
   
-  // 婚姻
-  const mar=gen===0?['双象','势均力敌']:gen===1?['淡象','平淡自然']:gen===4?['旺象','感情兴旺']:['破象','感情有波折'];
+  // 婚姻（v2：双象细分平双/阴阳双 + 破象克型）
+  let mar=gen===0?['双象','势均力敌']:gen===1?['淡象','平淡自然']:gen===4?['旺象','感情兴旺']:['破象','感情有波折'];
+  let marriageSub: string|undefined, marriageBreakKey: string|undefined;
+  if (gen===0) {
+    marriageSub = (ren % 2) === (di % 2) ? '平双' : '阴阳双';
+    mar = [marriageSub, marriageSub==='平双' ? '势均力敌（人格与地格五行等同、阴阳相同）' : '势均力敌（人格与地格五行等同、一阴一阳）'];
+  } else if (mar[0]==='破象') {
+    // wxRel(rw,dw)==='克' 表示 地(格)克人(格) → 克型 = 地克人（如 水克火）
+    marriageBreakKey = wxRel(rw,dw)==='克' ? `${dw}克${rw}` : `${rw}克${dw}`;
+  }
   
   // 主数
   const mainNum=dsum(now.getFullYear()-1111);
@@ -224,6 +254,43 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
   const ages=['1-9岁','10-18岁','19-27岁','28-36岁','37-45岁','46-54岁','55-63岁','64-72岁','73-81岁','82-90岁'];
   const reordered=ALL_GROUPS.slice(5).concat(ALL_GROUPS.slice(0,5));
   const groups=reordered.map((g,i)=>({name:g.name,ages:ages[i],count:9}));
+
+  // ═══ v2 增量计算（2026-08-20 老唐 v2.0 移植）═══
+  const mergeDigits=(n:number)=>{while(n>9)n=[...String(n)].reduce((a,b)=>a+ +b,0);return n;};
+  // 婚姻全文模板
+  let marriageFull: JiugongFull['marriageFull'];
+  if (marriageSub) marriageFull = MARRIAGE_TEMPLATES[marriageSub];
+  else if (marriageBreakKey) marriageFull = MARRIAGE_BREAK[marriageBreakKey] || MARRIAGE_TEMPLATES['破'];
+  else {
+    const mk = mar[0]==='破象'?'破':mar[0]==='淡象'?'淡':mar[0]==='旺象'?'旺':undefined;
+    if (mk) marriageFull = MARRIAGE_TEMPLATES[mk];
+  }
+  // 质三段式（特质/意义/切记/转折年）
+  const zfV2 = ZHI_FULL[zhiD.name];
+  // 星运详情（要点/特质/意义/切记/提示）
+  const stV2 = STAR_TABLE_V2[total];
+  const sffV2 = STAR_FORTUNE_FULL[total];
+  // 事业趋向（人格五行×个位数）
+  const cdV2 = CAREER_DIR[`${rw}:${ren%10}`];
+  // 上下助力（箭头法：箭头指向受方）
+  const relUpV2 = wxRel(rw,tw);       // 天对人格
+  const relDownV2 = wxRel(rw,dw);     // 地对人格
+  const upDir = (relUpV2==='生'||relUpV2==='克')?'向内':((wxRel(tw,rw)==='生'||wxRel(tw,rw)==='克')?'向外':'无');
+  const downDir = (relDownV2==='生'||relDownV2==='克')?'向内':((wxRel(dw,rw)==='生'||wxRel(dw,rw)==='克')?'向外':'无');
+  // 属下助力（地格合并数 1-9）
+  const hbV2 = mergeDigits(di);
+  // 性格动作力/处事方法
+  const paV2 = PERS_ACTION[mainFunc];
+  // 流年能量四段法（(虚岁-质)%10）
+  const lnStateV2 = YUN[(xuAge - zhi + 10) % 10];
+  // 卦签双向（对外总格象+能量 → 90卦 → 正向/反向）
+  const outerGuaRec = SCROLL_LUT.find(r=>r.chance===outer.qi&&r.yun===outer.energy)||SCROLL_LUT[0];
+  const fxV2 = GUAXIAN_FANXIANG[outerGuaRec.gua];
+  // 四格对策/注意事项
+  const ceV2 = (x:string)=>FOUR_GRID_CE[x];
+  // 财运全文（财库五型详解 + 加3八条 + 库泄/库破七条）
+  const ckFullV2 = CAIKU_FULL[pnum];
+  const cgXie = (PALACE[0].includes('泄')||PALACE[0].includes('破')) ? CAIGONG_XIE : undefined;
   
   return{name,year,month,day,total,tian,ren,di,zong,wai,tianWx:tw,renWx:rw,diWx:dw,xuAge,
     ju,juDesc:JU_DESC[ju],juFull:JU_FULL[ju]||JU_DESC[ju],
@@ -244,7 +311,27 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
     outerQi:outer.qi,outerEnergy:outer.energy,outerGua:outer.gua,outerStrategy:outer.strategy,
     energyFull:ENERGY_FULL,xiangStrategy:XIANG_STRATEGY_FULL,
     upperColl,selfColl,lowerColl,
-    groups,years};
+    groups,years,
+    // v2 增量
+    marriageSub,marriageBreakKey,marriageFull,
+    zhiMeaning:zfV2?.意义,zhiCaution:zfV2?.切记,zhiTips:zfV2?.提示,
+    xingyunPoints:stV2?.要点,xingyunTrait:stV2?.特质,
+    xingyunMeaning:sffV2?.意义||stV2?.意义,xingyunCaution:sffV2?.切记||stV2?.切记,xingyunTips:sffV2?.提示||stV2?.提示,
+    careerDir:cdV2,careerHealth:CAREER_HEALTH[rw],
+    arrowUp:ARROW_TEXT[`上:${upDir}`],arrowDown:ARROW_TEXT[`下:${downDir}`],arrowSummary:ARROW_TEXT['总结'],
+    subSupportNum:hbV2,subSupport:SUB_SUPPORT[hbV2],
+    mainFuncAction:paV2?.动作力,mainFuncMethod:paV2?.处事方法,
+    liunianState:lnStateV2,liunianDetail:LIUNIAN_DETAIL[lnStateV2],
+    guaName:outerGuaRec.gua,guaKoujue:outerGuaRec.koujue,guaJiedu:outerGuaRec.jiedu,
+    guaPositive:fxV2?.正向,guaReverse:fxV2?.反向,guaShixu:outerGuaRec.gua==='实虚',
+    upperCaution:ceV2(upper.qi)?.对策,upperNote:ceV2(upper.qi)?.注意事项,
+    selfCaution:ceV2(self.qi)?.对策,selfNote:ceV2(self.qi)?.注意事项,
+    lowerCaution:ceV2(lower.qi)?.对策,lowerNote:ceV2(lower.qi)?.注意事项,
+    outerCaution:ceV2(outer.qi)?.对策,outerNote:ceV2(outer.qi)?.注意事项,
+    caiKuFull:ckFullV2,
+    caiKuJia3:pnum===3?CAIKU_JIA3:undefined,caiKuJia3Note:pnum===3?CAIKU_JIA3_NOTE:undefined,
+    caigongXie:cgXie,caigongXieNote:cgXie?CAIGONG_XIE_NOTE:undefined,
+};
 }
 
 export async function getJiugongStroke(character:string):Promise<number> {

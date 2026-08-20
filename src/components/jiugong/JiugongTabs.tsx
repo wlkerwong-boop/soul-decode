@@ -11,6 +11,7 @@ import {
   type YearEnvironment,
 } from '../../lib/jiugong-environment';
 import { buildRelationshipDetails } from '../../lib/jiugong-relationships';
+import { JiugongManual } from './JiugongManual';
 import {
   createJiugongViewState,
   reduceJiugongViewState,
@@ -18,6 +19,7 @@ import {
 } from './jiugong-view-state';
 
 const TAB_OPTIONS: { key: JiugongTab; label: string; kicker: string }[] = [
+  { key: 'manual', label: '人生说明书', kicker: '完整报告' },
   { key: 'traits', label: '特质分析', kicker: '看见底色' },
   { key: 'environment', label: '经营环境', kicker: '读懂时势' },
   { key: 'analysis', label: '经营分析', kicker: '落到行动' },
@@ -474,6 +476,7 @@ export function JiugongTabs({ data }: { data: JiugongFull }) {
         </div>
 
         <div className="card-jade p-5 sm:p-7" role="tabpanel">
+          {state.tab === 'manual' && <JiugongManual data={data} />}
           {state.tab === 'traits' && <TraitsPanel data={data} />}
           {state.tab === 'environment' && (
             <EnvironmentPanel
@@ -495,15 +498,7 @@ export function JiugongTabs({ data }: { data: JiugongFull }) {
       </div>
 
       <div className="jiugong-print-report space-y-8">
-        <TraitsPanel data={data} />
-        <EnvironmentPanel
-          data={data}
-          environment={environment}
-          year={state.year}
-          onYearChange={() => undefined}
-          interactive={false}
-        />
-        <PrintAnalysisPanel data={data} environment={environment} />
+        <JiugongManual data={data} />
       </div>
     </>
   );
