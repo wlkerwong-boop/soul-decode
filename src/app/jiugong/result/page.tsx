@@ -47,6 +47,20 @@ export default function JiugongResultPage() {
   return (
     <main className="inner-page gradient-bg min-h-screen px-4 py-8 pt-nav print:bg-white print:px-0 print:py-0">
       <div className="mx-auto max-w-5xl">
+        {data.unknownChars && data.unknownChars.length > 0 && (
+          <div className="mb-5 rounded-2xl border border-amber-400/60 bg-amber-50 px-5 py-4 print:hidden" role="alert">
+            <p className="text-sm font-bold text-amber-900">
+              ⚠️ 名字中有以下字暂未收录于康熙笔画库
+            </p>
+            <p className="mt-1.5 text-xs leading-6 text-amber-800">
+              「{data.unknownChars.join('、')}」的笔画为部首估算，当前报告仅供参考。
+            </p>
+            <p className="mt-1 text-[11px] leading-5 text-amber-700">
+              建议人工核对康熙字典繁体笔画后，以准确笔画重新排盘，或咨询程天相九宫学理专业人士。
+            </p>
+          </div>
+        )}
+
         <header className="relative overflow-hidden rounded-[2rem] border border-[var(--border-color)] bg-[var(--bg-card)]/85 px-6 py-9 text-center shadow-xl backdrop-blur sm:px-10">
           <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-[var(--color-primary)]/10 blur-3xl" />
           <p className="text-[10px] font-semibold tracking-[0.32em] text-[var(--color-primary)]">

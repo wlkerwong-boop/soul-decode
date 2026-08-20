@@ -11,10 +11,9 @@ const globalCss = readFileSync(
 );
 
 describe('jiugong print report', () => {
-  it('prints all five advice topics instead of only the currently selected topic', () => {
-    expect(tabsSource).toContain('function PrintAnalysisPanel');
-    expect(tabsSource).toContain('data-jiugong-print-topics');
-    expect(tabsSource).toContain('<PrintAnalysisPanel data={data} environment={environment} />');
+  it('prints the full six-chapter manual instead of tab panels or per-topic advice', () => {
+    expect(tabsSource).toContain('<JiugongManual data={data} />');
+    expect(tabsSource).toContain('jiugong-print-report');
     expect(tabsSource).not.toMatch(
       /jiugong-print-report[\s\S]*?<AnalysisPanel[\s\S]*?topic=\{state\.topic\}/,
     );
