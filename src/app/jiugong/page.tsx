@@ -13,7 +13,7 @@ export default function JiugongPage() {
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const valid = name.length >= 2 && /^[一-鿿]{2,4}$/.test(name.replace(/\s/g,'')) && year && parseInt(year) >= 1900;
+  const valid = name.length >= 2 && /^[\p{Script=Han}]{2,4}$/u.test(name.replace(/\s/g,'')) && year && parseInt(year) >= 1900;
 
   const submit = async () => {
     if (!valid || loading) return;
