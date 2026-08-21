@@ -166,11 +166,8 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
   const di=strokes.length>=3?strokes[1]+strokes[2]:(strokes[1]||1)+1;
   const zong=total,wai=isDouble?zong-ren:zong-ren+1;
   
-  // 虚岁
-  const birth=new Date(year,month-1,day);
-  let age=now.getFullYear()-birth.getFullYear();
-  if(now.getMonth()<birth.getMonth()||(now.getMonth()===birth.getMonth()&&now.getDate()<birth.getDate()))age--;
-  const xuAge=age+1;
+  // 虚岁：年份口径（九宫只用年份，不按月日打折——老唐 CLI/规则表口径）
+  const xuAge=now.getFullYear()-year+1;
   
   // 局差
   const tens=Math.floor(total/10),ones=total%10;
@@ -179,55 +176,81 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
   // 质
   const zhi=total%10,zhiD=ZHI[zhi]||ZHI[5];
   
-  // 星运
+  // 星运（10–53 查表；超出回退质描述——规则表 §一）
   const xy=XYN[total];
+  const xingyunFallback=`${zhiD.name}（${zhiD.element}）：${zhiD.desc}`;
+  const xingyunName=xy?.name||xingyunFallback;
+  const xingyunFull=xy?.desc||xingyunFallback;
   
   // 管理IQ — 名字第二字
   const mgtKey=(strokes[1]??strokes[0])>9?dsum(strokes[1]??strokes[0]):(strokes[1]??strokes[0]);
   const mgt=MGT_FULL[mgtKey]||MGT_FULL[1];
   
-  // 五行性格
+  // 五行作用方向（统一语义：a 对 b 的正向作用；反向作用力记作平——规则表 §一/老唐 relation）
   const tw=WX[tian%10],rw=WX[ren%10],dw=WX[di%10];
   const wxOrder=(a:string)=>({木:1,火:2,土:3,金:4,水:5}as Record<string,number>)[a]||0;
-  const wxRel=(a:string,b:string)=>a===b?'平':((wxOrder(b)-wxOrder(a)+5)%5===1?'生':'克');
-  const thinkRel=`${rw}${wxRel(rw,tw)}${tw}`,actionRel=`${dw}${wxRel(dw,rw)}${rw}`;
-  const thinkDesc=WX_CHAR_FULL[thinkRel]||'';
-  const actionDesc=WX_CHAR_FULL[actionRel]||'';
-  const gen=(wxOrder(rw)-wxOrder(dw)+5)%5;
-  const mainFunc=gen===1||gen===3?'主功能':'副功能';
-  const mainFuncDesc=mainFunc==='主功能'?'主动性强、勤劳踏实、白手起家，适合操作流年':'善用头脑、人际关系、机会点，需要合作不能独闯';
+  const wxRel=(a:string,b:string):'生'|'克'|'平'=>{
+    if(a===b)return'平';
+    const diff=(wxOrder(b)-wxOrder(a)+5)%5;
+    if(diff===1)return'生';   // a 生 b
+    if(diff===2)return'克';   // a 克 b
+    return'平';               // 反向（b 生/克 a）记作平
+  };
+  // 思想 = 天→人；行动 = 人→地（老唐 analyze_personality）
+  const thinkRelWx=wxRel(tw,rw), actionRelWx=wxRel(rw,dw);
+  const thinkRel=thinkRelWx==='平'?'平':`${thinkRelWx}(${tw}→${rw})`;
+  const actionRel=actionRelWx==='平'?'平':`${actionRelWx}(${rw}→${dw})`;
+  const thinkDesc=thinkRelWx==='平'
+    ?'天格与人格五行无正向生克（反向作用力记作平），思想与上层磁场平顺自然，不受天格压制亦不借其力。'
+    :(WX_CHAR_FULL[`${tw}${thinkRelWx}${rw}`]||'');
+  const actionDesc=actionRelWx==='平'
+    ?'人格与地格五行无正向生克（反向作用力记作平），行动与下层磁场平顺自然，不压迫下属亦不受其拖累。'
+    :(WX_CHAR_FULL[`${rw}${actionRelWx}${dw}`]||'');
+  // 主副功能：人→地 生/克=主功能；地→人 生/克=副功能；等同=平功能
+  const mainFunc=actionRelWx==='生'||actionRelWx==='克'?'主功能':wxRel(dw,rw)==='生'||wxRel(dw,rw)==='克'?'副功能':'平功能';
+  const mainFuncDesc=mainFunc==='主功能'
+    ?'主动性强、勤劳踏实、白手起家，适合操作流年'
+    :mainFunc==='副功能'
+    ?'善用头脑、人际关系、机会点，需要合作不能独闯'
+    :'主副功能均衡型，人格与地格五行相同，呈并行线（库平）；既能主动实干也能借力合作，不偏独闯亦不偏依附。';
   
-  // 财富（v2 修正：先数字根再差，防差>9 时越界为负——老唐 core.analyze_wealth 口径）
+  // 财富（v2 修正：先数字根再差——老唐 analyze_wealth 口径）
   const rd=dsum(ren), dd=dsum(di);
   const pdiff=Math.abs(rd-dd);const pnum=pdiff>4?(Math.min(rd,dd)+9)-Math.max(rd,dd):pdiff;
   const PATH_DESC=['局平（名气暗财型）：靠专业成名','加1（能力暗财型）：白手起家，财库最旺','加2（能力正财型）：实力派，不能投机','加3（机运暗财型）：受栽培，赚钱无人知','加4（机运正财型）：人际关系为本，适合组织'];
-  const PALACE=gen===0?['库平','从商格，说话婉转']:gen===1||gen===3?['库泄','大方型，钱留不住']:gen===4?['库旺','守财型，企业家标配']:['库破','冲动型，冲动时破财'];
+  // 财宫：人生地=库泄 / 人克地=库破 / 地生人=库旺 / 其余(含地克人)=库平
+  const rDw=wxRel(rw,dw), dRw=wxRel(dw,rw);
+  const PALACE=rDw==='生'?['库泄','大方型，钱留不住']:rDw==='克'?['库破','冲动型，冲动时破财']:dRw==='生'?['库旺','守财型，企业家标配']:['库平','从商格，说话婉转'];
   
-  // 婚姻（v2：双象细分平双/阴阳双 + 破象克型）
-  let mar=gen===0?['双象','势均力敌']:gen===1?['淡象','平淡自然']:gen===4?['旺象','感情兴旺']:['破象','感情有波折'];
+  // 婚姻（老唐 analyze_marriage：地生人=淡 / 人生地=旺 / 双向克=破·克型 / 等同=双象·平双|阴阳双）
+  let mar: [string,string];
   let marriageSub: string|undefined, marriageBreakKey: string|undefined;
-  if (gen===0) {
+  if (dRw==='生') mar=['淡象','平淡自然（地格生人格）'];
+  else if (rDw==='生') mar=['旺象','感情兴旺（人格生地格）'];
+  else if (dRw==='克') { marriageBreakKey=`${dw}克${rw}`; mar=['破象',`感情有波折（地格${dw}克人格${rw}）`]; }
+  else if (rDw==='克') { marriageBreakKey=`${rw}克${dw}`; mar=['破象',`感情有波折（人格${rw}克地格${dw}）`]; }
+  else {
     marriageSub = (ren % 2) === (di % 2) ? '平双' : '阴阳双';
-    mar = [marriageSub, marriageSub==='平双' ? '势均力敌（人格与地格五行等同、阴阳相同）' : '势均力敌（人格与地格五行等同、一阴一阳）'];
-  } else if (mar[0]==='破象') {
-    // wxRel(rw,dw)==='克' 表示 地(格)克人(格) → 克型 = 地克人（如 水克火）
-    marriageBreakKey = wxRel(rw,dw)==='克' ? `${dw}克${rw}` : `${rw}克${dw}`;
+    mar=[marriageSub, marriageSub==='平双'?'势均力敌（人格与地格五行等同、阴阳相同）':'势均力敌（人格与地格五行等同、一阴一阳）'];
   }
   
   // 主数
   const mainNum=dsum(now.getFullYear()-1111);
   
   // 四格气场
-  function qiEnergy(n:number,grid:number,age=xuAge):{qi:string;energy:string;gua:string;strategy:string}{
+  // 能量循环（规则表 §二）：天格专用循环 0=帝旺；人/地/总普通循环 0=冠带
+  const CYCLE_TIANGAN=['帝旺','衰','病','死','绝','胎','养','长生','冠带','临官'];
+  const CYCLE_NORMAL=['冠带','临官','帝旺','衰','病','死','绝','胎','养','长生'];
+  function qiEnergy(n:number,grid:number,age=xuAge,isTiange=false):{qi:string;energy:string;gua:string;strategy:string}{
     const qiNum=((n-grid)%9+9)%9;
     const qi=XIANG[qiNum]||'名望';
     const yunIdx=(age-grid%10+10)%10;
-    const energy=YUN[yunIdx%10];
+    const energy=(isTiange?CYCLE_TIANGAN:CYCLE_NORMAL)[yunIdx%10];
     const gua=`${qi}${energy}`;
     const st=XIANG_STRATEGY_FULL[qi]||{upper:'',self:'',lower:'',outer:'',caution:''};
     return{qi,energy,gua,strategy:st.upper};
   }
-  const upper=qiEnergy(mainNum,tian),self=qiEnergy(mainNum,ren);
+  const upper=qiEnergy(mainNum,tian,xuAge,true),self=qiEnergy(mainNum,ren);
   const lower=qiEnergy(mainNum,di),outer=qiEnergy(mainNum,zong);
 
   // 碰撞周期：恢复 v5 已验收规则（每 10 年一次）
@@ -287,11 +310,12 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
   const sffV2 = STAR_FORTUNE_FULL[total];
   // 事业趋向（人格五行×个位数）
   const cdV2 = CAREER_DIR[`${rw}:${ren%10}`];
-  // 上下助力（箭头法：箭头指向受方）
-  const relUpV2 = wxRel(rw,tw);       // 天对人格
-  const relDownV2 = wxRel(rw,dw);     // 地对人格
-  const upDir = (relUpV2==='生'||relUpV2==='克')?'向内':((wxRel(tw,rw)==='生'||wxRel(tw,rw)==='克')?'向外':'无');
-  const downDir = (relDownV2==='生'||relDownV2==='克')?'向内':((wxRel(dw,rw)==='生'||wxRel(dw,rw)==='克')?'向外':'无');
+  // 上下助力（箭头法：箭头指向受方——老唐 report 2.5）
+  // 天/地 对人格正向生克 → 向内（对方箭头向着你）；反向（人对天/地生克）→ 向外（你的箭头指向对方）
+  const relUpV2 = wxRel(tw,rw);       // 天→人 正向
+  const relDownV2 = wxRel(dw,rw);     // 地→人 正向
+  const upDir = (relUpV2==='生'||relUpV2==='克')?'向内':((wxRel(rw,tw)==='生'||wxRel(rw,tw)==='克')?'向外':'无');
+  const downDir = (relDownV2==='生'||relDownV2==='克')?'向内':((wxRel(rw,dw)==='生'||wxRel(rw,dw)==='克')?'向外':'无');
   // 属下助力（地格合并数 1-9）
   const hbV2 = mergeDigits(di);
   // 性格动作力/处事方法
@@ -310,10 +334,10 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
   return{name,year,month,day,total,tian,ren,di,zong,wai,tianWx:tw,renWx:rw,diWx:dw,xuAge,
     ju,juDesc:JU_DESC[ju],juFull:JU_FULL[ju]||JU_DESC[ju],
     zhi,zhiName:zhiD.name,zhiElement:zhiD.element,zhiDesc:zhiD.desc,zhiFull:zhiD.desc,
-    xingyunName:xy?.name||`${total}画`,xingyunFull:xy?.desc||'',
+    xingyunName,xingyunFull,
     thinkRel,thinkDesc,actionRel,actionDesc,
-    wxThinkFull:WX_CHAR_FULL[thinkRel]||thinkDesc,
-    wxActionFull:WX_CHAR_FULL[actionRel]||actionDesc,
+    wxThinkFull: thinkRelWx==='平'?thinkDesc:(WX_CHAR_FULL[`${tw}${thinkRelWx}${rw}`]||thinkDesc),
+    wxActionFull: actionRelWx==='平'?actionDesc:(WX_CHAR_FULL[`${rw}${actionRelWx}${dw}`]||actionDesc),
     mainFunc,mainFuncDesc,
     wealthPath:PATH_DESC[pnum],wealthPalace:PALACE[0],wealthPalaceDesc:PALACE[1],
     marriage:mar[0],marriageDesc:mar[1],
