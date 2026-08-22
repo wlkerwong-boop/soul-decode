@@ -132,6 +132,12 @@ function ChapterBasics({ data }: { data: JiugongFull }) {
         <Badge tone="plain">局差 {data.ju}</Badge>
         <Badge tone="plain">质 {data.zhi} · {data.zhiName}</Badge>
       </div>
+      {data.zhiTips && data.zhiTips.length > 0 && (
+        <p className="mt-4 rounded-2xl bg-[var(--color-primary)]/[0.08] px-4 py-3 text-xs leading-6 text-[var(--text-secondary)]">
+          <span className="font-semibold text-[var(--color-primary)]">◎ 提示（人生转折关键年）：</span>
+          {data.zhiTips.join('、')} 岁
+        </p>
+      )}
       <p className="mt-4 text-[11px] leading-5 text-[var(--text-tertiary)]">
         用字口径：康熙字典繁体笔画；用名口径：10 岁前本名（此后改名基本无效，容易出现双人格）。五行↔数字取个位数：木1,2｜火3,4｜土5,6｜金7,8｜水9,0（奇阳偶阴）。
       </p>
@@ -190,12 +196,12 @@ function ChapterPersonality({ data }: { data: JiugongFull }) {
       <Sub title="2.3 性格 · 思维与行动">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-highlight)]/60 p-4">
-            <p className="text-[10px] tracking-[0.16em] text-[var(--text-tertiary)]">思想功能 · 天→人</p>
+            <p className="text-[10px] tracking-[0.16em] text-[var(--text-tertiary)]">思想功能 · 35岁以前为主 · 天→人</p>
             <p className="mt-1.5 text-xs font-semibold text-[var(--text-primary)]">{data.thinkRel}</p>
             <p className="mt-1.5 text-xs leading-6 text-[var(--text-secondary)]">{data.wxThinkFull || data.thinkDesc}</p>
           </div>
           <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-highlight)]/60 p-4">
-            <p className="text-[10px] tracking-[0.16em] text-[var(--text-tertiary)]">行动功能 · 人→地</p>
+            <p className="text-[10px] tracking-[0.16em] text-[var(--text-tertiary)]">行动功能 · 35岁以后为主 · 人→地</p>
             <p className="mt-1.5 text-xs font-semibold text-[var(--text-primary)]">{data.actionRel}</p>
             <p className="mt-1.5 text-xs leading-6 text-[var(--text-secondary)]">{data.wxActionFull || data.actionDesc}</p>
           </div>
@@ -339,10 +345,10 @@ function ChapterWealth({ data }: { data: JiugongFull }) {
 /** 章五 · 人体自然规律 · 流年运势 */
 function ChapterFlow({ data }: { data: JiugongFull }) {
   const aura = [
-    { label: '上层 · 天格', qi: data.upperQi, energy: data.upperEnergy, caution: data.upperCaution, note: data.upperNote },
-    { label: '自我 · 人格', qi: data.selfQi, energy: data.selfEnergy, caution: data.selfCaution, note: data.selfNote },
-    { label: '下层 · 地格', qi: data.lowerQi, energy: data.lowerEnergy, caution: data.lowerCaution, note: data.lowerNote },
-    { label: '对外 · 总格', qi: data.outerQi, energy: data.outerEnergy, caution: data.outerCaution, note: data.outerNote },
+    { label: '上层 · 天格', key: '上层', qi: data.upperQi, energy: data.upperEnergy, caution: data.upperCaution, note: data.upperNote },
+    { label: '自我 · 人格', key: '自我', qi: data.selfQi, energy: data.selfEnergy, caution: data.selfCaution, note: data.selfNote },
+    { label: '下层 · 地格', key: '下层', qi: data.lowerQi, energy: data.lowerEnergy, caution: data.lowerCaution, note: data.lowerNote },
+    { label: '对外 · 总格', key: '对外', qi: data.outerQi, energy: data.outerEnergy, caution: data.outerCaution, note: data.outerNote },
   ];
   const ln = data.liunianDetail;
   return (
@@ -354,23 +360,44 @@ function ChapterFlow({ data }: { data: JiugongFull }) {
     >
       <Sub title="5.1 四格气场 · 九大气场">
         <div className="grid gap-3 lg:grid-cols-2">
-          {aura.map((g) => (
-            <div key={g.label} className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-highlight)]/50 p-4">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-xs font-bold text-[var(--text-primary)]">{g.label}</p>
-                <Badge tone="plain">{g.qi} · {g.energy}</Badge>
+          {aura.map((g) => {
+            const qiInfo = data.gridQi?.[g.key]?.[g.qi];
+            const enInfo = data.gridEnergy?.[g.key];
+            return (
+              <div key={g.label} className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-highlight)]/50 p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-xs font-bold text-[var(--text-primary)]">{g.label}</p>
+                  <Badge tone="plain">{g.qi} · {g.energy}</Badge>
+                </div>
+                {g.label === '对外 · 总格' && data.guaName && (
+                  <p className="mt-2 rounded-xl bg-[var(--color-primary)]/10 px-3 py-2 text-xs leading-6 text-[var(--text-primary)]">
+                    ◆ 对外卦象：{data.guaName}卦
+                    {data.guaKoujue && <> —— {data.guaKoujue}</>}
+                    {data.guaShixu && <span className="ml-1 text-[var(--color-primary)]">（实虚卦：前段实/后段虚）</span>}
+                  </p>
+                )}
+                {qiInfo && (
+                  <div className="mt-2 space-y-1.5 text-xs leading-6 text-[var(--text-secondary)]">
+                    <p className="font-semibold text-[var(--text-primary)]">── 气场解读 ──</p>
+                    {qiInfo.解释 && <p>◆ 此象在该格的意义：{qiInfo.解释}</p>}
+                    {qiInfo.现象 && <p>◆ 产生现象：{qiInfo.现象}</p>}
+                    {qiInfo.操作 && <p>◆ 操作：{qiInfo.操作}</p>}
+                    {g.caution && <p>◆ 对策：{g.caution}</p>}
+                    {g.note && <p>◆ 注意事项：{g.note}</p>}
+                  </div>
+                )}
+                {enInfo && (
+                  <div className="mt-2 space-y-1.5 text-xs leading-6 text-[var(--text-secondary)]">
+                    <p className="font-semibold text-[var(--text-primary)]">── 能量解读 ──</p>
+                    {enInfo.代表 && <p>◆ 能量代表：{enInfo.代表}</p>}
+                    {enInfo.实例 && <p>◆ 能量实例：{enInfo.实例}</p>}
+                    {enInfo.碰撞 && <p>◆ 碰撞现象：{enInfo.碰撞}</p>}
+                    {enInfo.应变 && <p>◆ 应变之道：{enInfo.应变}</p>}
+                  </div>
+                )}
               </div>
-              {g.label === '对外 · 总格' && data.guaName && (
-                <p className="mt-2 rounded-xl bg-[var(--color-primary)]/10 px-3 py-2 text-xs leading-6 text-[var(--text-primary)]">
-                  ◆ 对外卦象：{data.guaName}卦
-                  {data.guaKoujue && <> —— {data.guaKoujue}</>}
-                  {data.guaShixu && <span className="ml-1 text-[var(--color-primary)]">（实虚卦：前段实/后段虚）</span>}
-                </p>
-              )}
-              {g.caution && <p className="mt-2 text-xs leading-6 text-[var(--text-secondary)]">对策：{g.caution}</p>}
-              {g.note && <p className="mt-1.5 text-xs leading-6 text-[var(--text-secondary)]">注意：{g.note}</p>}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </Sub>
 
@@ -378,14 +405,19 @@ function ChapterFlow({ data }: { data: JiugongFull }) {
         <div className="space-y-3">
           <div className="rounded-2xl border border-[var(--color-primary)]/20 bg-[var(--color-primary)]/[0.06] p-4">
             <p className="text-xs font-bold text-[var(--text-primary)]">
-              岁值星 · 逢{data.ageStar}
+              虚岁 {data.xuAge} 岁值 · 逢{data.ageStar}
             </p>
             <Prose text={data.ageStarFull} />
+            {data.suizhiNote && (
+              <p className="mt-2 rounded-xl bg-[var(--color-primary)]/10 px-3 py-2 text-xs leading-6 text-[var(--text-secondary)]">
+                ※ 注意：{data.suizhiNote}
+              </p>
+            )}
           </div>
           {ln && (
             <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)]/70 p-4">
               <p className="text-xs font-bold text-[var(--text-primary)]">
-                能量运 · {data.liunianState}运（{ln.副名}）
+                能量 · {data.liunianState}运（{ln.副名}）
               </p>
               <div className="mt-2 space-y-2 text-xs leading-6 text-[var(--text-secondary)]">
                 {ln.磁场 && <p>一、磁场：{ln.磁场}</p>}
@@ -410,6 +442,36 @@ function ChapterFlow({ data }: { data: JiugongFull }) {
                 </p>
               )}
               {data.guaReverse && <p className="mt-1.5 text-xs leading-6 text-[var(--text-secondary)]">◎ 反向思考：{data.guaReverse}（卦签反向）</p>}
+              {data.guaRef && (
+                <div className="mt-2 rounded-xl bg-white/40 p-3 text-xs leading-6 text-[var(--text-secondary)]">
+                  {data.guaRef.口诀 && <p>◆ 口诀参考：{data.guaRef.口诀}</p>}
+                  {data.guaRef.意义 && <p>◆ 其意义：{data.guaRef.意义}</p>}
+                  {data.guaRef.启示 && <p>◆ 启示：{data.guaRef.启示}</p>}
+                  {data.guaRef.切记 && <p className="font-semibold text-[var(--color-primary)]">◆ 切记：{data.guaRef.切记}</p>}
+                  {data.guaRef.反向 && <p>◆ 反向：{data.guaRef.反向}</p>}
+                </div>
+              )}
+            </div>
+          )}
+          {data.annualStrategy && data.annualStrategy.length > 0 && (
+            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)]/70 p-4">
+              <p className="text-xs font-bold text-[var(--text-primary)]">
+                年度经营策略（以生日为锚点，共四期）
+              </p>
+              <div className="mt-2 space-y-2.5">
+                {data.annualStrategy.map((s) => (
+                  <div key={s.阶段} className="rounded-xl bg-[var(--bg-highlight)]/70 p-3">
+                    <p className="text-xs font-semibold text-[var(--color-primary)]">
+                      {s.阶段}（{s.月份}）
+                    </p>
+                    {s.文案.map((text) => (
+                      <p key={text.slice(0, 12)} className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">
+                        {text}
+                      </p>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -426,7 +488,7 @@ function ChapterScroll({ data }: { data: JiugongFull }) {
       no="六"
       kicker="LIFETIME"
       title="人生九十年运势卷轴"
-      description={`${data.name} · 虚岁 1–90 岁完整卷轴 · ★▶ 标注 = ${currentYear}（虚岁 ${data.xuAge}）当前流年。`}
+      description={`${data.name} · 虚岁 1–90 岁完整卷轴 · ★ = 关键年卦象，▶ = ${new Date().getFullYear()}（虚岁 ${data.xuAge}）当前流年。`}
     >
       <div className="max-h-[56vh] overflow-auto rounded-2xl border border-[var(--border-color)] print:max-h-none print:overflow-visible">
         <table className="min-w-[680px] w-full text-left text-xs">
@@ -440,15 +502,16 @@ function ChapterScroll({ data }: { data: JiugongFull }) {
           <tbody>
             {data.years.map((item) => {
               const active = item.year === currentYear;
+              const flags = `${item.keyYear ? '★' : ''}${active ? '▶' : ''}`;
               return (
                 <tr
                   key={item.year}
                   className={`border-t border-[var(--border-color)]/60 ${
                     active ? 'bg-[var(--color-primary)]/10' : ''
-                  }`}
+                  } ${item.keyYear ? 'font-medium' : ''}`}
                 >
                   <td className="px-3 py-2 font-semibold">
-                    {active && <span className="mr-1 text-[var(--color-primary)]">★▶</span>}
+                    {flags && <span className={`mr-1 ${item.keyYear ? 'text-[var(--color-primary)]' : ''}`}>{flags}</span>}
                     {item.age}
                   </td>
                   <td className="px-3 py-2">{item.year}</td>
@@ -476,6 +539,9 @@ export function JiugongManual({ data }: { data: JiugongFull }) {
       <ChapterWealth data={data} />
       <ChapterFlow data={data} />
       <ChapterScroll data={data} />
+      <p className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-highlight)]/60 px-5 py-4 text-center text-[11px] leading-6 text-[var(--text-tertiary)] print:border-0 print:bg-white">
+        注明：人生说明书可以揭开潜藏在你身上的密码，告诉了你的命或业力，但运是可以经营的，如何依此去经营人生才是它的真正价值。
+      </p>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import {
   STAR_TABLE as STAR_TABLE_V2, STAR_FORTUNE_FULL, FOUR_GRID_CE, GUAXIAN_FANXIANG,
   LIUNIAN_DETAIL, CAREER_DIR, CAREER_HEALTH, SUB_SUPPORT, ARROW_TEXT,
   CAIKU_FULL, CAIKU_JIA3, CAIKU_JIA3_NOTE, CAIGONG_XIE, CAIGONG_XIE_NOTE,
+  GRID_QI, GRID_ENERGY, SUIZHI_FULL as SUIZHI_FULL_V3, ANNUAL_STRATEGY, GUAXIAN_REF,
 } from './jiugong-data-v2';
 import kangxiData from './data/kangxi-strokes.json';
 
@@ -55,6 +56,8 @@ const dsum=(n:number)=>{let s=String(n);while(s.length>1)s=String([...s].reduce(
 // ── 十种能量 ──
 const YUN=['冠带','临官','帝旺','衰','病','死','绝','胎','养','长生'];
 const COLLISION_ENERGY=['帝旺','临官','冠带','长生','养','胎','绝','死','病','衰'];
+// ── 关键年卦象（v3.0：翻身/奇迹/接替/转机/层级/野心/转世/贵人/机运/实虚，卷轴 ★ 标注）──
+const KEY_GUAXIAN=['翻身','奇迹','接替','转机','层级','野心','转世','贵人','机运','实虚'];
 
 // ── 局差简版 ──
 const JU_DESC=['先求稳定与平安，更上一层楼需名气靠山','紧跟贵人得第一，不可独闯','兢兢业业得天下，劳碌辛苦','士农工商皆通，用心惜福','志向远大，求功名'];
@@ -125,6 +128,7 @@ export interface JiugongFull {
     lowerQi:string;lowerEnergy:string;
     outerQi:string;outerEnergy:string;
     ageStar:string;ageStarDesc:string;
+    keyYear?:boolean;              // v3.0 关键年卦象（卷轴 ★ 标注）
   }[];
   // ── v2 增量（2026-08-20 移植老唐 v2.0）──
   marriageSub?:string;                 // 双象细分：平双/阴阳双
@@ -142,6 +146,12 @@ export interface JiugongFull {
   caiKuFull?:{类型:string;描述:string;详解:string[]};caiKuJia3?:string[];caiKuJia3Note?:string;
   caigongXie?:string[];caigongXieNote?:string;
   unknownChars:string[];          // 未收录字（笔画为估算，前端须显著提示）
+  // ── v3.0 增量（2026-08-22 老唐 v3.0 移植）──
+  gridQi?:Record<string,Record<string,{解释?:string;现象?:string;操作?:string}>>; // 5.1 此象在该格的意义/产生现象/操作（上层/自我/下层 × 9象）
+  gridEnergy?:Record<string,{代表?:string;实例?:string;碰撞?:string;应变?:string}>; // 5.1 能量解读（4格）
+  suizhiNote?:string;             // 5.2 岁值星注意（v3 全文补充）
+  annualStrategy?:{阶段:string;标题:string;月份:string;文案:string[]}[];  // 5.2 年度经营策略（生日前后四期）
+  guaRef?:{口诀?:string;意义?:string;启示?:string;切记?:string;反向?:string};  // 卦签参考（投机/名望卦）
 }
 
 export interface JiugongInput {
@@ -281,6 +291,7 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
     const yearOuter=qiEnergy(yearMainNum,zong,a);
     return{
       age:a,year:year+i,yun:row.yun,chance:row.chance,gua:row.gua,koujue:row.koujue,jiedu:row.jiedu,
+      keyYear:KEY_GUAXIAN.includes(row.gua),
       upperQi:yearUpper.qi,upperEnergy:yearUpper.energy,
       selfQi:yearSelf.qi,selfEnergy:yearSelf.energy,
       lowerQi:yearLower.qi,lowerEnergy:yearLower.energy,
@@ -330,6 +341,28 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
   // 财运全文（财库五型详解 + 加3八条 + 库泄/库破七条）
   const ckFullV2 = CAIKU_FULL[pnum];
   const cgXie = (PALACE[0].includes('泄')||PALACE[0].includes('破')) ? CAIGONG_XIE : undefined;
+
+  // ═══ v3.0 增量计算（2026-08-22 老唐 v3.0 移植）═══
+  const ageStarV = STAR[xuAge%10];
+  // 5.1 四格气场解读：GRID_QI（上/自/下三格 此象意义/现象/操作）+ GRID_ENERGY（4格 代表/实例/碰撞/应变）
+  const gridQi = GRID_QI as Record<string, Record<string, {解释?:string;现象?:string;操作?:string}>>;
+  const gridEnergy = GRID_ENERGY as Record<string, {代表?:string;实例?:string;碰撞?:string;应变?:string}>;
+  // 5.2 岁值星注意（v3 全文补充：键=全角星名，匹配网站的 ageStar 半角格式）
+  const szV3Key = Object.keys(SUIZHI_FULL_V3).find(
+    (k) => k.replace(/（/g,'(').replace(/）/g,')') === ageStarV,
+  );
+  const suizhiNote = szV3Key ? SUIZHI_FULL_V3[szV3Key]?.注意 : undefined;
+  // 5.2 年度经营策略（生日前后四期：结算期/产值检验期/机会点/附加价值期）
+  const annualStrategy = (ANNUAL_STRATEGY as Record<string,{偏移:[number,number];标题:string;文案:string[]}>)
+    ? Object.entries(ANNUAL_STRATEGY).map(([stage, s]) => ({
+        阶段: stage,
+        标题: s.标题,
+        月份: `${(month + s.偏移[0] - 1 + 12) % 12 + 1}月~${(month + s.偏移[1] - 1 + 12) % 12 + 1}月`,
+        文案: s.文案 as string[],
+      }))
+    : undefined;
+  // 卦签参考（投机卦/名望卦补充：口诀/意义/启示/切记）
+  const guaRef = GUAXIAN_REF[outerGuaRec.gua] as {口诀?:string;意义?:string;启示?:string;切记?:string;反向?:string} | undefined;
   
   return{name,year,month,day,total,tian,ren,di,zong,wai,tianWx:tw,renWx:rw,diWx:dw,xuAge,
     ju,juDesc:JU_DESC[ju],juFull:JU_FULL[ju]||JU_DESC[ju],
@@ -371,6 +404,8 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
     caiKuJia3:pnum===3?CAIKU_JIA3:undefined,caiKuJia3Note:pnum===3?CAIKU_JIA3_NOTE:undefined,
     caigongXie:cgXie,caigongXieNote:cgXie?CAIGONG_XIE_NOTE:undefined,
     unknownChars,
+    // v3.0 增量
+    gridQi,gridEnergy,suizhiNote,annualStrategy,guaRef,
 };
 }
 
