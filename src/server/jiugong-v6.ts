@@ -6,6 +6,7 @@ import {
   LIUNIAN_DETAIL, CAREER_DIR, CAREER_HEALTH, SUB_SUPPORT, ARROW_TEXT,
   CAIKU_FULL, CAIKU_JIA3, CAIKU_JIA3_NOTE, CAIGONG_XIE, CAIGONG_XIE_NOTE,
   GRID_QI, GRID_ENERGY, SUIZHI_FULL as SUIZHI_FULL_V3, ANNUAL_STRATEGY, GUAXIAN_REF,
+  COLLISION_FULL, MOTHER_QI, ZHI_FAMILY, INTERNAL_ENERGY,
 } from './jiugong-data-v2';
 import kangxiData from './data/kangxi-strokes.json';
 
@@ -58,6 +59,16 @@ const YUN=['冠带','临官','帝旺','衰','病','死','绝','胎','养','长�
 const COLLISION_ENERGY=['帝旺','临官','冠带','长生','养','胎','绝','死','病','衰'];
 // ── 关键年卦象（v3.0：翻身/奇迹/接替/转机/层级/野心/转世/贵人/机运/实虚，卷轴 ★ 标注）──
 const KEY_GUAXIAN=['翻身','奇迹','接替','转机','层级','野心','转世','贵人','机运','实虚'];
+// ── v4.0 碰撞期推演（《推算碰撞》讲义 6.3：磁场从1起，往后格数+1起步每+9一遇；往前格数-10，再每-9）──
+function collisionYearsOf(gridNum:number,maxAge=90):number[]{
+  const years=new Set<number>();
+  let base=gridNum+1;
+  while(base<=maxAge){years.add(base);base+=9;}
+  let back=gridNum-10;
+  while(back>=1){years.add(back);back-=9;}
+  return [...years].sort((a,b)=>a-b);
+}
+const isCollisionYear=(gridNum:number,xusui:number)=>collisionYearsOf(gridNum).includes(xusui);
 
 // ── 局差简版 ──
 const JU_DESC=['先求稳定与平安，更上一层楼需名气靠山','紧跟贵人得第一，不可独闯','兢兢业业得天下，劳碌辛苦','士农工商皆通，用心惜福','志向远大，求功名'];
@@ -152,6 +163,12 @@ export interface JiugongFull {
   suizhiNote?:string;             // 5.2 岁值星注意（v3 全文补充）
   annualStrategy?:{阶段:string;标题:string;月份:string;文案:string[]}[];  // 5.2 年度经营策略（生日前后四期）
   guaRef?:{口诀?:string;意义?:string;启示?:string;切记?:string;反向?:string};  // 卦签参考（投机/名望卦）
+  // ── v4.0 增量（2026-08-22 老唐 v4.0 移植）──
+  zhiFamily?:[string,string,string,string];   // 十大家族：质名/五行/家族/特质描述
+  motherQi?:string;                            // 九宫母气（质个位数）
+  collisions:{格:string;数:number;命中:boolean;解说:string;现象:string;提示:string}[]; // 四格碰撞期
+  collisionYears:Record<string,number[]>;      // 各格碰撞期虚岁全表
+  internalEnergy?:Record<string,unknown>;      // 内部能量（上层/自我/下层，第十四课）
 }
 
 export interface JiugongInput {
@@ -363,6 +380,21 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
     : undefined;
   // 卦签参考（投机卦/名望卦补充：口诀/意义/启示/切记）
   const guaRef = GUAXIAN_REF[outerGuaRec.gua] as {口诀?:string;意义?:string;启示?:string;切记?:string;反向?:string} | undefined;
+
+  // ═══ v4.0 增量计算（2026-08-22 老唐 v4.0 移植）═══
+  // 十大家族 + 九宫母气（2.1 特质）
+  const zhiFamily = (ZHI_FAMILY as Record<string,[string,string,string,string]>)[zhi];
+  const motherQi = (MOTHER_QI as Record<string,string>)[String(((zhi%9)+9)%9 || 9)];
+  // 碰撞期（《推算碰撞》讲义 6.3）：四格各自推演，标注当前虚岁是否命中
+  const CF = COLLISION_FULL as Record<string,{解说:string;现象:string;提示:string}>;
+  const gridDefs:[string,number][]=[['上层',tian],['自我',ren],['下层',di],['对外',zong]];
+  const collisions = gridDefs.map(([g,n])=>({
+    格:g,数:n,命中:isCollisionYear(n,xuAge),
+    解说:CF[g]?.解说||'',现象:CF[g]?.现象||'',提示:CF[g]?.提示||'',
+  }));
+  const collisionYears:Record<string,number[]> = Object.fromEntries(gridDefs.map(([g,n])=>[g,collisionYearsOf(n)] as [string,number[]]));
+  // 内部能量（第十四课：上层/自我/下层）
+  const internalEnergy = INTERNAL_ENERGY as Record<string,unknown>;
   
   return{name,year,month,day,total,tian,ren,di,zong,wai,tianWx:tw,renWx:rw,diWx:dw,xuAge,
     ju,juDesc:JU_DESC[ju],juFull:JU_FULL[ju]||JU_DESC[ju],
@@ -406,6 +438,8 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
     unknownChars,
     // v3.0 增量
     gridQi,gridEnergy,suizhiNote,annualStrategy,guaRef,
+    // v4.0 增量
+    zhiFamily,motherQi,collisions,collisionYears,internalEnergy,
 };
 }
 

@@ -183,7 +183,28 @@ function ChapterPersonality({ data }: { data: JiugongFull }) {
         </div>
       </Sub>
 
-      <Sub title="2.2 主导星特质">
+      <Sub title="2.2 特质 · 十大家族">
+        <div className="space-y-2">
+          {data.zhiFamily ? (
+            <p className="text-xs leading-6 text-[var(--text-secondary)]">
+              质{data.zhi} · <span className="font-bold text-[var(--text-primary)]">{data.zhiFamily[0]}（{data.zhiFamily[1]}）</span> · {data.zhiFamily[2]}
+              {data.motherQi && <>；九宫母气：{data.motherQi}</>}
+              <br />◎ 特质：{data.zhiFamily[3]}
+            </p>
+          ) : (
+            <p className="text-xs leading-6 text-[var(--text-secondary)]">质{data.zhi} 对照数据整理中。</p>
+          )}
+          {(data.zhi === 2 || data.zhi === 3 || data.zhi === 6) && (
+            <p className="rounded-xl bg-[var(--color-primary)]/10 px-3 py-2 text-xs leading-6 text-[var(--text-secondary)]">
+              ※ 用人提示：{data.zhi === 2 && '能说——适合做大客户沟通；能写——文案功夫特别强。'}
+              {data.zhi === 3 && '特别适合做业务。'}
+              {data.zhi === 6 && '招聘业务首选，最容易出CEO（尤其36画）。'}
+            </p>
+          )}
+        </div>
+      </Sub>
+
+      <Sub title="2.3 人生经营">
         <div className="space-y-2">
           <p className="text-xs leading-6 text-[var(--text-secondary)]">
             代表成功导向的总格星性为「{data.xingyunName}」，属{data.zhiElement}，{data.zhiDesc}。
@@ -193,7 +214,7 @@ function ChapterPersonality({ data }: { data: JiugongFull }) {
         </div>
       </Sub>
 
-      <Sub title="2.3 性格 · 思维与行动">
+      <Sub title="2.4 性格 · 思维与行动">
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-highlight)]/60 p-4">
             <p className="text-[10px] tracking-[0.16em] text-[var(--text-tertiary)]">思想功能 · 35岁以前为主 · 天→人</p>
@@ -359,6 +380,25 @@ function ChapterFlow({ data }: { data: JiugongFull }) {
       description={`${new Date().getFullYear()} 年（虚岁 ${data.xuAge} 岁）年度运势详批。`}
     >
       <Sub title="5.1 四格气场 · 九大气场">
+        <div className="mb-3 rounded-2xl border border-[var(--color-primary)]/25 bg-gradient-to-br from-[var(--color-primary)]/[0.10] to-transparent p-4">
+          <p className="text-xs font-bold text-[var(--text-primary)]">◎ 碰撞期（压力运）</p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            {data.collisions.map((c) => (
+              <div key={c.格} className={`rounded-xl p-3 ${c.命中 ? 'bg-[var(--color-primary)]/15 ring-1 ring-[var(--color-primary)]/40' : 'bg-[var(--bg-highlight)]/70'}`}>
+                <p className="text-xs font-bold text-[var(--text-primary)]">
+                  {c.格}（{c.数}数）{c.命中 && <span className="ml-1 text-[var(--color-primary)]">← 今年虚岁{data.xuAge}正处碰撞期</span>}
+                </p>
+                {c.解说 && <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">◆ 解说：{c.解说}</p>}
+                {c.现象 && <p className="text-xs leading-6 text-[var(--text-secondary)]">◆ 碰撞现象：{c.现象}</p>}
+                {c.提示 && <p className="text-xs leading-6 text-[var(--text-secondary)]">◆ 提示：{c.提示}</p>}
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px] leading-5 text-[var(--text-tertiary)]">
+            碰撞期推演口径：往后格数+1 起步、每+9 一遇；往前格数−10、再每−9。各格碰撞虚岁：
+            {Object.entries(data.collisionYears).map(([g, ys]) => ` ${g}${ys.join('/')}；`)}
+          </p>
+        </div>
         <div className="grid gap-3 lg:grid-cols-2">
           {aura.map((g) => {
             const qiInfo = data.gridQi?.[g.key]?.[g.qi];
@@ -389,10 +429,16 @@ function ChapterFlow({ data }: { data: JiugongFull }) {
                 {enInfo && (
                   <div className="mt-2 space-y-1.5 text-xs leading-6 text-[var(--text-secondary)]">
                     <p className="font-semibold text-[var(--text-primary)]">── 能量解读 ──</p>
-                    {enInfo.代表 && <p>◆ 能量代表：{enInfo.代表}</p>}
-                    {enInfo.实例 && <p>◆ 能量实例：{enInfo.实例}</p>}
-                    {enInfo.碰撞 && <p>◆ 碰撞现象：{enInfo.碰撞}</p>}
-                    {enInfo.应变 && <p>◆ 应变之道：{enInfo.应变}</p>}
+                    {enInfo.代表 && <p>◆ {g.key === '对外' ? '对外关系' : `处于${g.key}`}代表：{enInfo.代表}</p>}
+                    {enInfo.实例 && <p>◆ 能量容易发生现象：{enInfo.实例}</p>}
+                    {(data.internalEnergy as Record<string, unknown> | undefined)?.[g.key] != null && (
+                      <p>◆ 内部能量：{String((data.internalEnergy as Record<string, unknown>)[g.key])}</p>
+                    )}
+                    {g.key === '自我' && (
+                      <p className="text-[11px] leading-5 text-[var(--text-tertiary)]">
+                        （内部情绪发展：胎=松弛、养=稳定、长生=爆发、冠带=突显本性、临官=横冲、帝旺=高亢、衰=倦怠、病=心乱不稳、死=心静已死、绝=谷底空洞）
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -488,7 +534,7 @@ function ChapterScroll({ data }: { data: JiugongFull }) {
       no="六"
       kicker="LIFETIME"
       title="人生九十年运势卷轴"
-      description={`${data.name} · 虚岁 1–90 岁完整卷轴 · ★ = 关键年卦象，▶ = ${new Date().getFullYear()}（虚岁 ${data.xuAge}）当前流年。`}
+      description={`${data.name} · 虚岁 1–90 岁完整卷轴（卦象版）· ★ = 关键年卦象，▶ = ${new Date().getFullYear()}（虚岁 ${data.xuAge}）当前流年 · 完整版四大关系矩阵可下载电子表格。`}
     >
       <div className="max-h-[56vh] overflow-auto rounded-2xl border border-[var(--border-color)] print:max-h-none print:overflow-visible">
         <table className="min-w-[680px] w-full text-left text-xs">
