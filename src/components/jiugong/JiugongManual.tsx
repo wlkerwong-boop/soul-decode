@@ -237,7 +237,7 @@ function ChapterPersonality({ data }: { data: JiugongFull }) {
         </div>
       </Sub>
 
-      <Sub title="2.4 事业趋向">
+      <Sub title="2.5 事业趋向">
         {data.careerDir ? (
           <div className="space-y-2">
             <p className="text-xs leading-6 text-[var(--text-secondary)]">
@@ -257,7 +257,7 @@ function ChapterPersonality({ data }: { data: JiugongFull }) {
         )}
       </Sub>
 
-      <Sub title="2.5 上下助力与属下助力">
+      <Sub title="2.6 上下助力与属下助力">
         <div className="space-y-2 text-xs leading-6 text-[var(--text-secondary)]">
           <p className="font-semibold text-[var(--text-primary)]">
             ① 箭头法（天格{data.tianWx}—人格{data.renWx}—地格{data.diWx}）
@@ -274,7 +274,7 @@ function ChapterPersonality({ data }: { data: JiugongFull }) {
         </div>
       </Sub>
 
-      <Sub title="2.6 星运">
+      <Sub title="2.7 星运">
         <div className="space-y-2">
           <p className="text-xs leading-6 text-[var(--text-secondary)]">
             总笔画 {data.total} → <span className="font-semibold text-[var(--text-primary)]">{data.xingyunName}</span>
@@ -431,14 +431,19 @@ function ChapterFlow({ data }: { data: JiugongFull }) {
                     <p className="font-semibold text-[var(--text-primary)]">── 能量解读 ──</p>
                     {enInfo.代表 && <p>◆ {g.key === '对外' ? '对外关系' : `处于${g.key}`}代表：{enInfo.代表}</p>}
                     {enInfo.实例 && <p>◆ 能量容易发生现象：{enInfo.实例}</p>}
-                    {(data.internalEnergy as Record<string, unknown> | undefined)?.[g.key] != null && (
-                      <p>◆ 内部能量：{String((data.internalEnergy as Record<string, unknown>)[g.key])}</p>
-                    )}
-                    {g.key === '自我' && (
-                      <p className="text-[11px] leading-5 text-[var(--text-tertiary)]">
-                        （内部情绪发展：胎=松弛、养=稳定、长生=爆发、冠带=突显本性、临官=横冲、帝旺=高亢、衰=倦怠、病=心乱不稳、死=心静已死、绝=谷底空洞）
-                      </p>
-                    )}
+                    {(() => {
+                      const ie = (data.internalEnergy as Record<string, unknown> | undefined)?.[g.key];
+                      if (ie == null) return null;
+                      if (typeof ie === 'string') return <p>◆ 内部能量：{ie}</p>;
+                      const emo = (ie as { 情绪?: Record<string, string> }).情绪;
+                      if (!emo) return null;
+                      return (
+                        <>
+                          <p>◆ 内部能量 · 自我情绪十运发展：</p>
+                          <p className="pl-3">{Object.entries(emo).map(([k, v]) => `${k}=${v}`).join('；')}</p>
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -534,7 +539,7 @@ function ChapterScroll({ data }: { data: JiugongFull }) {
       no="六"
       kicker="LIFETIME"
       title="人生九十年运势卷轴"
-      description={`${data.name} · 虚岁 1–90 岁完整卷轴（卦象版）· ★ = 关键年卦象，▶ = ${new Date().getFullYear()}（虚岁 ${data.xuAge}）当前流年 · 完整版四大关系矩阵可下载电子表格。`}
+      description={`${data.name} · 虚岁 1–90 岁完整卷轴（卦象版）· ★ = 关键年卦象，▶ = ${new Date().getFullYear()}（虚岁 ${data.xuAge}）当前流年 · 完整版四大关系矩阵电子表格即将上线。`}
     >
       <div className="max-h-[56vh] overflow-auto rounded-2xl border border-[var(--border-color)] print:max-h-none print:overflow-visible">
         <table className="min-w-[680px] w-full text-left text-xs">
