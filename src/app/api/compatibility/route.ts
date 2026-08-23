@@ -144,6 +144,11 @@ export async function POST(request: NextRequest) {
             const payload = await response.json();
             if (payload.error?.message) upstreamError = String(payload.error.message);
             segmentText = normalizeCompatibilityAudience(payload.choices?.[0]?.message?.content || '');
+            // 🔒 免责声明去重：AI 常按 system prompt 在段 1 末尾额外写免责（粗体），
+            // 剥掉中间出现的，统一只保留报告最后 1 次（由最终章节输出）。
+            if (segment.id === 'compat-foundation') {
+              segmentText = segmentText.replace(/\*{0,2}仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议\*{0,2}/g, '');
+            }
             if (segmentText) {
               reportText += segmentText;
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: segmentText })}\n\n`));
@@ -179,8 +184,12 @@ export async function POST(request: NextRequest) {
               }
               const retryPayload = await retry.json();
               if (retryPayload.error?.message) throw new Error(`AI重试返回错误 (${segment.id}): ${retryPayload.error.message}`);
-              const retryText = normalizeCompatibilityAudience(retryPayload.choices?.[0]?.message?.content || '');
+              let retryText = normalizeCompatibilityAudience(retryPayload.choices?.[0]?.message?.content || '');
               if (!retryText.trim()) throw new Error(`AI未返回合盘正文 (${segment.id})`);
+              if (segment.id === 'compat-foundation') {
+                // 重试路径同样剥除段 1 的多余免责声明（与上方主路径一致）
+                retryText = retryText.replace(/\*{0,2}仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议\*{0,2}/g, '');
+              }
               reportText += retryText;
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: retryText })}\n\n`));
             }

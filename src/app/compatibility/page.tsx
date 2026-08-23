@@ -97,6 +97,9 @@ export default function HepanPage() {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // 🔒 防重复拼接：请求取消器 + 代次计数器（只接受最新一次生成的内容，旧请求内容一律丢弃）
+  const abortRef = useRef<AbortController | null>(null);
+  const genIdRef = useRef(0);
 
   useEffect(() => {
     if (loading && startTime) {
@@ -122,7 +125,7 @@ export default function HepanPage() {
   const requiredPrefixes = type === 'family'
     ? ['m', 'p', ...Array.from({ length: childrenCount }, (_, i) => `c${i}`)]
     : ['a', 'b'];
-  const canGenerate = !loading && (type !== 'family' || childrenCount > 0) && requiredPrefixes.every(canSubmit);
+  const canGenerate = !loading && !isStreaming && (type !== 'family' || childrenCount > 0) && requiredPrefixes.every(canSubmit);
   const reportTitle = REPORT_TITLES[type] || '合盘报告';
 
   const submit = async () => {
@@ -151,11 +154,19 @@ export default function HepanPage() {
       return buildCompatibilityPersonPayload(form, pfx);
     }
 
+    let genId = 0; // 本次生成代次（try/catch 共享，用于过期请求识别）
     try {
+      // 🔒 取消上一个未完成的请求（若在生成中重复点击，旧流立即掐断，内容不再拼入）
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+      genId = ++genIdRef.current;
+
       const r = await fetch('/api/compatibility', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ persons, type }),
+        signal: controller.signal,
       });
       if (!r.ok) { setError('生成失败 ('+r.status+')'); setLoading(false); return; }
       const reader = r.body?.getReader();
@@ -167,6 +178,7 @@ export default function HepanPage() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
+        if (genId !== genIdRef.current) break; // 本次请求已过期（新的生成已启动），丢弃后续内容
         const parsed = consumeSseChunk(sseBuffer, dec.decode(value, { stream: true }));
         sseBuffer = parsed.buffer;
         if (parsed.contents.length) {
@@ -184,7 +196,13 @@ export default function HepanPage() {
         if (parsed.done) { setLoading(false); setIsStreaming(false); break; }
       }
       if (streamError) return;
-    } catch (e: any) { setError(e.message||'网络错误'); setLoading(false); setIsStreaming(false); }
+    } catch (e: any) {
+      if (genId !== genIdRef.current) return; // 过期请求的异常静默忽略
+      if (e?.name === 'AbortError') return;   // 主动取消静默忽略
+      setError(e.message||'网络错误');
+      setReport(''); // 断线/异常不留半成品，避免误以为生成完成
+      setLoading(false); setIsStreaming(false);
+    }
     setLoading(false); setIsStreaming(false);
   };
 
@@ -282,7 +300,7 @@ export default function HepanPage() {
           </div>
         )}
 
-        {report && (
+        {report && !isStreaming && (
           <div className="soul-editorial-surface p-6 md:p-8 mt-10 max-w-4xl mx-auto">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
               <p className="soul-editorial-section-label">Reading</p>
@@ -312,10 +330,11 @@ export default function HepanPage() {
                   try {
                     btn.textContent = '⏳ 生成中...';
                     btn.disabled = true;
+                    const birthPlace = [form.a_province, form.a_country, form.a_city].filter(Boolean).join(' ') || '中国大陆';
                     const resp = await fetch('/api/word', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ report, meta: { year: '合盘', location: reportTitle, reportTitle, fileStem: reportTitle }, charts: { images: {} } }),
+                      body: JSON.stringify({ report, meta: { year: '合盘', location: birthPlace, reportTitle, fileStem: reportTitle }, charts: { images: {} } }),
                     });
                     if (!resp.ok) { alert('Word 生成失败'); return; }
                     const blob = await resp.blob();
