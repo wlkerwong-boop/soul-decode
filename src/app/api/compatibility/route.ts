@@ -13,6 +13,7 @@ import {
   buildFamilyDataDeclaration,
   COMPATIBILITY_SYSTEM_PROMPT,
   normalizeCompatibilityAudience,
+  validateCompatibilityInput,
   type CompatibilityMember,
 } from '@/lib/compatibility-depth';
 import { buildLocalCompatibilityReport } from '@/lib/compatibility-fallback';
@@ -57,13 +58,15 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (personList.length < 2) {
-      return new Response(JSON.stringify({ error: '需要至少两个人的出生信息' }), {
+    const compatibilityType = type || 'couple';
+    const inputError = validateCompatibilityInput(personList, compatibilityType);
+    if (inputError) {
+      return new Response(JSON.stringify({ error: inputError }), {
         status: 400, headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    const labels = type === 'family'
+    const labels = compatibilityType === 'family'
       ? ['本人', '伴侣', ...Array.from({ length: personList.length - 2 }, (_, i) => `孩子${i + 1}`)]
       : personList.map((_: any, i: number) => i === 0 ? '用户A' : `用户${String.fromCharCode(65 + i)}`);
     const currentYear = new Date().getFullYear();
@@ -103,7 +106,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const segments = buildCompatibilitySegments(members, type || 'couple');
+    const segments = buildCompatibilitySegments(members, compatibilityType);
 
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
@@ -111,7 +114,7 @@ export async function POST(request: NextRequest) {
         let reportText = '';
         try {
           // K3 加固条款：引擎注入「## 0. 排盘数据声明」节，AI 只写第 1 节起叙事
-          const declaration = buildFamilyDataDeclaration(members, type || 'couple');
+          const declaration = buildFamilyDataDeclaration(members, compatibilityType);
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: declaration })}\n\n`));
           reportText += declaration;
           for (const segment of segments) {
@@ -182,12 +185,12 @@ export async function POST(request: NextRequest) {
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: retryText })}\n\n`));
             }
           }
-          if (type === 'family' &&
-            (!reportText.includes('## 7.') || !reportText.includes('仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议'))) {
-            throw new Error('家庭合盘报告未完整生成：缺少第7节使用边界或免责声明');
+          const completionMarker = compatibilityType === 'family' ? '## 7.' : '## 6.';
+          if (!reportText.includes(completionMarker) || !reportText.includes('仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议')) {
+            throw new Error(`${compatibilityType === 'family' ? '家庭' : '双方'}合盘报告未完整生成：缺少最终章节或免责声明`);
           }
           // 事实层护栏（任务3 fail-closed）：流式已发出内容无法撤回，
-          // 校验失败时在 done 帧前补发 verify_error，客户端应判失败不落盘
+          // 校验失败时直接结束，客户端不得将已收到的半成品展示或落盘。
           try {
             assertReportVerified(reportText, {
               hd: { channels: members.flatMap((member) => member.hd?.channels || []) },
@@ -196,16 +199,29 @@ export async function POST(request: NextRequest) {
           } catch (verifyError: any) {
             console.error('合盘报告事实层校验未通过:', (verifyError?.issues || []).map((i: any) => i.message).join('; '));
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              error: verifyError?.message || '报告事实层校验未通过',
               verify_error: verifyError?.message || '报告事实层校验未通过',
               issues: verifyError?.issues || [],
             })}\n\n`));
+            return;
           }
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
         } catch (error: any) {
-          if (type === 'family') {
+          if (compatibilityType === 'family') {
             const fallback = buildLocalCompatibilityReport(members, 'family');
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: fallback, source: 'structured-fallback' })}\n\n`));
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, source: 'structured-fallback' })}\n\n`));
+            try {
+              if (!fallback.includes('## 7.') || !fallback.includes('仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议')) {
+                throw new Error('结构化家庭合盘缺少最终章节或免责声明');
+              }
+              assertReportVerified(fallback, {
+                hd: { channels: members.flatMap((member) => member.hd?.channels || []) },
+                bazi: { pillars: members.map((member) => member.bazi.split(' ')).flat() },
+              });
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: fallback, source: 'structured-fallback' })}\n\n`));
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, source: 'structured-fallback' })}\n\n`));
+            } catch (fallbackError: any) {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: fallbackError?.message || '合盘报告质量校验未通过' })}\n\n`));
+            }
           } else {
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: error.message || '中断' })}\n\n`));
           }

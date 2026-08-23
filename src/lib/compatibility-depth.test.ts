@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { buildCompatibilityPersonPayload, buildCompatibilitySegments, consumeSseChunk, normalizeCompatibilityAudience } from './compatibility-depth';
+import { buildCompatibilityPersonPayload, buildCompatibilitySegments, consumeSseChunk, normalizeCompatibilityAudience, validateCompatibilityInput } from './compatibility-depth';
 
 const members = [
-  { label: '家长', age: 44, bazi: '壬戌 庚戌 乙亥 辛巳', elementDistribution: { 木: 1, 金: 0 }, hd: { type: 'Projector', profile: '3/6', authority: 'Splenic', channels: ['18-58'] } },
-  { label: '孩子1', age: 11, bazi: '乙未 辛巳 辛亥 戊戌', elementDistribution: { 木: 0, 金: 2 }, hd: { type: 'Projector', profile: '3/6', authority: 'Splenic', channels: ['28-38'] } },
+  { label: '家长', age: 44, bazi: '壬戌 庚戌 乙亥 辛巳', elementDistribution: { 木: 1, 金: 0 }, city: '上海', hd: { type: 'Projector', profile: '3/6', authority: 'Splenic', channels: ['18-58'] } },
+  { label: '孩子1', age: 11, bazi: '乙未 辛巳 辛亥 戊戌', elementDistribution: { 木: 0, 金: 2 }, city: '上海', hd: { type: 'Projector', profile: '3/6', authority: 'Splenic', channels: ['28-38'] } },
+  { label: '孩子2', age: 8, bazi: '丙申 壬午 甲子 乙亥', elementDistribution: { 木: 2, 金: 1 }, city: '上海', hd: { type: 'Generator', profile: '4/6', authority: 'Sacral', channels: ['34-20'] } },
 ];
 
 describe('compatibility depth prompt', () => {
@@ -25,11 +26,27 @@ describe('compatibility depth prompt', () => {
     expect(full).toContain('排盘数据声明');
     expect(full).toContain('能量结构对照表');
     expect(full).toContain('家族共享印记');
-    expect(full).toContain('十对关系一张网');
+    expect(full).toContain('3对关系一张网');
     expect(full).toContain('家庭实践建议');
     expect(full).toContain('仅供自我观察与关系沟通参考');
     expect(full).toContain('妈妈也觉得这事没劲');
     expect(full).toContain('18-58');
+  });
+
+  it('keeps couple and friend prompts free of family-only member assumptions', () => {
+    for (const type of ['couple', 'friend'] as const) {
+      const full = buildCompatibilitySegments(members, type).map(x => x.prompt).join('\n');
+      expect(full).toContain('双方');
+      expect(full).not.toContain('家庭合盘报告');
+      expect(full).not.toContain('亲子沟通与养育话术');
+      expect(full).not.toContain('十对关系');
+      expect(full).not.toContain('五个人');
+    }
+  });
+
+  it('rejects a family request that has no child data', () => {
+    expect(validateCompatibilityInput(members.slice(0, 2), 'family')).toContain('至少需要一位孩子');
+    expect(validateCompatibilityInput([...members, members[1]], 'family')).toBeNull();
   });
 
   it('preserves an SSE event split across network chunks', () => {
@@ -38,6 +55,11 @@ describe('compatibility depth prompt', () => {
     const second = consumeSseChunk(first.buffer, '系密码\"}\n\n');
     expect(second.contents).toEqual(['关系密码']);
     expect(second.buffer).toBe('');
+  });
+
+  it('surfaces server-side report verification failures to the client parser', () => {
+    const parsed = consumeSseChunk('', 'data: {"verify_error":"事实层校验失败"}\n\n');
+    expect(parsed.error).toContain('事实层校验失败');
   });
 
   it('normalizes model language and asks for evidence-linked writing', () => {

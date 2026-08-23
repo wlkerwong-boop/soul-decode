@@ -2,8 +2,10 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const PDF_FONT_DIR = join(process.cwd(), 'public/fonts/lxgwwenkai/files');
+const PDF_FONT_CSS_PATH = join(process.cwd(), 'public/fonts/lxgwwenkai/lxgwwenkai-regular.css');
 const FONT_URL_PATTERN = /(?:https?:\/\/[^/"'()\s]+)?\/fonts\/lxgwwenkai\/files\/([A-Za-z0-9._-]+\.woff2)(?:[?#][^"'()\s]*)?/g;
 const FONT_FACE_PATTERN = /@font-face\s*{[^}]*}/gi;
+const LOCAL_FONT_STYLESHEET_PATTERN = /<link\b[^>]*href=["'](?:https?:\/\/[^/"']+)?\/fonts\/lxgwwenkai\/lxgwwenkai-regular\.css(?:[?#][^"']*)?["'][^>]*>\s*/gi;
 const fontDataCache = new Map<string, string>();
 
 type UnicodeRange = { start: number; end: number };
@@ -66,7 +68,12 @@ export function inlinePdfFontSources(markup: string): string {
     ),
   );
 
-  return markup.replace(FONT_FACE_PATTERN, (block) => {
+  const stylesheet = existsSync(PDF_FONT_CSS_PATH) ? readFileSync(PDF_FONT_CSS_PATH, 'utf8') : '';
+  const withLocalStylesheet = stylesheet
+    ? markup.replace(LOCAL_FONT_STYLESHEET_PATTERN, `<style>${stylesheet}</style>`)
+    : markup;
+
+  return withLocalStylesheet.replace(FONT_FACE_PATTERN, (block) => {
     if (!fontFaceCoversMarkup(block, codePoints)) return block;
     return block.replace(FONT_URL_PATTERN, (match, filename: string) => {
       return readFontAsDataUrl(filename) ?? match;

@@ -12,6 +12,15 @@ describe('inlinePdfFontSources', () => {
     expect(result).not.toContain('aisoulcode.cn/fonts/lxgwwenkai/files');
   });
 
+  it('inlines the site stylesheet when PDF HTML uses a link tag', () => {
+    const source = `<!doctype html><html><head><link rel="stylesheet" href="/fonts/lxgwwenkai/lxgwwenkai-regular.css"></head><body>关系合盘</body></html>`;
+    const result = inlinePdfFontSources(source);
+
+    expect(result).toContain('@font-face');
+    expect(result).toContain('data:font/woff2;base64,');
+    expect(result).not.toContain('href="/fonts/lxgwwenkai/lxgwwenkai-regular.css"');
+  });
+
   it('leaves unrelated resources unchanged', () => {
     const source = 'body { background: url("https://aisoulcode.cn/assets/report.png"); }';
 

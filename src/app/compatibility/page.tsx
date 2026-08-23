@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { CHINA_CITIES, INTERNATIONAL_CITIES } from '@/data/cities';
 import { buildCompatibilityPersonPayload, consumeSseChunk } from '@/lib/compatibility-depth';
 import ReportWaiting from '@/components/ReportWaiting';
+import { marked } from 'marked';
 
 const YEARS = Array.from({length:121},(_,i)=>2026-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
@@ -11,6 +12,16 @@ const HOURS = Array.from({length:24},(_,i)=>i);
 const MINUTES = [0,15,30,45];
 
 const continents = Object.keys(INTERNATIONAL_CITIES);
+
+const REPORT_TITLES: Record<string, string> = {
+  couple: '情侣合盘报告',
+  family: '家庭合盘报告',
+  friend: '朋友合盘报告',
+};
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character] || character));
+}
 
 function PersonForm({ label, pfx, data, setData }: {
   label: string; pfx: string;
@@ -107,9 +118,18 @@ export default function HepanPage() {
 
   const setData = (k: string, v: string) => setForm(prev => ({...prev, [k]: v}));
 
-  const canSubmit = (pfx: string) => form[pfx+'_year'] && form[pfx+'_month'] && form[pfx+'_day'] && form[pfx+'_city'];
+  const canSubmit = (pfx: string) => Boolean(form[pfx+'_year'] && form[pfx+'_month'] && form[pfx+'_day'] && form[pfx+'_city']);
+  const requiredPrefixes = type === 'family'
+    ? ['m', 'p', ...Array.from({ length: childrenCount }, (_, i) => `c${i}`)]
+    : ['a', 'b'];
+  const canGenerate = !loading && (type !== 'family' || childrenCount > 0) && requiredPrefixes.every(canSubmit);
+  const reportTitle = REPORT_TITLES[type] || '合盘报告';
 
   const submit = async () => {
+    if (!canGenerate) {
+      setError(type === 'family' && childrenCount === 0 ? '家庭合盘至少需要添加一位孩子' : '请完整填写参与者的出生年月日和出生城市');
+      return;
+    }
     setLoading(true); setError(''); setReport('');
     setIsStreaming(false); setStartTime(Date.now()); setElapsedSeconds(0);
 
@@ -143,6 +163,7 @@ export default function HepanPage() {
       const dec = new TextDecoder();
       let sseBuffer = '';
       let isFirstChunk = true;
+      let streamError = '';
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -152,11 +173,19 @@ export default function HepanPage() {
           if (isFirstChunk) { setLoading(false); setIsStreaming(true); isFirstChunk = false; }
           setReport(previous => previous + parsed.contents.join(''));
         }
-        if (parsed.error) { setError(parsed.error); setLoading(false); setIsStreaming(false); }
+        if (parsed.error) {
+          streamError = parsed.error;
+          setError(parsed.error);
+          setReport('');
+          setLoading(false);
+          setIsStreaming(false);
+          break;
+        }
         if (parsed.done) { setLoading(false); setIsStreaming(false); break; }
       }
+      if (streamError) return;
     } catch (e: any) { setError(e.message||'网络错误'); setLoading(false); setIsStreaming(false); }
-    if (!error) { setLoading(false); setIsStreaming(false); }
+    setLoading(false); setIsStreaming(false);
   };
 
   const handleRetry = useCallback(() => { submit(); }, [type, form, childrenCount]);
@@ -176,7 +205,7 @@ export default function HepanPage() {
             {v:'family',l:'家庭合盘'},
             {v:'friend',l:'朋友合盘'},
           ].map(t=>(
-            <button key={t.v} onClick={()=>setType(t.v)}
+            <button key={t.v} onClick={()=>{ setType(t.v); setReport(''); setError(''); setVisibleChapters(3); }}
               className="soul-editorial-tab"
               data-active={type===t.v}>
               {t.l}
@@ -217,7 +246,7 @@ export default function HepanPage() {
             <><PersonForm label="您" pfx="a" data={form} setData={setData} /><PersonForm label="朋友" pfx="b" data={form} setData={setData} /></>
           )}
 
-          <button onClick={submit} disabled={loading||!(canSubmit('a')||canSubmit('m'))}
+          <button onClick={submit} disabled={!canGenerate}
             title={type==='family'&&childrenCount===0?'请先添加至少一个孩子':undefined}
             className="soul-editorial-button w-full mt-2">
             {loading ? '⌛ 正在合盘...' : '✦ 生成合盘报告'}
@@ -271,7 +300,7 @@ export default function HepanPage() {
                   const b = new Blob([toPlain(report)], { type: 'text/plain;charset=utf-8' });
                   const a = document.createElement('a');
                   a.href = URL.createObjectURL(b);
-                  a.download = '家庭合盘.txt';
+                  a.download = `${reportTitle}.txt`;
                   a.click();
                 }}
                   className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
@@ -286,13 +315,13 @@ export default function HepanPage() {
                     const resp = await fetch('/api/word', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ report, meta: { year: '合盘', location: '家庭合盘' }, charts: { images: {} } }),
+                      body: JSON.stringify({ report, meta: { year: '合盘', location: reportTitle, reportTitle, fileStem: reportTitle }, charts: { images: {} } }),
                     });
                     if (!resp.ok) { alert('Word 生成失败'); return; }
                     const blob = await resp.blob();
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
-                    a.download = '家庭合盘.docx';
+                    a.download = `${reportTitle}.docx`;
                     a.click();
                     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
                   } catch (e: any) {
@@ -322,19 +351,19 @@ export default function HepanPage() {
                         td, th { border: 1px solid #E6D9C5; padding: 6px 8px; font-size: 12px; }
                         p { margin: 8px 0; }
                       </style></head><body>
-                      <h1>家庭合盘报告</h1>
-                      <pre style="white-space:pre-wrap;font-family:'LXGW WenKai',serif;font-size:13px;">${report.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+                      <h1>${escapeHtml(reportTitle)}</h1>
+                      <main>${marked(report, { breaks: true, gfm: true })}</main>
                     </body></html>`;
                     const resp = await fetch('/api/pdf', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ html }),
+                      body: JSON.stringify({ html, filename: reportTitle }),
                     });
                     if (!resp.ok) { alert('PDF 生成失败'); return; }
                     const blob = await resp.blob();
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(blob);
-                    a.download = '家庭合盘.pdf';
+                    a.download = `${reportTitle}.pdf`;
                     a.click();
                     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
                   } catch (e: any) {

@@ -173,7 +173,8 @@ export async function POST(req: NextRequest) {
 
       await browser.close();
 
-      const filename = `人生总览报告_${new Date().toISOString().slice(0, 10)}.pdf`;
+      const safeStem = String(body.filename || '人生总览报告').replace(/[\\/:*?"<>|]/g, '_').trim() || '人生总览报告';
+      const filename = `${safeStem}_${new Date().toISOString().slice(0, 10)}.pdf`;
       const res = new NextResponse(Buffer.from(pdfBuffer), {
         status: 200,
         headers: {

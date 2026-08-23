@@ -15,6 +15,8 @@ import {
   TextRun,
   WidthType,
 } from 'docx';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 type ReportChartImages = {
   humanDesign?: string;
@@ -27,6 +29,8 @@ type ReportCharts = {
 };
 
 type ReportMeta = {
+  reportTitle?: string;
+  fileStem?: string;
   year?: string;
   month?: string;
   day?: string;
@@ -45,11 +49,19 @@ const COLORS = {
   muted: '776E64',
 };
 
+const PACKAGED_DOCX_FONT_PATH = join(process.cwd(), 'public/fonts/noto/NotoSansCJKsc-Regular.otf');
+if (!existsSync(PACKAGED_DOCX_FONT_PATH)) {
+  throw new Error(`缺少随应用打包的 Word CJK 字体：${PACKAGED_DOCX_FONT_PATH}`);
+}
+
+const embeddedFonts = [{ name: 'SoulCode CJK', data: readFileSync(PACKAGED_DOCX_FONT_PATH) }];
+const REPORT_FONT_NAME = 'SoulCode CJK';
+
 const REPORT_FONT = {
-  ascii: 'STSong',
-  hAnsi: 'STSong',
-  eastAsia: 'STSong',
-  cs: 'STSong',
+  ascii: REPORT_FONT_NAME,
+  hAnsi: REPORT_FONT_NAME,
+  eastAsia: REPORT_FONT_NAME,
+  cs: REPORT_FONT_NAME,
 };
 
 const thinBorders = {
@@ -101,11 +113,13 @@ function tableCells(line: string) {
 function makeTable(rows: string[][]) {
   const columnCount = Math.max(...rows.map(row => row.length), 1);
   const columnWidth = Math.floor(9360 / columnCount);
+  const normalizedRows = rows.map((row) => Array.from({ length: columnCount }, (_, index) => row[index] || ''));
   return new Table({
     width: { size: 9360, type: WidthType.DXA },
+    columnWidths: Array.from({ length: columnCount }, () => columnWidth),
     layout: TableLayoutType.FIXED,
     borders: thinBorders,
-    rows: rows.map((row, rowIndex) => new TableRow({
+    rows: normalizedRows.map((row, rowIndex) => new TableRow({
       children: row.map((cell) => new TableCell({
         borders: thinBorders,
         shading: rowIndex === 0 ? { type: ShadingType.CLEAR, fill: COLORS.pale } : undefined,
@@ -151,6 +165,7 @@ function imageParagraph(dataUrl: string | undefined, width: number, height: numb
 
 /** Convert the report markdown to a stable, readable Word document. */
 export async function createWordReportBuffer(report: string, meta: ReportMeta = {}, charts: ReportCharts = {}) {
+  const reportTitle = meta.reportTitle || '人生总览报告';
   const children: (Paragraph | Table)[] = [
     new Paragraph({
       alignment: AlignmentType.CENTER,
@@ -160,7 +175,7 @@ export async function createWordReportBuffer(report: string, meta: ReportMeta = 
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 100 },
-      children: [new TextRun({ text: '人生总览报告', bold: true, color: COLORS.ink, size: 42, font: REPORT_FONT })],
+      children: [new TextRun({ text: reportTitle, bold: true, color: COLORS.ink, size: 42, font: REPORT_FONT })],
     }),
   ];
   const metaLine = metadataParagraph(meta);
@@ -258,8 +273,9 @@ export async function createWordReportBuffer(report: string, meta: ReportMeta = 
 
   const doc = new Document({
     creator: 'SoulCode',
-    title: '人生总览报告',
-    description: 'SoulCode 灵魂解码人生总览报告',
+    title: reportTitle,
+    description: `SoulCode ${reportTitle}`,
+    fonts: embeddedFonts,
     styles: {
       default: {
         document: {
