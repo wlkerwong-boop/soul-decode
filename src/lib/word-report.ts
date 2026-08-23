@@ -17,6 +17,7 @@ import {
 } from 'docx';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { normalizeInlineReportHeadings } from './normalize-inline-report-headings';
 
 type ReportChartImages = {
   humanDesign?: string;
@@ -208,7 +209,7 @@ export async function createWordReportBuffer(report: string, meta: ReportMeta = 
     children.push(image);
   }
 
-  const lines = report.replace(/\r\n/g, '\n').split('\n');
+  const lines = normalizeInlineReportHeadings(report.replace(/\r\n/g, '\n')).split('\n');
   let index = 0;
   while (index < lines.length) {
     const raw = lines[index];

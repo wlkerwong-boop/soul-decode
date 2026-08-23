@@ -107,6 +107,17 @@ export async function POST(request: NextRequest) {
     }
 
     const segments = buildCompatibilitySegments(members, compatibilityType);
+    const verificationTruth = {
+      compatibilityType,
+      members: members.map((member) => ({
+        label: member.label,
+        bazi: member.bazi,
+        elementDistribution: member.elementDistribution,
+        hd: member.hd,
+      })),
+      hd: { channels: members.flatMap((member) => member.hd?.channels || []) },
+      bazi: { pillars: members.map((member) => member.bazi.split(' ')).flat() },
+    };
 
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
@@ -194,17 +205,14 @@ export async function POST(request: NextRequest) {
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: retryText })}\n\n`));
             }
           }
-          const completionMarker = compatibilityType === 'family' ? '## 7.' : '## 6.';
+          const completionMarker = compatibilityType === 'family' ? '## 7.' : '## 5.';
           if (!reportText.includes(completionMarker) || !reportText.includes('仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议')) {
             throw new Error(`${compatibilityType === 'family' ? '家庭' : '双方'}合盘报告未完整生成：缺少最终章节或免责声明`);
           }
           // 事实层护栏（任务3 fail-closed）：流式已发出内容无法撤回，
           // 校验失败时直接结束，客户端不得将已收到的半成品展示或落盘。
           try {
-            assertReportVerified(reportText, {
-              hd: { channels: members.flatMap((member) => member.hd?.channels || []) },
-              bazi: { pillars: members.map((member) => member.bazi.split(' ')).flat() },
-            });
+            assertReportVerified(reportText, verificationTruth);
           } catch (verifyError: any) {
             console.error('合盘报告事实层校验未通过:', (verifyError?.issues || []).map((i: any) => i.message).join('; '));
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({
@@ -222,10 +230,7 @@ export async function POST(request: NextRequest) {
               if (!fallback.includes('## 7.') || !fallback.includes('仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议')) {
                 throw new Error('结构化家庭合盘缺少最终章节或免责声明');
               }
-              assertReportVerified(fallback, {
-                hd: { channels: members.flatMap((member) => member.hd?.channels || []) },
-                bazi: { pillars: members.map((member) => member.bazi.split(' ')).flat() },
-              });
+              assertReportVerified(fallback, verificationTruth);
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: fallback, source: 'structured-fallback' })}\n\n`));
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, source: 'structured-fallback' })}\n\n`));
             } catch (fallbackError: any) {

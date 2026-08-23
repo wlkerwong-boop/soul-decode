@@ -57,6 +57,63 @@ function lookupChannel(key) {
   return BY_GATE_PAIR.get(normalized) || null;
 }
 
+const NARRATIVE_ENGLISH_WHITELIST = new Set([
+  'Generator', 'Manifesting', 'Projector', 'Manifestor', 'Reflector', 'Sacral', 'Splenic', 'Emotional',
+  'Head', 'Ajna', 'Spleen', 'Root', 'Solar', 'Plexus', 'Throat', 'Ego', 'G',
+  'SoulCode', 'AI', 'HD', 'PDF', 'Word', 'DOCX',
+]);
+
+const COUPLE_FAMILY_TERMS = [
+  '孩子', '亲子', '父母', '家长会', '育儿', '子女', '儿女', '家庭财务', '家庭动作',
+];
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function memberContext(reportText, label, radius = 180) {
+  const contexts = [];
+  const needle = String(label || '');
+  if (!needle) return contexts;
+  let offset = 0;
+  while (offset < reportText.length) {
+    const index = reportText.indexOf(needle, offset);
+    if (index < 0) break;
+    contexts.push({
+      text: reportText.slice(Math.max(0, index - radius), Math.min(reportText.length, index + needle.length + radius)),
+      index,
+    });
+    offset = index + needle.length;
+  }
+  return contexts;
+}
+
+function memberPillars(member) {
+  return String(member?.bazi || '').split(/\s+/).filter(Boolean);
+}
+
+function memberDayPillar(member) {
+  return memberPillars(member)[2] || '';
+}
+
+function memberDayStem(member) {
+  return memberDayPillar(member).slice(0, 1);
+}
+
+function reportSectionCounts(reportText) {
+  const counts = new Map();
+  for (const match of reportText.matchAll(/^##\s*(\d+)[.、．]\s+.*$/gm)) {
+    const number = match[1];
+    counts.set(number, (counts.get(number) || 0) + 1);
+  }
+  return counts;
+}
+
+function findEnglishTokens(reportText) {
+  return [...new Set((reportText.match(/\b[A-Za-z][A-Za-z-]{2,}\b/g) || [])
+    .filter((token) => !NARRATIVE_ENGLISH_WHITELIST.has(token)))];
+}
+
 // 中心名英文 → 映射表中文（V2 用）
 const CENTER_EN_CN = {
   'Head': '头脑/Head', 'Ajna': '逻辑/Ajna', 'Throat': '喉咙', 'G': 'G',
@@ -190,6 +247,119 @@ export function verifyReportText(reportText, truth = null) {
         for (const pillar of t.bazi.pillars) {
           if (!section.includes(pillar)) fail('V6', `声明节缺八字四柱 ${pillar}`);
         }
+      }
+    }
+  }
+
+  // ---- V7（P1）成员级数据对账：正文不得改写声明节中的事实 ----
+  if (truth && Array.isArray(truth.members) && truth.members.length) {
+    const members = truth.members;
+    const dayStems = members.map(memberDayStem).filter(Boolean);
+
+    if (new Set(dayStems).size > 1 && /相同(?:的)?日柱天干/.test(reportText)) {
+      fail('V7', '正文声称双方日柱天干相同，但声明节中的日柱天干并不相同', `实际日柱：${members.map((member) => `${member.label}=${memberDayPillar(member)}`).join('；')}`);
+    }
+
+    for (const member of members) {
+      const contexts = memberContext(reportText, member.label).map((entry) => entry.text);
+      const context = contexts.join('\n');
+      const missingElements = ['金', '木', '水', '火', '土'].filter((element) => !(Number(member.elementDistribution?.[element]) > 0));
+      if (missingElements.length && /五行(?:俱全|齐全|完整|齐备)/.test(context)) {
+        fail('V7', `${member.label}的正文五行结论与声明不一致：缺少${missingElements.join('、')}却称“五行齐全”`, context.slice(0, 220));
+      }
+
+      const expectedProfile = String(member.hd?.profile || '');
+      if (expectedProfile) {
+        const profilePattern = new RegExp(`${escapeRegExp(member.label)}[^\\n]{0,100}?角色(?:是|为|：|:)\\s*([1-6]\\/[1-6])`, 'g');
+        for (const profileMatch of reportText.matchAll(profilePattern)) {
+          if (profileMatch[1] !== expectedProfile) {
+            fail('V7', `${member.label}的角色 ${profileMatch[1]} 与声明 ${expectedProfile} 不一致`, profileMatch[0]);
+          }
+        }
+      }
+
+      const expectedChannels = new Set(member.hd?.channels || []);
+      for (const channelMatch of reportText.matchAll(/(\d{1,2}-\d{1,2})\s*通道/g)) {
+        const contextStart = Math.max(0, channelMatch.index - 100);
+        const contextEnd = Math.min(reportText.length, channelMatch.index + channelMatch[0].length + 40);
+        const contextAroundChannel = reportText.slice(contextStart, contextEnd);
+        if (!contextAroundChannel.includes(member.label)) continue;
+        if (!/(拥有|有|独有|关键|通道中|通道是)/.test(contextAroundChannel)) continue;
+        const normalized = normalizeChannelKey(channelMatch[1]);
+        if (normalized && ![...expectedChannels].some((channel) => normalizeChannelKey(channel) === normalized)) {
+          fail('V7', `${member.label}被正文分配了声明中不存在的通道 ${channelMatch[1]}`, contextAroundChannel);
+        }
+      }
+
+      const dayPillar = memberDayPillar(member);
+      if (dayPillar) {
+        for (const entry of contexts) {
+          for (const pillarMatch of entry.matchAll(/日柱(?:是|为|：|:)\s*([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥])/g)) {
+            if (pillarMatch[1] !== dayPillar) {
+              fail('V7', `${member.label}的日柱 ${pillarMatch[1]} 与声明 ${dayPillar} 不一致`, pillarMatch[0]);
+            }
+          }
+        }
+      }
+    }
+
+    const hasJiaDayMaster = dayStems.includes('甲');
+    const hasGengDayMaster = dayStems.includes('庚');
+    if (hasJiaDayMaster && hasGengDayMaster) {
+      const jiaGengContext = reportText.match(/[^\n。]{0,80}庚金克甲木[^\n。]{0,80}/)?.[0] || '';
+      if (jiaGengContext && /正官/.test(jiaGengContext) && !/七杀/.test(jiaGengContext)) {
+        fail('V8', '庚金克甲木在甲木日主语境中应使用“七杀”，不得写成“正官”', jiaGengContext);
+      }
+    }
+  }
+
+  // ---- V8（P1）术语、语言与模块话术纯度 ----
+  if (truth?.compatibilityType) {
+    const englishTokens = findEnglishTokens(reportText);
+    if (englishTokens.length) {
+      fail('V8', `正文出现未翻译英文单词：${englishTokens.join('、')}`, englishTokens.join(', '));
+    }
+
+    if (truth.compatibilityType === 'couple' || truth.compatibilityType === 'friend') {
+      for (const term of COUPLE_FAMILY_TERMS) {
+        if (reportText.includes(term)) {
+          fail('V8', `情侣/朋友报告命中家庭化话术：${term}`, term);
+        }
+      }
+      if (/(^|[^\u4e00-\u9fff])(?:他|她)(?:们)?(?=$|[^\u4e00-\u9fff])/.test(reportText)) {
+        fail('V8', '情侣/朋友报告出现未授权性别代词，应统一使用成员标签', '检测到“他/她”');
+      }
+    }
+  }
+
+  // ---- V9（P1）结构兜底：章节唯一、免责声明唯一、总字数上限 ----
+  if (truth?.compatibilityType) {
+    const sectionCounts = reportSectionCounts(reportText);
+    for (const [number, count] of sectionCounts.entries()) {
+      if (count > 1) fail('V9', `章节编号 ${number} 出现 ${count} 次，应保持唯一`, `## ${number}`);
+    }
+
+    const disclaimer = '仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议';
+    const disclaimerCount = reportText.split(disclaimer).length - 1;
+    if (disclaimerCount !== 1) {
+      fail('V9', `免责声明出现 ${disclaimerCount} 次，应恰好 1 次`, disclaimer);
+    }
+
+    if (reportText.length > 18000) {
+      fail('V9', `报告正文 ${reportText.length} 字符，超过 18000 字数上限`, `length=${reportText.length}`);
+    }
+
+    if (truth.compatibilityType === 'couple' || truth.compatibilityType === 'friend') {
+      const expectedHeadings = [
+        ['1', '一眼看懂这段关系'],
+        ['2', '三个核心关系命题'],
+        ['3', '三个真实互动场景'],
+        ['4', '关系实践计划'],
+        ['5', '最终总结与使用边界'],
+      ];
+      for (const [number, title] of expectedHeadings) {
+        const count = [...reportText.matchAll(new RegExp(`^##\\s*${number}[.、．]\\s*${escapeRegExp(title)}\\s*$`, 'gm'))].length;
+        if (count !== 1) fail('V9', `情侣/朋友章节「${number}. ${title}」出现 ${count} 次，应恰好 1 次`);
       }
     }
   }

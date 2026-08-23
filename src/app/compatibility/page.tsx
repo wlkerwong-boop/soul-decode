@@ -4,6 +4,7 @@ import { CHINA_CITIES, INTERNATIONAL_CITIES } from '@/data/cities';
 import { buildCompatibilityPersonPayload, consumeSseChunk } from '@/lib/compatibility-depth';
 import ReportWaiting from '@/components/ReportWaiting';
 import { marked } from 'marked';
+import { normalizeInlineReportHeadings } from '@/lib/normalize-inline-report-headings';
 
 const YEARS = Array.from({length:121},(_,i)=>2026-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
@@ -330,11 +331,12 @@ export default function HepanPage() {
                   try {
                     btn.textContent = '⏳ 生成中...';
                     btn.disabled = true;
+                    const normalizedReport = normalizeInlineReportHeadings(report);
                     const birthPlace = [form.a_province, form.a_country, form.a_city].filter(Boolean).join(' ') || '中国大陆';
                     const resp = await fetch('/api/word', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ report, meta: { year: '合盘', location: birthPlace, reportTitle, fileStem: reportTitle }, charts: { images: {} } }),
+                      body: JSON.stringify({ report: normalizedReport, meta: { year: '合盘', location: birthPlace, reportTitle, fileStem: reportTitle }, charts: { images: {} } }),
                     });
                     if (!resp.ok) { alert('Word 生成失败'); return; }
                     const blob = await resp.blob();
@@ -359,6 +361,7 @@ export default function HepanPage() {
                   try {
                     btn.textContent = '⏳ 生成中...';
                     btn.disabled = true;
+                    const normalizedReport = normalizeInlineReportHeadings(report);
                     const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
                       <link rel="stylesheet" href="/fonts/lxgwwenkai/lxgwwenkai-regular.css">
                       <style>
@@ -371,7 +374,7 @@ export default function HepanPage() {
                         p { margin: 8px 0; }
                       </style></head><body>
                       <h1>${escapeHtml(reportTitle)}</h1>
-                      <main>${marked(report, { breaks: true, gfm: true })}</main>
+                      <main>${marked(normalizedReport, { breaks: true, gfm: true })}</main>
                     </body></html>`;
                     const resp = await fetch('/api/pdf', {
                       method: 'POST',

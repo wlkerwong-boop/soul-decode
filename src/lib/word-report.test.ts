@@ -12,4 +12,13 @@ describe('createWordReportBuffer', () => {
     expect(zipDirectory).toContain('word/fonts/SoulCode CJK.odttf');
     expect(zipDirectory).toContain('word/fontTable.xml');
   });
+
+  it('does not leave an inline heading marker in the exported document', async () => {
+    const buffer = await createWordReportBuffer('上一段结论。## 4. 关系全景\n\n正文。', {
+      reportTitle: '情侣合盘报告',
+    });
+    const documentXml = buffer.toString('latin1');
+
+    expect(documentXml).not.toContain('## 4.');
+  });
 });

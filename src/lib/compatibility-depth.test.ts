@@ -44,6 +44,28 @@ describe('compatibility depth prompt', () => {
     }
   });
 
+  it('uses the single-line five-section structure for couple and friend prompts', () => {
+    for (const type of ['couple', 'friend'] as const) {
+      const full = buildCompatibilitySegments(members.slice(0, 2), type).map(x => x.prompt).join('\n');
+      expect(full).toContain('## 1. 一眼看懂这段关系');
+      expect(full).toContain('## 2. 三个核心关系命题');
+      expect(full).toContain('## 3. 三个真实互动场景');
+      expect(full).toContain('## 4. 关系实践计划');
+      expect(full).toContain('## 5. 最终总结与使用边界');
+      expect(full).toContain('8000-12000');
+      expect(full).not.toContain('## 1. 双方能量结构对照表');
+      expect(full).not.toContain('## 4. 关系全景');
+      expect(full).not.toContain('## 6. 最终寄语与使用边界');
+    }
+  });
+
+  it('pins terminology and bans untranslated narrative English in the pair prompt', () => {
+    const full = buildCompatibilitySegments(members.slice(0, 2), 'couple').map(x => x.prompt).join('\n');
+    expect(full).toContain('庚金克甲木在甲木日主语境中只能表述为七杀');
+    expect(full).toContain('不得出现 visceral');
+    expect(full).toContain('情侣/朋友模块禁止家庭化话术');
+  });
+
   it('rejects a family request that has no child data', () => {
     expect(validateCompatibilityInput(members.slice(0, 2), 'family')).toContain('至少需要一位孩子');
     expect(validateCompatibilityInput([...members, members[1]], 'family')).toBeNull();

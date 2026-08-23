@@ -41,6 +41,52 @@ const NARRATIVE = `## 1. 能量结构对照表
 
 仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议。`;
 
+const COUPLE_TRUTH = {
+  compatibilityType: 'couple',
+  members: [
+    {
+      label: '用户A',
+      age: 44,
+      bazi: '辛酉 辛丑 庚戌 丁丑',
+      elementDistribution: { 金: 4, 土: 3, 火: 1 },
+      hd: { type: 'Generator', profile: '5/1', authority: '荐骨权威', channels: ['24-61', '34-57'] },
+    },
+    {
+      label: '用户B',
+      age: 44,
+      bazi: '壬戌 庚戌 甲申 辛未',
+      elementDistribution: { 水: 1, 土: 3, 金: 3, 木: 1 },
+      hd: { type: 'Generator', profile: '3/5', authority: '荐骨权威', channels: ['27-50', '28-38', '34-57'] },
+    },
+  ],
+  hd: { channels: ['24-61', '34-57', '27-50', '28-38'] },
+  bazi: { pillars: ['辛酉', '辛丑', '庚戌', '丁丑', '壬戌', '庚戌', '甲申', '辛未'] },
+};
+
+const COUPLE_DECLARATION = buildFamilyDataDeclaration(COUPLE_TRUTH.members, 'couple');
+const COUPLE_VALID_REPORT = `${COUPLE_DECLARATION}
+## 1. 一眼看懂这段关系
+
+双方都是 Generator，A 为 5/1，B 为 3/5。
+
+## 2. 三个核心关系命题
+
+共同通道 34-57 带来直觉同步；A 的 24-61 与 B 的 28-38形成思考与行动的互补；B 的 27-50提醒双方把照顾与边界说清楚。
+
+## 3. 三个真实互动场景
+
+共同决策、冲突后修复、照顾与独立。
+
+## 4. 关系实践计划
+
+每日一次身体报告，每周一次复盘，每月一次关系回顾。
+
+## 5. 最终总结与使用边界
+
+这段关系需要把差异翻译成可执行的沟通接口。
+
+仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议。`;
+
 function issuesFor(reportText, truth = FAKE_TRUTH) {
   return verifyReportText(reportText, truth).filter((i) => i.rule === 'V6');
 }
@@ -101,5 +147,47 @@ describe('verify-report V6（P7 声明节规则）', () => {
     const v6 = issuesFor(NARRATIVE);
     expect(v6.length).toBeGreaterThan(0);
     expect(v6[0].message).toContain('缺少');
+  });
+});
+
+describe('verify-report P1 内容层闸门', () => {
+  it('accepts a concise couple report with one declaration, one disclaimer and unique five sections', () => {
+    expect(verifyReportText(COUPLE_VALID_REPORT, COUPLE_TRUTH)).toEqual([]);
+  });
+
+  it('rejects member-level five-element claims that contradict the declaration', () => {
+    const report = `${COUPLE_VALID_REPORT}\n用户B的五行格局五行齐全。`;
+    const issues = verifyReportText(report, COUPLE_TRUTH);
+    expect(issues.some((i) => i.rule === 'V7' && i.message.includes('五行'))).toBe(true);
+  });
+
+  it('rejects fabricated day-stem claims and wrong ten-god terminology', () => {
+    const report = `${COUPLE_VALID_REPORT}\n双方相同日柱天干“辛”与“庚”，庚金克甲木属于正官。`;
+    const issues = verifyReportText(report, COUPLE_TRUTH);
+    expect(issues.some((i) => i.rule === 'V7' && i.message.includes('日柱'))).toBe(true);
+    expect(issues.some((i) => i.rule === 'V8' && i.message.includes('七杀'))).toBe(true);
+  });
+
+  it('rejects a channel or profile assigned to the wrong member', () => {
+    const report = `${COUPLE_VALID_REPORT}\n用户A的角色是3/5，并且用户A拥有27-50通道。`;
+    const issues = verifyReportText(report, COUPLE_TRUTH);
+    expect(issues.filter((i) => i.rule === 'V7').length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('rejects untranslated English and family-only phrases in a couple report', () => {
+    const report = `${COUPLE_VALID_REPORT}\n用户B出现visceral反应，孩子会不会累是需要讨论的家庭动作。`;
+    const issues = verifyReportText(report, COUPLE_TRUTH);
+    expect(issues.some((i) => i.rule === 'V8' && i.message.includes('英文'))).toBe(true);
+    expect(issues.some((i) => i.rule === 'V8' && i.message.includes('家庭化'))).toBe(true);
+  });
+
+  it('rejects duplicate sections, duplicate disclaimer and oversized reports', () => {
+    const duplicated = `${COUPLE_VALID_REPORT}\n## 1. 一眼看懂这段关系\n再次开始。\n仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议。`;
+    const duplicateIssues = verifyReportText(duplicated, COUPLE_TRUTH);
+    expect(duplicateIssues.some((i) => i.rule === 'V9' && i.message.includes('章节'))).toBe(true);
+    expect(duplicateIssues.some((i) => i.rule === 'V9' && i.message.includes('免责声明'))).toBe(true);
+
+    const oversized = `${COUPLE_VALID_REPORT}${'长'.repeat(18001)}`;
+    expect(verifyReportText(oversized, COUPLE_TRUTH).some((i) => i.rule === 'V9' && i.message.includes('字数'))).toBe(true);
   });
 });
