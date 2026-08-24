@@ -115,8 +115,60 @@ function findEnglishTokens(reportText) {
     .filter((token) => !NARRATIVE_ENGLISH_WHITELIST.has(token)))];
 }
 
-function splitReportClauses(reportText) {
-  return reportText.split(/[，。；！？\n]/).map((clause) => clause.trim()).filter(Boolean);
+function splitReportSentences(reportText) {
+  const sentences = [];
+  const boundaryPattern = /[。！？\n]/g;
+  let start = 0;
+  let match;
+  while ((match = boundaryPattern.exec(reportText)) !== null) {
+    const text = reportText.slice(start, match.index).trim();
+    if (text) sentences.push({ text, offset: start });
+    start = match.index + match[0].length;
+  }
+  const tail = reportText.slice(start).trim();
+  if (tail) sentences.push({ text: tail, offset: start });
+  return sentences;
+}
+
+function nearestMemberLabelBefore(text, index, members) {
+  let nearest = null;
+  for (const member of members) {
+    const label = String(member.label || '');
+    if (!label) continue;
+    const labelIndex = text.lastIndexOf(label, index);
+    if (labelIndex >= 0 && (!nearest || labelIndex > nearest.index)) {
+      nearest = { label, index: labelIndex };
+    }
+  }
+  return nearest?.label || null;
+}
+
+function channelMentionsInSentence(sentence, members) {
+  const mentions = [];
+  const channelPattern = /(\d{1,2}-\d{1,2})(?:\s*通道)?/g;
+  for (const match of sentence.text.matchAll(channelPattern)) {
+    if (!lookupChannel(match[1])) continue;
+    const channelContext = sentence.text.slice(Math.max(0, match.index - 24), match.index + match[0].length + 24);
+    if (!/通道|相连|相接|连接|关联|拥有|独有|关键|有/.test(channelContext)) continue;
+    const precedingText = sentence.text.slice(0, match.index + match[0].length);
+    const memberLabel = nearestMemberLabelBefore(precedingText, precedingText.length, members);
+    if (!memberLabel) continue;
+    mentions.push({ channel: match[1], memberLabel, evidence: sentence.text });
+  }
+  return mentions;
+}
+
+function findUnauthorizedGenderPronoun(reportText) {
+  const pronounPattern = /他|她/g;
+  const allowedWords = ['他人', '他们', '她们', '他的', '她的'];
+  for (const match of reportText.matchAll(pronounPattern)) {
+    const index = match.index ?? 0;
+    const before = reportText[index - 1] || '';
+    const following = reportText.slice(index);
+    if (before === '其' || allowedWords.some((word) => following.startsWith(word))) continue;
+    return reportText.slice(Math.max(0, index - 12), Math.min(reportText.length, index + 12));
+  }
+  return null;
 }
 
 function reportClauseAt(reportText, index) {
@@ -299,13 +351,12 @@ export function verifyReportText(reportText, truth = null) {
       }
 
       const expectedChannels = new Set(member.hd?.channels || []);
-      for (const clause of splitReportClauses(reportText)) {
-        if (!clause.includes(member.label)) continue;
-        for (const channelMatch of clause.matchAll(/(\d{1,2}-\d{1,2})\s*通道/g)) {
-          if (!/(拥有|有|独有|关键|通道中|通道是)/.test(clause)) continue;
-          const normalized = normalizeChannelKey(channelMatch[1]);
+      for (const sentence of splitReportSentences(reportText)) {
+        for (const mention of channelMentionsInSentence(sentence, members)) {
+          if (mention.memberLabel !== member.label) continue;
+          const normalized = normalizeChannelKey(mention.channel);
           if (normalized && ![...expectedChannels].some((channel) => normalizeChannelKey(channel) === normalized)) {
-            fail('V7', `${member.label}被正文分配了声明中不存在的通道 ${channelMatch[1]}`, clause);
+            fail('V7', `${member.label}被正文分配了声明中不存在的通道 ${mention.channel}`, mention.evidence);
           }
         }
       }
@@ -348,8 +399,9 @@ export function verifyReportText(reportText, truth = null) {
           fail('V8', `情侣/朋友报告命中家庭化话术：${term}`, term);
         }
       }
-      if (/(?:他|她)(?:们)?/.test(reportText)) {
-        fail('V8', '情侣/朋友报告出现未授权性别代词，应统一使用成员标签', '检测到“他/她”');
+      const unauthorizedPronoun = findUnauthorizedGenderPronoun(reportText);
+      if (unauthorizedPronoun) {
+        fail('V8', '情侣/朋友报告出现未授权性别代词，应统一使用成员标签', unauthorizedPronoun);
       }
     }
   }

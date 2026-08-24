@@ -224,6 +224,24 @@ describe('verify-report P1 内容层闸门', () => {
     expect(issues.filter((i) => i.rule === 'V7')).toEqual([]);
   });
 
+  it('uses the nearest member label when two member clauses share one sentence', () => {
+    const report = `${COUPLE_VALID_REPORT}\n用户A提及用户B的28-38通道，而用户A拥有24-61通道。`;
+    const issues = verifyReportText(report, COUPLE_TRUTH);
+    expect(issues.filter((i) => i.rule === 'V7')).toEqual([]);
+  });
+
+  it('uses the nearest member label when one sentence contains two labeled channel clauses', () => {
+    const report = `${COUPLE_VALID_REPORT}\n用户A说用户B有28-38通道，同时用户A有24-61通道。`;
+    const issues = verifyReportText(report, COUPLE_TRUTH);
+    expect(issues.filter((i) => i.rule === 'V7')).toEqual([]);
+  });
+
+  it('keeps the nearest member label across a comma when the subject is omitted', () => {
+    const report = `${COUPLE_VALID_REPORT}\n用户A拥有24-61通道，同时28-38通道也与之相连。`;
+    const issues = verifyReportText(report, COUPLE_TRUTH);
+    expect(issues.some((i) => i.rule === 'V7' && i.message.includes('用户A') && i.message.includes('28-38'))).toBe(true);
+  });
+
   it('keeps family member-channel ownership isolated by clause as well', () => {
     const report = `${FAMILY_VALID_REPORT}\n成员甲拥有18-58通道，成员乙拥有28-38通道，成员丙拥有34-20通道。`;
     const issues = verifyReportText(report, FAMILY_TRUTH);
@@ -252,6 +270,12 @@ describe('verify-report P1 内容层闸门', () => {
     const report = `${COUPLE_VALID_REPORT}\n让他先说完，再由用户B回应。`;
     const issues = verifyReportText(report, COUPLE_TRUTH);
     expect(issues.some((i) => i.rule === 'V8' && i.message.includes('性别代词'))).toBe(true);
+  });
+
+  it('allows common possessive and collective words containing 他 or 她', () => {
+    const report = `${COUPLE_VALID_REPORT}\n照顾他人、他们、其他和其它，也会保存他的资料与她的选择。`;
+    const issues = verifyReportText(report, COUPLE_TRUTH);
+    expect(issues.filter((i) => i.rule === 'V8' && i.message.includes('性别代词'))).toEqual([]);
   });
 
   it('rejects untranslated English and family-only phrases in a couple report', () => {

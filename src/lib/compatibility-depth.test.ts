@@ -73,6 +73,12 @@ describe('compatibility depth prompt', () => {
     expect(full).toContain('所有指代一律改用成员标签');
   });
 
+  it('requires a final full-text pronoun self-check before delivery', () => {
+    const full = buildCompatibilitySegments(members.slice(0, 2), 'friend').map(x => x.prompt).join('\n');
+    expect(full).toContain('成稿前全文检索“他/她”');
+    expect(full).toContain('检索到后全部替换为成员标签');
+  });
+
   it('rejects a family request that has no child data', () => {
     expect(validateCompatibilityInput(members.slice(0, 2), 'family')).toContain('至少需要一位孩子');
     expect(validateCompatibilityInput([...members, members[1]], 'family')).toBeNull();
