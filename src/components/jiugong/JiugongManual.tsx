@@ -166,12 +166,6 @@ function ChapterPersonality({ data }: { data: JiugongFull }) {
             </span>
             {data.zhiDesc}
           </p>
-          {data.zhiMeaning && (
-            <p className="rounded-2xl bg-[var(--bg-highlight)] p-3 text-xs leading-6 text-[var(--text-secondary)]">
-              ◎ 其意义在告诉你：{data.zhiMeaning}
-              {data.zhiCaution && <>；切记：{data.zhiCaution}</>}
-            </p>
-          )}
           {data.zhiTips && data.zhiTips.length > 0 && (
             <p className="text-xs leading-6 text-[var(--text-secondary)]">
               <span className="font-semibold text-[var(--text-primary)]">
@@ -194,6 +188,12 @@ function ChapterPersonality({ data }: { data: JiugongFull }) {
           ) : (
             <p className="text-xs leading-6 text-[var(--text-secondary)]">质{data.zhi} 对照数据整理中。</p>
           )}
+          {data.zhiMeaning && (
+            <p className="rounded-2xl bg-[var(--bg-highlight)] p-3 text-xs leading-6 text-[var(--text-secondary)]">
+              ◎ 其意义在告诉你：{data.zhiMeaning}
+              {data.zhiCaution && <>；切记：{data.zhiCaution}</>}
+            </p>
+          )}
           {(data.zhi === 2 || data.zhi === 3 || data.zhi === 6) && (
             <p className="rounded-xl bg-[var(--color-primary)]/10 px-3 py-2 text-xs leading-6 text-[var(--text-secondary)]">
               ※ 用人提示：{data.zhi === 2 && '能说——适合做大客户沟通；能写——文案功夫特别强。'}
@@ -207,10 +207,9 @@ function ChapterPersonality({ data }: { data: JiugongFull }) {
       <Sub title="2.3 人生经营">
         <div className="space-y-2">
           <p className="text-xs leading-6 text-[var(--text-secondary)]">
-            代表成功导向的总格星性为「{data.xingyunName}」，属{data.zhiElement}，{data.zhiDesc}。
+            代表成功导向的总格星性为「<span className="font-semibold text-[var(--text-primary)]">{data.xingyunName}</span>」。
           </p>
-          {data.zhiMeaning && <Prose text={`◎ 其意义在告诉你：${data.zhiMeaning}`} />}
-          {data.zhiCaution && <Prose text={`◎ 切记：${data.zhiCaution}`} />}
+          {data.juFull && <Prose text={data.juFull} />}
         </div>
       </Sub>
 
@@ -288,6 +287,18 @@ function ChapterPersonality({ data }: { data: JiugongFull }) {
           {data.xingyunMeaning && <Prose text={`◎ 其意义是在告诉你：${data.xingyunMeaning}`} />}
           {data.xingyunCaution && <Prose text={`◎ 切记：${data.xingyunCaution}`} />}
           {data.xingyunTips && <Prose text={`◎ 提示：${data.xingyunTips}`} />}
+        </div>
+      </Sub>
+
+      <Sub title="2.8 管理IQ · 九型">
+        <div className="space-y-2">
+          <p className="text-xs leading-6 text-[var(--text-secondary)]">
+            <span className="font-semibold text-[var(--text-primary)]">
+              管理IQ · {data.mgtType} · {data.mgtScore}分
+            </span>
+            {data.mgtDesc && <> · {data.mgtDesc}</>}
+          </p>
+          {data.mgtFull && <Prose text={data.mgtFull} />}
         </div>
       </Sub>
     </Chapter>
@@ -471,7 +482,7 @@ function ChapterFlow({ data }: { data: JiugongFull }) {
                 能量 · {data.liunianState}运（{ln.副名}）
               </p>
               <div className="mt-2 space-y-2 text-xs leading-6 text-[var(--text-secondary)]">
-                {ln.磁场 && <p>一、磁场：{ln.磁场}</p>}
+                {ln.磁场 && <p>◎ 磁场：{ln.磁场.replace(/^一磁场/, '')}</p>}
                 {ln.动能 && <p>二、动能：{ln.动能}</p>}
                 {ln.生命力 && <p>三、生命力：{ln.生命力}</p>}
                 {ln.心态 && <p>四、心态：{ln.心态}</p>}
