@@ -17,7 +17,7 @@ import {
 } from 'docx';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { normalizeInlineReportHeadings } from './normalize-inline-report-headings';
+import { normalizeInlineReportHeadings } from './normalize-inline-report-headings.mjs';
 
 type ReportChartImages = {
   humanDesign?: string;

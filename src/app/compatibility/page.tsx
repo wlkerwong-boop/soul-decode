@@ -4,7 +4,7 @@ import { CHINA_CITIES, INTERNATIONAL_CITIES } from '@/data/cities';
 import { buildCompatibilityPersonPayload, consumeSseChunk } from '@/lib/compatibility-depth';
 import ReportWaiting from '@/components/ReportWaiting';
 import { marked } from 'marked';
-import { normalizeInlineReportHeadings } from '@/lib/normalize-inline-report-headings';
+import { normalizeInlineReportHeadings } from '@/lib/normalize-inline-report-headings.mjs';
 
 const YEARS = Array.from({length:121},(_,i)=>2026-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);

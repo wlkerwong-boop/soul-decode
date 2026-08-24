@@ -87,6 +87,50 @@ const COUPLE_VALID_REPORT = `${COUPLE_DECLARATION}
 
 仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议。`;
 
+const FAMILY_TRUTH = {
+  compatibilityType: 'family',
+  members: [
+    { label: '成员甲', age: 44, bazi: '甲子 乙丑 丙寅 丁卯', elementDistribution: { 木: 1, 金: 0 }, hd: { type: 'Projector', profile: '3/6', authority: 'Splenic', channels: ['18-58'] } },
+    { label: '成员乙', age: 42, bazi: '乙丑 丙寅 丁卯 戊辰', elementDistribution: { 木: 1, 金: 0 }, hd: { type: 'Projector', profile: '3/6', authority: 'Splenic', channels: ['28-38'] } },
+    { label: '成员丙', age: 11, bazi: '丙寅 丁卯 戊辰 己巳', elementDistribution: { 木: 1, 金: 0 }, hd: { type: 'Generator', profile: '4/6', authority: 'Sacral', channels: ['34-20'] } },
+  ],
+  hd: { channels: ['18-58', '28-38', '34-20'] },
+  bazi: { pillars: ['甲子', '乙丑', '丙寅', '丁卯', '乙丑', '丙寅', '丁卯', '戊辰', '丙寅', '丁卯', '戊辰', '己巳'] },
+};
+
+const FAMILY_VALID_REPORT = `${buildFamilyDataDeclaration(FAMILY_TRUTH.members, 'family')}
+## 1. 能量结构对照表
+
+成员结构对照。
+
+## 2. 一眼看懂这个家
+
+家庭整体互动。
+
+## 3. 写在血脉里的密码
+
+共享印记。
+
+## 4. 3对关系一张网
+
+关系全景。
+
+## 5. 亲子沟通与养育话术
+
+沟通建议。
+
+## 6. 家庭实践建议
+
+实践建议。
+
+## 7. 最终寄语（家族金句）
+
+最终寄语。
+
+## 8. 使用边界与免责声明
+
+仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议。`;
+
 function issuesFor(reportText, truth = FAKE_TRUTH) {
   return verifyReportText(reportText, truth).filter((i) => i.rule === 'V6');
 }
@@ -172,6 +216,42 @@ describe('verify-report P1 内容层闸门', () => {
     const report = `${COUPLE_VALID_REPORT}\n用户A的角色是3/5，并且用户A拥有27-50通道。`;
     const issues = verifyReportText(report, COUPLE_TRUTH);
     expect(issues.filter((i) => i.rule === 'V7').length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('does not attribute a channel across adjacent Chinese clauses', () => {
+    const report = `${COUPLE_VALID_REPORT}\n用户A拥有24-61通道，用户B拥有28-38通道。`;
+    const issues = verifyReportText(report, COUPLE_TRUTH);
+    expect(issues.filter((i) => i.rule === 'V7')).toEqual([]);
+  });
+
+  it('keeps family member-channel ownership isolated by clause as well', () => {
+    const report = `${FAMILY_VALID_REPORT}\n成员甲拥有18-58通道，成员乙拥有28-38通道，成员丙拥有34-20通道。`;
+    const issues = verifyReportText(report, FAMILY_TRUTH);
+    expect(issues.filter((i) => i.rule === 'V7')).toEqual([]);
+  });
+
+  it('normalizes inline headings before V9 structure validation', () => {
+    const report = COUPLE_VALID_REPORT.replace('\n## 3. 三个真实互动场景', '。## 3. 三个真实互动场景');
+    const issues = verifyReportText(report, COUPLE_TRUTH);
+    expect(issues.filter((i) => i.rule === 'V9')).toEqual([]);
+  });
+
+  it('does not treat a child metaphor as couple or friend family contamination', () => {
+    const report = `${COUPLE_VALID_REPORT}\n用户A被当成需要全方位照看的孩子。`;
+    const issues = verifyReportText(report, COUPLE_TRUTH);
+    expect(issues.filter((i) => i.rule === 'V8' && i.message.includes('家庭化'))).toEqual([]);
+  });
+
+  it('still blocks a definite child reference next to an exempt metaphor', () => {
+    const report = `${COUPLE_VALID_REPORT}\n用户A像个需要照看的孩子，但孩子会不会累仍需讨论。`;
+    const issues = verifyReportText(report, COUPLE_TRUTH);
+    expect(issues.some((i) => i.rule === 'V8' && i.message.includes('孩子'))).toBe(true);
+  });
+
+  it('keeps blocking gender pronouns when attached to Chinese words', () => {
+    const report = `${COUPLE_VALID_REPORT}\n让他先说完，再由用户B回应。`;
+    const issues = verifyReportText(report, COUPLE_TRUTH);
+    expect(issues.some((i) => i.rule === 'V8' && i.message.includes('性别代词'))).toBe(true);
   });
 
   it('rejects untranslated English and family-only phrases in a couple report', () => {

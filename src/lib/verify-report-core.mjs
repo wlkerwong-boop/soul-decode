@@ -19,6 +19,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { normalizeInlineReportHeadings } from './normalize-inline-report-headings.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // 打包进 .next 后 __dirname 指向产物目录（源相对路径失效），按候选链回退到进程 cwd 的仓库路径
@@ -114,6 +115,24 @@ function findEnglishTokens(reportText) {
     .filter((token) => !NARRATIVE_ENGLISH_WHITELIST.has(token)))];
 }
 
+function splitReportClauses(reportText) {
+  return reportText.split(/[，。；！？\n]/).map((clause) => clause.trim()).filter(Boolean);
+}
+
+function reportClauseAt(reportText, index) {
+  const separators = ['，', '。', '；', '！', '？', '\n'];
+  const start = Math.max(...separators.map((separator) => reportText.lastIndexOf(separator, index - 1) + 1));
+  const end = Math.min(...separators
+    .map((separator) => reportText.indexOf(separator, index))
+    .filter((position) => position >= 0), reportText.length);
+  return reportText.slice(start, end);
+}
+
+function isMetaphoricalChildMention(reportText, index) {
+  const clause = reportClauseAt(reportText, index);
+  return /(?:当成|当作|视为|看作)[^。！？\n]{0,30}孩子|(?:像|好像|仿佛|如同)[^。！？\n]{0,20}孩子/.test(clause);
+}
+
 // 中心名英文 → 映射表中文（V2 用）
 const CENTER_EN_CN = {
   'Head': '头脑/Head', 'Ajna': '逻辑/Ajna', 'Throat': '喉咙', 'G': 'G',
@@ -124,6 +143,7 @@ const CENTER_EN_CN = {
 
 /** 返回 issues 数组；空数组 = 通过 */
 export function verifyReportText(reportText, truth = null) {
+  reportText = normalizeInlineReportHeadings(reportText);
   const issues = [];
   const fail = (rule, message, evidence = '') => issues.push({ rule, message, evidence });
 
@@ -279,15 +299,14 @@ export function verifyReportText(reportText, truth = null) {
       }
 
       const expectedChannels = new Set(member.hd?.channels || []);
-      for (const channelMatch of reportText.matchAll(/(\d{1,2}-\d{1,2})\s*通道/g)) {
-        const contextStart = Math.max(0, channelMatch.index - 100);
-        const contextEnd = Math.min(reportText.length, channelMatch.index + channelMatch[0].length + 40);
-        const contextAroundChannel = reportText.slice(contextStart, contextEnd);
-        if (!contextAroundChannel.includes(member.label)) continue;
-        if (!/(拥有|有|独有|关键|通道中|通道是)/.test(contextAroundChannel)) continue;
-        const normalized = normalizeChannelKey(channelMatch[1]);
-        if (normalized && ![...expectedChannels].some((channel) => normalizeChannelKey(channel) === normalized)) {
-          fail('V7', `${member.label}被正文分配了声明中不存在的通道 ${channelMatch[1]}`, contextAroundChannel);
+      for (const clause of splitReportClauses(reportText)) {
+        if (!clause.includes(member.label)) continue;
+        for (const channelMatch of clause.matchAll(/(\d{1,2}-\d{1,2})\s*通道/g)) {
+          if (!/(拥有|有|独有|关键|通道中|通道是)/.test(clause)) continue;
+          const normalized = normalizeChannelKey(channelMatch[1]);
+          if (normalized && ![...expectedChannels].some((channel) => normalizeChannelKey(channel) === normalized)) {
+            fail('V7', `${member.label}被正文分配了声明中不存在的通道 ${channelMatch[1]}`, clause);
+          }
         }
       }
 
@@ -322,11 +341,14 @@ export function verifyReportText(reportText, truth = null) {
 
     if (truth.compatibilityType === 'couple' || truth.compatibilityType === 'friend') {
       for (const term of COUPLE_FAMILY_TERMS) {
-        if (reportText.includes(term)) {
+        const termPattern = new RegExp(escapeRegExp(term), 'g');
+        const hasNonExemptMatch = [...reportText.matchAll(termPattern)]
+          .some((match) => !(term === '孩子' && isMetaphoricalChildMention(reportText, match.index ?? 0)));
+        if (hasNonExemptMatch) {
           fail('V8', `情侣/朋友报告命中家庭化话术：${term}`, term);
         }
       }
-      if (/(^|[^\u4e00-\u9fff])(?:他|她)(?:们)?(?=$|[^\u4e00-\u9fff])/.test(reportText)) {
+      if (/(?:他|她)(?:们)?/.test(reportText)) {
         fail('V8', '情侣/朋友报告出现未授权性别代词，应统一使用成员标签', '检测到“他/她”');
       }
     }

@@ -66,6 +66,13 @@ describe('compatibility depth prompt', () => {
     expect(full).toContain('情侣/朋友模块禁止家庭化话术');
   });
 
+  it('gives an explicit label-only gender-pronoun rewrite instruction', () => {
+    const full = buildCompatibilitySegments(members.slice(0, 2), 'couple').map(x => x.prompt).join('\n');
+    expect(full).toContain('全文不得出现“他/她”');
+    expect(full).toContain('“他”→“用户A”');
+    expect(full).toContain('所有指代一律改用成员标签');
+  });
+
   it('rejects a family request that has no child data', () => {
     expect(validateCompatibilityInput(members.slice(0, 2), 'family')).toContain('至少需要一位孩子');
     expect(validateCompatibilityInput([...members, members[1]], 'family')).toBeNull();

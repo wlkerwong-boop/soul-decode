@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeInlineReportHeadings } from './normalize-inline-report-headings';
+import { normalizeInlineReportHeadings } from './normalize-inline-report-headings.mjs';
 
 describe('normalizeInlineReportHeadings', () => {
   it('moves an inline numbered heading onto its own line', () => {
