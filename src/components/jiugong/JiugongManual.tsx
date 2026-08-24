@@ -482,12 +482,14 @@ function ChapterFlow({ data }: { data: JiugongFull }) {
                 能量 · {data.liunianState}运（{ln.副名}）
               </p>
               <div className="mt-2 space-y-2 text-xs leading-6 text-[var(--text-secondary)]">
-                {ln.磁场 && <p>◎ 磁场：{ln.磁场.replace(/^一磁场/, '')}</p>}
-                {ln.动能 && <p>二、动能：{ln.动能}</p>}
-                {ln.生命力 && <p>三、生命力：{ln.生命力}</p>}
-                {ln.心态 && <p>四、心态：{ln.心态}</p>}
-                {ln.发展现象 && <p>◎ 发展现象：{ln.发展现象}</p>}
-                {ln.运用法则 && <p>◎ 运用法则：{ln.运用法则}</p>}
+                {/* 老唐原版文案自带「一/二/三/四/五/六」字头（如"二动能…"），渲染层编号已有，
+                    去字头防"二、动能：二动能……"重复；不带字头的运段 replace 无匹配原样输出 */}
+                {ln.磁场 && <p>一、磁场：{ln.磁场.replace(/^一磁场/, '')}</p>}
+                {ln.动能 && <p>二、动能：{ln.动能.replace(/^二动能/, '')}</p>}
+                {ln.生命力 && <p>三、生命力：{ln.生命力.replace(/^三生命力/, '')}</p>}
+                {ln.心态 && <p>四、心态：{ln.心态.replace(/^四心态/, '')}</p>}
+                {ln.发展现象 && <p>◎ 发展现象：{ln.发展现象.replace(/^五运势现象/, '')}</p>}
+                {ln.运用法则 && <p>◎ 运用法则：{ln.运用法则.replace(/^六注意事项/, '')}</p>}
               </div>
             </div>
           )}
