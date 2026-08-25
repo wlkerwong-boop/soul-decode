@@ -87,6 +87,15 @@ const COUPLE_VALID_REPORT = `${COUPLE_DECLARATION}
 
 仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议。`;
 
+const NAMED_COUPLE_TRUTH = {
+  ...COUPLE_TRUTH,
+  members: COUPLE_TRUTH.members.map((member, index) => ({
+    ...member,
+    label: index === 0 ? '王献科' : '张晓霞',
+  })),
+};
+const NAMED_COUPLE_DECLARATION = buildFamilyDataDeclaration(NAMED_COUPLE_TRUTH.members, 'couple');
+
 const FAMILY_TRUTH = {
   compatibilityType: 'family',
   members: [
@@ -240,6 +249,35 @@ describe('verify-report P1 内容层闸门', () => {
     const report = `${COUPLE_VALID_REPORT}\n用户A拥有24-61通道，同时28-38通道也与之相连。`;
     const issues = verifyReportText(report, COUPLE_TRUTH);
     expect(issues.some((i) => i.rule === 'V7' && i.message.includes('用户A') && i.message.includes('28-38'))).toBe(true);
+  });
+
+  it('keeps named members and all member attributes aligned in the same sentence', () => {
+    const report = `${NAMED_COUPLE_DECLARATION}
+王献科的角色是5/1……张晓霞的角色是3/5。王献科人类图角色为5/1……张晓霞角色为3/5。
+王献科的角色是5/1且拥有24-61通道，张晓霞的角色是3/5且拥有28-38通道。
+王献科拥有24-61通道，同时张晓霞拥有28-38通道。
+王献科的五行缺水，张晓霞的五行缺火。
+王献科的日柱是庚戌，张晓霞的日柱是甲申。
+## 1. 一眼看懂这段关系
+双方关系。
+## 2. 三个核心关系命题
+关系命题。
+## 3. 三个真实互动场景
+互动场景。
+## 4. 关系实践计划
+实践计划。
+## 5. 最终总结与使用边界
+总结。
+
+仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议。`;
+    expect(verifyReportText(report, NAMED_COUPLE_TRUTH).filter((i) => i.rule === 'V7')).toEqual([]);
+  });
+
+  it('still blocks a wrong named member attribute after nearest-label attribution', () => {
+    const report = `${NAMED_COUPLE_DECLARATION}
+王献科的角色是3/5……张晓霞的角色是3/5。`;
+    const issues = verifyReportText(report, NAMED_COUPLE_TRUTH);
+    expect(issues.some((i) => i.rule === 'V7' && i.message.includes('王献科') && i.message.includes('角色'))).toBe(true);
   });
 
   it('keeps family member-channel ownership isolated by clause as well', () => {

@@ -13,6 +13,7 @@ import {
   buildFamilyDataDeclaration,
   COMPATIBILITY_SYSTEM_PROMPT,
   normalizeCompatibilityAudience,
+  shouldRetryCompatibilityVerification,
   validateCompatibilityInput,
   type CompatibilityMember,
 } from '@/lib/compatibility-depth';
@@ -122,15 +123,19 @@ export async function POST(request: NextRequest) {
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
-        let reportText = '';
         try {
           // K3 加固条款：引擎注入「## 0. 排盘数据声明」节，AI 只写第 1 节起叙事
           const declaration = buildFamilyDataDeclaration(members, compatibilityType);
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: declaration })}\n\n`));
-          reportText += declaration;
-          for (const segment of segments) {
+          for (let verificationAttempt = 0; verificationAttempt <= 2; verificationAttempt += 1) {
+            let reportText = declaration;
+            const acceptedChunks = [declaration];
+            try {
+              for (const segment of segments) {
             let segmentText = '';
             let upstreamError = '';
+            const segmentPrompt = verificationAttempt > 0
+              ? `${segment.prompt}\n\n这是第${verificationAttempt}次质量重生成：请把全文中的“他/她”逐处替换为对应成员标签，完成全文检索与自查后再交付。`
+              : segment.prompt;
             const response = await fetch(`${config.baseUrl}/chat/completions`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
@@ -139,7 +144,7 @@ export async function POST(request: NextRequest) {
 ...(String(config.model).includes('deepseek') || String(config.model).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
                 messages: [
                   { role: 'system', content: COMPATIBILITY_SYSTEM_PROMPT },
-                  { role: 'user', content: segment.prompt },
+                  { role: 'user', content: segmentPrompt },
                 ],
                 temperature: 0.7,
                 max_tokens: segment.maxTokens,
@@ -162,7 +167,7 @@ export async function POST(request: NextRequest) {
             }
             if (segmentText) {
               reportText += segmentText;
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: segmentText })}\n\n`));
+              acceptedChunks.push(segmentText);
             }
 
             // DeepSeek occasionally closes an empty streamed segment. Retry the
@@ -180,7 +185,7 @@ export async function POST(request: NextRequest) {
 ...(String(config.model).includes('deepseek') || String(config.model).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
                   messages: [
                     { role: 'system', content: COMPATIBILITY_SYSTEM_PROMPT },
-                    { role: 'user', content: segment.prompt },
+                    { role: 'user', content: segmentPrompt },
                   ],
                   temperature: 0.7,
                   max_tokens: segment.maxTokens,
@@ -202,27 +207,27 @@ export async function POST(request: NextRequest) {
                 retryText = retryText.replace(/\*{0,2}仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议\*{0,2}/g, '');
               }
               reportText += retryText;
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: retryText })}\n\n`));
+              acceptedChunks.push(retryText);
             }
           }
           const completionMarker = compatibilityType === 'family' ? '## 7.' : '## 5.';
           if (!reportText.includes(completionMarker) || !reportText.includes('仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议')) {
             throw new Error(`${compatibilityType === 'family' ? '家庭' : '双方'}合盘报告未完整生成：缺少最终章节或免责声明`);
           }
-          // 事实层护栏（任务3 fail-closed）：流式已发出内容无法撤回，
-          // 校验失败时直接结束，客户端不得将已收到的半成品展示或落盘。
-          try {
-            assertReportVerified(reportText, verificationTruth);
-          } catch (verifyError: any) {
-            console.error('合盘报告事实层校验未通过:', (verifyError?.issues || []).map((i: any) => i.message).join('; '));
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-              error: verifyError?.message || '报告事实层校验未通过',
-              verify_error: verifyError?.message || '报告事实层校验未通过',
-              issues: verifyError?.issues || [],
-            })}\n\n`));
-            return;
+          assertReportVerified(reportText, verificationTruth);
+          for (const content of acceptedChunks) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
           }
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`));
+          return;
+            } catch (verificationError: any) {
+              if (shouldRetryCompatibilityVerification(compatibilityType, verificationError?.issues, verificationAttempt)) {
+                console.warn(`合盘报告仅命中代词闸门，自动重生成 ${verificationAttempt + 1}/2`);
+                continue;
+              }
+              throw verificationError;
+            }
+          }
         } catch (error: any) {
           if (compatibilityType === 'family') {
             const fallback = buildLocalCompatibilityReport(members, 'family');
@@ -237,7 +242,11 @@ export async function POST(request: NextRequest) {
               controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: fallbackError?.message || '合盘报告质量校验未通过' })}\n\n`));
             }
           } else {
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: error.message || '中断' })}\n\n`));
+            const errorPayload = {
+              error: error.message || '中断',
+              ...(error?.issues ? { verify_error: error.message || '报告事实层校验未通过', issues: error.issues } : {}),
+            };
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorPayload)}\n\n`));
           }
         } finally {
           controller.close();

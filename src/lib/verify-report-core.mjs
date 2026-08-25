@@ -72,23 +72,6 @@ function escapeRegExp(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function memberContext(reportText, label, radius = 180) {
-  const contexts = [];
-  const needle = String(label || '');
-  if (!needle) return contexts;
-  let offset = 0;
-  while (offset < reportText.length) {
-    const index = reportText.indexOf(needle, offset);
-    if (index < 0) break;
-    contexts.push({
-      text: reportText.slice(Math.max(0, index - radius), Math.min(reportText.length, index + needle.length + radius)),
-      index,
-    });
-    offset = index + needle.length;
-  }
-  return contexts;
-}
-
 function memberPillars(member) {
   return String(member?.bazi || '').split(/\s+/).filter(Boolean);
 }
@@ -143,19 +126,35 @@ function nearestMemberLabelBefore(text, index, members) {
   return nearest?.label || null;
 }
 
-function channelMentionsInSentence(sentence, members) {
+function memberAttributeMentionsInSentence(sentence, members, pattern, acceptMatch = () => true) {
   const mentions = [];
-  const channelPattern = /(\d{1,2}-\d{1,2})(?:\s*通道)?/g;
-  for (const match of sentence.text.matchAll(channelPattern)) {
-    if (!lookupChannel(match[1])) continue;
-    const channelContext = sentence.text.slice(Math.max(0, match.index - 24), match.index + match[0].length + 24);
-    if (!/通道|相连|相接|连接|关联|拥有|独有|关键|有/.test(channelContext)) continue;
-    const precedingText = sentence.text.slice(0, match.index + match[0].length);
+  for (const match of sentence.text.matchAll(pattern)) {
+    const index = match.index ?? 0;
+    if (!acceptMatch(match, sentence.text)) continue;
+    const precedingText = sentence.text.slice(0, index + match[0].length);
     const memberLabel = nearestMemberLabelBefore(precedingText, precedingText.length, members);
     if (!memberLabel) continue;
-    mentions.push({ channel: match[1], memberLabel, evidence: sentence.text });
+    mentions.push({ memberLabel, match, evidence: sentence.text });
   }
   return mentions;
+}
+
+function channelMentionsInSentence(sentence, members) {
+  return memberAttributeMentionsInSentence(
+    sentence,
+    members,
+    /(\d{1,2}-\d{1,2})(?:\s*通道)?/g,
+    (match, sentenceText) => {
+      if (!lookupChannel(match[1])) return false;
+      const index = match.index ?? 0;
+      const channelContext = sentenceText.slice(Math.max(0, index - 24), index + match[0].length + 24);
+      return /通道|相连|相接|连接|关联|拥有|独有|关键|有/.test(channelContext);
+    },
+  ).map((mention) => ({
+    channel: mention.match[1],
+    memberLabel: mention.memberLabel,
+    evidence: mention.evidence,
+  }));
 }
 
 function findUnauthorizedGenderPronoun(reportText) {
@@ -326,49 +325,44 @@ export function verifyReportText(reportText, truth = null) {
   // ---- V7（P1）成员级数据对账：正文不得改写声明节中的事实 ----
   if (truth && Array.isArray(truth.members) && truth.members.length) {
     const members = truth.members;
+    const membersByLabel = new Map(members.map((member) => [member.label, member]));
     const dayStems = members.map(memberDayStem).filter(Boolean);
 
     if (new Set(dayStems).size > 1 && /相同(?:的)?日柱天干/.test(reportText)) {
       fail('V7', '正文声称双方日柱天干相同，但声明节中的日柱天干并不相同', `实际日柱：${members.map((member) => `${member.label}=${memberDayPillar(member)}`).join('；')}`);
     }
 
-    for (const member of members) {
-      const contexts = memberContext(reportText, member.label).map((entry) => entry.text);
-      const context = contexts.join('\n');
-      const missingElements = ['金', '木', '水', '火', '土'].filter((element) => !(Number(member.elementDistribution?.[element]) > 0));
-      if (missingElements.length && /五行(?:俱全|齐全|完整|齐备)/.test(context)) {
-        fail('V7', `${member.label}的正文五行结论与声明不一致：缺少${missingElements.join('、')}却称“五行齐全”`, context.slice(0, 220));
-      }
-
-      const expectedProfile = String(member.hd?.profile || '');
-      if (expectedProfile) {
-        const profilePattern = new RegExp(`${escapeRegExp(member.label)}[^\\n]{0,100}?角色(?:是|为|：|:)\\s*([1-6]\\/[1-6])`, 'g');
-        for (const profileMatch of reportText.matchAll(profilePattern)) {
-          if (profileMatch[1] !== expectedProfile) {
-            fail('V7', `${member.label}的角色 ${profileMatch[1]} 与声明 ${expectedProfile} 不一致`, profileMatch[0]);
-          }
+    for (const sentence of splitReportSentences(reportText)) {
+      for (const mention of memberAttributeMentionsInSentence(sentence, members, /角色(?:是|为|：|:)\s*([1-6]\/[1-6])/g)) {
+        const member = membersByLabel.get(mention.memberLabel);
+        const expectedProfile = String(member?.hd?.profile || '');
+        if (expectedProfile && mention.match[1] !== expectedProfile) {
+          fail('V7', `${mention.memberLabel}的角色 ${mention.match[1]} 与声明 ${expectedProfile} 不一致`, mention.match[0]);
         }
       }
 
-      const expectedChannels = new Set(member.hd?.channels || []);
-      for (const sentence of splitReportSentences(reportText)) {
-        for (const mention of channelMentionsInSentence(sentence, members)) {
-          if (mention.memberLabel !== member.label) continue;
-          const normalized = normalizeChannelKey(mention.channel);
-          if (normalized && ![...expectedChannels].some((channel) => normalizeChannelKey(channel) === normalized)) {
-            fail('V7', `${member.label}被正文分配了声明中不存在的通道 ${mention.channel}`, mention.evidence);
-          }
+      for (const mention of memberAttributeMentionsInSentence(sentence, members, /五行(?:俱全|齐全|完整|齐备)/g)) {
+        const member = membersByLabel.get(mention.memberLabel);
+        const missingElements = ['金', '木', '水', '火', '土'].filter((element) => !(Number(member?.elementDistribution?.[element]) > 0));
+        if (missingElements.length) {
+          fail('V7', `${mention.memberLabel}的正文五行结论与声明不一致：缺少${missingElements.join('、')}却称“五行齐全”`, mention.evidence);
         }
       }
 
-      const dayPillar = memberDayPillar(member);
-      if (dayPillar) {
-        for (const entry of contexts) {
-          for (const pillarMatch of entry.matchAll(/日柱(?:是|为|：|:)\s*([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥])/g)) {
-            if (pillarMatch[1] !== dayPillar) {
-              fail('V7', `${member.label}的日柱 ${pillarMatch[1]} 与声明 ${dayPillar} 不一致`, pillarMatch[0]);
-            }
-          }
+      for (const mention of channelMentionsInSentence(sentence, members)) {
+        const member = membersByLabel.get(mention.memberLabel);
+        const expectedChannels = new Set(member?.hd?.channels || []);
+        const normalized = normalizeChannelKey(mention.channel);
+        if (normalized && ![...expectedChannels].some((channel) => normalizeChannelKey(channel) === normalized)) {
+          fail('V7', `${mention.memberLabel}被正文分配了声明中不存在的通道 ${mention.channel}`, mention.evidence);
+        }
+      }
+
+      for (const mention of memberAttributeMentionsInSentence(sentence, members, /日柱(?:是|为|：|:)\s*([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥])/g)) {
+        const member = membersByLabel.get(mention.memberLabel);
+        const expectedDayPillar = memberDayPillar(member);
+        if (expectedDayPillar && mention.match[1] !== expectedDayPillar) {
+          fail('V7', `${mention.memberLabel}的日柱 ${mention.match[1]} 与声明 ${expectedDayPillar} 不一致`, mention.match[0]);
         }
       }
     }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildCompatibilityPersonPayload, buildCompatibilitySegments, consumeSseChunk, normalizeCompatibilityAudience, validateCompatibilityInput } from './compatibility-depth';
+import { buildCompatibilityPersonPayload, buildCompatibilitySegments, consumeSseChunk, isPronounOnlyVerificationFailure, normalizeCompatibilityAudience, shouldRetryCompatibilityVerification, validateCompatibilityInput } from './compatibility-depth';
 
 const members = [
   { label: '家长', age: 44, bazi: '壬戌 庚戌 乙亥 辛巳', elementDistribution: { 木: 1, 金: 0 }, city: '上海', hd: { type: 'Projector', profile: '3/6', authority: 'Splenic', channels: ['18-58'] } },
@@ -77,6 +77,23 @@ describe('compatibility depth prompt', () => {
     const full = buildCompatibilitySegments(members.slice(0, 2), 'friend').map(x => x.prompt).join('\n');
     expect(full).toContain('成稿前全文检索“他/她”');
     expect(full).toContain('检索到后全部替换为成员标签');
+    expect(full).toContain('硬性步骤');
+  });
+
+  it('classifies only pronoun verification failures as safe automatic retries', () => {
+    expect(isPronounOnlyVerificationFailure([
+      { rule: 'V8', message: '情侣/朋友报告出现未授权性别代词，应统一使用成员标签' },
+    ])).toBe(true);
+    expect(isPronounOnlyVerificationFailure([
+      { rule: 'V8', message: '情侣/朋友报告出现未授权性别代词，应统一使用成员标签' },
+      { rule: 'V7', message: '用户A被正文分配了声明中不存在的通道 28-38' },
+    ])).toBe(false);
+    expect(isPronounOnlyVerificationFailure([])).toBe(false);
+    const pronounIssue = [{ rule: 'V8', message: '情侣/朋友报告出现未授权性别代词，应统一使用成员标签' }];
+    expect(shouldRetryCompatibilityVerification('couple', pronounIssue, 0)).toBe(true);
+    expect(shouldRetryCompatibilityVerification('friend', pronounIssue, 1)).toBe(true);
+    expect(shouldRetryCompatibilityVerification('couple', pronounIssue, 2)).toBe(false);
+    expect(shouldRetryCompatibilityVerification('family', pronounIssue, 0)).toBe(false);
   });
 
   it('rejects a family request that has no child data', () => {
