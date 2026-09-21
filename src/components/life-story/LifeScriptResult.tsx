@@ -6,6 +6,7 @@ import {
   LIFE_SCRIPT_RESULT_KEY,
   type LifeScriptResult as LifeScriptResultData,
 } from '@/lib/life-story';
+import { buildSafeLifeStoryShareText } from '@/lib/life-story-growth';
 import './life-story.css';
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -37,6 +38,7 @@ function List({ items }: { items: string[] }) {
 export default function LifeScriptResult() {
   const [result, setResult] = useState<LifeScriptResultData | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [shareNotice, setShareNotice] = useState('');
 
   useEffect(() => {
     try {
@@ -71,6 +73,29 @@ export default function LifeScriptResult() {
 
   const continuity = result.paths.find((path) => path.type === 'continuity');
   const change = result.paths.find((path) => path.type === 'change');
+
+  const shareResult = async () => {
+    const shareText = buildSafeLifeStoryShareText(result, `${window.location.origin}/life-story`);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'SoulCode · 人生路径练习卡', text: shareText });
+        setShareNotice('已打开系统分享。');
+        return;
+      }
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareText);
+        setShareNotice('复制成功，可以发给你信任的人。');
+        return;
+      }
+      throw new Error('share-unavailable');
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        setShareNotice('已取消分享。');
+        return;
+      }
+      setShareNotice('当前浏览器暂不支持分享，请继续在本页完成行动。');
+    }
+  };
 
   return (
     <main className="life-story-shell">
@@ -108,10 +133,15 @@ export default function LifeScriptResult() {
           ))}
         </div>
 
-        <div className="life-script-source-row"><strong>来源标签</strong>{result.sourceLabels.map((label) => <span key={label}>{SOURCE_LABELS[label] || label}</span>)}</div>
-        <div className="life-script-disclaimer"><strong>请这样使用它</strong><p>不是命运判决。{result.disclaimer}</p><p>把它当作一份可被现实修正的观察稿：先选一个小行动，七天后用真实反馈更新你的判断。</p></div>
-        <div className="life-story-actions"><a className="life-story-secondary-button" href="/master-report">回看出生画像</a><a className="life-story-secondary-button" href="/life-story">再做一次人生总结</a><a className="life-story-primary-button" href="/life-story/challenges">开始十重考验 →</a></div>
-      </section>
+         <div className="life-script-source-row"><strong>来源标签</strong>{result.sourceLabels.map((label) => <span key={label}>{SOURCE_LABELS[label] || label}</span>)}</div>
+         <div className="life-script-disclaimer"><strong>请这样使用它</strong><p>不是命运判决。{result.disclaimer}</p><p>把它当作一份可被现实修正的观察稿：先选一个小行动，七天后用真实反馈更新你的判断。</p></div>
+         <div className="life-script-next-step">
+           <div><h3>把行动带回现实</h3><p>先挑一个你愿意承担的 7 天行动；如果这张地图对你有帮助，可以分享一张不包含私密经历的摘要。</p></div>
+           <div className="life-script-next-step-actions"><button type="button" className="life-story-secondary-button" onClick={shareResult}>分享一张安全摘要</button><a className="life-story-primary-button" href="/life-story/challenges">进入十重考验 →</a></div>
+           {shareNotice && <p className="life-story-notice" aria-live="polite">{shareNotice}</p>}
+         </div>
+         <div className="life-story-actions"><a className="life-story-secondary-button" href="/master-report">回看出生画像</a><a className="life-story-secondary-button" href="/life-story">再做一次人生总结</a></div>
+       </section>
       <p className="life-story-footnote">如果内容触发了强烈不适，请先暂停体验，和可信任的人或专业人士沟通。重大健康、法律、投资和关系决定不应只依据本模拟。</p>
     </main>
   );

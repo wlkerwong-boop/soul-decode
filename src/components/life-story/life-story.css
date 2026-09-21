@@ -18,6 +18,10 @@
 .life-story-eyebrow { margin-top: 38px; color: #b18342; font-size: 11px; letter-spacing: .2em; font-weight: 700; }
 .life-story-header h1 { max-width: 680px; margin: 12px 0 12px; font-family: Georgia, 'Songti SC', serif; font-size: clamp(36px, 7vw, 72px); line-height: .98; letter-spacing: -.055em; font-weight: 500; }
 .life-story-header p { max-width: 630px; margin: 0; color: var(--story-muted); font-size: 15px; line-height: 1.85; }
+.life-story-value-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; max-width: 760px; margin-top: 24px; }
+.life-story-value-strip > div { display: grid; gap: 4px; padding: 13px 14px; border: 1px solid rgba(25, 59, 53, .1); border-radius: 13px; background: rgba(255,255,255,.42); }
+.life-story-value-strip strong { color: #9a7140; font-size: 12px; letter-spacing: .04em; }
+.life-story-value-strip span { color: var(--story-muted); font-size: 12px; line-height: 1.5; }
 .life-story-panel { padding: clamp(20px, 4vw, 44px); border: 1px solid rgba(255, 255, 255, .9); border-radius: 28px; background: var(--story-paper); box-shadow: 0 20px 70px rgba(25, 59, 53, .08); backdrop-filter: blur(12px); }
 .life-story-progress-row { display: flex; justify-content: space-between; color: #b18342; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .life-story-progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 22px 0 40px; }
@@ -90,6 +94,11 @@
 .life-script-disclaimer { margin-top: 23px; padding: 16px 18px; border-left: 3px solid #3e8d72; border-radius: 7px; color: var(--story-muted); background: rgba(228, 239, 231, .62); font-size: 12px; line-height: 1.7; }
 .life-script-disclaimer strong { color: var(--story-ink); }
 .life-script-disclaimer p { margin: 4px 0 0; }
+.life-script-next-step { display: grid; gap: 13px; margin-top: 24px; padding: 18px; border: 1px solid rgba(62, 141, 114, .24); border-radius: 15px; background: rgba(228, 239, 231, .52); }
+.life-script-next-step h3 { margin: 0; color: var(--story-ink); font-size: 14px; }
+.life-script-next-step p { margin: 5px 0 0; color: var(--story-muted); font-size: 12px; line-height: 1.7; }
+.life-script-next-step-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.life-script-next-step-actions a { text-decoration: none; text-align: center; }
 .life-script-result-panel .life-story-actions a { text-decoration: none; text-align: center; }
 .life-challenge-progress-bar { height: 5px; margin: 14px 0 34px; overflow: hidden; border-radius: 999px; background: rgba(25, 59, 53, .1); }
 .life-challenge-progress-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #2d8066, #b18342); transition: width .3s ease; }
@@ -110,6 +119,7 @@
   .life-story-shell { padding: 24px 13px 42px; }
   .life-story-header { padding-bottom: 25px; }
   .life-story-eyebrow { margin-top: 28px; }
+  .life-story-value-strip { grid-template-columns: 1fr; margin-top: 19px; }
   .life-story-panel { padding: 20px 16px; border-radius: 21px; }
   .life-story-progress { gap: 5px; margin-bottom: 28px; }
   .life-story-progress-item { display: block; padding: 8px 0; }

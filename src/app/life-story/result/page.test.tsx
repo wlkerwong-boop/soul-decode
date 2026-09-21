@@ -20,4 +20,11 @@ describe('life script result page contract', () => {
     expect(viewSource).toContain('重新填写人生总结');
     expect(viewSource).toContain('sessionStorage');
   });
+
+  it('offers a safe share card and an action-focused next step', () => {
+    expect(viewSource).toContain('分享一张安全摘要');
+    expect(viewSource).toContain('把行动带回现实');
+    expect(viewSource).toContain('navigator.share');
+    expect(viewSource).toContain('复制成功');
+  });
 });

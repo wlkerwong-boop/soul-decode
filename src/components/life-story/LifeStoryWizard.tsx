@@ -342,6 +342,11 @@ export default function LifeStoryWizard() {
         <div className="life-story-eyebrow">SOULCODE · LIFE STORY LAB</div>
         <h1>把报告放回真实人生</h1>
         <p>出生画像只是起点。你亲自走过的路、做过的选择和此刻想改变的方向，才是剧本真正可以被校正的部分。</p>
+        <div className="life-story-value-strip" aria-label="开始前说明">
+          <div><strong>8–12 分钟</strong><span>四段填写，可随时暂停</span></div>
+          <div><strong>双路径</strong><span>得到一份总结与两条可讨论的可能性</span></div>
+          <div><strong>反思实验</strong><span>草稿只保存在当前浏览器</span></div>
+        </div>
       </header>
 
       <section className="life-story-panel" aria-label="人生总结向导">

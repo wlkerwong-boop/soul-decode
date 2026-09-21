@@ -20,4 +20,11 @@ describe('life story wizard page contract', () => {
     expect(wizardSource).toContain('/api/life-script/summary');
     expect(wizardSource).toContain('/api/life-script/generate');
   });
+
+  it('explains the time, output, and save boundary before users start', () => {
+    expect(wizardSource).toContain('8–12 分钟');
+    expect(wizardSource).toContain('双路径');
+    expect(wizardSource).toContain('当前浏览器');
+    expect(wizardSource).toContain('反思实验');
+  });
 });
