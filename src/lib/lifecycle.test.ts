@@ -45,4 +45,16 @@ describe('life context', () => {
     expect(getTimeConfidenceLabel(context.timeConfidence)).toBe('未知');
     expect(context.notices).toContain('出生时刻未知：人类图、紫微斗数时辰和其他时刻敏感结论不可作为精确验证。');
   });
+
+  it('distinguishes approximate birth time from completely unknown time', () => {
+    const context = buildLifeContext({
+      birthDate: '1980-09-12',
+      analysisDate: '2026-09-21',
+      lifeStatus: 'alive',
+      timeConfidence: 'approximate',
+    });
+
+    expect(context.notices).toContain('出生时刻为约数：宫位、时柱和其他分钟敏感结论仅作参考。');
+    expect(context.notices).not.toContain('出生时刻未知：人类图、紫微斗数时辰和其他时刻敏感结论不可作为精确验证。');
+  });
 });

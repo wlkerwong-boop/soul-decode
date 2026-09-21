@@ -115,7 +115,11 @@ export function buildLifeContext(input: BuildLifeContextInput): LifeContext {
     ageLabel = `当前年龄：${age}岁`;
   }
 
-  if (timeConfidence !== 'exact') {
+  if (timeConfidence === 'approximate') {
+    notices.push('出生时刻为约数：宫位、时柱和其他分钟敏感结论仅作参考。');
+  } else if (timeConfidence === 'hour_only') {
+    notices.push('仅知出生时辰：分钟敏感结论不可作为精确验证。');
+  } else if (timeConfidence === 'unknown') {
     notices.push('出生时刻未知：人类图、紫微斗数时辰和其他时刻敏感结论不可作为精确验证。');
   }
 
