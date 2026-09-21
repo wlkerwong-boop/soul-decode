@@ -12,7 +12,7 @@ import { marked } from 'marked';
 import { CHINA_CITIES, INTERNATIONAL_CITIES, CITY_TZ } from '@/data/cities';
 import { beginNewReportView } from '@/lib/master-report-view';
 
-const YEARS = Array.from({length:121},(_,i)=>2026-i);
+const YEARS = Array.from({length:new Date().getFullYear()-1800+1},(_,i)=>new Date().getFullYear()-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
 const DAYS = Array.from({length:31},(_,i)=>i+1);
 const HOURS = Array.from({length:24},(_,i)=>i);

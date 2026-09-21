@@ -16,21 +16,6 @@ import {
 const require = createRequire(import.meta.url);
 const { assertReportVerified } = require('../../../lib/verify-report-core.mjs');
 
-function calcBazi(y: number, m: number, d: number, h: number) {
-  const { Solar } = require('lunar-javascript');
-  const solar = Solar.fromYmdHms(y, m, d, h, 0, 0);
-  const lunar = solar.getLunar();
-  // 立春派统一：getYearInGanZhiExact()（节气换年）。旧实现 getYearInGanZhi() 按春节换年，
-  // 对 1982-01-27 会得壬戌（错），Exact 版得辛酉（K3 裁决口径，病灶#5 根因）。
-  const pillars = [
-    lunar.getYearInGanZhiExact(), lunar.getMonthInGanZhiExact(),
-    lunar.getDayInGanZhi(), lunar.getTimeInGanZhi()
-  ];
-  const dayMaster = lunar.getDayGan();
-  const elMap: Record<string, string> = {甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
-  return { pillars, dayMaster: `${dayMaster}（${elMap[dayMaster]}）` };
-}
-
 async function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
   const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
   const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
@@ -124,7 +109,7 @@ export async function POST(req: NextRequest) {
 
     // 并行计算全部7个系统
     const [baziResult, hdResult, ziweiResult, zodiacResult] = await Promise.all([
-      Promise.resolve(calculateReportBazi(y, m, d, h)),
+      Promise.resolve(calculateReportBazi(y, m, d, h, mi)),
       Promise.resolve(calcHD(y, m, d, h, mi, tz, lat, lon)),
       Promise.resolve(calcZiwei(y, m, d, h, g)),
       Promise.resolve(calcZodiac(y, m, d)),

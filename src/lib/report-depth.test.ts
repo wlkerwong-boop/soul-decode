@@ -33,10 +33,10 @@ describe('report data mapping', () => {
     expect(formatElementDistribution(result.elementDistribution)).not.toContain('数据暂缺');
   });
 
-  it('uses the same Beijing-calendar conversion for overseas births', () => {
+  it('uses the birthplace local calendar clock for overseas births', () => {
     const result = calculateReportBaziForTimezone(2015, 6, 4, 19, 45, 'America/Los_Angeles');
-    expect(result.pillars).toEqual(['乙未', '辛巳', '辛亥', '癸巳']);
-    expect(result.beijing.hour).toBe(10);
+    expect(result.pillars).toEqual(['乙未', '辛巳', '辛亥', '戊戌']);
+    expect(result.local).toEqual({ year: 2015, month: 6, day: 4, hour: 19, minute: 45 });
   });
 
   it('keeps stem separate from the five-movement label', () => {

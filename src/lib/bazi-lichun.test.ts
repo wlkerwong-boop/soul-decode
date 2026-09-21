@@ -19,16 +19,22 @@ describe('八字岁首立春派统一（任务2）', () => {
     expect(r.pillars[0]).toBe('壬戌');
   });
 
-  it('一然 LA 2015-06-04 19:45 → 时柱癸巳（K3 裁决）', () => {
+  it('出生地当地时间作为标准：一然 LA 2015-06-04 19:45 → 时柱戊戌', () => {
     const r = calculateAuthoritativeBazi(2015, 6, 4, 19, 45, 'America/Los_Angeles');
-    expect(r.pillars[3]).toBe('癸巳');
+    expect(r.pillars).toEqual(['乙未', '辛巳', '辛亥', '戊戌']);
+  });
+
+  it('时区只影响需要绝对时刻的系统，不改变八字的出生地当地年月日时', () => {
+    const la = calculateAuthoritativeBazi(2015, 6, 4, 19, 45, 'America/Los_Angeles');
+    const shanghai = calculateAuthoritativeBazi(2015, 6, 4, 19, 45, 'Asia/Shanghai');
+    expect(la.pillars).toEqual(shanghai.pillars);
   });
 
   it('master-report 全量回归：五口四柱与金标准一致', () => {
     const cases: [string, number, number, number, number, number, string, string[]][] = [
       ['王献科', 1982, 1, 27, 12, 0, 'Asia/Shanghai', ['辛酉', '辛丑', '庚戌', '壬午']],
       ['一斐', 2010, 12, 4, 19, 0, 'Asia/Shanghai', ['庚寅', '丁亥', '戊子', '壬戌']],
-      ['一然', 2015, 6, 4, 19, 45, 'America/Los_Angeles', ['乙未', '辛巳', '辛亥', '癸巳']],
+      ['一然', 2015, 6, 4, 19, 45, 'America/Los_Angeles', ['乙未', '辛巳', '辛亥', '戊戌']],
       ['一如', 2017, 11, 2, 10, 0, 'Asia/Shanghai', ['丁酉', '庚戌', '癸巳', '丁巳']],
       ['晓霞', 1985, 7, 15, 8, 0, 'Asia/Shanghai', ['乙丑', '癸未', '乙卯', '庚辰']],
     ];
@@ -36,5 +42,10 @@ describe('八字岁首立春派统一（任务2）', () => {
       const r = calculateAuthoritativeBazi(y, m, d, h, mi, tz);
       expect(r.pillars, `${label} 四柱`).toEqual(expected);
     }
+  });
+
+  it('支持 1900 年以前的历史人物样本', () => {
+    const r = calculateAuthoritativeBazi(1893, 12, 26, 7, 30, 'Asia/Shanghai');
+    expect(r.pillars).toEqual(['癸巳', '甲子', '丁酉', '甲辰']);
   });
 });

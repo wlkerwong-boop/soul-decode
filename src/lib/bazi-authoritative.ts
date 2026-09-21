@@ -11,57 +11,22 @@ const BRANCH_ELEMENTS: Record<string, string> = {
 };
 
 /**
- * Convert a birth time to the Beijing clock used by SoulCode's existing
- * report corpus. The product keeps the user-entered Gregorian date and only
- * converts the clock portion; this preserves previously verified overseas
- * reports such as Los Angeles 2015-06-04 19:45 → 10:45 Beijing time.
+ * The product contract is the civil clock at the birthplace.
+ *
+ * Timezone is intentionally not applied to Bazi or Ziwei: the user-entered
+ * local date and local clock are the chart input. Human Design and astrology
+ * use the same local input plus the IANA timezone when they need an absolute
+ * instant. Keeping this helper explicit prevents accidental UTC/Beijing
+ * conversion in one report route but not another.
  */
-export function toBeijingParts(
+export function normalizeBirthplaceParts(
   year: number,
   month: number,
   day: number,
   hour: number,
   minute: number,
-  timezone = 'Asia/Shanghai',
 ) {
-  const guessUtc = Date.UTC(year, month - 1, day, hour, minute || 0, 0);
-  try {
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: timezone,
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-      hour12: false,
-    });
-    const parts: Record<string, number> = {};
-    formatter.formatToParts(new Date(guessUtc)).forEach((part) => {
-      parts[part.type] = parseInt(part.value, 10);
-    });
-    const localAsUtc = Date.UTC(
-      parts.year,
-      parts.month - 1,
-      parts.day,
-      parts.hour % 24,
-      parts.minute,
-      parts.second,
-    );
-    const offsetMinutes = (guessUtc - localAsUtc) / 60000;
-    const beijingMinutes = hour * 60 + (minute || 0) + 8 * 60 + offsetMinutes;
-    const normalizedMinutes = ((beijingMinutes % 1440) + 1440) % 1440;
-    return {
-      year,
-      month,
-      day,
-      hour: Math.floor(normalizedMinutes / 60),
-      minute: normalizedMinutes % 60,
-    };
-  } catch {
-    // Unknown timezone: retain the historical product fallback of Beijing time.
-    return { year, month, day, hour, minute };
-  }
+  return { year, month, day, hour, minute: minute || 0 };
 }
 
 export function calculateAuthoritativeBazi(
@@ -70,11 +35,11 @@ export function calculateAuthoritativeBazi(
   day: number,
   hour: number,
   minute = 0,
-  timezone = 'Asia/Shanghai',
+  _timezone = 'Asia/Shanghai',
 ) {
-  const beijing = toBeijingParts(year, month, day, hour, minute, timezone);
+  const local = normalizeBirthplaceParts(year, month, day, hour, minute);
   const lunar = (Solar as any)
-    .fromYmdHms(beijing.year, beijing.month, beijing.day, beijing.hour, beijing.minute, 0)
+    .fromYmdHms(local.year, local.month, local.day, local.hour, local.minute, 0)
     .getLunar();
   const pillars = [
     lunar.getYearInGanZhiExact(),
@@ -98,6 +63,6 @@ export function calculateAuthoritativeBazi(
     elements,
     elementDistribution,
     dayMaster: `${dayStem}（${STEM_ELEMENTS[dayStem]}）`,
-    beijing,
+    local,
   };
 }

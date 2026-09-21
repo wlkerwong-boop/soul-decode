@@ -127,7 +127,7 @@ const PROFILE_DESC: Record<string, {conscious:string,unconscious:string,desc:str
 };
 
 const currentYear = new Date().getFullYear();
-const years = Array.from({ length: 100 }, (_, i) => String(currentYear - i));
+const years = Array.from({ length: currentYear - 1800 + 1 }, (_, i) => String(currentYear - i));
 
 export default function HumanDesignPage() {
   const [form, setForm] = useState({ year: '', month: '', day: '', hour: '', location: '', gender: '', timezone: '' });

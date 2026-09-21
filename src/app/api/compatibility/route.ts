@@ -18,7 +18,7 @@ import {
   type CompatibilityMember,
 } from '@/lib/compatibility-depth';
 import { buildLocalCompatibilityReport } from '@/lib/compatibility-fallback';
-import { calculateAuthoritativeBazi } from '@/lib/bazi-authoritative';
+import { calculateReportBazi } from '@/lib/report-depth';
 
 const require = createRequire(import.meta.url);
 const { assertReportVerified } = require('../../../lib/verify-report-core.mjs');
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       const hour = parseInt(person.hour) || 12;
       const minute = parseInt(person.minute) || 0;
       const timezone = person.timezone || CITY_TZ[person.city] || 'Asia/Shanghai';
-      const bazi = calculateAuthoritativeBazi(year, month, day, hour, minute, timezone);
+      const bazi = calculateReportBazi(year, month, day, hour, minute);
       const hd = await calculateBodygraph(
         `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
         `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,

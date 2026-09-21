@@ -1,4 +1,3 @@
-import { Solar } from 'lunar-javascript';
 import { calculateAuthoritativeBazi } from './bazi-authoritative';
 import { describeChannels } from './hd-channels-map';
 
@@ -25,38 +24,14 @@ export interface PersonalReportContext {
   liunian: string;
 }
 
-export function calculateReportBazi(year: number, month: number, day: number, hour: number) {
-  const lunar = (Solar as any).fromYmdHms(year, month, day, hour, 0, 0).getLunar();
-  const pillars = [
-    lunar.getYearInGanZhiExact(),
-    lunar.getMonthInGanZhiExact(),
-    lunar.getDayInGanZhiExact(),
-    lunar.getTimeInGanZhi(),
-  ];
-  const stemElements: Record<string, string> = {甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
-  const branchElements: Record<string, string> = {子:'水',丑:'土',寅:'木',卯:'木',辰:'土',巳:'火',午:'火',未:'土',申:'金',酉:'金',戌:'土',亥:'水'};
-  const ganElements = pillars.map(pillar => stemElements[pillar[0]]);
-  const zhiElements = pillars.map(pillar => branchElements[pillar[1]]);
-  const elements = [...ganElements, ...zhiElements];
-  const elementDistribution = elements.reduce<Record<string, number>>((distribution, element) => {
-    distribution[element] = (distribution[element] || 0) + 1;
-    return distribution;
-  }, {});
-  const dayStem = lunar.getDayGan();
-  return {
-    pillars,
-    ganElements,
-    zhiElements,
-    elements,
-    elementDistribution,
-    dayMaster: `${dayStem}（${stemElements[dayStem]}）`,
-  };
+export function calculateReportBazi(year: number, month: number, day: number, hour: number, minute = 0) {
+  return calculateAuthoritativeBazi(year, month, day, hour, minute, 'Asia/Shanghai');
 }
 
 /**
- * Production report entry point. Bazi uses the Beijing calendar clock after
- * converting the user's local birth time, while Human Design and astrology
- * continue to use the original local time and timezone.
+ * Backward-compatible name for callers that still pass a timezone. The
+ * product standard is the birthplace's local civil date and clock, so the
+ * timezone is retained only for API compatibility and is not applied here.
  */
 export function calculateReportBaziForTimezone(
   year: number,
@@ -64,9 +39,9 @@ export function calculateReportBaziForTimezone(
   day: number,
   hour: number,
   minute = 0,
-  timezone = 'Asia/Shanghai',
+  _timezone = 'Asia/Shanghai',
 ) {
-  return calculateAuthoritativeBazi(year, month, day, hour, minute, timezone);
+  return calculateReportBazi(year, month, day, hour, minute);
 }
 
 export function calculateWuyunLiuqi(year: number) {

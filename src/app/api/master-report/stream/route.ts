@@ -8,7 +8,7 @@ import { takeSseLines } from '@/lib/sse';
 import {
   buildPersonalReportSegments,
   buildPersonalReportDataDeclaration,
-  calculateReportBaziForTimezone,
+  calculateReportBazi,
   calculateWuyunLiuqi,
   PERSONAL_REPORT_SYSTEM_PROMPT,
   finalizePersonalReport,
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
     console.log(`[report-gen] ${new Date().toISOString()} ip=${clientIp} city=${body.city || '?'} y=${y}-${m}-${d} ${g} status=${status} ${extra} ${Math.round((Date.now() - startedAt) / 1000)}s`);
 
   // 计算所有数据
-  const baziResult = calculateReportBaziForTimezone(y, m, d, h, mi, tz);
+  const baziResult = calculateReportBazi(y, m, d, h, mi);
   let hdResult: any;
   try {
     hdResult = await calcHD(y, m, d, h, mi, tz, lat, lon);
