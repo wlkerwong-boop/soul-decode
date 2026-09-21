@@ -1,0 +1,125 @@
+.life-story-shell {
+  --story-ink: #193b35;
+  --story-muted: #6d7d76;
+  --story-line: rgba(25, 59, 53, .14);
+  --story-paper: rgba(255, 253, 247, .84);
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 42px 20px 64px;
+  color: var(--story-ink);
+  background: radial-gradient(circle at 82% 4%, rgba(231, 187, 104, .17), transparent 25rem), linear-gradient(145deg, #f6f3e9 0%, #f4f8f3 52%, #edf3ec 100%);
+}
+.life-story-orbit { position: absolute; width: 540px; height: 540px; top: -270px; right: -170px; border: 1px solid rgba(28, 104, 82, .12); border-radius: 50%; box-shadow: 0 0 0 34px rgba(28, 104, 82, .035), 0 0 0 86px rgba(28, 104, 82, .025); pointer-events: none; }
+.life-story-header, .life-story-panel, .life-story-footnote { position: relative; z-index: 1; width: min(100%, 980px); margin: 0 auto; }
+.life-story-header { padding: 12px 4px 34px; }
+.life-story-back { color: var(--story-muted); font-size: 13px; text-decoration: none; }
+.life-story-back:hover { color: var(--story-ink); }
+.life-story-eyebrow { margin-top: 38px; color: #b18342; font-size: 11px; letter-spacing: .2em; font-weight: 700; }
+.life-story-header h1 { max-width: 680px; margin: 12px 0 12px; font-family: Georgia, 'Songti SC', serif; font-size: clamp(36px, 7vw, 72px); line-height: .98; letter-spacing: -.055em; font-weight: 500; }
+.life-story-header p { max-width: 630px; margin: 0; color: var(--story-muted); font-size: 15px; line-height: 1.85; }
+.life-story-panel { padding: clamp(20px, 4vw, 44px); border: 1px solid rgba(255, 255, 255, .9); border-radius: 28px; background: var(--story-paper); box-shadow: 0 20px 70px rgba(25, 59, 53, .08); backdrop-filter: blur(12px); }
+.life-story-progress-row { display: flex; justify-content: space-between; color: #b18342; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.life-story-progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 22px 0 40px; }
+.life-story-progress-item { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; padding: 11px 0; border-top: 2px solid var(--story-line); color: #a1aaa4; }
+.life-story-progress-item span { grid-row: span 2; font-size: 11px; }
+.life-story-progress-item strong { font-size: 13px; font-weight: 700; }
+.life-story-progress-item small { font-size: 11px; }
+.life-story-progress-item.is-active { border-color: #24735d; color: var(--story-ink); }
+.life-story-progress-item.is-done { color: #6a9786; }
+.life-story-step-heading { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 28px; }
+.life-story-step-index { color: #b18342; font: 18px Georgia, serif; }
+.life-story-step-heading h2 { margin: 0; font: 500 clamp(25px, 4vw, 38px)/1.15 Georgia, 'Songti SC', serif; letter-spacing: -.04em; }
+.life-story-step-heading p { margin: 9px 0 0; color: var(--story-muted); font-size: 14px; line-height: 1.7; }
+.life-story-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.life-story-field { display: flex; flex-direction: column; gap: 7px; }
+.life-story-label { font-size: 13px; font-weight: 700; }
+.life-story-hint { color: var(--story-muted); font-size: 12px; line-height: 1.55; }
+.life-story-input { width: 100%; min-height: 46px; padding: 12px 13px; color: var(--story-ink); border: 1px solid var(--story-line); border-radius: 12px; outline: none; background: rgba(255,255,255,.62); font: inherit; transition: border-color .2s, box-shadow .2s, background .2s; }
+.life-story-input--area { min-height: 124px; resize: vertical; line-height: 1.7; }
+.life-story-input:focus { border-color: #3e8d72; background: #fffefa; box-shadow: 0 0 0 3px rgba(62, 141, 114, .12); }
+.life-story-input::placeholder { color: #a8b2ac; }
+.life-story-events { display: grid; gap: 18px; }
+.life-story-empty { padding: 28px; border: 1px dashed var(--story-line); border-radius: 16px; color: var(--story-muted); text-align: center; }
+.life-story-event { padding: 22px; border: 1px solid var(--story-line); border-radius: 18px; background: rgba(255,255,255,.42); }
+.life-story-event-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; color: #9a7140; font-size: 12px; font-weight: 700; letter-spacing: .12em; }
+.life-story-event-meta { display: grid; grid-template-columns: 1fr 180px; gap: 14px; margin-bottom: 16px; }
+.life-story-event .life-story-field + .life-story-field { margin-top: 16px; }
+.life-story-actions { display: flex; justify-content: space-between; gap: 14px; align-items: center; margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--story-line); }
+.life-story-action-group { display: flex; gap: 10px; }
+.life-story-primary-button, .life-story-secondary-button { min-height: 42px; padding: 10px 17px; border-radius: 11px; font: inherit; font-size: 13px; cursor: pointer; transition: transform .2s, box-shadow .2s, background .2s; }
+.life-story-primary-button { color: #fffdf7; border: 1px solid #1f6b54; background: #1f6b54; box-shadow: 0 8px 20px rgba(31, 107, 84, .16); }
+.life-story-primary-button:hover { transform: translateY(-1px); box-shadow: 0 11px 24px rgba(31, 107, 84, .23); }
+.life-story-primary-button:disabled { cursor: wait; opacity: .55; transform: none; }
+.life-story-secondary-button { color: var(--story-ink); border: 1px solid var(--story-line); background: rgba(255,255,255,.56); }
+.life-story-secondary-button:hover { background: #fffefa; }
+.life-story-text-button { color: #9a7140; border: 0; background: transparent; cursor: pointer; font-size: 12px; }
+.life-story-consent { display: flex; gap: 10px; align-items: flex-start; grid-column: 1 / -1; padding: 15px; border-radius: 13px; color: var(--story-muted); background: rgba(228, 239, 231, .65); font-size: 12px; line-height: 1.65; }
+.life-story-consent input { margin-top: 3px; accent-color: #1f6b54; }
+.life-story-errors { margin-top: 20px; padding: 13px 16px; border-left: 3px solid #be6b53; border-radius: 8px; color: #914d3d; background: rgba(190, 107, 83, .08); font-size: 13px; line-height: 1.8; }
+.life-story-notice { margin-top: 17px; color: #537468; font-size: 12px; line-height: 1.7; }
+.life-story-summary-editor { display: grid; gap: 20px; }
+.life-story-source-note { display: grid; gap: 5px; margin-top: 24px; padding: 16px; border-radius: 14px; color: var(--story-muted); background: rgba(241, 233, 209, .45); font-size: 12px; line-height: 1.6; }
+.life-story-source-note strong { color: #9a7140; }
+.life-story-source-note p { margin: 0; }
+.life-story-footnote { padding: 20px 4px; color: #89938d; font-size: 12px; line-height: 1.7; text-align: center; }
+.life-story-result-loading { width: min(100%, 980px); margin: 20vh auto; color: var(--story-muted); text-align: center; }
+.life-story-missing { position: relative; z-index: 1; width: min(100%, 620px); margin: 12vh auto; padding: 38px; border: 1px solid rgba(255, 255, 255, .9); border-radius: 24px; background: var(--story-paper); box-shadow: 0 20px 70px rgba(25, 59, 53, .08); }
+.life-story-missing h1 { margin: 16px 0 12px; font: 500 38px/1.1 Georgia, 'Songti SC', serif; }
+.life-story-missing p { margin: 0 0 25px; color: var(--story-muted); line-height: 1.8; }
+.life-script-result-panel { overflow: hidden; }
+.life-script-result-kicker { color: #b18342; font-size: 11px; font-weight: 700; letter-spacing: .15em; }
+.life-script-headline { max-width: 720px; margin: 12px 0 32px; font: 500 clamp(28px, 5vw, 50px)/1.12 Georgia, 'Songti SC', serif; letter-spacing: -.045em; }
+.life-script-summary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.life-script-summary-grid > div, .life-script-column { padding: 18px; border-radius: 15px; background: rgba(246, 243, 233, .65); }
+.life-script-summary-grid h3, .life-script-column h3, .life-script-actions-card h3 { margin: 0; color: #5f766c; font-size: 12px; letter-spacing: .04em; }
+.life-script-list { display: grid; gap: 8px; margin: 12px 0 0; padding-left: 18px; color: var(--story-muted); font-size: 13px; line-height: 1.65; }
+.life-script-list li::marker { color: #b18342; }
+.life-script-divider { height: 1px; margin: 42px 0 30px; background: var(--story-line); }
+.life-script-path-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; }
+.life-script-path { display: grid; gap: 16px; padding: 24px; border: 1px solid var(--story-line); border-top: 4px solid #739b8a; border-radius: 18px; background: rgba(255,255,255,.5); }
+.life-script-path--change { border-top-color: #b18342; background: rgba(250, 247, 237, .75); }
+.life-script-path-label { color: #5f766c; font-size: 11px; font-weight: 800; letter-spacing: .14em; }
+.life-script-path--change .life-script-path-label { color: #9a7140; }
+.life-script-path h2 { margin: 0; font: 500 27px/1.2 Georgia, 'Songti SC', serif; }
+.life-script-premise { margin: -5px 0 0; color: var(--story-muted); font-size: 13px; line-height: 1.7; }
+.life-script-actions-card { padding: 16px; border: 1px solid rgba(177, 131, 66, .3); border-radius: 14px; background: rgba(241, 233, 209, .42); }
+.life-script-source-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 32px; color: var(--story-muted); font-size: 12px; }
+.life-script-source-row strong { margin-right: 4px; color: #9a7140; }
+.life-script-source-row span { padding: 5px 9px; border: 1px solid var(--story-line); border-radius: 999px; background: rgba(255,255,255,.58); }
+.life-script-disclaimer { margin-top: 23px; padding: 16px 18px; border-left: 3px solid #3e8d72; border-radius: 7px; color: var(--story-muted); background: rgba(228, 239, 231, .62); font-size: 12px; line-height: 1.7; }
+.life-script-disclaimer strong { color: var(--story-ink); }
+.life-script-disclaimer p { margin: 4px 0 0; }
+.life-script-result-panel .life-story-actions a { text-decoration: none; text-align: center; }
+.life-challenge-progress-bar { height: 5px; margin: 14px 0 34px; overflow: hidden; border-radius: 999px; background: rgba(25, 59, 53, .1); }
+.life-challenge-progress-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #2d8066, #b18342); transition: width .3s ease; }
+.life-challenge-stage { display: flex; justify-content: space-between; color: #9a7140; font-size: 11px; font-weight: 700; letter-spacing: .12em; }
+.life-challenge-panel h2 { margin: 14px 0 14px; font: 500 clamp(29px, 5vw, 49px)/1.1 Georgia, 'Songti SC', serif; letter-spacing: -.045em; }
+.life-challenge-scenario { max-width: 760px; margin: 0; color: var(--story-muted); font-size: 15px; line-height: 1.9; }
+.life-challenge-question { margin: 26px 0 16px; color: var(--story-ink); font-weight: 700; }
+.life-challenge-choice-list { display: grid; gap: 10px; }
+.life-challenge-choice { display: flex; gap: 12px; align-items: center; padding: 15px 16px; color: var(--story-ink); border: 1px solid var(--story-line); border-radius: 13px; background: rgba(255,255,255,.52); text-align: left; font: inherit; cursor: pointer; transition: border-color .2s, background .2s, transform .2s; }
+.life-challenge-choice:hover, .life-challenge-choice.is-selected { border-color: #3e8d72; background: rgba(228, 239, 231, .8); transform: translateX(2px); }
+.life-challenge-choice-mark { color: #3e8d72; font-size: 18px; }
+.life-challenge-reflection { margin-top: 24px; }
+.life-challenge-finish { position: relative; z-index: 1; }
+.life-challenge-finish h1 { margin: 18px 0 12px; font: 500 clamp(36px, 7vw, 70px)/1 Georgia, 'Songti SC', serif; letter-spacing: -.055em; }
+.life-challenge-lead { max-width: 700px; margin: 0 0 30px; color: var(--story-muted); line-height: 1.85; }
+.life-challenge-finish .life-script-result-kicker { margin-top: 24px; }
+@media (max-width: 680px) {
+  .life-story-shell { padding: 24px 13px 42px; }
+  .life-story-header { padding-bottom: 25px; }
+  .life-story-eyebrow { margin-top: 28px; }
+  .life-story-panel { padding: 20px 16px; border-radius: 21px; }
+  .life-story-progress { gap: 5px; margin-bottom: 28px; }
+  .life-story-progress-item { display: block; padding: 8px 0; }
+  .life-story-progress-item strong, .life-story-progress-item small { display: none; }
+  .life-story-progress-item span { font-size: 10px; }
+  .life-story-grid { grid-template-columns: 1fr; gap: 18px; }
+  .life-story-event-meta { grid-template-columns: 1fr 130px; }
+  .life-story-actions { align-items: stretch; flex-direction: column-reverse; }
+  .life-story-action-group { justify-content: flex-end; }
+  .life-story-actions > .life-story-secondary-button { align-self: flex-start; }
+  .life-script-summary-grid, .life-script-path-grid { grid-template-columns: 1fr; }
+  .life-story-missing { margin: 8vh auto; padding: 26px 20px; }
+}

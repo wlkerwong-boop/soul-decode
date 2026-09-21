@@ -809,6 +809,18 @@ export default function MasterPage() {
                   {NEXT_STEPS.fullReport.btn}
                 </a>
               </div>
+
+              <div className="card-jade p-6 md:p-8 mt-6 text-center border border-[var(--border-accent)]">
+                <div className="text-3xl mb-3">🧭</div>
+                <h3 className="text-lg font-bold mb-2">把报告放回真实人生</h3>
+                <p className="text-sm text-[var(--text-secondary)] mb-4 max-w-lg mx-auto">
+                  填写你的成长经历、关键门槛和当前状态，先校正一份人生总结，再查看“不改变路径”和“主动改变路径”两种可能性。
+                </p>
+                <a href="/life-story"
+                  className="inline-flex px-6 py-3 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-accent)] text-[var(--text-accent)] font-medium text-sm hover:shadow-lg transition-all">
+                  开始人生总结 →
+                </a>
+              </div>
               </>
             )}
           </>
