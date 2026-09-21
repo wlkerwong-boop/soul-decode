@@ -12,7 +12,7 @@ const AI_BASE = "https://api.deepseek.com/v1";
 // ===== Input validation =====
 function validateYear(y) {
   const n = parseInt(y);
-  if (isNaN(n) || n < 1900 || n > 2100) return null;
+  if (isNaN(n) || n < 1800 || n > 2100) return null;
   return n;
 }
 function validateMonth(m) {
@@ -60,14 +60,15 @@ function calcBazi(y, m, d, h) {
     const { Solar } = require('lunar-javascript');
     const solar = Solar.fromYmdHms(y, m, d, h, 0, 0);
     const lunar = solar.getLunar();
-    const pillars = [];
-    ['YEAR','MONTH','DAY','HOUR'].forEach(p => {
-      const gz = lunar['get' + p + 'InGanZhi']();
-      pillars.push(gz);
-    });
-    const dayGZ = lunar.getDayInGanZhi();
-    const dayMaster = dayGZ[0] + '金';
-    return { pillars, dayMaster, elements: ['金','金','金','火'] };
+    const pillars = [
+      lunar.getYearInGanZhiExact(),
+      lunar.getMonthInGanZhiExact(),
+      lunar.getDayInGanZhiExact(),
+      lunar.getTimeInGanZhi(),
+    ];
+    const elementMap = {甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
+    const dayMaster = pillars[2][0];
+    return { pillars, dayMaster: dayMaster + '（' + elementMap[dayMaster] + '）', elements: pillars.map(p => elementMap[p[0]]) };
   } catch(e) { return null; }
 }
 
@@ -77,10 +78,10 @@ function calcZodiac(y, m, d) {
   return{sunSign:"摩羯",zodiac:"摩羯座"};
 }
 
-function calcZW(y, m, d, h, g, by, bm, bd, bjH) {
+function calcZW(y, m, d, h, g) {
   try {
-    const ds = by ? String(by).padStart(4,'0')+'-'+String(bm).padStart(2,'0')+'-'+String(bd).padStart(2,'0') : String(y).padStart(4,'0')+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const ti = bjH!==undefined ? Math.floor((bjH+1)/2)%12 : Math.floor((h+1)/2)%12;
+    const ds = String(y).padStart(4,'0')+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const ti = Math.floor((h+1)/2)%12;
     const iz = require('iztro');
     const r = iz.astro.bySolar(ds, ti, g, true, 'zh-CN');
     return { palaces: r.palaces.map(function(p) { return {name:p.name, stars:(p.majorStars||[])||[]}; }) };
@@ -150,13 +151,10 @@ app.post('/api/master-report', async (req, res) => {
     }
     const g = gender||'男';
 
-    // Beijing time for bazi/ziwei
-    const tzo = timezone==='America/Los_Angeles'?-7:timezone==='America/New_York'?-4:timezone==='Europe/London'?0:timezone==='Asia/Tokyo'?9:timezone==='Australia/Sydney'?10:8;
-    const bi = (h*60+mi)+(8-tzo)*60;
-    const bjH = Math.floor(((bi%1440)+1440)%1440/60);
-    const bjD = Math.floor((bi+1440)/1440)-1;
-
-    const [ba, zo, zw, wy, ln] = [calcBazi(y,m,d,bjH), calcZodiac(y,m,d), calcZW(y,m,d,h,g, y,m+((bjH>h||bjD>0)?1:0),d+bjD,bjH), calcWY(y), calcLN(y)];
+    // Product contract: use the birthplace's local civil date and clock for
+    // Bazi and Ziwei. Human Design still receives the same local clock plus
+    // the IANA timezone above when it needs an absolute instant.
+    const [ba, zo, zw, wy, ln] = [calcBazi(y,m,d,h), calcZodiac(y,m,d), calcZW(y,m,d,h,g), calcWY(y), calcLN(y)];
     let hd = calcHD(y,m,d,h,mi,timezone||'Asia/Shanghai');
     if (!hd) { hd = {type:'计算中',profile:'HD引擎加载中', centers:[], gates:[], channels:[]}; }
 
