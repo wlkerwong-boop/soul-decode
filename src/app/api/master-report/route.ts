@@ -12,6 +12,7 @@ import {
   PERSONAL_REPORT_SYSTEM_PROMPT,
   finalizePersonalReport,
 } from '@/lib/report-depth';
+import { buildLifeContext } from '@/lib/lifecycle';
 
 const require = createRequire(import.meta.url);
 const { assertReportVerified } = require('../../../lib/verify-report-core.mjs');
@@ -105,7 +106,14 @@ export async function POST(req: NextRequest) {
     const { lat, lon } = getBirthCoords(body.city, location);
     const g = gender === '女' ? '女' : '男';
     const now = new Date();
-    const age = now.getFullYear() - y - (now.getMonth()+1<m||(now.getMonth()+1===m&&now.getDate()<d)?1:0);
+    const life = buildLifeContext({
+      birthDate: `${y}-${String(m).padStart(4, '0')}-${String(d).padStart(2, '0')}`,
+      deathDate: body.deathDate,
+      analysisDate: body.analysisDate || now,
+      lifeStatus: body.lifeStatus,
+      timeConfidence: body.timeConfidence,
+    });
+    const age = life.age ?? 0;
 
     // 并行计算全部7个系统
     const [baziResult, hdResult, ziweiResult, zodiacResult] = await Promise.all([
@@ -142,7 +150,9 @@ export async function POST(req: NextRequest) {
 - 最后必须有一句「点睛金句」作为收尾（用**加粗**）
 - 报告末尾标注：*本报告基于八字（lunar-javascript）、人类图（Jovian认证v6引擎）、占星（查表法）、紫微斗数（iztro引擎）、五运六气（天干化运/地支化气）七系统融合分析生成。*
 
-请为一位${age}岁的${g}性出具一份七系统融合人生总览报告。用户未提供姓名，报告中称呼统一用"您"，禁止编造任何名字。数据如下：
+请按以下生命周期规则写作：${life.mode === 'historical' ? '这是已故人物历史回顾，只讨论已发生的人生主题，不得生成面向当前年份的未来规划、健康安排或在世行动建议。' : life.mode === 'uncertain' ? '生命周期状态未知，不得断言对象在世或已故，使用条件式表达。' : '这是在世对象的当前人生报告，可以讨论截至分析日期的现实处境和未来行动。'}
+
+请为一位${life.ageLabel}的${g}性出具一份七系统融合人生总览报告。用户未提供姓名，报告中称呼统一用"您"，禁止编造任何名字。数据如下：
 
 【一、八字命盘】
 四柱：${baziResult.pillars.join(' ')}
@@ -185,7 +195,11 @@ ${liunianResult}
 
     // 优先使用阿里云API（无超时限制）
     const aliyunUrl = 'http://47.102.142.225/api/master-report';
+    // 旧 report-api 不认识生命周期和时辰置信度字段。历史人物、状态未知或时刻不精确时，
+    // 必须走本地统一提示词路径，避免外部兼容服务重新生成“在世年龄”和精确时柱叙事。
+    const canUseLegacyAliyun = life.mode === 'current' && life.timeConfidence === 'exact';
     try {
+      if (!canUseLegacyAliyun) throw new Error('lifecycle context requires local report path');
       const aliRes = await fetch(aliyunUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -216,6 +230,7 @@ ${liunianResult}
         });
         const reportContext = {
           age,
+          life,
           gender: g,
           birth: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`,
           location: [body.location, body.city].filter(Boolean).join(' ') || '未提供',
@@ -223,9 +238,9 @@ ${liunianResult}
           hd: hdResult,
           ziwei: ziweiResult,
           astrology: zodiacResult,
-          wuyun: wuyunResult,
-          liunian: liunianResult,
-        };
+        wuyun: wuyunResult,
+        liunian: liunianResult,
+      };
         const segments = buildPersonalReportSegments(reportContext);
         let fullReport = '';
         for (const segment of segments) {
@@ -285,6 +300,7 @@ ${liunianResult}
         zodiac: zodiacResult,
         wuyun: wuyunResult,
         liunian: liunianResult,
+        life,
       },
     });
   } catch (e: any) {

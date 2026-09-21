@@ -14,6 +14,7 @@ import {
   finalizePersonalReport,
   normalizePersonalReportAudience,
 } from '@/lib/report-depth';
+import { buildLifeContext } from '@/lib/lifecycle';
 
 const require = createRequire(import.meta.url);
 const { assertReportVerified } = require('../../../../lib/verify-report-core.mjs');
@@ -103,7 +104,13 @@ export async function POST(req: NextRequest) {
   const { lat, lon } = getBirthCoords(body.city, location);
   const g = gender === '女' ? '女' : '男';
   const now = new Date();
-  const age = now.getFullYear() - y - (now.getMonth() + 1 < m || (now.getMonth() + 1 === m && now.getDate() < d) ? 1 : 0);
+  const life = buildLifeContext({
+    birthDate: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+    deathDate: body.deathDate,
+    analysisDate: body.analysisDate || now,
+    lifeStatus: body.lifeStatus,
+    timeConfidence: body.timeConfidence,
+  });
   // 生成日志（监控用）：时间/IP/出生地/结果/字数，输出到 pm2 out.log
   const clientIp = (req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '').split(',')[0].trim() || 'unknown';
   const startedAt = Date.now();
@@ -129,7 +136,8 @@ export async function POST(req: NextRequest) {
   const liunianResult = calcLiuNian(y);
 
   const reportContext = {
-    age,
+    age: life.age ?? 0,
+    life,
     gender: g,
     birth: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`,
     location: [location, body.city].filter(Boolean).join(' ') || '未提供',
@@ -258,6 +266,7 @@ export async function POST(req: NextRequest) {
           zodiac: astrologyResult,
           wuyun: wuyunResult,
           liunian: liunianResult,
+          life,
         })}\n\n`));
         controller.close();
       } catch (e: any) {

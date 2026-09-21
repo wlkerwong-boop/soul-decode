@@ -10,6 +10,7 @@ import {
   normalizePersonalReportAudience,
   finalizePersonalReport,
 } from './report-depth';
+import { buildLifeContext } from './lifecycle';
 
 const adultContext = {
   age: 44,
@@ -48,6 +49,41 @@ describe('report data mapping', () => {
 });
 
 describe('personal report prompt', () => {
+  it('renders historical lifecycle and time-confidence boundaries in the declaration', () => {
+    const historical = {
+      ...adultContext,
+      age: 32,
+      life: buildLifeContext({
+        birthDate: '1940-11-27',
+        deathDate: '1973-07-20',
+        analysisDate: '2026-09-21',
+        lifeStatus: 'deceased',
+        timeConfidence: 'exact',
+      }),
+    };
+    const declaration = buildPersonalReportDataDeclaration(historical);
+    expect(declaration).toContain('享年：32岁（已故）');
+    expect(declaration).toContain('分析模式：historical');
+    expect(buildPersonalReportSegments(historical).map(segment => segment.prompt).join('\n'))
+      .toContain('不得生成面向当前年份的未来规划');
+  });
+
+  it('warns that unknown birth time cannot validate time-sensitive systems', () => {
+    const unknownTime = {
+      ...adultContext,
+      age: 144,
+      life: buildLifeContext({
+        birthDate: '1881-09-25',
+        analysisDate: '2026-09-21',
+        lifeStatus: 'deceased',
+        timeConfidence: 'unknown',
+      }),
+    };
+    const declaration = buildPersonalReportDataDeclaration(unknownTime);
+    expect(declaration).toContain('出生时刻可信度：未知');
+    expect(declaration).toContain('人类图、紫微斗数时辰');
+  });
+
   it('splits the report into three bounded segments with every v2 chapter', () => {
     const segments = buildPersonalReportSegments(adultContext);
     expect(segments).toHaveLength(3);

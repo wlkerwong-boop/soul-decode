@@ -1,5 +1,6 @@
 import { calculateAuthoritativeBazi } from './bazi-authoritative';
 import { describeChannels } from './hd-channels-map';
+import { getLifeModeInstruction, getTimeConfidenceLabel, type LifeContext } from './lifecycle';
 
 export interface ReportSegment {
   id: string;
@@ -9,6 +10,7 @@ export interface ReportSegment {
 
 export interface PersonalReportContext {
   age: number;
+  life?: LifeContext;
   gender: string;
   birth: string;
   location: string;
@@ -75,7 +77,13 @@ function serializeContext(context: PersonalReportContext) {
     ? context.ziwei.palaces.map((palace: any) => `${palace.name}：${(palace.stars || []).slice(0, 5).join('、') || '无主星'}`).join('；')
     : '数据暂缺';
   const planets = context.astrology?.planets?.map((planet: any) => `${planet.name}${planet.sign}座${planet.degree}°`).join('、') || context.astrology?.zodiac || '数据暂缺';
-  return `出生：${context.birth}；出生地：${context.location}；当前年龄：${context.age}岁；性别：${context.gender}
+  const life = context.life;
+  const ageLabel = life?.ageLabel || `当前年龄：${context.age}岁`;
+  const lifeLine = life
+    ? `生命周期：${life.status}；分析模式：${life.mode}；出生时刻可信度：${getTimeConfidenceLabel(life.timeConfidence)}；分析日期：${life.analysisDate}`
+    : '生命周期：在世当前人生模式；出生时刻可信度：精确';
+  return `出生：${context.birth}；出生地：${context.location}；${ageLabel}；性别：${context.gender}
+${lifeLine}
 八字：${context.bazi.pillars.join(' ')}；日主${context.bazi.dayMaster}；五行${formatElementDistribution(context.bazi.elementDistribution)}
 人类图：${hd}
 紫微斗数：${ziwei}
@@ -97,10 +105,17 @@ export function buildPersonalReportDataDeclaration(context: PersonalReportContex
     ? context.ziwei.palaces.map((palace: any) => `${palace.name}宫：${(palace.stars || []).slice(0, 5).join('、') || '无主星'}`).join('；')
     : '数据暂缺';
   const planets = context.astrology?.planets?.map((planet: any) => `${planet.name}${planet.sign}座${planet.degree}°`).join('、') || context.astrology?.zodiac || '数据暂缺';
+  const life = context.life;
+  const ageLabel = life?.ageLabel || `当前年龄：${context.age}岁`;
+  const lifeLine = life
+    ? `- 生命周期：${life.status}｜分析模式：${life.mode}｜出生时刻可信度：${getTimeConfidenceLabel(life.timeConfidence)}｜分析日期：${life.analysisDate}`
+    : '- 生命周期：alive｜分析模式：current｜出生时刻可信度：精确';
+  const notices = life?.notices?.length ? `\n- 重要边界：${life.notices.join('；')}` : '';
   return [
     '## 0. 排盘数据声明',
     '',
-    `- 出生：${context.birth}｜出生地：${context.location}｜当前年龄：${context.age}岁｜性别：${context.gender}`,
+    `- 出生：${context.birth}｜出生地：${context.location}｜${ageLabel}｜性别：${context.gender}`,
+    lifeLine + notices,
     `- 八字四柱：${context.bazi.pillars.join(' ')}｜日主：${context.bazi.dayMaster}｜五行：${formatElementDistribution(context.bazi.elementDistribution)}`,
     `- 人类图：${hd}`,
     `- 紫微斗数：${ziwei}`,
@@ -165,11 +180,17 @@ export function finalizePersonalReport(report: string, context: PersonalReportCo
 
 export function buildPersonalReportSegments(context: PersonalReportContext): ReportSegment[] {
   const data = serializeContext(context);
-  const minor = context.age < 18;
-  const perspective = minor
+  const mode = context.life?.mode || 'current';
+  const minor = mode === 'current' && context.age < 18;
+  const perspective = mode === 'historical'
+    ? `对象为已故人物，采用历史回顾视角。第三章写“人生阶段与公开经历回顾”，第四章写“天赋与影响的历史主题”，第五章只做文本中的文化观察，不给出现实健康判断，第六章写“可供读者反思的行动提问”。不得生成面向当前年份的未来规划、退休建议、健康安排或在世行动清单。`
+    : mode === 'uncertain'
+      ? `对象的生命周期状态未知，禁止断言其在世或已故。第三章避免依赖当前年龄的现实推断，第六章只写条件式反思问题。${context.life?.notices.join(' ') || ''}`
+      : minor
     ? `对象未满18岁，全文采用家长视角。第三章写“成长阶段与学习风格”，第四章写“天赋保护与养育建议”，第六章写“家长行动清单”。尊重孩子的类型和节奏，禁止给孩子定性或制造焦虑。`
     : `对象已成年，第三章聚焦“此刻的人生”，第四章聚焦“天赋与方向”，第六章聚焦个人实践。`;
-  const shared = `\n\n【唯一可信数据】\n${data}\n\n【视角】\n${perspective}\n\n全文总长度要求6000-10000字。`;
+  const lifeInstruction = context.life ? getLifeModeInstruction(context.life) : '这是在世对象的当前人生模式。';
+  const shared = `\n\n【唯一可信数据】\n${data}\n\n【视角】\n${perspective}\n\n【生命周期规则】\n${lifeInstruction}\n\n全文总长度要求6000-10000字。`;
 
   return [
     {
@@ -182,12 +203,12 @@ export function buildPersonalReportSegments(context: PersonalReportContext): Rep
     {
       id: 'direction',
       maxTokens: 6000,
-      prompt: `这是三段报告的第2段。直接从第3章开始，不重复数据声明，约2200-3200字。\n\n## 3. ${minor ? '成长阶段与学习风格' : '此刻的人生'}\n解释当前年龄在人类图爻线阶段、紫微身命结构、八字大运/流年的含义。无可靠大运数据时明确说“本次数据未提供大运起运”，不得编造。\n\n## 4. ${minor ? '天赋保护与养育建议' : '天赋与方向'}\n提供天赋地图表；每个方向标注由哪几个系统共同指向；给出具体编号避坑清单。${minor ? '补充尊重孩子类型特质的教育方式与家长可直接使用的话术。' : ''}\n\n## 5. 健康与情绪养护\n结合八字五行、五运六气和开放/定义中心，写体质观察与情绪出口；每条建议落到时辰与每周频次，并明确非医疗诊断。\n\n**本段结束时直接结束，禁止写免责声明、禁止写任何收尾语或总结——后续章节会继续。**${shared}`,
+      prompt: `这是三段报告的第2段。直接从第3章开始，不重复数据声明，约2200-3200字。\n\n## 3. ${mode === 'historical' ? '人生阶段与公开经历回顾' : minor ? '成长阶段与学习风格' : mode === 'uncertain' ? '条件式人生观察' : '此刻的人生'}\n解释${mode === 'historical' ? '已发生的人生阶段和公开影响，不写当前年龄的现实规划' : '当前年龄在人类图爻线阶段、紫微身命结构、八字大运/流年的含义'}。无可靠大运数据时明确说“本次数据未提供大运起运”，不得编造。\n\n## 4. ${mode === 'historical' ? '天赋与历史影响主题' : minor ? '天赋保护与养育建议' : '天赋与方向'}\n提供天赋地图表；每个方向标注由哪几个系统共同指向；给出具体编号避坑清单。${minor ? '补充尊重孩子类型特质的教育方式与家长可直接使用的话术。' : ''}\n\n## 5. ${mode === 'historical' ? '文本中的健康与情绪主题边界' : '健康与情绪养护'}\n${mode === 'historical' ? '只说明报告文本中的象征性主题，不对已故人物作医学、现实健康或未来寿命判断。' : '结合八字五行、五运六气和开放/定义中心，写体质观察与情绪出口；每条建议落到时辰与每周频次，并明确非医疗诊断。'}\n\n**本段结束时直接结束，禁止写免责声明、禁止写任何收尾语或总结——后续章节会继续。**${shared}`,
     },
     {
       id: 'practice',
       maxTokens: 5000,
-      prompt: `这是三段报告的第3段（最后一段）。直接从第6章开始，约2000-3000字。\n\n## 6. ${minor ? '家长行动清单' : '实践纲领'}\n每日、每周、每月、每年各1-3条。每条包含具体做法、触发条件和完成标准；至少给出两句“练习说：……”的话术。\n\n## 7. 最终寄语\n第二人称，回扣报告中至少三个真实具体数据，有温度但不滥情，不承诺命运结果。结尾再次提醒把报告当地图而非判决书。**这是报告最后一段，请务必写完整第6、7两章，以完整的第7章最终寄语自然结束。**${shared}`,
+      prompt: `这是三段报告的第3段（最后一段）。直接从第6章开始，约2000-3000字。\n\n## 6. ${mode === 'historical' ? '可供读者反思的行动提问' : minor ? '家长行动清单' : mode === 'uncertain' ? '条件式反思清单' : '实践纲领'}\n${mode === 'historical' ? '围绕公开人生主题提出每日、每周、每月各1-3个供读者反思的问题，不写已故人物当下行动建议。' : mode === 'uncertain' ? '使用“如果对象目前在世/如果对象正在经历某阶段”的条件式表达，不把状态未知写成事实。' : '每日、每周、每月、每年各1-3条。每条包含具体做法、触发条件和完成标准；至少给出两句“练习说：……”的话术。'}\n\n## 7. 最终寄语\n第二人称，回扣报告中至少三个真实具体数据，有温度但不滥情，不承诺命运结果。${mode === 'historical' ? '明确这是历史回顾，不向已故人物发出未来指令。' : ''}结尾再次提醒把报告当地图而非判决书。**这是报告最后一段，请务必写完整第6、7两章，以完整的第7章最终寄语自然结束。**${shared}`,
     },
   ];
 }
