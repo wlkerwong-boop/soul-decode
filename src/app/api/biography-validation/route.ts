@@ -8,7 +8,13 @@ import {
 
 export const runtime = 'nodejs';
 
-const noStoreHeaders = { 'Cache-Control': 'no-store' };
+const noStoreHeaders = {
+  'Cache-Control': 'no-store',
+  'CDN-Cache-Control': 'no-store',
+  'Surrogate-Control': 'no-store',
+  Pragma: 'no-cache',
+  Expires: '0',
+};
 
 export async function POST(request: NextRequest) {
   try {

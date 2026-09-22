@@ -23,6 +23,10 @@ describe('biography validation API', () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('no-store');
+    expect(response.headers.get('cdn-cache-control')).toBe('no-store');
+    expect(response.headers.get('surrogate-control')).toBe('no-store');
+    expect(response.headers.get('pragma')).toBe('no-cache');
+    expect(response.headers.get('expires')).toBe('0');
     expect(body).toMatchObject({ ok: true, score: { personId: 'bruce-lee', observedFitScore: 100 } });
   });
 
