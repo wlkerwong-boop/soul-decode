@@ -38,14 +38,14 @@ const GENDER_OPTIONS = [
 
 const TIMEZONE_OPTIONS = [
   { value: '', label: '选择时区' },
-  { value: '中国标准时间(CST, UTC+8)', label: '中国标准时间(CST, UTC+8)' },
-  { value: '美国东部(EST, UTC-5)', label: '美国东部(EST, UTC-5)' },
-  { value: '美国西部(PST, UTC-8)', label: '美国西部(PST, UTC-8)' },
-  { value: '英国(GMT, UTC+0)', label: '英国(GMT, UTC+0)' },
-  { value: '澳洲东部(AEST, UTC+10)', label: '澳洲东部(AEST, UTC+10)' },
-  { value: '日本(JST, UTC+9)', label: '日本(JST, UTC+9)' },
-  { value: '欧洲中部(CET, UTC+1)', label: '欧洲中部(CET, UTC+1)' },
-  { value: '其他', label: '其他' },
+  { value: 'Asia/Shanghai', label: '中国标准时间（UTC+8）' },
+  { value: 'America/New_York', label: '美国东部当地时间' },
+  { value: 'America/Los_Angeles', label: '美国西部当地时间' },
+  { value: 'Pacific/Honolulu', label: '夏威夷当地时间' },
+  { value: 'Europe/London', label: '英国当地时间' },
+  { value: 'Australia/Sydney', label: '澳大利亚悉尼当地时间' },
+  { value: 'Asia/Tokyo', label: '日本当地时间' },
+  { value: 'Europe/Paris', label: '法国当地时间' },
 ];
 
 const HOUR_OPTIONS = [
@@ -254,7 +254,7 @@ export default function BirthInputForm() {
   }, []);
 
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 100 }, (_, i) => String(currentYear - i));
+  const years = Array.from({ length: currentYear - 1800 + 1 }, (_, i) => String(currentYear - i));
   const months = Array.from({ length: 12 }, (_, i) => String(i + 1));
   const days = Array.from({ length: 31 }, (_, i) => String(i + 1));
 
@@ -913,7 +913,7 @@ export default function BirthInputForm() {
                 border: '1px solid rgba(201,169,110,0.15)',
               }}
             >
-              <p className="text-sm text-[var(--text-accent)] mb-1 text-center">☕ 如果这份报告对你有帮助</p>
+              <p className="text-sm text-[var(--text-accent)] mb-1 text-center">☕ 如果这份报告对您有帮助</p>
               <p className="text-xs text-[var(--text-secondary)] mb-4 text-center">
                 打赏一杯咖啡，支持我们持续精进算法
               </p>
@@ -944,7 +944,7 @@ export default function BirthInputForm() {
                 }}
               >
                 <p className="text-xs text-[var(--text-secondary)] mb-2">
-                  或者输入朋友给你的免费码
+                  或者输入朋友给您的免费码
                 </p>
                 <div className="flex gap-2 max-w-xs mx-auto">
                   <input

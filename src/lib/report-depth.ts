@@ -1,4 +1,6 @@
-import { Solar } from 'lunar-javascript';
+import { calculateAuthoritativeBazi } from './bazi-authoritative';
+import { describeChannels } from './hd-channels-map';
+import { getLifeModeInstruction, getTimeConfidenceLabel, type LifeContext } from './lifecycle';
 
 export interface ReportSegment {
   id: string;
@@ -8,6 +10,7 @@ export interface ReportSegment {
 
 export interface PersonalReportContext {
   age: number;
+  life?: LifeContext;
   gender: string;
   birth: string;
   location: string;
@@ -23,32 +26,24 @@ export interface PersonalReportContext {
   liunian: string;
 }
 
-export function calculateReportBazi(year: number, month: number, day: number, hour: number) {
-  const lunar = (Solar as any).fromYmdHms(year, month, day, hour, 0, 0).getLunar();
-  const pillars = [
-    lunar.getYearInGanZhiExact(),
-    lunar.getMonthInGanZhiExact(),
-    lunar.getDayInGanZhiExact(),
-    lunar.getTimeInGanZhi(),
-  ];
-  const stemElements: Record<string, string> = {甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
-  const branchElements: Record<string, string> = {子:'水',丑:'土',寅:'木',卯:'木',辰:'土',巳:'火',午:'火',未:'土',申:'金',酉:'金',戌:'土',亥:'水'};
-  const ganElements = pillars.map(pillar => stemElements[pillar[0]]);
-  const zhiElements = pillars.map(pillar => branchElements[pillar[1]]);
-  const elements = [...ganElements, ...zhiElements];
-  const elementDistribution = elements.reduce<Record<string, number>>((distribution, element) => {
-    distribution[element] = (distribution[element] || 0) + 1;
-    return distribution;
-  }, {});
-  const dayStem = lunar.getDayGan();
-  return {
-    pillars,
-    ganElements,
-    zhiElements,
-    elements,
-    elementDistribution,
-    dayMaster: `${dayStem}（${stemElements[dayStem]}）`,
-  };
+export function calculateReportBazi(year: number, month: number, day: number, hour: number, minute = 0) {
+  return calculateAuthoritativeBazi(year, month, day, hour, minute, 'Asia/Shanghai');
+}
+
+/**
+ * Backward-compatible name for callers that still pass a timezone. The
+ * product standard is the birthplace's local civil date and clock, so the
+ * timezone is retained only for API compatibility and is not applied here.
+ */
+export function calculateReportBaziForTimezone(
+  year: number,
+  month: number,
+  day: number,
+  hour: number,
+  minute = 0,
+  _timezone = 'Asia/Shanghai',
+) {
+  return calculateReportBazi(year, month, day, hour, minute);
 }
 
 export function calculateWuyunLiuqi(year: number) {
@@ -76,13 +71,19 @@ export function formatElementDistribution(distribution: Record<string, number>) 
 
 function serializeContext(context: PersonalReportContext) {
   const hd = context.hd
-    ? `类型${context.hd.type}；角色${context.hd.profile}；权威${context.hd.authority}；策略${context.hd.strategy}；通道${(context.hd.channels || []).join('、') || '无完整通道'}；定义中心${(context.hd.definedCenters || []).join('、') || '无'}`
+    ? `类型${context.hd.type}；角色${context.hd.profile}；权威${context.hd.authority}；策略${context.hd.strategy}；通道${describeChannels(context.hd.channels)}；定义中心${(context.hd.definedCenters || []).join('、') || '无'}`
     : '数据暂缺';
   const ziwei = context.ziwei
     ? context.ziwei.palaces.map((palace: any) => `${palace.name}：${(palace.stars || []).slice(0, 5).join('、') || '无主星'}`).join('；')
     : '数据暂缺';
   const planets = context.astrology?.planets?.map((planet: any) => `${planet.name}${planet.sign}座${planet.degree}°`).join('、') || context.astrology?.zodiac || '数据暂缺';
-  return `出生：${context.birth}；出生地：${context.location}；当前年龄：${context.age}岁；性别：${context.gender}
+  const life = context.life;
+  const ageLabel = life?.ageLabel || `当前年龄：${context.age}岁`;
+  const lifeLine = life
+    ? `生命周期：${life.status}；分析模式：${life.mode}；出生时刻可信度：${getTimeConfidenceLabel(life.timeConfidence)}；分析日期：${life.analysisDate}`
+    : '生命周期：在世当前人生模式；出生时刻可信度：精确';
+  return `出生：${context.birth}；出生地：${context.location}；${ageLabel}；性别：${context.gender}
+${lifeLine}
 八字：${context.bazi.pillars.join(' ')}；日主${context.bazi.dayMaster}；五行${formatElementDistribution(context.bazi.elementDistribution)}
 人类图：${hd}
 紫微斗数：${ziwei}
@@ -91,39 +92,136 @@ function serializeContext(context: PersonalReportContext) {
 流年：${context.liunian}`;
 }
 
+/**
+ * 引擎注入的「## 0. 排盘数据声明」节（K3 加固条款 §三·五）。
+ * 所有数字/列表由代码从计算 JSON 直接拼装，禁止 AI 撰写任何数据；
+ * AI 只写第 1 节起的叙事，本声明节由调用方在报告最前注入。
+ */
+export function buildPersonalReportDataDeclaration(context: PersonalReportContext): string {
+  const hd = context.hd
+    ? `类型：${context.hd.type}｜人生角色：${context.hd.profile}｜内在权威：${context.hd.authority}｜策略：${context.hd.strategy}｜签名：${context.hd.signature || '—'}｜非自我主题：${context.hd.notSelfTheme || '—'}｜通道：${describeChannels(context.hd.channels)}｜定义中心：${(context.hd.definedCenters || []).join('、') || '无'}`
+    : '数据暂缺';
+  const ziwei = context.ziwei
+    ? context.ziwei.palaces.map((palace: any) => `${palace.name}宫：${(palace.stars || []).slice(0, 5).join('、') || '无主星'}`).join('；')
+    : '数据暂缺';
+  const planets = context.astrology?.planets?.map((planet: any) => `${planet.name}${planet.sign}座${planet.degree}°`).join('、') || context.astrology?.zodiac || '数据暂缺';
+  const life = context.life;
+  const ageLabel = life?.ageLabel || `当前年龄：${context.age}岁`;
+  const lifeLine = life
+    ? `- 生命周期：${life.status}｜分析模式：${life.mode}｜出生时刻可信度：${getTimeConfidenceLabel(life.timeConfidence)}｜分析日期：${life.analysisDate}`
+    : '- 生命周期：alive｜分析模式：current｜出生时刻可信度：精确';
+  const notices = life?.notices?.length ? `\n- 重要边界：${life.notices.join('；')}` : '';
+  return [
+    '## 0. 排盘数据声明',
+    '',
+    `- 出生：${context.birth}｜出生地：${context.location}｜${ageLabel}｜性别：${context.gender}`,
+    lifeLine + notices,
+    `- 八字四柱：${context.bazi.pillars.join(' ')}｜日主：${context.bazi.dayMaster}｜五行：${formatElementDistribution(context.bazi.elementDistribution)}`,
+    `- 人类图：${hd}`,
+    `- 紫微斗数：${ziwei}`,
+    `- 占星：${context.astrology?.zodiac || ''}｜${planets}`,
+    `- 五运六气：${context.wuyun.description}`,
+    `- 流年：${context.liunian}`,
+    '',
+    '> 本声明节由系统依据排盘数据直接生成，以下解读均以此为准。命理是地图不是判决书，七分天性三分环境，与真人不符之处以真人为准。',
+    '',
+  ].join('\n');
+}
+
 export const PERSONAL_REPORT_SYSTEM_PROMPT = `你是严谨而温暖的生命蓝图解读者。你必须只依据输入的真实排盘数据写作，不补造通道、宫星、十神、行星、年龄节点或医学结论。
 
 纪律：
 1. 每个关键论断必须就近挂至少一个具体数据；优先给出通道编号、宫位主星、日主与五行数量、行星星座。
 2. 主动交叉引用，例如“人类图的X，在八字里对应Y”；至少诚实指出一处系统张力并解释如何整合。
-3. 第二人称、口语化且有专业密度；禁止“你很有魅力”一类无数据空话。
+3. 全篇使用尊称“您”，不要使用“你”；口语化但有专业密度；禁止“您很有魅力”一类无数据空话。
 4. 所有建议必须落到动作、时辰、频次或可直接练习的话术。
 5. 命理只作自我观察，不替代医疗、法律或财务建议。
-6. 最终全文目标为6000-10000个中文字符。你只写本次指定章节，不重复前段，不预写后段。`;
+6. 最终全文目标为6000-10000个中文字符。你只写本次指定章节，不重复前段，不预写后段。
+7. 正文必须包含“使用边界与免责声明”小节，明确本报告仅供自我观察、个人成长与关系沟通参考，不构成医疗、法律、教育或投资建议。
+8. 通道与中心的连接关系**只准引用数据声明中映射表给出的“X(中心) ↔ Y(中心)”字段**，禁止自行改写或补造任何通道-中心连接；映射表缺项的通道只写编号，不描述连接。`;
+
+export const PERSONAL_REPORT_DISCLAIMER =
+  '\n\n---\n\n## 使用边界与免责声明\n\n本报告仅供自我观察、个人成长与关系沟通参考，不构成医疗、法律、教育或投资建议。';
+
+/** Keep the tone respectful and deterministic across model chunks. */
+export function normalizePersonalReportAudience(report: string) {
+  return report
+    .replace(/你们/g, '您们')
+    .replace(/你的/g, '您的')
+    .replace(/你自己/g, '您自己')
+    .replace(/你/g, '您');
+}
+
+function appendPersonalDataCheck(report: string, context: PersonalReportContext) {
+  const required = [
+    ...context.bazi.pillars,
+    context.hd?.type,
+    context.hd?.profile,
+    context.hd?.authority,
+  ].filter(Boolean) as string[];
+  const missing = required.filter((value) => !report.includes(value));
+  if (!missing.length) return report;
+
+  const hd = context.hd
+    ? `${context.hd.type} · ${context.hd.profile} · ${context.hd.authority} · 通道${describeChannels(context.hd.channels)}`
+    : '数据暂缺';
+  return `${report.trimEnd()}\n\n## 数据核验卡\n\n为避免解读文字遮蔽原始数据，本报告最后保留一份可复核摘要：\n\n- 八字四柱：${context.bazi.pillars.join(' ')}\n- 日主：${context.bazi.dayMaster}\n- 人类图：${hd}\n- 本次缺少或未在正文完整出现的字段：${missing.join('、')}\n\n若正文叙述与此卡片不一致，请以排盘数据和您本人实际体验为准。`;
+}
+
+export function appendPersonalReportDisclaimer(report: string) {
+  if (report.includes('本报告仅供自我观察、个人成长与关系沟通参考')) return report;
+  return `${report.trimEnd()}${PERSONAL_REPORT_DISCLAIMER}`;
+}
+
+export function finalizePersonalReport(report: string, context: PersonalReportContext) {
+  const normalized = normalizePersonalReportAudience(report);
+  return appendPersonalReportDisclaimer(appendPersonalDataCheck(normalized, context));
+}
+
+/**
+ * Normalize both the current local-generation path and the legacy report-api
+ * path to one verifiable report contract. The legacy service predates the
+ * engine-owned declaration section, so inject it here before finalization.
+ */
+export function preparePersonalReport(report: string, context: PersonalReportContext) {
+  const hasDeclaration = /##\s*0[.、．]\s*(?:家庭排盘数据声明|双方排盘数据声明|排盘数据声明)/.test(report);
+  const withDeclaration = hasDeclaration
+    ? report
+    : `${buildPersonalReportDataDeclaration(context)}\n${report.trimStart()}`;
+  return finalizePersonalReport(withDeclaration, context);
+}
 
 export function buildPersonalReportSegments(context: PersonalReportContext): ReportSegment[] {
   const data = serializeContext(context);
-  const minor = context.age < 18;
-  const perspective = minor
+  const mode = context.life?.mode || 'current';
+  const minor = mode === 'current' && context.age < 18;
+  const perspective = mode === 'historical'
+    ? `对象为已故人物，采用历史回顾视角。第三章写“人生阶段与公开经历回顾”，第四章写“天赋与影响的历史主题”，第五章只做文本中的文化观察，不给出现实健康判断，第六章写“可供读者反思的行动提问”。不得生成面向当前年份的未来规划、退休建议、健康安排或在世行动清单。`
+    : mode === 'uncertain'
+      ? `对象的生命周期状态未知，禁止断言其在世或已故。第三章避免依赖当前年龄的现实推断，第六章只写条件式反思问题。${context.life?.notices.join(' ') || ''}`
+      : minor
     ? `对象未满18岁，全文采用家长视角。第三章写“成长阶段与学习风格”，第四章写“天赋保护与养育建议”，第六章写“家长行动清单”。尊重孩子的类型和节奏，禁止给孩子定性或制造焦虑。`
     : `对象已成年，第三章聚焦“此刻的人生”，第四章聚焦“天赋与方向”，第六章聚焦个人实践。`;
-  const shared = `\n\n【唯一可信数据】\n${data}\n\n【视角】\n${perspective}\n\n全文总长度要求6000-10000字。`;
+  const lifeInstruction = context.life ? getLifeModeInstruction(context.life) : '这是在世对象的当前人生模式。';
+  const shared = `\n\n【唯一可信数据】\n${data}\n\n【视角】\n${perspective}\n\n【生命周期规则】\n${lifeInstruction}\n\n全文总长度要求6000-10000字。`;
 
   return [
     {
       id: 'foundation',
-      maxTokens: 7000,
-      prompt: `这是三段报告的第1段。只输出以下三章，约2200-3200字：\n\n## 0. 排盘数据声明\n逐条列出出生信息、八字四柱与五行、人类图类型/角色/权威/通道、紫微命宫主星、占星行星星座、五运六气。末尾原样写：命理是地图不是判决书，七分天性三分环境，与真人不符之处以真人为准。\n\n## 1. 核心命盘总览\n用“系统 × 关键数据 × 一句话主题”的七行表格；收尾以“七个系统说的是同一个人：”给出综合画像。\n\n## 2. 交叉印证\n提炼3-5个核心特质。每个特质必须并列至少三个系统的具体证据，并写“给你的提醒”：阴影面 + 一句可执行动作。至少写一处系统矛盾及整合解释。${shared}`,
+      // 2200-3200 中文字 ≈ 3300-4800 token（含 markdown/表格），3500 会被截断。
+      // 2026-08-15 修复：提到 6000，并禁止本段写免责声明/收尾语（finalize 统一追加）。
+      maxTokens: 6000,
+      prompt: `这是三段报告的第1段。**注意：「## 0. 排盘数据声明」已由系统依据排盘数据直接生成在报告开头，禁止你重复输出或改写任何排盘数字、列表、通道连接**。只输出以下两章，约2200-3200字：\n\n## 1. 核心命盘总览\n用“系统 × 关键数据 × 一句话主题”的七行表格；收尾以“七个系统说的是同一个人：”给出综合画像。\n\n## 2. 交叉印证\n提炼3-5个核心特质。每个特质必须并列至少三个系统的具体证据，并写“给你的提醒”：阴影面 + 一句可执行动作。至少写一处系统矛盾及整合解释。\n\n**本段结束时直接结束，禁止写免责声明、禁止写任何收尾语或总结——后续章节会继续。**${shared}`,
     },
     {
       id: 'direction',
-      maxTokens: 7000,
-      prompt: `这是三段报告的第2段。直接从第3章开始，不重复数据声明，约2200-3200字。\n\n## 3. ${minor ? '成长阶段与学习风格' : '此刻的人生'}\n解释当前年龄在人类图爻线阶段、紫微身命结构、八字大运/流年的含义。无可靠大运数据时明确说“本次数据未提供大运起运”，不得编造。\n\n## 4. ${minor ? '天赋保护与养育建议' : '天赋与方向'}\n提供天赋地图表；每个方向标注由哪几个系统共同指向；给出具体编号避坑清单。${minor ? '补充尊重孩子类型特质的教育方式与家长可直接使用的话术。' : ''}\n\n## 5. 健康与情绪养护\n结合八字五行、五运六气和开放/定义中心，写体质观察与情绪出口；每条建议落到时辰与每周频次，并明确非医疗诊断。${shared}`,
+      maxTokens: 6000,
+      prompt: `这是三段报告的第2段。直接从第3章开始，不重复数据声明，约2200-3200字。\n\n## 3. ${mode === 'historical' ? '人生阶段与公开经历回顾' : minor ? '成长阶段与学习风格' : mode === 'uncertain' ? '条件式人生观察' : '此刻的人生'}\n解释${mode === 'historical' ? '已发生的人生阶段和公开影响，不写当前年龄的现实规划' : '当前年龄在人类图爻线阶段、紫微身命结构、八字大运/流年的含义'}。无可靠大运数据时明确说“本次数据未提供大运起运”，不得编造。\n\n## 4. ${mode === 'historical' ? '天赋与历史影响主题' : minor ? '天赋保护与养育建议' : '天赋与方向'}\n提供天赋地图表；每个方向标注由哪几个系统共同指向；给出具体编号避坑清单。${minor ? '补充尊重孩子类型特质的教育方式与家长可直接使用的话术。' : ''}\n\n## 5. ${mode === 'historical' ? '文本中的健康与情绪主题边界' : '健康与情绪养护'}\n${mode === 'historical' ? '只说明报告文本中的象征性主题，不对已故人物作医学、现实健康或未来寿命判断。' : '结合八字五行、五运六气和开放/定义中心，写体质观察与情绪出口；每条建议落到时辰与每周频次，并明确非医疗诊断。'}\n\n**本段结束时直接结束，禁止写免责声明、禁止写任何收尾语或总结——后续章节会继续。**${shared}`,
     },
     {
       id: 'practice',
-      maxTokens: 6000,
-      prompt: `这是三段报告的第3段。直接从第6章开始，约1600-2400字。\n\n## 6. ${minor ? '家长行动清单' : '实践纲领'}\n每日、每周、每月、每年各1-3条。每条包含具体做法、触发条件和完成标准；至少给出两句“练习说：……”的话术。\n\n## 7. 最终寄语\n第二人称，回扣报告中至少三个真实具体数据，有温度但不滥情，不承诺命运结果。结尾再次提醒把报告当地图而非判决书。${shared}`,
+      maxTokens: 5000,
+      prompt: `这是三段报告的第3段（最后一段）。直接从第6章开始，约2000-3000字。\n\n## 6. ${mode === 'historical' ? '可供读者反思的行动提问' : minor ? '家长行动清单' : mode === 'uncertain' ? '条件式反思清单' : '实践纲领'}\n${mode === 'historical' ? '围绕公开人生主题提出每日、每周、每月各1-3个供读者反思的问题，不写已故人物当下行动建议。' : mode === 'uncertain' ? '使用“如果对象目前在世/如果对象正在经历某阶段”的条件式表达，不把状态未知写成事实。' : '每日、每周、每月、每年各1-3条。每条包含具体做法、触发条件和完成标准；至少给出两句“练习说：……”的话术。'}\n\n## 7. 最终寄语\n第二人称，回扣报告中至少三个真实具体数据，有温度但不滥情，不承诺命运结果。${mode === 'historical' ? '明确这是历史回顾，不向已故人物发出未来指令。' : ''}结尾再次提醒把报告当地图而非判决书。**这是报告最后一段，请务必写完整第6、7两章，以完整的第7章最终寄语自然结束。**${shared}`,
     },
   ];
 }

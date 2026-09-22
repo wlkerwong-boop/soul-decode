@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer, { Browser } from 'puppeteer';
+import { existsSync } from 'node:fs';
+import { isAllowedPdfUrl } from '@/lib/pdf-url-policy';
+import { inlinePdfFontSources } from '@/lib/pdf-fonts';
 
 const ALLOWED_ORIGIN = 'https://aisoulcode.cn';
 
@@ -15,10 +18,15 @@ function setCors(response: NextResponse, origin: string | null) {
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
 }
 
-/** 启动 Puppeteer Browser（puppeteer 自带 Chromium，无需系统安装） */
+/** 启动 PDF 浏览器：优先复用服务器已有 Chrome，否则回退 Puppeteer 自带浏览器。 */
 async function launchBrowser(): Promise<Browser> {
+  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+    || process.env.CHROME_PATH
+    || (existsSync('/usr/bin/google-chrome') ? '/usr/bin/google-chrome' : undefined);
+
   return puppeteer.launch({
     headless: true,
+    ...(executablePath ? { executablePath } : {}),
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -66,6 +74,15 @@ export async function POST(req: NextRequest) {
       return res;
     }
 
+    if (url && !isAllowedPdfUrl(url)) {
+      const res = NextResponse.json(
+        { error: 'url 只允许访问 SoulCode 自有 HTTPS 页面' },
+        { status: 400 }
+      );
+      setCors(res, origin);
+      return res;
+    }
+
     let browser: Browser | null = null;
 
     try {
@@ -82,7 +99,9 @@ export async function POST(req: NextRequest) {
 
       if (html) {
         // 直接设置 HTML 内容
-        await page.setContent(html, {
+        // PDF 页面从 about:blank 开始，不能依赖外部字体请求；将本地中文字体
+        // 分片内嵌后再交给 Puppeteer，避免中文在 PDF 中变成方框。
+        await page.setContent(inlinePdfFontSources(html), {
           waitUntil: 'load',
           timeout: 30000,
         });
@@ -92,6 +111,18 @@ export async function POST(req: NextRequest) {
           waitUntil: 'load',
           timeout: 30000,
         });
+      }
+
+      // 中文字体是异步加载的；先等待字体完成，再生成 PDF。
+      await page.evaluate(async () => {
+        if (document.fonts?.ready) await document.fonts.ready;
+      });
+      await new Promise(resolve => setTimeout(resolve, 400));
+      const fontReady = await page.evaluate(() =>
+        document.fonts ? document.fonts.check('16px "LXGW WenKai"') : true
+      );
+      if (!fontReady) {
+        console.warn('[pdf] LXGW WenKai 未完成加载，将使用系统中文字体回退');
       }
 
       // 等待图表渲染（SVG 和 Canvas）
@@ -133,7 +164,7 @@ export async function POST(req: NextRequest) {
         headerTemplate: '<span></span>',
         footerTemplate: `
           <div style="width:100%;font-size:8px;color:#999;text-align:center;padding:0 15mm;">
-            <span style="float:left;">灵魂解码 · aisoulcode.cn</span>
+            <span style="float:left;">SoulCode · aisoulcode.cn</span>
             <span style="float:right;"><span class="pageNumber"></span> / <span class="totalPages"></span></span>
           </div>
         `,
@@ -142,7 +173,8 @@ export async function POST(req: NextRequest) {
 
       await browser.close();
 
-      const filename = `人生总览报告_${new Date().toISOString().slice(0, 10)}.pdf`;
+      const safeStem = String(body.filename || '人生总览报告').replace(/[\\/:*?"<>|]/g, '_').trim() || '人生总览报告';
+      const filename = `${safeStem}_${new Date().toISOString().slice(0, 10)}.pdf`;
       const res = new NextResponse(Buffer.from(pdfBuffer), {
         status: 200,
         headers: {
@@ -162,13 +194,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
-  } catch (error: any) {
-    console.error('[pdf] 生成失败:', error.message);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[pdf] 生成失败:', message);
     const res = NextResponse.json(
       {
         error: 'PDF 生成失败',
-        message: error.message || '未知错误',
-        hint: error.message?.includes('Chrome') || error.message?.includes('chromium')
+        message: message || '未知错误',
+        hint: message.includes('Chrome') || message.includes('chromium')
           ? '服务器未安装 Chromium。请运行: apt-get install -y chromium-browser'
           : undefined,
       },

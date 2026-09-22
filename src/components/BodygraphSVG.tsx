@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { CHART_ATLAS_COLORS } from './chart-atlas/chart-atlas';
 
 interface BodygraphSVGProps {
   definedCenters: string[];
@@ -74,9 +75,9 @@ const GP: Record<number,{dx:number,dy:number}> = {
 };
 
 const NAMES: Record<string,string> = {
-  Head:'顶轮·灵感',Ajna:'眉心轮·思考',Throat:'喉咙·表达',
-  G:'G中心·方向',Ego:'意志力·自我',Sacral:'荐骨·生命力',
-  'Solar Plexus':'情绪·觉知',Spleen:'脾脏·直觉',Root:'根轮·压力'
+  Head:'顶轮',Ajna:'眉心',Throat:'喉咙',
+  G:'G中心',Ego:'意志',Sacral:'荐骨',
+  'Solar Plexus':'情绪',Spleen:'脾脏',Root:'根部'
 };
 
 function cc(p: typeof C[string]) { return {x:p.x, y:p.y + p.h/2}; }
@@ -89,56 +90,56 @@ function curve(x1:number,y1:number,x2:number,y2:number,act:boolean) {
 export default function BodygraphSVG({definedCenters,activatedGates,channels,print}:BodygraphSVGProps) {
   const defSet=new Set(definedCenters), chSet=new Set(channels);
   const isPrint = print || false;
-
-  // Print mode colors: myBodyGraph classic style (white bg, black outlines, brown fills)
   const colors = isPrint ? {
-    bg: 'white',
-    inactiveChannel: 'rgba(0,0,0,0.08)',
-    activeChannelGlow: '#333',
-    activeChannelLine: '#555',
-    definedCenterFill: '#e8d5b0',
-    definedCenterStroke: '#333',
-    undefinedCenterFill: '#f5f5f5',
-    undefinedCenterStroke: '#999',
-    gateText: '#333',
-    centerNameDefined: '#222',
-    centerNameUndefined: '#888',
+    paper: '#FFFFFF',
+    inactiveChannel: '#D8D0C4',
+    activeChannel: '#6E5A36',
+    definedCenterFill: '#EAD9B9',
+    definedCenterStroke: '#6E5A36',
+    undefinedCenterFill: '#FAF7F1',
+    undefinedCenterStroke: '#A09689',
+    gateText: '#332D26',
+    centerNameDefined: '#332D26',
+    centerNameUndefined: '#766C60',
   } : {
-    bg: 'rgba(0,0,0,0)',
-    inactiveChannel: 'rgba(255,255,255,0.04)',
-    activeChannelGlow: '#c9a84c',
-    activeChannelLine: 'rgba(201,168,76,0.5)',
-    definedCenterFill: 'rgba(201,168,76,0.25)',
-    definedCenterStroke: '#d4a84c',
-    undefinedCenterFill: 'rgba(255,255,255,0.05)',
-    undefinedCenterStroke: 'rgba(255,255,255,0.12)',
-    gateText: '#d4a84c',
-    centerNameDefined: '#c9a84c',
-    centerNameUndefined: 'rgba(255,255,255,0.3)',
+    paper: CHART_ATLAS_COLORS.paper,
+    inactiveChannel: '#DAD1C5',
+    activeChannel: CHART_ATLAS_COLORS.gold,
+    definedCenterFill: '#EBDDBF',
+    definedCenterStroke: CHART_ATLAS_COLORS.gold,
+    undefinedCenterFill: '#FBF8F2',
+    undefinedCenterStroke: '#C9BFAF',
+    gateText: '#765B24',
+    centerNameDefined: '#332D26',
+    centerNameUndefined: '#8A8072',
+  };
+
+  const centerPath = (p: typeof C[string]) => {
+    if (p.shape==='triangle') return `M${p.x},${p.y+p.h}L${p.x-p.w/2},${p.y}L${p.x+p.w/2},${p.y}Z`;
+    if (p.shape==='triangle-down') return `M${p.x},${p.y}L${p.x-p.w/2},${p.y+p.h}L${p.x+p.w/2},${p.y+p.h}Z`;
+    if (p.shape==='diamond') return `M${p.x},${p.y}L${p.x+p.w/2},${p.y+p.h/2}L${p.x},${p.y+p.h}L${p.x-p.w/2},${p.y+p.h/2}Z`;
+    return `M${p.x-p.w/2},${p.y}L${p.x+p.w/2},${p.y}L${p.x+p.w/2},${p.y+p.h}L${p.x-p.w/2},${p.y+p.h}Z`;
   };
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg" className="w-full max-w-md mx-auto">
-      {isPrint ? null : (
-      <defs>
-        <filter id="g"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        <radialGradient id="bg"><stop offset="0%" stopColor="rgba(201,168,76,0.04)"/><stop offset="100%" stopColor="rgba(0,0,0,0)"/></radialGradient>
-        <radialGradient id="dg"><stop offset="0%" stopColor="rgba(201,168,76,0.35)"/><stop offset="100%" stopColor="rgba(201,168,76,0.15)"/></radialGradient>
-      </defs>
-      )}
-      <circle cx={W/2} cy={H/2} r={160} fill={isPrint ? 'none' : 'url(#bg)'}/>
+    <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg" className="w-full mx-auto chart-atlas-svg">
+      <title>人类图 BodyGraph</title>
+      <rect x="0" y="0" width={W} height={H} rx="14" fill={colors.paper} />
+      <text x="22" y="28" fill={colors.gateText} fontSize="10" fontWeight="700" letterSpacing="2" fontFamily="LXGW WenKai, PingFang SC, sans-serif">BODYGRAPH · 人类图</text>
+      <text x={W-22} y="28" textAnchor="end" fill={colors.centerNameUndefined} fontSize="9" fontFamily="LXGW WenKai, PingFang SC, sans-serif">九大中心 · 通道 · 闸门</text>
+      <g transform="translate(0 22)">
 
       {/* Inactive channels */}
       {Object.entries(CH).map(([k,[c1,c2]])=>chSet.has(k)?null:(
-        <path key={'ic-'+k} d={curve(cc(C[c1]).x,cc(C[c1]).y,cc(C[c2]).x,cc(C[c2]).y,false)} fill="none" stroke={colors.inactiveChannel} strokeWidth="1" strokeDasharray="4,4" strokeLinecap="round"/>
+        <path key={'ic-'+k} d={curve(cc(C[c1]).x,cc(C[c1]).y,cc(C[c2]).x,cc(C[c2]).y,false)} fill="none" stroke={colors.inactiveChannel} strokeWidth="1.1" strokeDasharray="3,5" strokeLinecap="round"/>
       ))}
 
       {/* Active channels - glow + line */}
       {channels.map(k=>{const e=CH[k];if(!e)return null;const p=cc(C[e[0]]),q=cc(C[e[1]]);return(
-        <path key={'ac-'+k} d={curve(p.x,p.y,q.x,q.y,true)} fill="none" stroke={colors.activeChannelGlow} strokeWidth="3" filter={isPrint?undefined:"url(#g)"} strokeLinecap="round"/>
+        <path key={'ac-'+k} d={curve(p.x,p.y,q.x,q.y,true)} fill="none" stroke={colors.activeChannel} strokeWidth="4" strokeLinecap="round" opacity="0.9"/>
       )})}
       {channels.map(k=>{const e=CH[k];if(!e)return null;const p=cc(C[e[0]]),q=cc(C[e[1]]);return(
-        <path key={'acl-'+k} d={curve(p.x,p.y,q.x,q.y,true)} fill="none" stroke={colors.activeChannelLine} strokeWidth="1.5" strokeLinecap="round"/>
+        <path key={'acl-'+k} d={curve(p.x,p.y,q.x,q.y,true)} fill="none" stroke={colors.paper} strokeWidth="1" strokeLinecap="round" opacity="0.75"/>
       )})}
 
       {/* Center shapes */}
@@ -147,23 +148,25 @@ export default function BodygraphSVG({definedCenters,activatedGates,channels,pri
         const fill=def?colors.definedCenterFill:colors.undefinedCenterFill;
         const str=def?colors.definedCenterStroke:colors.undefinedCenterStroke;
         const sw=def?2.5:1;
-        let d='';
-        if(p.shape==='triangle') d=`M${p.x},${p.y+p.h}L${p.x-p.w/2},${p.y}L${p.x+p.w/2},${p.y}Z`;
-        else if(p.shape==='triangle-down') d=`M${p.x},${p.y}L${p.x-p.w/2},${p.y+p.h}L${p.x+p.w/2},${p.y+p.h}Z`;
-        else if(p.shape==='diamond') d=`M${p.x},${p.y}L${p.x+p.w/2},${p.y+p.h/2}L${p.x},${p.y+p.h}L${p.x-p.w/2},${p.y+p.h/2}Z`;
-        else d=`M${p.x-p.w/2},${p.y}L${p.x+p.w/2},${p.y}L${p.x+p.w/2},${p.y+p.h}L${p.x-p.w/2},${p.y+p.h}Z`;
-        return <path key={n} d={d} fill={fill} stroke={str} strokeWidth={sw} strokeLinejoin="round" />;
+        return <path key={n} d={centerPath(p)} fill={fill} stroke={str} strokeWidth={sw} strokeLinejoin="round" />;
       })}
 
       {/* Gate numbers */}
       {activatedGates.map(g=>{const ct=GC[g],cp=C[ct],gp=GP[g];if(!ct||!cp||!gp)return null;return(
-        <text key={'g'+g} x={cp.x+gp.dx} y={cp.y+cp.h/2+gp.dy} textAnchor="middle" fill={colors.gateText} fontSize="10" fontWeight="bold" fontFamily="sans-serif">{g}</text>
+        <text key={'g'+g} x={cp.x+gp.dx} y={cp.y+cp.h/2+gp.dy} textAnchor="middle" fill={colors.gateText} fontSize="10.5" fontWeight="700" fontFamily="LXGW WenKai, PingFang SC, sans-serif">{g}</text>
       )})}
 
       {/* Center names */}
       {Object.entries(C).map(([n,p])=>(
-        <text key={'lb-'+n} x={p.x} y={p.y+p.h/2+3} textAnchor="middle" fill={defSet.has(n)?colors.centerNameDefined:colors.centerNameUndefined} fontSize="9" fontWeight={defSet.has(n)?'bold':'normal'} fontFamily="sans-serif">{NAMES[n]||n}</text>
+        <text key={'lb-'+n} x={p.x} y={n === 'Root' ? p.y - 6 : p.y + p.h + 13} textAnchor="middle" fill={defSet.has(n)?colors.centerNameDefined:colors.centerNameUndefined} fontSize="8.5" fontWeight={defSet.has(n)?'700':'400'} fontFamily="LXGW WenKai, PingFang SC, sans-serif">{NAMES[n]||n}</text>
       ))}
+      </g>
+      <g transform={`translate(22 ${H-24})`} fontFamily="LXGW WenKai, PingFang SC, sans-serif" fontSize="9">
+        <circle cx="5" cy="-3" r="4" fill={colors.definedCenterFill} stroke={colors.definedCenterStroke}/>
+        <text x="15" y="0" fill={colors.centerNameUndefined}>已定义</text>
+        <circle cx="70" cy="-3" r="4" fill={colors.undefinedCenterFill} stroke={colors.undefinedCenterStroke}/>
+        <text x="80" y="0" fill={colors.centerNameUndefined}>开放</text>
+      </g>
     </svg>
   );
 }

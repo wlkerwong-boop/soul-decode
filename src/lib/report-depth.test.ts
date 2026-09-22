@@ -1,10 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildPersonalReportDataDeclaration,
   buildPersonalReportSegments,
   calculateReportBazi,
+  calculateReportBaziForTimezone,
   calculateWuyunLiuqi,
   formatElementDistribution,
+  appendPersonalReportDisclaimer,
+  normalizePersonalReportAudience,
+  finalizePersonalReport,
+  preparePersonalReport,
 } from './report-depth';
+import { buildLifeContext } from './lifecycle';
 
 const adultContext = {
   age: 44,
@@ -28,6 +35,12 @@ describe('report data mapping', () => {
     expect(formatElementDistribution(result.elementDistribution)).not.toContain('数据暂缺');
   });
 
+  it('uses the birthplace local calendar clock for overseas births', () => {
+    const result = calculateReportBaziForTimezone(2015, 6, 4, 19, 45, 'America/Los_Angeles');
+    expect(result.pillars).toEqual(['乙未', '辛巳', '辛亥', '戊戌']);
+    expect(result.local).toEqual({ year: 2015, month: 6, day: 4, hour: 19, minute: 45 });
+  });
+
   it('keeps stem separate from the five-movement label', () => {
     const result = calculateWuyunLiuqi(1982);
     expect(result.stem).toBe('壬');
@@ -37,17 +50,84 @@ describe('report data mapping', () => {
 });
 
 describe('personal report prompt', () => {
+  it('renders historical lifecycle and time-confidence boundaries in the declaration', () => {
+    const historical = {
+      ...adultContext,
+      age: 32,
+      life: buildLifeContext({
+        birthDate: '1940-11-27',
+        deathDate: '1973-07-20',
+        analysisDate: '2026-09-21',
+        lifeStatus: 'deceased',
+        timeConfidence: 'exact',
+      }),
+    };
+    const declaration = buildPersonalReportDataDeclaration(historical);
+    expect(declaration).toContain('享年：32岁（已故）');
+    expect(declaration).toContain('分析模式：historical');
+    expect(buildPersonalReportSegments(historical).map(segment => segment.prompt).join('\n'))
+      .toContain('不得生成面向当前年份的未来规划');
+  });
+
+  it('warns that unknown birth time cannot validate time-sensitive systems', () => {
+    const unknownTime = {
+      ...adultContext,
+      age: 144,
+      life: buildLifeContext({
+        birthDate: '1881-09-25',
+        analysisDate: '2026-09-21',
+        lifeStatus: 'deceased',
+        timeConfidence: 'unknown',
+      }),
+    };
+    const declaration = buildPersonalReportDataDeclaration(unknownTime);
+    expect(declaration).toContain('出生时刻可信度：未知');
+    expect(declaration).toContain('人类图、紫微斗数时辰');
+  });
+
   it('splits the report into three bounded segments with every v2 chapter', () => {
     const segments = buildPersonalReportSegments(adultContext);
     expect(segments).toHaveLength(3);
     const full = segments.map(segment => segment.prompt).join('\n');
-    for (const heading of ['排盘数据声明', '核心命盘总览', '交叉印证', '此刻的人生', '天赋与方向', '健康与情绪养护', '实践纲领', '最终寄语']) {
+    // K3 加固条款：## 0 声明节由引擎注入，AI 段只提示"已生成"、不再被要求撰写数据列表
+    expect(full).toContain('已由系统依据排盘数据直接生成');
+    expect(full).not.toContain('逐条列出出生信息');
+    expect(full).not.toContain('逐条列出');
+    for (const heading of ['核心命盘总览', '交叉印证', '此刻的人生', '天赋与方向', '健康与情绪养护', '实践纲领', '最终寄语']) {
       expect(full).toContain(heading);
     }
     expect(full).toContain('6000-10000');
     expect(full).toContain('18-58');
     expect(full).toContain('紫微');
-    expect(full).toContain('命理是地图不是判决书');
+    // 声明节由引擎注入，含原「命理是地图不是判决书」表述
+    const declaration = buildPersonalReportDataDeclaration(adultContext);
+    expect(declaration).toContain('排盘数据声明');
+    expect(declaration).toContain('命理是地图不是判决书');
+    expect(declaration).toContain('18-58');
+  });
+
+  it('appends a deterministic disclaimer when model output omits one', () => {
+    const result = appendPersonalReportDisclaimer('正文内容');
+    expect(result).toContain('仅供自我观察、个人成长与关系沟通参考');
+    expect(appendPersonalReportDisclaimer(result)).toBe(result);
+    expect(appendPersonalReportDisclaimer('已有免责声明，但没有标准句')).toContain('仅供自我观察、个人成长与关系沟通参考');
+  });
+
+  it('normalizes respectful second-person language and adds a data check card when needed', () => {
+    expect(normalizePersonalReportAudience('你要相信你自己，你们可以慢慢来。')).toBe('您要相信您自己，您们可以慢慢来。');
+    const result = finalizePersonalReport('您是一位观察者。', adultContext);
+    expect(result).toContain('## 数据核验卡');
+    expect(result).toContain('壬戌 庚戌 乙亥 辛巳');
+    expect(result).toContain('Projector · 3/6 · Splenic');
+    expect(result).not.toContain('你');
+  });
+
+  it('injects and finalizes a legacy report before verification', () => {
+    const result = preparePersonalReport('## 1. 旧报告\n\n正文内容', adultContext);
+    expect(result.match(/## 0\. 排盘数据声明/g)).toHaveLength(1);
+    expect(result).toContain('由系统依据排盘数据直接生成');
+    expect(result).toContain('## 1. 旧报告');
+    expect(result).toContain('仅供自我观察、个人成长与关系沟通参考');
   });
 
   it('switches minors to parent-facing growth and education guidance', () => {

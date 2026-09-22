@@ -3,6 +3,7 @@
  * 调用DeepSeek AI生成个性化人类图深度报告
  */
 import { NextRequest } from 'next/server';
+import { describeChannels } from '@/lib/hd-channels-map';
 
 export const runtime = 'nodejs';
 
@@ -20,7 +21,10 @@ function buildHDPrompt(hd: any): string {
 非自我主题：${hd.notSelfTheme || '未知'}
 定义中心：${(hd.definedCenters||[]).join('、') || '无'}
 开放中心：${(hd.undefinedCenters||[]).join('、') || '无'}
-激活通道：${(hd.channels||[]).join('、') || '无'}
+激活通道：${describeChannels(hd.channels)}
+
+【纪律】
+通道与中心的连接关系只准引用上方映射表给出的“X(中心) ↔ Y(中心)”字段，禁止自行改写或补造任何通道-中心连接；映射表缺项的通道只写编号，不描述连接。
 
 【报告要求】
 请用中文撰写，语气温暖、专业、深刻。篇幅约1500-2500字。
@@ -44,7 +48,7 @@ function buildHDPrompt(hd: any): string {
 - 在不同人生阶段的变化
 
 ## 5. 通道与天赋
-- 激活通道（${(hd.channels||[]).join('、')}）的具体天赋解读
+- 激活通道（${describeChannels(hd.channels)}）的具体天赋解读
 - 如何在工作和生活中运用
 
 ## 6. 一句话核心建议
@@ -60,7 +64,7 @@ export async function POST(request: NextRequest) {
     const prompt = buildHDPrompt(hd);
     const apiKey = process.env.DEEPSEEK_API_KEY;
     const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
-    const model = process.env.AI_MODEL || 'deepseek-v4-pro';
+    const model = process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
     let interpretation = '';
     let aiUsed = false;
 
@@ -71,6 +75,7 @@ export async function POST(request: NextRequest) {
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
           body: JSON.stringify({
             model,
+            ...(String(model).includes('deepseek') || String(model).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
             messages: [
               { role: 'system', content: '你是顶尖的人类图导师，严格基于Ra Uru Hu原始体系。你的解读温暖、精准、有深度，帮助来访者理解自己的能量设计并活出真实的自己。' },
               { role: 'user', content: prompt }

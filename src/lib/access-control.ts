@@ -30,7 +30,7 @@ export function markReportPaid(reportId: string, type: PaidReport['type']): void
     paid.push({
       id: reportId,
       type,
-      phone: user.phone || '',
+      phone: user.email || user.phone || '',
       paidAt: new Date().toISOString(),
       amount: 9.9,
     });

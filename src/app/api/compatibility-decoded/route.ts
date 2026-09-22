@@ -91,6 +91,7 @@ ${person2.pillars ? `八字四柱：${person2.pillars.filter((p: string) => p !=
       },
       body: JSON.stringify({
         model: config.model,
+...(String(config.model).includes('deepseek') || String(config.model).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: prompt },

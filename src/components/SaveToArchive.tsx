@@ -77,7 +77,7 @@ export default function SaveToArchive({ content, reportType, defaultTitle, exist
                 type="password"
                 value={password}
                 onChange={e => { setPassword(e.target.value); setError(''); }}
-                placeholder="例如：你的生日或自定义密码"
+                placeholder="例如：您的生日或自定义密码"
                 className="w-full p-2.5 rounded-lg bg-black/40 border border-[var(--border-color)] text-white text-sm focus:border-[var(--text-accent)] outline-none"
               />
             </div>

@@ -200,7 +200,7 @@ export default function PromptTemplates() {
         }}
       >
         <p className="font-medium text-[var(--text-accent)] mb-1">💡 使用建议</p>
-        <p>复制提示词后，粘贴到DeepSeek、ChatGPT或Claude等AI助手的对话框。模板中的"____________"部分请替换为你自己的具体信息。建议每次只做一个模板，深入探索。</p>
+        <p>复制提示词后，粘贴到DeepSeek、ChatGPT或Claude等AI助手的对话框。模板中的"____________"部分请替换为您自己的具体信息。建议每次只做一个模板，深入探索。</p>
       </div>
     </div>
   );

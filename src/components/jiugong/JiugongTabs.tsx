@@ -11,6 +11,7 @@ import {
   type YearEnvironment,
 } from '../../lib/jiugong-environment';
 import { buildRelationshipDetails } from '../../lib/jiugong-relationships';
+import { JiugongManual } from './JiugongManual';
 import {
   createJiugongViewState,
   reduceJiugongViewState,
@@ -18,6 +19,7 @@ import {
 } from './jiugong-view-state';
 
 const TAB_OPTIONS: { key: JiugongTab; label: string; kicker: string }[] = [
+  { key: 'manual', label: '人生说明书', kicker: '完整报告' },
   { key: 'traits', label: '特质分析', kicker: '看见底色' },
   { key: 'environment', label: '经营环境', kicker: '读懂时势' },
   { key: 'analysis', label: '经营分析', kicker: '落到行动' },
@@ -79,7 +81,7 @@ function TraitsPanel({ data }: { data: JiugongFull }) {
       <PanelTitle
         eyebrow="01 · NATURE"
         title="先天结构，不是命运判词"
-        description="从局、质、星运与五行关系中，看见你惯常如何思考、行动、经营资源。"
+        description="从局、质、星运与五行关系中，看见您惯常如何思考、行动、经营资源。"
       />
       <div className="grid gap-3 sm:grid-cols-3">
         <Metric label="局" value={`局差 ${data.ju}`} detail={data.juDesc} />
@@ -224,7 +226,7 @@ function EnvironmentPanel({
             个人年度四层关系详解
           </h3>
           <p className="mt-2 max-w-3xl text-xs leading-6 text-[var(--text-secondary)]">
-            以下内容把当年气场与姓名形成的个人结构合并解释。四层分别回答：环境在说什么、为什么与你有关、优势和风险在哪里，以及今年具体怎么做。
+            以下内容把当年气场与姓名形成的个人结构合并解释。四层分别回答：环境在说什么、为什么与您有关、优势和风险在哪里，以及今年具体怎么做。
           </p>
         </div>
         <div className="grid gap-4 xl:grid-cols-2">
@@ -244,7 +246,7 @@ function EnvironmentPanel({
                   <p className="mt-1 text-[var(--text-secondary)]">{detail.annualContext}</p>
                 </div>
                 <div>
-                  <p className="font-semibold text-[var(--text-primary)]">与你的个人结构如何结合</p>
+                  <p className="font-semibold text-[var(--text-primary)]">与您的个人结构如何结合</p>
                   <p className="mt-1 text-[var(--text-secondary)]">{detail.personalFit}</p>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -474,6 +476,7 @@ export function JiugongTabs({ data }: { data: JiugongFull }) {
         </div>
 
         <div className="card-jade p-5 sm:p-7" role="tabpanel">
+          {state.tab === 'manual' && <JiugongManual data={data} />}
           {state.tab === 'traits' && <TraitsPanel data={data} />}
           {state.tab === 'environment' && (
             <EnvironmentPanel
@@ -495,15 +498,7 @@ export function JiugongTabs({ data }: { data: JiugongFull }) {
       </div>
 
       <div className="jiugong-print-report space-y-8">
-        <TraitsPanel data={data} />
-        <EnvironmentPanel
-          data={data}
-          environment={environment}
-          year={state.year}
-          onYearChange={() => undefined}
-          interactive={false}
-        />
-        <PrintAnalysisPanel data={data} environment={environment} />
+        <JiugongManual data={data} />
       </div>
     </>
   );

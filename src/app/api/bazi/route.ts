@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { calculateBazi, toBaziJson } from 'taibu-core/bazi';
 import { calculateBaziDayun, toBaziDayunText } from 'taibu-core/bazi-dayun';
 import { lookupCity } from '@/lib/city';
+import { isSupportedBirthYear } from '@/lib/birth-validation';
 
 export const runtime = 'nodejs';
 
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
     const mi = parseInt(minute, 10) || 0;
 
     // 基本日期校验
-    if (isNaN(y) || isNaN(m) || isNaN(d) || y < 1900 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31) {
+    if (isNaN(y) || isNaN(m) || isNaN(d) || !isSupportedBirthYear(y) || m < 1 || m > 12 || d < 1 || d > 31) {
       return NextResponse.json(
         { error: '请填写有效的出生日期' },
         { status: 400 }

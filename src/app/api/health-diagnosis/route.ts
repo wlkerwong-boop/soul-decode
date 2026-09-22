@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
     const config = {
       baseUrl: process.env.AI_BASE_URL || 'https://api.deepseek.com/v1',
       apiKey: process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || '',
-      model: process.env.AI_MODEL || 'deepseek-v4-pro',
+      model: process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
     };
 
     if (!config.apiKey) {
@@ -89,6 +89,7 @@ export async function POST(req: NextRequest) {
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${config.apiKey}` },
       body: JSON.stringify({
         model: config.model,
+...(String(config.model).includes('deepseek') || String(config.model).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: userContent },

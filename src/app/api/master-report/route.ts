@@ -1,34 +1,26 @@
 // 七系统融合报告 API — 人生总览
 import { NextRequest, NextResponse } from 'next/server';
+import { createRequire } from 'node:module';
 import { getBirthCoords } from '@/data/cities';
-import { calculateBodygraph } from '@/lib/hd';
+import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
+import { describeChannels } from '@/lib/hd-channels-map';
 import {
+  buildPersonalReportSegments,
   calculateReportBazi,
   calculateWuyunLiuqi as calculateReportWuyunLiuqi,
+  PERSONAL_REPORT_SYSTEM_PROMPT,
+  preparePersonalReport,
 } from '@/lib/report-depth';
+import { buildLifeContext } from '@/lib/lifecycle';
+import { formatBirthDateForLifecycle } from '@/lib/master-report-input';
 
-function calcBazi(y: number, m: number, d: number, h: number) {
-  const { Solar } = require('lunar-javascript');
-  const solar = Solar.fromYmdHms(y, m, d, h, 0, 0);
-  const lunar = solar.getLunar();
-  const pillars = [
-    lunar.getYearInGanZhi(), lunar.getMonthInGanZhi(),
-    lunar.getDayInGanZhi(), lunar.getTimeInGanZhi()
-  ];
-  const dayMaster = lunar.getDayGan();
-  const elMap: Record<string, string> = {甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
-  return { pillars, dayMaster: `${dayMaster}（${elMap[dayMaster]}）` };
-}
+const require = createRequire(import.meta.url);
+const { assertReportVerified } = require('../../../lib/verify-report-core.mjs');
 
 async function calcHD(y: number, m: number, d: number, h: number, mi: number, tz: string, lat: number, lon: number) {
-  try {
-    const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
-    return await calculateBodygraph(ds, ts, tz, lat, lon);
-  } catch (e: any) {
-    console.error('HD calc failed:', e.message);
-    return null;
-  }
+  const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
+  return calculateBodygraph(ds, ts, tz, lat, lon);
 }
 
 function calcZiwei(y: number, m: number, d: number, h: number, gender: string) {
@@ -114,26 +106,48 @@ export async function POST(req: NextRequest) {
     const { lat, lon } = getBirthCoords(body.city, location);
     const g = gender === '女' ? '女' : '男';
     const now = new Date();
-    const age = now.getFullYear() - y - (now.getMonth()+1<m||(now.getMonth()+1===m&&now.getDate()<d)?1:0);
+    const life = buildLifeContext({
+      birthDate: formatBirthDateForLifecycle(y, m, d),
+      deathDate: body.deathDate,
+      analysisDate: body.analysisDate || now,
+      lifeStatus: body.lifeStatus,
+      timeConfidence: body.timeConfidence,
+    });
+    const age = life.age ?? 0;
 
     // 并行计算全部7个系统
     const [baziResult, hdResult, ziweiResult, zodiacResult] = await Promise.all([
-      Promise.resolve(calculateReportBazi(y, m, d, h)),
+      Promise.resolve(calculateReportBazi(y, m, d, h, mi)),
       Promise.resolve(calcHD(y, m, d, h, mi, tz, lat, lon)),
       Promise.resolve(calcZiwei(y, m, d, h, g)),
       Promise.resolve(calcZodiac(y, m, d)),
     ]);
+    // 不允许在人类图失败时继续生成“数据暂缺”的完整报告。
+    assertHumanDesignResult(hdResult);
     
     const wuyunResult = calculateReportWuyunLiuqi(y);
     const liunianResult = calcLiuNian(y, now.getFullYear());
+    const reportContext = {
+      age,
+      life,
+      gender: g,
+      birth: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`,
+      location: [body.location, body.city].filter(Boolean).join(' ') || '未提供',
+      bazi: baziResult,
+      hd: hdResult,
+      ziwei: ziweiResult,
+      astrology: zodiacResult,
+      wuyun: wuyunResult,
+      liunian: liunianResult,
+    };
 
     // 构建完整提示词（与阿里云 report-api 同步的七系统格式）
     const prompt = `你是一位修炼数十年的命理导师，精通八字、人类图、占星、紫微斗数、五运六气、流年、人生规划七大体系。你的报告像长辈跟孩子谈心——温暖、直接、有力。每个数据点转化为具体人生场景。交叉印证。禁止AI套话。字数10000-20000字。**必须完整生成所有章节，不得截断。**
 
 【报告格式要求-严格按以下执行】
-- 开头段：直接称呼用户（如"老王，你53岁"），简述核心命盘，自然引入
+- 开头段：直接称呼用户（如"您今年53岁"），简述核心命盘，自然引入
 - 每个系统数据需配表格：八字四柱表（天干/地支/十神/藏干/纳音）、人类图数据表（类型/角色/权威/中心/通道/闸门）、紫微12宫全表（含辅星和意义列）
-- 通道描述要详细：每条通道写Gate名称+功能说明，标注引用来源如[(Human Design HD)](https://humandesignhd.com) 或 [(Free Quantum Human Design)](https://freehumandesignchart.com)
+- 通道描述要详细：每条通道写Gate名称+两端中心，**连接关系只准引用数据中映射表给出的"X(中心) ↔ Y(中心)"字段**，禁止自行改写或补造；标注引用来源如[(Human Design HD)](https://humandesignhd.com) 或 [(Free Quantum Human Design)](https://freehumandesignchart.com)
 - 紫微部分标注特定格局名称（如"七杀朝斗""紫府同宫"）
 - 占星部分引用经典组合描述（如太阳天秤+上升狮子="优雅的君主"）
 - 七系统交叉印证：Markdown表格，横轴为八字/人类图/占星/紫微，纵轴为核心本质/能量模式/人际/事业/挑战/优势。每格加粗核心词
@@ -149,7 +163,9 @@ export async function POST(req: NextRequest) {
 - 最后必须有一句「点睛金句」作为收尾（用**加粗**）
 - 报告末尾标注：*本报告基于八字（lunar-javascript）、人类图（Jovian认证v6引擎）、占星（查表法）、紫微斗数（iztro引擎）、五运六气（天干化运/地支化气）七系统融合分析生成。*
 
-请为一位${age}岁的${g}性出具一份七系统融合人生总览报告。用户未提供姓名，报告中称呼统一用"你"，禁止编造任何名字。数据如下：
+请按以下生命周期规则写作：${life.mode === 'historical' ? '这是已故人物历史回顾，只讨论已发生的人生主题，不得生成面向当前年份的未来规划、健康安排或在世行动建议。' : life.mode === 'uncertain' ? '生命周期状态未知，不得断言对象在世或已故，使用条件式表达。' : '这是在世对象的当前人生报告，可以讨论截至分析日期的现实处境和未来行动。'}
+
+请为一位${life.ageLabel}的${g}性出具一份七系统融合人生总览报告。用户未提供姓名，报告中称呼统一用"您"，禁止编造任何名字。数据如下：
 
 【一、八字命盘】
 四柱：${baziResult.pillars.join(' ')}
@@ -160,7 +176,7 @@ ${hdResult ? `【二、人类图】
 内在权威：${hdResult.authority}
 策略：${hdResult.strategy} | 签名：${hdResult.signature} | 非自我：${hdResult.notSelfTheme}
 定义中心：${(hdResult.definedCenters||[]).join('、')||'无'} | 未定义：${(hdResult.undefinedCenters||[]).join('、')||'无'}
-通道：${(hdResult.channels||[]).join('、')||'无'}
+通道：${describeChannels(hdResult.channels)}
 激活闸门：${(hdResult.activatedGates||[]).join('、')||'无'}` : '【二、人类图】数据暂缺'}
 
 ${ziweiResult ? `【三、紫微斗数】
@@ -192,7 +208,11 @@ ${liunianResult}
 
     // 优先使用阿里云API（无超时限制）
     const aliyunUrl = 'http://47.102.142.225/api/master-report';
+    // 旧 report-api 不认识生命周期和时辰置信度字段。历史人物、状态未知或时刻不精确时，
+    // 必须走本地统一提示词路径，避免外部兼容服务重新生成“在世年龄”和精确时柱叙事。
+    const canUseLegacyAliyun = life.mode === 'current' && life.timeConfidence === 'exact';
     try {
+      if (!canUseLegacyAliyun) throw new Error('lifecycle context requires local report path');
       const aliRes = await fetch(aliyunUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -201,7 +221,7 @@ ${liunianResult}
       });
       const aliData = await aliRes.json();
       if (aliData.success && aliData.report) {
-        report = aliData.report;
+        report = preparePersonalReport(aliData.report, reportContext);
       }
     } catch (e) {
       console.log('Aliyun API unavailable, falling back to local:', (e as Error).message);
@@ -211,29 +231,66 @@ ${liunianResult}
     if (!report && !apiKey) console.error('master-report: DEEPSEEK_API_KEY 未配置');
     if (!report && apiKey) {
       try {
-        const modelName = process.env.AI_MODEL || 'deepseek-v4-pro';
-        const res = await fetch(`${baseUrl}/chat/completions`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-          body: JSON.stringify({
-            model: modelName,
-            messages: [
-              { role: 'system', content: '你是修炼数十年的命理导师，精通八字、人类图、占星、紫微斗数、五运六气、流年、人生规划七大体系。你的报告像长辈跟孩子谈心——温暖、直接、有力。每个数据点转化为具体人生场景。交叉印证。禁止AI套话。字数10000-20000字。**必须完整生成所有章节，不得截断。**\n\n【报告格式要求】\n- 每个系统配表格：八字四柱表、人类图数据表、紫微12宫全表\n- 七系统交叉印证：Markdown表格\n- 流年运势/财富配置/健康养生：Markdown表格\n- 大运分析+时间窗口+言行指引+关键风险提示\n- 最后必须有一句「点睛金句」\n- 报告末尾标注七系统来源' },
-              { role: 'user', content: prompt }
-            ],
-            max_tokens: 24000,
-            temperature: 0.7,
-          }),
-          signal: AbortSignal.timeout(180000),
+        // 与 stream 通道完全一致：三段生成 + finalize（2026-08-16 统一手机/桌面质量）
+        const modelName = process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
+        const elMap: Record<string, string> = {甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
+        const elementDistribution: Record<string, number> = {};
+        baziResult.pillars.forEach((p: string) => {
+          [...p].forEach((ch: string) => {
+            const wx = elMap[ch];
+            if (wx) elementDistribution[wx] = (elementDistribution[wx] || 0) + 1;
+          });
         });
-        if (!res.ok) {
-          const errText = await res.text().catch(() => '');
-          console.error(`DeepSeek API error: ${res.status} ${errText.slice(0, 300)}`);
-        } else {
+        const localReportContext = { ...reportContext, bazi: { ...baziResult, elementDistribution } };
+        const segments = buildPersonalReportSegments(localReportContext);
+        let fullReport = '';
+        for (const segment of segments) {
+          const res = await fetch(`${baseUrl}/chat/completions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+            body: JSON.stringify({
+              model: modelName,
+              ...(String(modelName).includes('deepseek') || String(modelName).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
+              messages: [
+                { role: 'system', content: PERSONAL_REPORT_SYSTEM_PROMPT },
+                { role: 'user', content: segment.prompt },
+              ],
+              max_tokens: segment.maxTokens,
+              temperature: 0.7,
+              stream: false,
+            }),
+            signal: AbortSignal.timeout(180000),
+          });
+          if (!res.ok) {
+            const errText = await res.text().catch(() => '');
+            console.error(`DeepSeek API error: ${res.status} ${segment.id} ${errText.slice(0, 200)}`);
+            break;
+          }
           const data = await res.json();
-          report = data.choices?.[0]?.message?.content || '';
+          fullReport += data.choices?.[0]?.message?.content || '';
         }
-      } catch {}
+        if (fullReport.length > 500) {
+          // 引擎注入「## 0. 排盘数据声明」节（K3 加固条款：AI 不写数字/列表）
+          report = preparePersonalReport(fullReport, localReportContext);
+        }
+      } catch (e) {
+        console.error('DeepSeek fallback error:', (e as Error).message);
+      }
+    }
+
+    if (!report || !report.trim()) {
+      return NextResponse.json({ success: false, error: '报告生成失败：报告内容为空，请稍后重试' }, { status: 502 });
+    }
+
+    // 事实层护栏（任务3 fail-closed）：校验不过 → 报错重生成，禁止带病交付
+    try {
+      assertReportVerified(report, {
+        hd: hdResult,
+        bazi: baziResult,
+      });
+    } catch (verifyError: any) {
+      console.error('报告事实层校验未通过，拒绝交付:', verifyError?.issues?.map((i: any) => i.message).join('; ') || verifyError?.message);
+      return NextResponse.json({ success: false, error: verifyError?.message || '报告事实层校验未通过' }, { status: 422 });
     }
 
     return NextResponse.json({
@@ -241,14 +298,16 @@ ${liunianResult}
       report,
       data: {
         bazi: baziResult,
-        hd: hdResult ? { type: hdResult.type, profile: hdResult.profile, authority: hdResult.authority, definedCenters: hdResult.definedCenters, activatedGates: hdResult.activatedGates, channels: hdResult.channels } : null,
+        hd: hdResult ? { type: hdResult.type, profile: hdResult.profile, authority: hdResult.authority, strategy: hdResult.strategy, definedCenters: hdResult.definedCenters, activatedGates: hdResult.activatedGates, channels: hdResult.channels } : null,
         ziwei: ziweiResult ? { palaces: ziweiResult.palaces } : null,
         zodiac: zodiacResult,
         wuyun: wuyunResult,
         liunian: liunianResult,
+        life,
       },
     });
   } catch (e: any) {
-    return NextResponse.json({ success: false, error: e.message }, { status: 500 });
+    const status = e?.name === 'HumanDesignEngineError' ? 503 : 500;
+    return NextResponse.json({ success: false, error: e.message }, { status });
   }
 }

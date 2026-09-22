@@ -1,6 +1,6 @@
 import type { AdviceTopic } from '../../lib/jiugong-advice';
 
-export type JiugongTab = 'traits' | 'environment' | 'analysis';
+export type JiugongTab = 'manual' | 'traits' | 'environment' | 'analysis';
 
 export interface JiugongViewState {
   tab: JiugongTab;
@@ -14,7 +14,7 @@ export type JiugongViewAction =
   | { type: 'select-topic'; topic: AdviceTopic };
 
 export function createJiugongViewState(year: number): JiugongViewState {
-  return { tab: 'traits', year, topic: 'career' };
+  return { tab: 'manual', year, topic: 'career' };
 }
 
 export function reduceJiugongViewState(

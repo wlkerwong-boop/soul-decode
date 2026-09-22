@@ -3,14 +3,26 @@ import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { CHINA_CITIES, INTERNATIONAL_CITIES } from '@/data/cities';
 import { buildCompatibilityPersonPayload, consumeSseChunk } from '@/lib/compatibility-depth';
 import ReportWaiting from '@/components/ReportWaiting';
+import { marked } from 'marked';
+import { normalizeInlineReportHeadings } from '@/lib/normalize-inline-report-headings.mjs';
 
-const YEARS = Array.from({length:121},(_,i)=>2026-i);
+const YEARS = Array.from({length:new Date().getFullYear()-1800+1},(_,i)=>new Date().getFullYear()-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
 const DAYS = Array.from({length:31},(_,i)=>i+1);
 const HOURS = Array.from({length:24},(_,i)=>i);
 const MINUTES = [0,15,30,45];
 
 const continents = Object.keys(INTERNATIONAL_CITIES);
+
+const REPORT_TITLES: Record<string, string> = {
+  couple: '情侣合盘报告',
+  family: '家庭合盘报告',
+  friend: '朋友合盘报告',
+};
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character] || character));
+}
 
 function PersonForm({ label, pfx, data, setData }: {
   label: string; pfx: string;
@@ -42,26 +54,27 @@ function PersonForm({ label, pfx, data, setData }: {
   );
 
   return (
-    <div className="space-y-3 p-4 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-color)]">
-      <h3 className="text-sm font-bold text-[var(--text-accent)]">{label}</h3>
-      <div className="grid grid-cols-5 gap-1.5">
+    <div className="soul-editorial-person">
+      <h3 className="soul-editorial-person-title">{label}</h3>
+      <div className="soul-editorial-person-grid grid grid-cols-2 sm:grid-cols-5 gap-2">
         <Sel value={data[pfx+'_year']} set={v=>setData(pfx+'_year',v)} opts={YEARS} ph="年份" />
         <Sel value={data[pfx+'_month']} set={v=>setData(pfx+'_month',v)} opts={MONTHS} ph="月" />
         <Sel value={data[pfx+'_day']} set={v=>setData(pfx+'_day',v)} opts={DAYS} ph="日" />
         <Sel value={data[pfx+'_hour']} set={v=>setData(pfx+'_hour',v)} opts={HOURS} ph="时" />
         <Sel value={data[pfx+'_minute']} set={v=>setData(pfx+'_minute',v)} opts={MINUTES} ph="分" />
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
         <Sel value={continent} set={v=>{setData(pfx+'_continent',v);setData(pfx+'_country','');setData(pfx+'_province','');setData(pfx+'_city','');}} opts={continents} ph="大洲" cls="input-jade text-sm py-2" />
         {continent ? <Sel value={country} set={v=>{setData(pfx+'_country',v);setData(pfx+'_province','');setData(pfx+'_city','');}} opts={continentCountries} ph="国家" cls="input-jade text-sm py-2" /> : <div />}
         {isChina && country ? <Sel value={province} set={v=>{setData(pfx+'_province',v);setData(pfx+'_city','');}} opts={provinces} ph="省份" cls="input-jade text-sm py-2" /> : (country && !isChina) ? <Sel value={city} set={v=>setData(pfx+'_city',v)} opts={cities} ph="城市" cls="input-jade text-sm py-2" /> : <div />}
         {isChina && province ? <Sel value={city} set={v=>setData(pfx+'_city',v)} opts={cities} ph="城市" cls="input-jade text-sm py-2" /> : <div />}
       </div>
-      <div className="flex gap-2">
+      <div className="soul-editorial-person-actions">
         {['男','女'].map(g => (
           <button key={g} onClick={()=>setData(pfx+'_gender',g)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${gender===g ? 'bg-[var(--text-accent)] text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)] hover:bg-opacity-80'}`}>
-            {g==='男'?'👨 男':'👩 女'}
+            className="soul-editorial-gender"
+            data-active={gender===g}>
+            {g}
           </button>
         ))}
       </div>
@@ -73,15 +86,21 @@ export default function HepanPage() {
   const [type, setType] = useState('couple');
   const [form, setForm] = useState<Record<string,string>>({});
   const [report, setReport] = useState('');
+  const [visibleChapters, setVisibleChapters] = useState(3);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [childrenCount, setChildrenCount] = useState(0);
 
   // ── 等待体验 ──
   const [isStreaming, setIsStreaming] = useState(false);
+  // 注：任何时刻只渲染前 visibleChapters 章（生成中也不自动展开全部），
+  // 避免旧内核（微信X5/安卓自带浏览器）2万字 DOM 布局卡死触发 reload/back。
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // 🔒 防重复拼接：请求取消器 + 代次计数器（只接受最新一次生成的内容，旧请求内容一律丢弃）
+  const abortRef = useRef<AbortController | null>(null);
+  const genIdRef = useRef(0);
 
   useEffect(() => {
     if (loading && startTime) {
@@ -103,9 +122,18 @@ export default function HepanPage() {
 
   const setData = (k: string, v: string) => setForm(prev => ({...prev, [k]: v}));
 
-  const canSubmit = (pfx: string) => form[pfx+'_year'] && form[pfx+'_month'] && form[pfx+'_day'] && form[pfx+'_city'];
+  const canSubmit = (pfx: string) => Boolean(form[pfx+'_year'] && form[pfx+'_month'] && form[pfx+'_day'] && form[pfx+'_city']);
+  const requiredPrefixes = type === 'family'
+    ? ['m', 'p', ...Array.from({ length: childrenCount }, (_, i) => `c${i}`)]
+    : ['a', 'b'];
+  const canGenerate = !loading && !isStreaming && (type !== 'family' || childrenCount > 0) && requiredPrefixes.every(canSubmit);
+  const reportTitle = REPORT_TITLES[type] || '合盘报告';
 
   const submit = async () => {
+    if (!canGenerate) {
+      setError(type === 'family' && childrenCount === 0 ? '家庭合盘至少需要添加一位孩子' : '请完整填写参与者的出生年月日和出生城市');
+      return;
+    }
     setLoading(true); setError(''); setReport('');
     setIsStreaming(false); setStartTime(Date.now()); setElapsedSeconds(0);
 
@@ -127,11 +155,19 @@ export default function HepanPage() {
       return buildCompatibilityPersonPayload(form, pfx);
     }
 
+    let genId = 0; // 本次生成代次（try/catch 共享，用于过期请求识别）
     try {
+      // 🔒 取消上一个未完成的请求（若在生成中重复点击，旧流立即掐断，内容不再拼入）
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+      genId = ++genIdRef.current;
+
       const r = await fetch('/api/compatibility', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({ persons, type }),
+        signal: controller.signal,
       });
       if (!r.ok) { setError('生成失败 ('+r.status+')'); setLoading(false); return; }
       const reader = r.body?.getReader();
@@ -139,48 +175,66 @@ export default function HepanPage() {
       const dec = new TextDecoder();
       let sseBuffer = '';
       let isFirstChunk = true;
+      let streamError = '';
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
+        if (genId !== genIdRef.current) break; // 本次请求已过期（新的生成已启动），丢弃后续内容
         const parsed = consumeSseChunk(sseBuffer, dec.decode(value, { stream: true }));
         sseBuffer = parsed.buffer;
         if (parsed.contents.length) {
           if (isFirstChunk) { setLoading(false); setIsStreaming(true); isFirstChunk = false; }
           setReport(previous => previous + parsed.contents.join(''));
         }
-        if (parsed.error) { setError(parsed.error); setLoading(false); setIsStreaming(false); }
+        if (parsed.error) {
+          streamError = parsed.error;
+          setError(parsed.error);
+          setReport('');
+          setLoading(false);
+          setIsStreaming(false);
+          break;
+        }
         if (parsed.done) { setLoading(false); setIsStreaming(false); break; }
       }
-    } catch (e: any) { setError(e.message||'网络错误'); setLoading(false); setIsStreaming(false); }
-    if (!error) { setLoading(false); setIsStreaming(false); }
+      if (streamError) return;
+    } catch (e: any) {
+      if (genId !== genIdRef.current) return; // 过期请求的异常静默忽略
+      if (e?.name === 'AbortError') return;   // 主动取消静默忽略
+      setError(e.message||'网络错误');
+      setReport(''); // 断线/异常不留半成品，避免误以为生成完成
+      setLoading(false); setIsStreaming(false);
+    }
+    setLoading(false); setIsStreaming(false);
   };
 
   const handleRetry = useCallback(() => { submit(); }, [type, form, childrenCount]);
 
   return (
-    <div className="gradient-bg min-h-screen px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">💞 <span className="gradient-text">关系合盘</span></h1>
-          <p className="text-sm text-[var(--text-secondary)]">八字合婚·人类图合盘·占星比较盘</p>
+    <div className="inner-page soul-editorial-page min-h-screen px-4 py-8 pt-nav">
+      <div className="soul-editorial-shell">
+        <div className="soul-editorial-header">
+          <p className="soul-editorial-eyebrow">Relationship Reading</p>
+          <h1 className="soul-editorial-title"><span className="gradient-text">关系合盘</span></h1>
+          <p className="soul-editorial-lead">八字合婚 · 人类图合盘 · 占星比较盘</p>
         </div>
 
-        <div className="flex justify-center gap-2 mb-6">
+        <div className="soul-editorial-tabs soul-editorial-tabs--three max-w-xl mx-auto mb-8">
           {[
-            {v:'couple',l:'💑 情侣合盘'},
-            {v:'family',l:'👨‍👩‍👧‍👦 家庭合盘'},
-            {v:'friend',l:'🤝 朋友合盘'},
+            {v:'couple',l:'情侣合盘'},
+            {v:'family',l:'家庭合盘'},
+            {v:'friend',l:'朋友合盘'},
           ].map(t=>(
-            <button key={t.v} onClick={()=>setType(t.v)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${type===t.v ? 'bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)] border border-[var(--border-color)]'}`}>
+            <button key={t.v} onClick={()=>{ setType(t.v); setReport(''); setError(''); setVisibleChapters(3); }}
+              className="soul-editorial-tab"
+              data-active={type===t.v}>
               {t.l}
             </button>
           ))}
         </div>
 
-        <div className="card-jade p-6 space-y-4">
+        <div className="soul-editorial-form space-y-6 max-w-4xl mx-auto">
           {type === 'couple' && (
-            <><PersonForm label="你" pfx="a" data={form} setData={setData} /><PersonForm label="对方" pfx="b" data={form} setData={setData} /></>
+            <><PersonForm label="您" pfx="a" data={form} setData={setData} /><PersonForm label="对方" pfx="b" data={form} setData={setData} /></>
           )}
           {type === 'family' && (
             <div className="space-y-3">
@@ -208,12 +262,12 @@ export default function HepanPage() {
             </div>
           )}
           {type === 'friend' && (
-            <><PersonForm label="你" pfx="a" data={form} setData={setData} /><PersonForm label="朋友" pfx="b" data={form} setData={setData} /></>
+            <><PersonForm label="您" pfx="a" data={form} setData={setData} /><PersonForm label="朋友" pfx="b" data={form} setData={setData} /></>
           )}
 
-          <button onClick={submit} disabled={loading||!(canSubmit('a')||canSubmit('m'))}
+          <button onClick={submit} disabled={!canGenerate}
             title={type==='family'&&childrenCount===0?'请先添加至少一个孩子':undefined}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-bold text-base hover:shadow-lg transition-all disabled:opacity-40">
+            className="soul-editorial-button w-full mt-2">
             {loading ? '⌛ 正在合盘...' : '✦ 生成合盘报告'}
           </button>
           {error && !loading && !isStreaming && <p className="text-red-400 text-sm text-center">{error}</p>}
@@ -247,19 +301,128 @@ export default function HepanPage() {
           </div>
         )}
 
-        {report && (
-          <div className="card-jade p-6 mt-6">
-            <h2 className="text-xl font-bold mb-4">📜 合盘解读</h2>
-            <div className="prose prose-sm md:prose-base prose-invert whitespace-pre-wrap leading-relaxed">
-              {report.split('\n').map((line, i) => (<p key={i} className="mb-3">{line || ' '}</p>))}
+        {report && !isStreaming && (
+          <div className="soul-editorial-surface p-6 md:p-8 mt-10 max-w-4xl mx-auto">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+              <p className="soul-editorial-section-label">Reading</p>
+              <div className="flex gap-2 flex-wrap">
+                <button onClick={() => {
+                  const toPlain = (md: string) => md
+                    .replace(/^#{1,4}\s+/gm, '')
+                    .replace(/\*\*([^*]+)\*\*/g, '$1')
+                    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                    .replace(/`([^`]+)`/g, '$1')
+                    .replace(/^\s*\|[-:|\s]+\|\s*$/gm, '')
+                    .replace(/^\s*\|/gm, '')
+                    .replace(/\|\s*$/gm, '')
+                    .replace(/\n{3,}/g, '\n\n');
+                  const b = new Blob([toPlain(report)], { type: 'text/plain;charset=utf-8' });
+                  const a = document.createElement('a');
+                  a.href = URL.createObjectURL(b);
+                  a.download = `${reportTitle}.txt`;
+                  a.click();
+                }}
+                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                  📄 下载TXT
+                </button>
+                <button onClick={async () => {
+                  const btn = document.activeElement as HTMLButtonElement;
+                  const origText = btn.textContent;
+                  try {
+                    btn.textContent = '⏳ 生成中...';
+                    btn.disabled = true;
+                    const normalizedReport = normalizeInlineReportHeadings(report);
+                    const birthPlace = [form.a_province, form.a_country, form.a_city].filter(Boolean).join(' ') || '中国大陆';
+                    const resp = await fetch('/api/word', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ report: normalizedReport, meta: { year: '合盘', location: birthPlace, reportTitle, fileStem: reportTitle }, charts: { images: {} } }),
+                    });
+                    if (!resp.ok) { alert('Word 生成失败'); return; }
+                    const blob = await resp.blob();
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `${reportTitle}.docx`;
+                    a.click();
+                    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+                  } catch (e: any) {
+                    alert('Word 生成异常: ' + (e.message || '网络错误'));
+                  } finally {
+                    btn.textContent = origText;
+                    btn.disabled = false;
+                  }
+                }}
+                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                  📝 下载Word
+                </button>
+                <button onClick={async () => {
+                  const btn = document.activeElement as HTMLButtonElement;
+                  const origText = btn.textContent;
+                  try {
+                    btn.textContent = '⏳ 生成中...';
+                    btn.disabled = true;
+                    const normalizedReport = normalizeInlineReportHeadings(report);
+                    const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+                      <link rel="stylesheet" href="/fonts/lxgwwenkai/lxgwwenkai-regular.css">
+                      <style>
+                        body { font-family: 'LXGW WenKai', serif; color: #2B2620; padding: 24px; line-height: 1.9; }
+                        h1 { color: #A8843C; font-size: 22px; border-bottom: 2px solid #E6D9C5; padding-bottom: 8px; }
+                        h2 { color: #A8843C; font-size: 17px; margin-top: 24px; }
+                        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+                        th { background: #F7F0E4; color: #A8843C; }
+                        td, th { border: 1px solid #E6D9C5; padding: 6px 8px; font-size: 12px; }
+                        p { margin: 8px 0; }
+                      </style></head><body>
+                      <h1>${escapeHtml(reportTitle)}</h1>
+                      <main>${marked(normalizedReport, { breaks: true, gfm: true })}</main>
+                    </body></html>`;
+                    const resp = await fetch('/api/pdf', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ html, filename: reportTitle }),
+                    });
+                    if (!resp.ok) { alert('PDF 生成失败'); return; }
+                    const blob = await resp.blob();
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `${reportTitle}.pdf`;
+                    a.click();
+                    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+                  } catch (e: any) {
+                    alert('PDF 生成异常: ' + (e.message || '网络错误'));
+                  } finally {
+                    btn.textContent = origText;
+                    btn.disabled = false;
+                  }
+                }}
+                  className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                  📥 下载PDF
+                </button>
+              </div>
+            </div>
+            <h2 className="text-2xl font-semibold mb-5">合盘解读</h2>
+            <div className="prose prose-sm md:prose-base whitespace-pre-wrap leading-relaxed">
+              {report.split(/^(?=## )/m).filter((s: string) => s.trim()).slice(0, visibleChapters).map((section, i) => (
+                <div key={i} style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}>
+                  {section.split('\n').map((line, j) => (<p key={j} className="mb-3">{line || ' '}</p>))}
+                </div>
+              ))}
+              {visibleChapters < report.split(/^(?=## )/m).filter((s: string) => s.trim()).length && (
+                <div className="text-center mt-6">
+                  <button onClick={() => setVisibleChapters(v => v + 3)}
+                    className="px-6 py-2.5 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                    📖 继续阅读（剩余 {report.split(/^(?=## )/m).filter((s: string) => s.trim()).length - visibleChapters} 章）
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {/* ── R4: 下一步 CTA ── */}
         {report && (
-          <div className="card-jade p-6 mt-6 text-center">
-            <div className="text-3xl mb-3">🏫</div>
+          <div className="soul-editorial-surface p-6 md:p-8 mt-6 text-center max-w-4xl mx-auto">
+            <div className="text-2xl mb-3">✦</div>
             <h3 className="text-lg font-bold mb-2">见己学园 · 家庭成长助手</h3>
             <p className="text-sm text-[var(--text-secondary)] mb-4 max-w-lg mx-auto">
               即将上线：个性化学习方案、成长图谱追踪、家长课程匹配。三站联动，从看清孩子到陪好孩子。

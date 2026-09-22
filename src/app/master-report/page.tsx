@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/components/AuthContext';
 import VoiceReader from '@/components/VoiceReader';
 import BodygraphSVG from '@/components/BodygraphSVG';
 import BaziChart from '@/components/BaziChart';
@@ -10,13 +12,15 @@ import { marked } from 'marked';
 import { CHINA_CITIES, INTERNATIONAL_CITIES, CITY_TZ } from '@/data/cities';
 import { beginNewReportView } from '@/lib/master-report-view';
 
-const YEARS = Array.from({length:121},(_,i)=>2026-i);
+const YEARS = Array.from({length:new Date().getFullYear()-1800+1},(_,i)=>new Date().getFullYear()-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
 const DAYS = Array.from({length:31},(_,i)=>i+1);
 const HOURS = Array.from({length:24},(_,i)=>i);
 const MINUTES = Array.from({length:60},(_,i)=>i);
 
 export default function MasterPage() {
+  const router = useRouter();
+  const { isLoggedIn } = useAuth();
   const [year, setYear] = useState(''); const [month, setMonth] = useState('');
   const [day, setDay] = useState(''); const [hour, setHour] = useState(''); const [minute, setMinute] = useState('0');
   const [continent, setContinent] = useState(''); const [country, setCountry] = useState('');
@@ -77,6 +81,47 @@ export default function MasterPage() {
 
   const charCount = report.length;
 
+  // Word 导出使用当前页面已经验收过的 SVG 图表转成 PNG，保证字体和网页看到的一致。
+  const captureChartImage = async (kind: string) => {
+    const svg = document.querySelector(`section[data-chart-kind="${kind}"] svg`) as SVGSVGElement | null;
+    if (!svg) return undefined;
+    const clone = svg.cloneNode(true) as SVGSVGElement;
+    clone.removeAttribute('class');
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const viewBox = svg.viewBox.baseVal;
+    const width = Math.max(900, Math.round(viewBox.width * 2.2));
+    const height = Math.max(600, Math.round(viewBox.height * (width / viewBox.width)));
+    clone.setAttribute('width', String(width));
+    clone.setAttribute('height', String(height));
+    const xml = new XMLSerializer().serializeToString(clone);
+    const blobUrl = URL.createObjectURL(new Blob([xml], { type: 'image/svg+xml;charset=utf-8' }));
+    try {
+      const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const loaded = new Image();
+        loaded.onload = () => resolve(loaded);
+        loaded.onerror = reject;
+        loaded.src = blobUrl;
+      });
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d');
+      if (!context) return undefined;
+      context.fillStyle = '#FBF8F2';
+      context.fillRect(0, 0, width, height);
+      context.drawImage(image, 0, 0, width, height);
+      return canvas.toDataURL('image/png');
+    } finally {
+      URL.revokeObjectURL(blobUrl);
+    }
+  };
+
+  const captureChartImages = async () => ({
+    humanDesign: await captureChartImage('human-design'),
+    bazi: await captureChartImage('bazi'),
+    ziwei: await captureChartImage('ziwei'),
+  });
+
   // Load saved reports on mount
   useEffect(() => {
     try {
@@ -84,6 +129,30 @@ export default function MasterPage() {
       if (saved) setSavedReports(JSON.parse(saved));
     } catch {}
   }, []);
+
+  // ── 登录门禁：未登录点排盘 → 暂存表单 → 去登录；登录回来自动恢复 ──
+  const [restoredNotice, setRestoredNotice] = useState('');
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    try {
+      const raw = sessionStorage.getItem('soul_pending_scan');
+      if (raw) {
+        const p = JSON.parse(raw);
+        if (p.year) setYear(p.year);
+        if (p.month) setMonth(p.month);
+        if (p.day) setDay(p.day);
+        if (p.hour) setHour(p.hour);
+        if (p.minute) setMinute(p.minute);
+        if (p.continent) setContinent(p.continent);
+        if (p.country) setCountry(p.country);
+        if (p.province) setProvince(p.province);
+        if (p.city) setCity(p.city);
+        if (p.gender) setGender(p.gender);
+        sessionStorage.removeItem('soul_pending_scan');
+        setRestoredNotice('✅ 登录成功，已恢复您填写的出生信息，请点击下方按钮开始排盘');
+      }
+    } catch {}
+  }, [isLoggedIn]);
 
   // Extract name from report for auto-labeling
   const extractName = (r: string) => {
@@ -123,7 +192,20 @@ export default function MasterPage() {
     return 'Asia/Shanghai';
   }, [city]);
 
-  const submit = async () => {
+  const submit = async (retryCount = 0) => {
+    // ── 登录门禁：未登录必须先注册/登录才能测评生成 ──
+    if (!isLoggedIn) {
+      try {
+        sessionStorage.setItem('soul_pending_scan', JSON.stringify({
+          year, month, day, hour, minute, continent, country, province, city, gender,
+        }));
+      } catch {}
+      // 测试环境（/staging 子路径）下跳转需带前缀，否则会丢失路径
+      const base = typeof window !== 'undefined' && window.location.pathname.startsWith('/staging') ? '/staging' : '';
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/master-report';
+      router.push(`${base}/auth/login?next=${encodeURIComponent(currentPath)}`);
+      return;
+    }
     setLoading(true); setError(''); setReport(''); setData(null); setShowQuickInput(false);
     setIsStreaming(false); setStartTime(Date.now()); setElapsedSeconds(0);
 
@@ -137,7 +219,29 @@ export default function MasterPage() {
       if (!r.ok) { setError('API错误: ' + r.status); setLoading(false); return; }
 
       const reader = r.body?.getReader();
-      if (!reader) { setError('不支持流式读取'); setLoading(false); return; }
+      if (!reader) {
+        // 不支持流式读取（微信内置浏览器/旧内核）：降级到非流式接口（report-api 通道）
+        setError(''); // 清空错误，走降级
+        try {
+          const r2 = await fetch('/api/master-report', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({year, month, day, hour, minute, location:loc, city, gender, timezone:detectedTz}),
+          });
+          const d = await r2.json();
+          if (d.success && d.report) {
+            setReport(d.report);
+            setLoading(false);
+            setIsStreaming(false);
+            saveToHistory(d.report, null);
+          } else {
+            setError(d.error || '生成失败，请重试'); setLoading(false);
+          }
+        } catch (e2: any) {
+          setError(e2.message || '生成失败，请重试'); setLoading(false);
+        }
+        return;
+      }
 
       const decoder = new TextDecoder();
       let buffer = '';
@@ -156,6 +260,15 @@ export default function MasterPage() {
           if (line.startsWith('data: ')) {
             try {
               const msg = JSON.parse(line.slice(6));
+              if (msg.verify_error) {
+                fullReport = '';
+                setReport('');
+                setData(null);
+                setError(msg.verify_error);
+                setLoading(false);
+                setIsStreaming(false);
+                return;
+              }
               if (msg.error) { setError(msg.error); setLoading(false); setIsStreaming(false); return; }
               if (msg.done) {
                 setData({ bazi: msg.bazi, hd: msg.hd, ziwei: msg.ziwei, zodiac: msg.zodiac, wuyun: msg.wuyun, liunian: msg.liunian });
@@ -176,21 +289,42 @@ export default function MasterPage() {
           }
         }
       }
-    } catch (e: any) { setError(e.message||'网络错误'); setLoading(false); setIsStreaming(false); }
+    } catch (e: any) {
+      // 断线自动重试（最多 2 次，间隔 1.5s；已收到部分内容也重试——宁可重新生成也不交付半份）
+      if (retryCount < 2) {
+        console.log('report stream retry #' + (retryCount + 1), e?.message || '');
+        setTimeout(() => submit(retryCount + 1), 1500);
+        return;
+      }
+      setError('网络中断，请点击"重试"按钮重新生成'); setLoading(false); setIsStreaming(false);
+    }
     // 流式自然结束
     if (!error) { setLoading(false); setIsStreaming(false); }
   };
 
-  const handleRetry = useCallback(() => { submit(); }, [year, month, day, hour, minute, continent, country, province, city, gender]);
+  const handleRetry = useCallback(() => { submit(); }, [year, month, day, hour, minute, continent, country, province, city, gender, isLoggedIn]);
 
   const allFilled = year && month && day && continent && country && city;
   const quickFilled = year && month && day && continent && country && city;
 
-  const reportHtml = useMemo(() => {
-    if (!report) return '';
-    try { return marked(report, { breaks: true, gfm: true }) as string; }
-    catch { return report; }
+  // 报告分章渲染：按 "## " 标题切分，每章独立渲染（增量构建 DOM，避免 2 万字一次性
+  // 渲染导致安卓 Chrome"页面未响应"崩溃 reload/back——2026-08-16 修复）
+  const reportSections = useMemo(() => {
+    if (!report) return [];
+    return report.split(/^(?=## )/m).filter((s: string) => s.trim().length > 0);
   }, [report]);
+  const [visibleChapters, setVisibleChapters] = useState(3);
+  // 注：任何时刻只渲染前 visibleChapters 章（生成中也不自动展开全部）。
+  // 2026-08-16 修复：旧内核（微信X5/安卓自带浏览器）在生成结束时若已展开全部
+  // 章节，2万字 DOM 一次性布局会卡死页面并触发 reload/back。统一"前3章+继续阅读"。
+  const chapterHtml = useMemo(() => {
+    const out: string[] = [];
+    for (let i = 0; i < Math.min(visibleChapters, reportSections.length); i++) {
+      try { out.push(marked(reportSections[i], { breaks: true, gfm: true }) as string); }
+      catch { out.push(reportSections[i]); }
+    }
+    return out;
+  }, [reportSections, visibleChapters]);
 
   // ── R2: 骨架结果 ──
   const showSkeleton = data && !showFullReport;
@@ -209,13 +343,15 @@ export default function MasterPage() {
   };
 
   return (
-    <div className="gradient-bg min-h-screen px-4 py-6 md:py-10">
-      <div className="max-w-4xl mx-auto">
+    <div className="inner-page soul-editorial-page min-h-screen px-4 py-6 md:py-10 pt-nav">
+      <div className="soul-editorial-shell">
 
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight leading-tight">✦ <span className="gradient-text">人生总览</span></h1>
-          <p className="text-base md:text-lg text-[var(--text-secondary)]">一次输入 · 七大系统交叉融合</p>
-          <p className="text-sm text-[var(--text-secondary)] opacity-70">八字·人类图·占星·紫微斗数·五运六气·流年·人生规划</p>
+        <div className="soul-editorial-header">
+          <p className="soul-editorial-eyebrow">Seven-System Reading</p>
+          <h1 className="soul-editorial-title">
+            人生<span className="gradient-text">总览</span>
+          </h1>
+          <p className="soul-editorial-lead">一次输入 · 七个维度交叉印证，看见完整的您</p>
           {(report || data) && !showQuickInput && (
             <button
               type="button"
@@ -253,95 +389,133 @@ export default function MasterPage() {
 
         {/* ── R2: 免费排盘极简输入（4 字段）── */}
         {showQuickInput && (
-          <div className="card-jade p-5 md:p-6 mb-8 max-w-lg mx-auto report-form">
-            {/* 性别选择 */}
-            <div className="flex gap-2 mb-4">
-              {['男','女'].map(g => (
-                <button key={g} onClick={()=>setGender(g)}
-                  className={`flex-1 py-3 rounded-xl text-sm font-semibold transition-all ${
-                    gender===g ? 'bg-[var(--text-accent)] text-white shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-secondary)]'
-                  }`}>{g}</button>
-              ))}
+          <div className="soul-editorial-grid mb-10">
+            {/* 左：品牌信息（桌面） */}
+            <div className="soul-editorial-intro hidden md:block">
+              <p className="soul-editorial-section-label">一次输入，七重印证</p>
+              <h2>
+                七套古老智慧，<br />交叉印证<span className="gradient-text">同一件事</span>
+              </h2>
+              <p>
+                您的出生信息将同时经由七个系统运算——东方命理与西方能量学彼此校验，输出一份互为印证的完整报告。
+              </p>
+              <div className="soul-editorial-tags">
+                {['八字','人类图','占星','紫微斗数','五运六气','流年','人生规划'].map(s => (
+                  <span key={s} className="soul-editorial-tag">
+                    {s}
+                  </span>
+                ))}
+              </div>
+              <div className="soul-editorial-privacy">
+                出生信息仅用于排盘，绝不外泄
+              </div>
             </div>
 
-            {/* 出生日期 — 4 字段 */}
-            <div className="grid grid-cols-4 gap-2 mb-4">
-              <select value={year} onChange={e=>setYear(e.target.value)}
-                className="input-jade text-sm py-3 px-1 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
-                <option value="">年份</option>
-                {YEARS.map(y=><option key={y} value={y}>{y}</option>)}
-              </select>
-              <select value={month} onChange={e=>setMonth(e.target.value)}
-                className="input-jade text-sm py-3 px-1 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
-                <option value="">月</option>
-                {MONTHS.map(m=><option key={m} value={m}>{m}</option>)}
-              </select>
-              <select value={day} onChange={e=>setDay(e.target.value)}
-                className="input-jade text-sm py-3 px-1 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
-                <option value="">日</option>
-                {DAYS.map(d=><option key={d} value={d}>{d}</option>)}
-              </select>
-              <select value={hour} onChange={e=>setHour(e.target.value)}
-                className="input-jade text-sm py-3 px-1 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
-                <option value="">时</option>
-                {HOURS.map(h=><option key={h} value={h}>{h}</option>)}
-              </select>
-            </div>
+            {/* 右：表单卡 */}
+            <div className="soul-editorial-form report-form">
+              {/* 00 输入前必读 */}
+              <div className="mb-5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-highlight)]/60 p-3.5 space-y-2 text-xs leading-relaxed">
+                <p className="font-semibold text-[var(--text-primary)]">📌 测评前请先看这 3 条</p>
+                <p className="text-[var(--text-secondary)]">📅 <strong>出生日期请填阳历（公历）</strong>；阴历（农历）出生的朋友，请先换算成阳历再填写</p>
+                <p className="text-[var(--text-secondary)]">📜 报告共 7 个章节，会<strong>一段一段逐章生成</strong>，约需 3-5 分钟，生成过程中请勿关闭页面</p>
+                <p className="text-[var(--text-secondary)]">📱 建议使用手机<strong>自带浏览器</strong>（Safari / Chrome）打开本页测评；在微信内直接打开可能出现显示异常，可点右上角"在浏览器打开"</p>
+              </div>
 
-            {/* 出生地 — 逐级级联 */}
-            <div className="space-y-2 mb-4">
-              <select value={continent} onChange={e=>{setContinent(e.target.value);setCountry('');setProvince('');setCity('');}}
-                className="w-full input-jade text-sm py-3 px-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
-                <option value="">选择大洲</option>
-                {continents.map(c=><option key={c} value={c}>{c}</option>)}
-              </select>
-              {continent && (
-                <select value={country} onChange={e=>{setCountry(e.target.value);setProvince('');setCity('');}}
-                  className="w-full input-jade text-sm py-3 px-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
-                  <option value="">选择国家</option>
-                  {continentCountries.map(c=><option key={c} value={c}>{c}</option>)}
-                </select>
+              {restoredNotice && (
+                <div className="mb-4 rounded-lg border border-emerald-700/40 bg-emerald-900/20 p-3 text-xs text-emerald-200">
+                  {restoredNotice}
+                </div>
               )}
-              {isChina && country && (
-                <select value={province} onChange={e=>{setProvince(e.target.value);setCity('');}}
-                  className="w-full input-jade text-sm py-3 px-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
-                  <option value="">选择省份</option>
-                  {provinces.map(p=><option key={p} value={p}>{p}</option>)}
-                </select>
-              )}
-              {country && cities.length > 0 && (
-                <select value={city} onChange={e=>setCity(e.target.value)}
-                  className="w-full input-jade text-sm py-3 px-3 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]">
-                  <option value="">选择城市</option>
-                  {cities.map(c=><option key={c} value={c}>{c}</option>)}
-                </select>
-              )}
-            </div>
 
-            {/* 分钟+时区 */}
-            <details className="mb-4 text-xs text-[var(--text-tertiary)]">
-              <summary className="cursor-pointer py-1 hover:text-[var(--text-secondary)] transition-colors">精确时间（可选）</summary>
-              <div className="flex items-center gap-2 mt-2">
-                <span>分钟：</span>
+              {/* 01 基本信息 */}
+              <div className="soul-editorial-form-section">
+              <p className="soul-editorial-form-label">基本信息</p>
+              <div className="soul-editorial-tabs">
+                {['男','女'].map(g => (
+                  <button key={g} onClick={()=>setGender(g)}
+                    className="soul-editorial-tab"
+                    data-active={gender===g}>{g}</button>
+                ))}
+              </div>
+              </div>
+
+              {/* 02 出生时间 */}
+              <div className="soul-editorial-form-section">
+              <p className="soul-editorial-form-label">出生时间</p>
+              <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+                <select value={year} onChange={e=>setYear(e.target.value)}
+                  className="input-jade soul-editorial-field px-3">
+                  <option value="">年份</option>
+                  {YEARS.map(y=><option key={y} value={y}>{y}</option>)}
+                </select>
+                <select value={month} onChange={e=>setMonth(e.target.value)}
+                  className="input-jade soul-editorial-field px-3">
+                  <option value="">月</option>
+                  {MONTHS.map(m=><option key={m} value={m}>{m}</option>)}
+                </select>
+                <select value={day} onChange={e=>setDay(e.target.value)}
+                  className="input-jade soul-editorial-field px-3">
+                  <option value="">日</option>
+                  {DAYS.map(d=><option key={d} value={d}>{d}</option>)}
+                </select>
+                <select value={hour} onChange={e=>setHour(e.target.value)}
+                  className="input-jade soul-editorial-field px-3">
+                  <option value="">时</option>
+                  {HOURS.map(h=><option key={h} value={h}>{h}</option>)}
+                </select>
                 <select value={minute} onChange={e=>setMinute(e.target.value)}
-                  className="input-jade text-xs py-2 px-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)]">
+                  className="input-jade soul-editorial-field px-3">
                   {MINUTES.map(m=><option key={m} value={m}>{m}分</option>)}
                 </select>
-                <span className="ml-auto">时区：{city ? detectedTz : '选择城市后自动匹配'}</span>
               </div>
-            </details>
+              <p className="text-xs text-[var(--text-tertiary)] mt-2">
+                分钟不记得可跳过（默认 0 分），记得越精确排盘越准；时区会随出生城市自动匹配
+              </p>
+              </div>
 
-            <p className="text-xs text-[var(--text-tertiary)] text-center mb-4">
-              🔒 出生信息仅用于排盘，绝不外泄
-            </p>
+              {/* 03 出生地点 */}
+              <div className="soul-editorial-form-section">
+              <p className="soul-editorial-form-label">出生地点</p>
+              <div className="space-y-3">
+                <select value={continent} onChange={e=>{setContinent(e.target.value);setCountry('');setProvince('');setCity('');}}
+                  className="w-full input-jade soul-editorial-field px-4">
+                  <option value="">选择大洲</option>
+                  {continents.map(c=><option key={c} value={c}>{c}</option>)}
+                </select>
+                {continent && (
+                  <select value={country} onChange={e=>{setCountry(e.target.value);setProvince('');setCity('');}}
+                    className="w-full input-jade soul-editorial-field px-4">
+                    <option value="">选择国家</option>
+                    {continentCountries.map(c=><option key={c} value={c}>{c}</option>)}
+                  </select>
+                )}
+                {isChina && country && (
+                  <select value={province} onChange={e=>{setProvince(e.target.value);setCity('');}}
+                    className="w-full input-jade soul-editorial-field px-4">
+                    <option value="">选择省份</option>
+                    {provinces.map(p=><option key={p} value={p}>{p}</option>)}
+                  </select>
+                )}
+                {country && cities.length > 0 && (
+                  <select value={city} onChange={e=>setCity(e.target.value)}
+                    className="w-full input-jade soul-editorial-field px-4">
+                    <option value="">选择城市</option>
+                    {cities.map(c=><option key={c} value={c}>{c}</option>)}
+                  </select>
+                )}
+              </div>
+              </div>
 
-            <button onClick={submit} disabled={!quickFilled||loading}
-              className={`w-full py-3.5 rounded-xl font-semibold text-sm transition-all ${
-                quickFilled&&!loading ? 'bg-[var(--text-accent)] text-white hover:shadow-md' : 'bg-[var(--bg-highlight)] text-[var(--text-tertiary)] cursor-not-allowed'
-              }`}>
-              {loading ? '⌛ 正在排盘中...' : '✦ 免费排盘，查看我的出厂配置'}
-            </button>
-            {error && !loading && <p className="text-red-400 text-xs mt-2 text-center">{error}</p>}
+              {/* CTA */}
+              <button onClick={() => submit()} disabled={!quickFilled||loading}
+                className="soul-editorial-button w-full mt-8">
+                {loading ? '⌛ 正在排盘中...' : '✦ 免费排盘，查看我的出厂配置'}
+              </button>
+              <p className="text-xs text-[var(--text-tertiary)] text-center mt-4 md:hidden">
+                🔒 出生信息仅用于排盘，绝不外泄
+              </p>
+              {error && !loading && <p className="text-red-400 text-xs mt-2 text-center">{error}</p>}
+            </div>
           </div>
         )}
 
@@ -350,7 +524,7 @@ export default function MasterPage() {
           <div className="max-w-lg mx-auto mb-8">
             {data.hd && (
               <div className="card-jade p-6 text-center mb-6">
-                <div className="text-sm text-[var(--text-tertiary)] mb-2">你的出厂配置预览</div>
+                <div className="text-sm text-[var(--text-tertiary)] mb-2">您的出厂配置预览</div>
                 <div className="print-hidden mb-4">
                   <BodygraphSVG definedCenters={data.hd.definedCenters||[]} activatedGates={data.hd.activatedGates||[]} channels={data.hd.channels||[]} centerDefinition={{}} />
                 </div>
@@ -361,14 +535,14 @@ export default function MasterPage() {
                   人生角色 {data.hd.profile} · {data.hd.authority}
                 </p>
                 <p className="text-xs text-[var(--text-tertiary)] mt-3">
-                  这只是人类图系统的冰山一角——你的完整报告涵盖 7 大古老智慧系统，含深度图文解读。
+                  这只是人类图系统的冰山一角——您的完整报告涵盖 7 大古老智慧系统，含深度图文解读。
                 </p>
               </div>
             )}
 
             <div className="text-center">
               <p className="text-sm text-[var(--text-secondary)] mb-3">
-                这只是你 7 个系统中的 <strong>1 个的 1/10</strong>
+                这只是您 7 个系统中的 <strong>1 个的 1/10</strong>
               </p>
               <button onClick={() => setShowFullReport(true)}
                 className="px-8 py-4 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-semibold text-base hover:shadow-lg transition-all transform hover:scale-105">
@@ -401,44 +575,65 @@ export default function MasterPage() {
             </div>
             {/* Charts */}
             {data && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <div className="soul-chart-atlas-grid mb-10">
                 {data.hd && (
-                  <div className="card-jade p-5">
-                    <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">🧬 人类图</h3>
+                  <section data-chart-kind="human-design" className="soul-chart-card soul-chart-card--primary">
+                    <div className="soul-chart-card-heading">
+                      <div><p className="soul-chart-kicker">01 · BODYGRAPH</p><h3>人类图</h3></div>
+                      <span>九大中心</span>
+                    </div>
                     <div className="print-hidden">
                       <BodygraphSVG definedCenters={data.hd.definedCenters||[]} activatedGates={data.hd.activatedGates||[]} channels={data.hd.channels||[]} centerDefinition={{}} />
                     </div>
                     <div className="print-only">
                       <BodygraphSVG print={true} definedCenters={data.hd.definedCenters||[]} activatedGates={data.hd.activatedGates||[]} channels={data.hd.channels||[]} centerDefinition={{}} />
                     </div>
-                    <p className="text-sm text-[var(--text-secondary)] mt-3 text-center">{data.hd.type} · {data.hd.profile} · {data.hd.authority}</p>
-                  </div>
+                    <div className="soul-chart-summary-grid">
+                      {[
+                        ['类型', data.hd.type], ['策略', data.hd.strategy], ['内在权威', data.hd.authority],
+                        ['人生角色', data.hd.profile], ['定义', data.hd.definition],
+                      ].filter(([, value]) => value).map(([label, value]) => (
+                        <div key={label} className="soul-chart-summary-item"><span>{label}</span><strong>{value}</strong></div>
+                      ))}
+                    </div>
+                  </section>
                 )}
                 {data.bazi && (
-                  <div className="card-jade p-5">
-                    <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">🀄 八字四柱</h3>
+                  <section data-chart-kind="bazi" className="soul-chart-card soul-chart-card--primary">
+                    <div className="soul-chart-card-heading">
+                      <div><p className="soul-chart-kicker">02 · FOUR PILLARS</p><h3>八字四柱</h3></div>
+                      <span>日主 · 五行</span>
+                    </div>
                     <BaziChart
                       pillars={data.bazi.pillars || []}
                       dayMaster={data.bazi.dayMaster || ''}
                       elements={data.bazi.ganElements || []}
                       elementDistribution={data.bazi.elementDistribution || {}}
                     />
-                  </div>
+                  </section>
                 )}
                 {data.ziwei && (
-                  <div className="card-jade p-5">
-                    <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">⭐ 紫微斗数</h3>
+                  <section data-chart-kind="ziwei" className="soul-chart-card soul-chart-card--secondary">
+                    <div className="soul-chart-card-heading">
+                      <div><p className="soul-chart-kicker">03 · TWELVE PALACES</p><h3>紫微斗数</h3></div>
+                      <span>命宫图谱</span>
+                    </div>
                     <ZiWeiChart palaces={data.ziwei.palaces||[]} horoscope={data.ziwei.horoscope||null} />
-                  </div>
+                  </section>
                 )}
                 {data.wuyun && (
-                  <div className="card-jade p-5">
-                    <h3 className="text-base font-bold text-[var(--text-accent)] mb-3">🌊 五运六气</h3>
-                    <div className="text-sm text-[var(--text-secondary)] space-y-2">
-                      <p>出生年运：{data.wuyun.wuyun}</p>
-                      <p>出生气化：{data.wuyun.liuqi}</p>
+                  <section className="soul-chart-card soul-chart-card--secondary soul-wuyun-card">
+                    <div className="soul-chart-card-heading">
+                      <div><p className="soul-chart-kicker">04 · SEASONAL RHYTHM</p><h3>五运六气</h3></div>
+                      <span>出生节律</span>
                     </div>
-                  </div>
+                    <div className="soul-wuyun-orbit" aria-hidden="true"><span /><i /><b /></div>
+                    <div className="soul-wuyun-values">
+                      <div><span>出生年运</span><strong>{data.wuyun.wuyun || '—'}</strong></div>
+                      <div><span>出生气化</span><strong>{data.wuyun.liuqi || '—'}</strong></div>
+                    </div>
+                    <p className="soul-wuyun-note">以出生年份对应的运气信息作为报告中的节律观察入口。</p>
+                  </section>
                 )}
               </div>
             )}
@@ -463,6 +658,50 @@ export default function MasterPage() {
                         clone.querySelectorAll('script').forEach(s => s.remove());
                         // 移除不需要的元素
                         clone.querySelectorAll('.no-print, nav, .voice-reader-btn').forEach(el => el.remove());
+                        // page.setContent() 使用 about:blank，必须把页面资源改成绝对地址，
+                        // 否则本地字体和样式会加载失败，中文在 PDF 中会变成空白方框。
+                        const head = clone.querySelector('head');
+                        if (head) {
+                          const base = document.createElement('base');
+                          base.href = `${window.location.origin}/`;
+                          head.prepend(base);
+                        }
+                        clone.querySelectorAll<HTMLLinkElement>('link[href]').forEach((link) => {
+                          const href = link.getAttribute('href');
+                          if (href) link.setAttribute('href', new URL(href, window.location.href).href);
+                        });
+                        if (!clone.querySelector('meta[charset]') && head) {
+                          const charset = document.createElement('meta');
+                          charset.setAttribute('charset', 'utf-8');
+                          head.prepend(charset);
+                        }
+                        // 将样式表内联到 PDF 文档，并把其中的字体/图片 URL 改成绝对地址。
+                        // 这样 Puppeteer 在 about:blank 中也能完整保留内页排版。
+                        const stylesheetLinks = Array.from(
+                          clone.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"][href]')
+                        );
+                        await Promise.all(stylesheetLinks.map(async (link) => {
+                          const href = link.getAttribute('href');
+                          if (!href) return;
+                          const absoluteHref = new URL(href, window.location.href).href;
+                          try {
+                            const cssResponse = await fetch(absoluteHref);
+                            if (!cssResponse.ok) return;
+                            const cssText = await cssResponse.text();
+                            const inlinedCss = cssText.replace(/url\(([^)]+)\)/g, (match, rawValue) => {
+                              const raw = String(rawValue).trim();
+                              const quote = raw.startsWith('"') || raw.startsWith("'") ? raw[0] : '';
+                              const value = quote ? raw.slice(1, -1) : raw;
+                              if (/^(data:|https?:|blob:|#)/i.test(value)) return match;
+                              return `url("${new URL(value, absoluteHref).href}")`;
+                            });
+                            const style = document.createElement('style');
+                            style.textContent = inlinedCss;
+                            link.replaceWith(style);
+                          } catch {
+                            // 保留绝对地址的 link 作为回退，避免单个样式表阻断 PDF。
+                          }
+                        }));
                         const html = '<!DOCTYPE html>' + clone.outerHTML;
                         const resp = await fetch('/api/pdf', {
                           method: 'POST',
@@ -491,8 +730,56 @@ export default function MasterPage() {
                       className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
                       📥 下载PDF
                     </button>
+                    <button onClick={async () => {
+                      const btn = document.activeElement as HTMLButtonElement;
+                      const origText = btn.textContent;
+                      try {
+                        btn.textContent = '⏳ 生成中...';
+                        btn.disabled = true;
+                        const resp = await fetch('/api/word', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            report,
+                            meta: { year, month, day, hour, minute, gender, city, location: isChina ? province : country },
+                            charts: { images: await captureChartImages() },
+                          }),
+                        });
+                        if (!resp.ok) {
+                          const err = await resp.json().catch(() => ({ error: `HTTP ${resp.status}` }));
+                          alert('Word 生成失败: ' + (err.error || '未知错误'));
+                          return;
+                        }
+                        const blob = await resp.blob();
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `人生总览_${year || 'report'}.docx`;
+                        a.click();
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                      } catch (e: any) {
+                        alert('Word 生成异常: ' + (e.message || '网络错误'));
+                      } finally {
+                        btn.textContent = origText;
+                        btn.disabled = false;
+                      }
+                    }}
+                      className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                      📝 下载Word
+                    </button>
                     <button onClick={()=>{
-                      const b=new Blob([report],{type:'text/plain;charset=utf-8'});
+                      // TXT 导出：去除 markdown 符号，输出干净可读的纯文本
+                      const toPlain = (md: string) => md
+                        .replace(/^#{1,4}\s+/gm, '')
+                        .replace(/\*\*([^*]+)\*\*/g, '$1')
+                        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+                        .replace(/`([^`]+)`/g, '$1')
+                        .replace(/^\s*\|[-:|\s]+\|\s*$/gm, '')
+                        .replace(/^\s*\|/gm, '')
+                        .replace(/\|\s*$/gm, '')
+                        .replace(/[ \t]+$/gm, '')
+                        .replace(/\n{3,}/g, '\n\n');
+                      const b=new Blob([toPlain(report)],{type:'text/plain;charset=utf-8'});
                       const a=document.createElement('a');
                       a.href=URL.createObjectURL(b);
                       a.download=`人生总览_${year||''}.txt`;
@@ -503,8 +790,20 @@ export default function MasterPage() {
                     </button>
                   </div>
                 </div>
-                <div className="report-content prose prose-sm md:prose-base max-w-none leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: reportHtml }} />
+                <div className="report-content prose prose-sm md:prose-base max-w-none leading-relaxed">
+                  {chapterHtml.map((html, i) => (
+                    <div key={i} style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}
+                      dangerouslySetInnerHTML={{ __html: html }} />
+                  ))}
+                  {visibleChapters < reportSections.length && (
+                    <div className="text-center mt-6">
+                      <button onClick={() => setVisibleChapters(v => v + 3)}
+                        className="px-6 py-2.5 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">
+                        📖 继续阅读（剩余 {reportSections.length - visibleChapters} 章）
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* ── R4: 下一步 CTA ── */}
@@ -517,6 +816,18 @@ export default function MasterPage() {
                 <a href={NEXT_STEPS.fullReport.href}
                   className="inline-flex px-6 py-3 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-medium text-sm hover:shadow-lg transition-all">
                   {NEXT_STEPS.fullReport.btn}
+                </a>
+              </div>
+
+              <div className="card-jade p-6 md:p-8 mt-6 text-center border border-[var(--border-accent)]">
+                <div className="text-3xl mb-3">🧭</div>
+                <h3 className="text-lg font-bold mb-2">把报告放回真实人生</h3>
+                <p className="text-sm text-[var(--text-secondary)] mb-4 max-w-lg mx-auto">
+                  填写你的成长经历、关键门槛和当前状态，先校正一份人生总结，再查看“不改变路径”和“主动改变路径”两种可能性。
+                </p>
+                <a href="/life-story"
+                  className="inline-flex px-6 py-3 rounded-xl bg-[var(--bg-highlight)] border border-[var(--border-accent)] text-[var(--text-accent)] font-medium text-sm hover:shadow-lg transition-all">
+                  开始人生总结 →
                 </a>
               </div>
               </>
@@ -537,7 +848,17 @@ export default function MasterPage() {
                 {savedReports.map((r: any) => (
                   <div key={r.id}
                     className="flex items-center gap-3 p-3 rounded-xl bg-[var(--bg-highlight)] hover:bg-[var(--bg-card)] transition-colors cursor-pointer group"
-                    onClick={() => { setReport(r.report); setData(r.data); setShowQuickInput(false); setShowFullReport(true); setShowHistory(false); }}>
+                    onClick={() => {
+                      if (!r.report || r.report.length < 100) {
+                        // 报告数据损坏/被清空：提示并移除该条，避免渲染崩溃（手机 Safari reload 问题）
+                        const updated = savedReports.filter((x: any) => x.id !== r.id);
+                        setSavedReports(updated);
+                        try { localStorage.setItem('master_report_history', JSON.stringify(updated)); } catch {}
+                        alert('该报告数据已失效，已为您移除，请重新生成。');
+                        return;
+                      }
+                      setReport(r.report); setData(r.data); setShowQuickInput(false); setShowFullReport(true); setShowHistory(false); setVisibleChapters(3);
+                    }}>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium text-[var(--text-primary)] truncate">{r.name}</div>
                       <div className="text-xs text-[var(--text-tertiary)] mt-0.5">

@@ -46,8 +46,8 @@ export default function FeedbackForm({
   if (submitted) {
     return (
       <div className="mt-6 text-center py-4">
-        <p className="text-sm text-green-400">感谢你的反馈！🙏</p>
-        <p className="text-xs text-[var(--text-secondary)] opacity-60 mt-1">你的意见将帮助我们持续改进</p>
+        <p className="text-sm text-green-400">感谢您的反馈！🙏</p>
+        <p className="text-xs text-[var(--text-secondary)] opacity-60 mt-1">您的意见将帮助我们持续改进</p>
       </div>
     );
   }
@@ -60,9 +60,9 @@ export default function FeedbackForm({
       }}
     >
       <div className="text-center mb-4">
-        <p className="text-sm text-[var(--text-accent)] font-medium">📊 这份报告对你有帮助吗？</p>
+        <p className="text-sm text-[var(--text-accent)] font-medium">📊 这份报告对您有帮助吗？</p>
         <p className="text-xs text-[var(--text-secondary)] opacity-60 mt-1">
-          你的反馈将帮助我们优化算法，让更多人受益
+          您的反馈将帮助我们优化算法，让更多人受益
         </p>
       </div>
 
