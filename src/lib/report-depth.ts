@@ -178,6 +178,19 @@ export function finalizePersonalReport(report: string, context: PersonalReportCo
   return appendPersonalReportDisclaimer(appendPersonalDataCheck(normalized, context));
 }
 
+/**
+ * Normalize both the current local-generation path and the legacy report-api
+ * path to one verifiable report contract. The legacy service predates the
+ * engine-owned declaration section, so inject it here before finalization.
+ */
+export function preparePersonalReport(report: string, context: PersonalReportContext) {
+  const hasDeclaration = /##\s*0[.、．]\s*(?:家庭排盘数据声明|双方排盘数据声明|排盘数据声明)/.test(report);
+  const withDeclaration = hasDeclaration
+    ? report
+    : `${buildPersonalReportDataDeclaration(context)}\n${report.trimStart()}`;
+  return finalizePersonalReport(withDeclaration, context);
+}
+
 export function buildPersonalReportSegments(context: PersonalReportContext): ReportSegment[] {
   const data = serializeContext(context);
   const mode = context.life?.mode || 'current';

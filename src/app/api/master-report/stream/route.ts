@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
     });
   }
   const ziweiResult = calcZiwei(y, m, d, h, g);
-  const astrologyResult = await calcPlanetPositions(y, m, d, h, mi, lat, lon);
+  const astrologyResult = await calcPlanetPositions(y, m, d, h, mi, lat, lon, tz);
   const wuyunResult = calculateWuyunLiuqi(y);
   const liunianResult = calcLiuNian(y);
 
@@ -254,6 +254,8 @@ export async function POST(req: NextRequest) {
             verify_error: verifyError?.message || '报告事实层校验未通过',
             issues: verifyError?.issues || [],
           })}\n\n`));
+          controller.close();
+          return;
         }
 
         // Send final data payload

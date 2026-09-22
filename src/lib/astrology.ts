@@ -106,6 +106,34 @@ function signFromLongitude(lon: number): { sign: string; degree: number } {
   return { sign: SIGN_NAMES[idx], degree: Math.round((lon % 30) * 10) / 10 };
 }
 
+function getTimeZoneOffsetMinutes(instant: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+  }).formatToParts(instant);
+  const values: Record<string, number> = {};
+  for (const part of parts) {
+    if (part.type !== 'literal') values[part.type] = Number(part.value);
+  }
+  const renderedAsUtc = Date.UTC(values.year, values.month - 1, values.day, values.hour, values.minute, values.second);
+  return Math.round((renderedAsUtc - instant.getTime()) / 60000);
+}
+
+/** Convert a birthplace-local civil clock to the UTC instant expected by Swiss Ephemeris. */
+export function localCivilTimeToUtc(
+  year: number, month: number, day: number, hour: number, minute: number, timeZone = 'UTC',
+) {
+  const localClockAsUtc = Date.UTC(year, month - 1, day, hour, minute, 0);
+  let utcMs = localClockAsUtc;
+  for (let i = 0; i < 3; i++) {
+    utcMs = localClockAsUtc - getTimeZoneOffsetMinutes(new Date(utcMs), timeZone) * 60000;
+  }
+  return new Date(utcMs);
+}
+
 /**
  * 使用 swisseph-wasm 精确计算行星位置
  * 返回太阳/月亮/水星/金星/火星的星座和度数
@@ -113,15 +141,19 @@ function signFromLongitude(lon: number): { sign: string; degree: number } {
 export async function calcPlanetPositions(
   year: number, month: number, day: number,
   hour: number, minute: number,
-  lat: number, lon: number
+  lat: number, lon: number, timeZone = 'UTC'
 ): Promise<{ planets: PlanetPosition[]; zodiac: string }> {
   const fallbackSign = getZodiacByDate(month, day)?.name || '双子';
 
   try {
     const swisseph = await getSwisseph();
 
-    // 计算儒略日（UTC）
-    const jd = swisseph.swe_julday(year, month, day, hour + minute / 60, 1);
+    // 用户输入的是出生地当地民用时间；Swiss Ephemeris 接收 UTC。
+    const utc = localCivilTimeToUtc(year, month, day, hour, minute, timeZone);
+    const jd = swisseph.swe_julday(
+      utc.getUTCFullYear(), utc.getUTCMonth() + 1, utc.getUTCDate(),
+      utc.getUTCHours() + utc.getUTCMinutes() / 60, 1,
+    );
 
     const planetIds: [number, string][] = [
       [0, '太阳'], [1, '月亮'], [2, '水星'], [3, '金星'], [4, '火星']

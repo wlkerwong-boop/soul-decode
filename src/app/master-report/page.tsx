@@ -260,6 +260,15 @@ export default function MasterPage() {
           if (line.startsWith('data: ')) {
             try {
               const msg = JSON.parse(line.slice(6));
+              if (msg.verify_error) {
+                fullReport = '';
+                setReport('');
+                setData(null);
+                setError(msg.verify_error);
+                setLoading(false);
+                setIsStreaming(false);
+                return;
+              }
               if (msg.error) { setError(msg.error); setLoading(false); setIsStreaming(false); return; }
               if (msg.done) {
                 setData({ bazi: msg.bazi, hd: msg.hd, ziwei: msg.ziwei, zodiac: msg.zodiac, wuyun: msg.wuyun, liunian: msg.liunian });

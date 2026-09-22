@@ -88,6 +88,27 @@ function calcZW(y, m, d, h, g) {
   } catch(e) { return null; }
 }
 
+function ensureLegacyReportDeclaration(report, data) {
+  if (/##\s*0[.、．]\s*(?:排盘数据声明|家庭排盘数据声明|双方排盘数据声明)/.test(report)) return report;
+  const pillars = data.bazi?.pillars || [];
+  const channels = data.hd?.channels || [];
+  const declaration = [
+    '## 0. 排盘数据声明',
+    '',
+    `- 出生：${data.year}-${String(data.month).padStart(2, '0')}-${String(data.day).padStart(2, '0')} ${String(data.hour).padStart(2, '0')}:${String(data.minute).padStart(2, '0')}｜出生地：${data.location || '未提供'}｜性别：${data.gender}`,
+    `- 八字四柱：${pillars.join(' ')}｜日主：${data.bazi?.dayMaster || '数据暂缺'}`,
+    `- 人类图：类型：${data.hd?.type || '数据暂缺'}｜人生角色：${data.hd?.profile || '数据暂缺'}｜内在权威：${data.hd?.authority || '数据暂缺'}｜通道：${channels.join('、') || '无完整通道'}`,
+    `- 紫微斗数：${data.ziwei?.palaces?.map(p => `${p.name}宫：${(p.stars || []).slice(0, 5).join('、') || '无主星'}`).join('；') || '数据暂缺'}`,
+    `- 占星：${data.zodiac?.zodiac || '数据暂缺'}`,
+    `- 五运六气：${data.wuyun?.description || '数据暂缺'}`,
+    `- 流年：${data.liunian || '数据暂缺'}`,
+    '',
+    '> 本声明节由系统依据排盘数据直接生成，以下解读均以此为准。命理是地图不是判决书，与真人不符之处以真人为准。',
+    '',
+  ].join('\n');
+  return `${declaration}\n${report.trimStart()}`;
+}
+
 function calcHD(y, m, d, h, mi, tz) {
   if (!hdReady || !hdMod) return null;
   try {
@@ -178,7 +199,11 @@ app.post('/api/master-report', async (req, res) => {
       fullReport += '\n\n' + part2;
     }
 
-    res.json({success:true, report:fullReport, data:{bazi:ba, zodiac:zo, hd, ziwei:zw, wuyun:wy, liunian:ln}});
+    const report = ensureLegacyReportDeclaration(fullReport, {
+      year: y, month: m, day: d, hour: h, minute: mi, location, gender: g,
+      bazi: ba, zodiac: zo, hd, ziwei: zw, wuyun: wy, liunian: ln,
+    });
+    res.json({success:true, report, data:{bazi:ba, zodiac:zo, hd, ziwei:zw, wuyun:wy, liunian:ln}});
   } catch(e) {
     res.json({success:false, error:e.message||'生成失败'});
   }

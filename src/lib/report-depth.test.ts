@@ -9,6 +9,7 @@ import {
   appendPersonalReportDisclaimer,
   normalizePersonalReportAudience,
   finalizePersonalReport,
+  preparePersonalReport,
 } from './report-depth';
 import { buildLifeContext } from './lifecycle';
 
@@ -119,6 +120,14 @@ describe('personal report prompt', () => {
     expect(result).toContain('壬戌 庚戌 乙亥 辛巳');
     expect(result).toContain('Projector · 3/6 · Splenic');
     expect(result).not.toContain('你');
+  });
+
+  it('injects and finalizes a legacy report before verification', () => {
+    const result = preparePersonalReport('## 1. 旧报告\n\n正文内容', adultContext);
+    expect(result.match(/## 0\. 排盘数据声明/g)).toHaveLength(1);
+    expect(result).toContain('由系统依据排盘数据直接生成');
+    expect(result).toContain('## 1. 旧报告');
+    expect(result).toContain('仅供自我观察、个人成长与关系沟通参考');
   });
 
   it('switches minors to parent-facing growth and education guidance', () => {

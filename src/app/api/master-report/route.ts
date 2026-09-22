@@ -6,13 +6,13 @@ import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
 import { describeChannels } from '@/lib/hd-channels-map';
 import {
   buildPersonalReportSegments,
-  buildPersonalReportDataDeclaration,
   calculateReportBazi,
   calculateWuyunLiuqi as calculateReportWuyunLiuqi,
   PERSONAL_REPORT_SYSTEM_PROMPT,
-  finalizePersonalReport,
+  preparePersonalReport,
 } from '@/lib/report-depth';
 import { buildLifeContext } from '@/lib/lifecycle';
+import { formatBirthDateForLifecycle } from '@/lib/master-report-input';
 
 const require = createRequire(import.meta.url);
 const { assertReportVerified } = require('../../../lib/verify-report-core.mjs');
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
     const g = gender === '女' ? '女' : '男';
     const now = new Date();
     const life = buildLifeContext({
-      birthDate: `${y}-${String(m).padStart(4, '0')}-${String(d).padStart(2, '0')}`,
+      birthDate: formatBirthDateForLifecycle(y, m, d),
       deathDate: body.deathDate,
       analysisDate: body.analysisDate || now,
       lifeStatus: body.lifeStatus,
@@ -127,6 +127,19 @@ export async function POST(req: NextRequest) {
     
     const wuyunResult = calculateReportWuyunLiuqi(y);
     const liunianResult = calcLiuNian(y, now.getFullYear());
+    const reportContext = {
+      age,
+      life,
+      gender: g,
+      birth: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`,
+      location: [body.location, body.city].filter(Boolean).join(' ') || '未提供',
+      bazi: baziResult,
+      hd: hdResult,
+      ziwei: ziweiResult,
+      astrology: zodiacResult,
+      wuyun: wuyunResult,
+      liunian: liunianResult,
+    };
 
     // 构建完整提示词（与阿里云 report-api 同步的七系统格式）
     const prompt = `你是一位修炼数十年的命理导师，精通八字、人类图、占星、紫微斗数、五运六气、流年、人生规划七大体系。你的报告像长辈跟孩子谈心——温暖、直接、有力。每个数据点转化为具体人生场景。交叉印证。禁止AI套话。字数10000-20000字。**必须完整生成所有章节，不得截断。**
@@ -208,7 +221,7 @@ ${liunianResult}
       });
       const aliData = await aliRes.json();
       if (aliData.success && aliData.report) {
-        report = aliData.report;
+        report = preparePersonalReport(aliData.report, reportContext);
       }
     } catch (e) {
       console.log('Aliyun API unavailable, falling back to local:', (e as Error).message);
@@ -228,20 +241,8 @@ ${liunianResult}
             if (wx) elementDistribution[wx] = (elementDistribution[wx] || 0) + 1;
           });
         });
-        const reportContext = {
-          age,
-          life,
-          gender: g,
-          birth: `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`,
-          location: [body.location, body.city].filter(Boolean).join(' ') || '未提供',
-          bazi: { ...baziResult, elementDistribution },
-          hd: hdResult,
-          ziwei: ziweiResult,
-          astrology: zodiacResult,
-        wuyun: wuyunResult,
-        liunian: liunianResult,
-      };
-        const segments = buildPersonalReportSegments(reportContext);
+        const localReportContext = { ...reportContext, bazi: { ...baziResult, elementDistribution } };
+        const segments = buildPersonalReportSegments(localReportContext);
         let fullReport = '';
         for (const segment of segments) {
           const res = await fetch(`${baseUrl}/chat/completions`, {
@@ -270,24 +271,26 @@ ${liunianResult}
         }
         if (fullReport.length > 500) {
           // 引擎注入「## 0. 排盘数据声明」节（K3 加固条款：AI 不写数字/列表）
-          report = `${buildPersonalReportDataDeclaration(reportContext)}\n${finalizePersonalReport(fullReport, reportContext)}`;
+          report = preparePersonalReport(fullReport, localReportContext);
         }
       } catch (e) {
         console.error('DeepSeek fallback error:', (e as Error).message);
       }
     }
 
+    if (!report || !report.trim()) {
+      return NextResponse.json({ success: false, error: '报告生成失败：报告内容为空，请稍后重试' }, { status: 502 });
+    }
+
     // 事实层护栏（任务3 fail-closed）：校验不过 → 报错重生成，禁止带病交付
-    if (report) {
-      try {
-        assertReportVerified(report, {
-          hd: hdResult,
-          bazi: baziResult,
-        });
-      } catch (verifyError: any) {
-        console.error('报告事实层校验未通过，拒绝交付:', verifyError?.issues?.map((i: any) => i.message).join('; ') || verifyError?.message);
-        return NextResponse.json({ success: false, error: verifyError?.message || '报告事实层校验未通过' }, { status: 422 });
-      }
+    try {
+      assertReportVerified(report, {
+        hd: hdResult,
+        bazi: baziResult,
+      });
+    } catch (verifyError: any) {
+      console.error('报告事实层校验未通过，拒绝交付:', verifyError?.issues?.map((i: any) => i.message).join('; ') || verifyError?.message);
+      return NextResponse.json({ success: false, error: verifyError?.message || '报告事实层校验未通过' }, { status: 422 });
     }
 
     return NextResponse.json({

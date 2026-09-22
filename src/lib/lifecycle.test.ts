@@ -4,6 +4,7 @@ import {
   getLifeModeInstruction,
   getTimeConfidenceLabel,
 } from './lifecycle';
+import { formatBirthDateForLifecycle } from './master-report-input';
 
 describe('life context', () => {
   it('calculates current age for a living person from the analysis date', () => {
@@ -56,5 +57,15 @@ describe('life context', () => {
 
     expect(context.notices).toContain('出生时刻为约数：宫位、时柱和其他分钟敏感结论仅作参考。');
     expect(context.notices).not.toContain('出生时刻未知：人类图、紫微斗数时辰和其他时刻敏感结论不可作为精确验证。');
+  });
+
+  it('formats single-digit birth months for lifecycle parsing', () => {
+    expect(formatBirthDateForLifecycle(2000, 1, 2)).toBe('2000-01-02');
+    expect(formatBirthDateForLifecycle(2000, 12, 31)).toBe('2000-12-31');
+    expect(buildLifeContext({
+      birthDate: formatBirthDateForLifecycle(2000, 1, 2),
+      analysisDate: '2026-01-01',
+      lifeStatus: 'alive',
+    }).age).toBe(25);
   });
 });
