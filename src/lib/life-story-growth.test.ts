@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { LifeScriptResult } from './life-story';
-import { buildSafeLifeStoryShareText } from './life-story-growth';
+import { buildLifeStoryCompanionInviteText, buildSafeLifeStoryShareText } from './life-story-growth';
 
 const result: LifeScriptResult = {
   summary: {
@@ -45,6 +45,18 @@ describe('life story growth helpers', () => {
     expect(text).toContain('不是命运判决');
     expect(text).toContain('https://aisoulcode.cn/life-story');
     expect(text).not.toContain('2018');
+    expect(text).not.toContain('出生');
+    expect(text).not.toContain('车祸');
+  });
+
+  it('builds a privacy-safe companion invitation with the three reflection questions', () => {
+    const text = buildLifeStoryCompanionInviteText('https://aisoulcode.cn/life-story');
+
+    expect(text).toContain('朋友同行');
+    expect(text).toContain('https://aisoulcode.cn/life-story?mode=companion');
+    expect(text).toContain('这份总结里，哪一句最像你？');
+    expect(text).toContain('哪一句你不认同？现实证据是什么？');
+    expect(text).toContain('未来 7 天各自做一个小实验，如何互相支持？');
     expect(text).not.toContain('出生');
     expect(text).not.toContain('车祸');
   });

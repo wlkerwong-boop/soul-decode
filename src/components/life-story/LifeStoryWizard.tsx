@@ -15,6 +15,7 @@ import {
   type LifeStoryProfile,
   validateLifeStory,
 } from '@/lib/life-story';
+import { buildLifeStoryCompanionInviteText } from '@/lib/life-story-growth';
 import './life-story.css';
 
 const STEPS = [
@@ -87,6 +88,7 @@ export default function LifeStoryWizard() {
   const [errors, setErrors] = useState<string[]>([]);
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
+  const [isCompanionMode, setIsCompanionMode] = useState(false);
   const hydrated = useRef(false);
 
   const isSummaryDraft = (value: unknown): value is LifeScriptSummary => {
@@ -99,6 +101,9 @@ export default function LifeStoryWizard() {
   };
 
   useEffect(() => {
+    // The mode is read client-side so the invitation URL never changes the SSR output.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsCompanionMode(new URLSearchParams(window.location.search).get('mode') === 'companion');
     try {
       const raw = localStorage.getItem(LIFE_STORY_DRAFT_KEY);
       if (raw) {
@@ -245,6 +250,29 @@ export default function LifeStoryWizard() {
     }
   };
 
+  const shareCompanionInvite = async () => {
+    const inviteText = buildLifeStoryCompanionInviteText(`${window.location.origin}/life-story`);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'SoulCode · 朋友同行人生总结', text: inviteText });
+        setNotice('已打开系统分享；朋友会独立完成自己的总结。');
+        return;
+      }
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(inviteText);
+        setNotice('同行邀请已复制；朋友打开后会独立完成自己的总结。');
+        return;
+      }
+      throw new Error('share-unavailable');
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        setNotice('已取消分享。');
+        return;
+      }
+      setNotice('当前浏览器暂不支持分享，请复制浏览器地址后邀请朋友。');
+    }
+  };
+
   const updateSummaryArray = (key: keyof Pick<LifeScriptSummary, 'strengths' | 'patterns' | 'tensions' | 'openQuestions'>, value: string) => {
     setSummary((current) => (current ? { ...current, [key]: value.split('\n').map((line) => line.trim()).filter(Boolean) } : current));
   };
@@ -369,6 +397,7 @@ export default function LifeStoryWizard() {
         <div className="life-story-eyebrow">SOULCODE · LIFE STORY LAB</div>
         <h1>把报告放回真实人生</h1>
         <p>出生画像只是起点。你亲自走过的路、做过的选择和此刻想改变的方向，才是剧本真正可以被校正的部分。</p>
+        {isCompanionMode && <div className="life-story-companion-banner"><strong>朋友同行模式</strong><span>你们各自完成自己的总结，不互相查看原始经历；完成后再带着三问见面交流。</span></div>}
         <div className="life-story-value-strip" aria-label="开始前说明">
           <div><strong>8–12 分钟</strong><span>四段填写，可随时暂停</span></div>
           <div><strong>双路径</strong><span>得到一份总结与两条可讨论的可能性</span></div>
@@ -392,8 +421,9 @@ export default function LifeStoryWizard() {
           <div className="life-story-confirmation">
             <div className="life-story-step-heading"><span className="life-story-step-index">05</span><div><h2>先校正，再进入人生模拟</h2><p>以下内容是根据你填写的经历整理出的工作稿。任何一句不准确，都可以直接改掉。</p></div></div>
             {summary && <div className="life-story-summary-editor"><Field label="一句话总览" value={summary.headline} onChange={(value) => setSummary({ ...summary, headline: value })} multiline={false} />{(['strengths', 'patterns', 'tensions', 'openQuestions'] as const).map((key) => <Field key={key} label={{ strengths: '你已经拥有的力量', patterns: '可能重复的应对模式', tensions: '此刻的拉扯', openQuestions: '值得继续追问的问题' }[key]} hint="每行一条，可直接修改" value={summary[key].join('\n')} onChange={(value) => updateSummaryArray(key, value)} />)}</div>}
-            <div className="life-story-source-note"><strong>来源边界</strong><span>用户经历 · 当前选择 · 可选出生画像 · AI 推演</span><p>“不改变路径”和“主动改变路径”都是可讨论的可能性，不是对你的定论。</p><p>先免费查看人生总结工作稿；确认工作稿后登录，即可继续双路径模拟。</p></div>
-            {errors.length > 0 && <div className="life-story-errors" role="alert">{errors.map((error) => <div key={error}>· {error}</div>)}</div>}
+             <div className="life-story-source-note"><strong>来源边界</strong><span>用户经历 · 当前选择 · 可选出生画像 · AI 推演</span><p>“不改变路径”和“主动改变路径”都是可讨论的可能性，不是对你的定论。</p><p>先免费查看人生总结工作稿；确认工作稿后登录，即可继续双路径模拟。</p></div>
+             <div className="life-story-companion-cta"><div><strong>想和朋友一起走一遍？</strong><span>双方各自完成，不上传或互相暴露原始经历；之后用三问对谈。</span></div><button type="button" className="life-story-secondary-button" onClick={shareCompanionInvite}>邀请朋友一起完成</button></div>
+             {errors.length > 0 && <div className="life-story-errors" role="alert">{errors.map((error) => <div key={error}>· {error}</div>)}</div>}
             {notice && <div className="life-story-notice" aria-live="polite">{notice}</div>}
             <div className="life-story-actions"><button type="button" className="life-story-secondary-button" onClick={() => setStep(3)}>← 修改原始经历</button><button type="button" className="life-story-primary-button" onClick={requestScript} disabled={busy}>{busy ? '生成中…' : '确认并进入双路径模拟 →'}</button></div>
           </div>

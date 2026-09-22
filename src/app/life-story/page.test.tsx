@@ -38,4 +38,13 @@ describe('life story wizard page contract', () => {
     expect(scriptSection).toContain('saveBeforeLogin();');
     expect(wizardSource).toContain('确认工作稿后登录');
   });
+
+  it('offers a privacy-safe companion mode without creating a shared room', () => {
+    expect(wizardSource).toContain("get('mode') === 'companion'");
+    expect(wizardSource).toContain('朋友同行');
+    expect(wizardSource).toContain('各自完成');
+    expect(wizardSource).toContain('邀请朋友一起完成');
+    expect(wizardSource).toContain('buildLifeStoryCompanionInviteText');
+    expect(wizardSource).not.toContain('roomId');
+  });
 });

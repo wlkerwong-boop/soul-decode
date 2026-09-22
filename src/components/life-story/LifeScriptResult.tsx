@@ -6,7 +6,7 @@ import {
   LIFE_SCRIPT_RESULT_KEY,
   type LifeScriptResult as LifeScriptResultData,
 } from '@/lib/life-story';
-import { buildSafeLifeStoryShareText } from '@/lib/life-story-growth';
+import { buildLifeStoryCompanionInviteText, buildSafeLifeStoryShareText } from '@/lib/life-story-growth';
 import './life-story.css';
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -97,6 +97,29 @@ export default function LifeScriptResult() {
     }
   };
 
+  const shareCompanionInvite = async () => {
+    const inviteText = buildLifeStoryCompanionInviteText(`${window.location.origin}/life-story`);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'SoulCode · 朋友同行人生总结', text: inviteText });
+        setShareNotice('已打开朋友同行邀请。');
+        return;
+      }
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(inviteText);
+        setShareNotice('朋友同行邀请已复制，可以发给你信任的人。');
+        return;
+      }
+      throw new Error('share-unavailable');
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        setShareNotice('已取消分享。');
+        return;
+      }
+      setShareNotice('当前浏览器暂不支持分享，请复制浏览器地址后邀请朋友。');
+    }
+  };
+
   return (
     <main className="life-story-shell">
       <div className="life-story-orbit" aria-hidden="true" />
@@ -137,7 +160,8 @@ export default function LifeScriptResult() {
          <div className="life-script-disclaimer"><strong>请这样使用它</strong><p>不是命运判决。{result.disclaimer}</p><p>把它当作一份可被现实修正的观察稿：先选一个小行动，七天后用真实反馈更新你的判断。</p></div>
          <div className="life-script-next-step">
            <div><h3>把行动带回现实</h3><p>先挑一个你愿意承担的 7 天行动；如果这张地图对你有帮助，可以分享一张不包含私密经历的摘要。</p></div>
-           <div className="life-script-next-step-actions"><button type="button" className="life-story-secondary-button" onClick={shareResult}>分享一张安全摘要</button><a className="life-story-primary-button" href="/life-story/challenges">进入十重考验 →</a></div>
+           <div className="life-script-next-step-actions"><button type="button" className="life-story-secondary-button" onClick={shareResult}>分享一张安全摘要</button><button type="button" className="life-story-secondary-button" onClick={shareCompanionInvite}>邀请朋友一起完成</button><a className="life-story-primary-button" href="/life-story/challenges">进入十重考验 →</a></div>
+           <a className="life-story-companion-link" href="/life-story?mode=companion">先独立体验朋友同行模式 →</a>
            {shareNotice && <p className="life-story-notice" aria-live="polite">{shareNotice}</p>}
          </div>
          <div className="life-story-actions"><a className="life-story-secondary-button" href="/master-report">回看出生画像</a><a className="life-story-secondary-button" href="/life-story">再做一次人生总结</a></div>

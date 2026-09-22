@@ -27,4 +27,11 @@ describe('life script result page contract', () => {
     expect(viewSource).toContain('navigator.share');
     expect(viewSource).toContain('复制成功');
   });
+
+  it('offers a privacy-safe companion invitation', () => {
+    expect(viewSource).toContain('邀请朋友一起完成');
+    expect(viewSource).toContain('buildLifeStoryCompanionInviteText');
+    expect(viewSource).toContain('mode=companion');
+    expect(viewSource).not.toContain('roomId');
+  });
 });
