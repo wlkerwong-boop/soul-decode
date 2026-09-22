@@ -1,5 +1,6 @@
 export const LIFE_STORY_VERSION = 1 as const;
 export const LIFE_STORY_DRAFT_KEY = 'life_story_draft_v1';
+export const LIFE_STORY_SUMMARY_DRAFT_KEY = 'life_story_summary_draft_v1';
 export const LIFE_SCRIPT_RESULT_KEY = 'life_script_result_v1';
 
 export const LIFE_STORY_THEMES = [

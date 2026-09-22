@@ -8,6 +8,7 @@ import {
   createEmptyLifeStory,
   LIFE_SCRIPT_RESULT_KEY,
   LIFE_STORY_DRAFT_KEY,
+  LIFE_STORY_SUMMARY_DRAFT_KEY,
   LIFE_STORY_THEMES,
   type LifeScriptSummary,
   type LifeStoryEvent,
@@ -88,6 +89,15 @@ export default function LifeStoryWizard() {
   const [busy, setBusy] = useState(false);
   const hydrated = useRef(false);
 
+  const isSummaryDraft = (value: unknown): value is LifeScriptSummary => {
+    if (!value || typeof value !== 'object') return false;
+    const candidate = value as Record<string, unknown>;
+    return typeof candidate.headline === 'string' &&
+      ['strengths', 'patterns', 'tensions', 'openQuestions'].every((key) =>
+        Array.isArray(candidate[key]) && candidate[key].every((item) => typeof item === 'string'),
+      );
+  };
+
   useEffect(() => {
     try {
       const raw = localStorage.getItem(LIFE_STORY_DRAFT_KEY);
@@ -99,6 +109,13 @@ export default function LifeStoryWizard() {
           setStory({ ...createEmptyLifeStory(), ...parsed, consent: { ...createEmptyLifeStory().consent, ...parsed.consent } });
           setNotice('已恢复上次保存在本机的草稿。');
         }
+      }
+      const summaryRaw = localStorage.getItem(LIFE_STORY_SUMMARY_DRAFT_KEY);
+      const savedSummary = summaryRaw ? JSON.parse(summaryRaw) : null;
+      if (isSummaryDraft(savedSummary)) {
+        setSummary(savedSummary);
+        setStep(4);
+        setNotice('已恢复上次的人生总结工作稿；请先校正，再决定是否继续模拟。');
       }
     } catch {
       setNotice('本机草稿读取失败，你仍可以继续填写。');
@@ -115,6 +132,15 @@ export default function LifeStoryWizard() {
       // Do not echo the draft or interrupt the writing flow when storage is full.
     }
   }, [story]);
+
+  useEffect(() => {
+    try {
+      if (summary) localStorage.setItem(LIFE_STORY_SUMMARY_DRAFT_KEY, JSON.stringify(summary));
+      else localStorage.removeItem(LIFE_STORY_SUMMARY_DRAFT_KEY);
+    } catch {
+      // The summary is a convenience copy only; the writing flow must remain usable.
+    }
+  }, [summary]);
 
   const progress = useMemo(() => `${Math.min(step + 1, STEPS.length)} / ${STEPS.length}`, [step]);
 
@@ -157,6 +183,7 @@ export default function LifeStoryWizard() {
   const clearDraft = () => {
     try {
       localStorage.removeItem(LIFE_STORY_DRAFT_KEY);
+      localStorage.removeItem(LIFE_STORY_SUMMARY_DRAFT_KEY);
     } catch {
       // 页面状态仍然可以清空。
     }
@@ -170,6 +197,7 @@ export default function LifeStoryWizard() {
   const saveBeforeLogin = () => {
     try {
       localStorage.setItem(LIFE_STORY_DRAFT_KEY, JSON.stringify(story));
+      if (summary) localStorage.setItem(LIFE_STORY_SUMMARY_DRAFT_KEY, JSON.stringify(summary));
       sessionStorage.setItem('life_story_return_step', String(step));
     } catch {
       // 登录仍可继续，页面重新打开时不会带入未保存内容。
@@ -194,11 +222,6 @@ export default function LifeStoryWizard() {
       setErrors(validation.errors);
       return;
     }
-    if (!isLoggedIn) {
-      saveBeforeLogin();
-      return;
-    }
-
     setBusy(true);
     setNotice('正在把你的经历整理成一面可校正的镜子……');
     try {
@@ -228,6 +251,10 @@ export default function LifeStoryWizard() {
 
   const requestScript = async () => {
     if (!summary) return;
+    if (!isLoggedIn) {
+      saveBeforeLogin();
+      return;
+    }
     setBusy(true);
     setErrors([]);
     setNotice('正在生成两条可能路径，并整理 7 天行动卡……');
@@ -365,7 +392,7 @@ export default function LifeStoryWizard() {
           <div className="life-story-confirmation">
             <div className="life-story-step-heading"><span className="life-story-step-index">05</span><div><h2>先校正，再进入人生模拟</h2><p>以下内容是根据你填写的经历整理出的工作稿。任何一句不准确，都可以直接改掉。</p></div></div>
             {summary && <div className="life-story-summary-editor"><Field label="一句话总览" value={summary.headline} onChange={(value) => setSummary({ ...summary, headline: value })} multiline={false} />{(['strengths', 'patterns', 'tensions', 'openQuestions'] as const).map((key) => <Field key={key} label={{ strengths: '你已经拥有的力量', patterns: '可能重复的应对模式', tensions: '此刻的拉扯', openQuestions: '值得继续追问的问题' }[key]} hint="每行一条，可直接修改" value={summary[key].join('\n')} onChange={(value) => updateSummaryArray(key, value)} />)}</div>}
-            <div className="life-story-source-note"><strong>来源边界</strong><span>用户经历 · 当前选择 · 可选出生画像 · AI 推演</span><p>“不改变路径”和“主动改变路径”都是可讨论的可能性，不是对你的定论。</p></div>
+            <div className="life-story-source-note"><strong>来源边界</strong><span>用户经历 · 当前选择 · 可选出生画像 · AI 推演</span><p>“不改变路径”和“主动改变路径”都是可讨论的可能性，不是对你的定论。</p><p>先免费查看人生总结工作稿；确认工作稿后登录，即可继续双路径模拟。</p></div>
             {errors.length > 0 && <div className="life-story-errors" role="alert">{errors.map((error) => <div key={error}>· {error}</div>)}</div>}
             {notice && <div className="life-story-notice" aria-live="polite">{notice}</div>}
             <div className="life-story-actions"><button type="button" className="life-story-secondary-button" onClick={() => setStep(3)}>← 修改原始经历</button><button type="button" className="life-story-primary-button" onClick={requestScript} disabled={busy}>{busy ? '生成中…' : '确认并进入双路径模拟 →'}</button></div>

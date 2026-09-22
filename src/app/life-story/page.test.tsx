@@ -27,4 +27,15 @@ describe('life story wizard page contract', () => {
     expect(wizardSource).toContain('当前浏览器');
     expect(wizardSource).toContain('反思实验');
   });
+
+  it('lets guests see the reflective summary before asking them to log in', () => {
+    const summarySection = wizardSource.slice(wizardSource.indexOf('const requestSummary'), wizardSource.indexOf('const updateSummaryArray'));
+    const scriptSection = wizardSource.slice(wizardSource.indexOf('const requestScript'), wizardSource.indexOf('const next'));
+
+    expect(summarySection).not.toContain('saveBeforeLogin();');
+    expect(summarySection).toContain("setNotice('正在把你的经历整理成一面可校正的镜子……');");
+    expect(wizardSource).toContain('先免费查看人生总结');
+    expect(scriptSection).toContain('saveBeforeLogin();');
+    expect(wizardSource).toContain('确认工作稿后登录');
+  });
 });
