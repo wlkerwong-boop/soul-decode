@@ -97,6 +97,16 @@ describe('life script APIs and parser', () => {
     });
   });
 
+  it('marks the guest summary response as non-cacheable at every proxy layer', async () => {
+    const response = await summaryPOST(requestOf({ lifeStory: completeStory() }));
+
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    expect(response.headers.get('cdn-cache-control')).toBe('no-store');
+    expect(response.headers.get('surrogate-control')).toBe('no-store');
+    expect(response.headers.get('pragma')).toBe('no-cache');
+    expect(response.headers.get('expires')).toBe('0');
+  });
+
   it('builds a bounded prompt with the source boundary included', () => {
     const prompt = buildLifeScriptPrompt(completeStory(), { type: 'birth-profile' }, validModelJson.summary);
 
