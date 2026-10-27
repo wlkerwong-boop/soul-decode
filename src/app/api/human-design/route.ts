@@ -7,6 +7,7 @@
  * 响应保持 { success, bodygraph } 契约，经纬度经 cities 解析、未知地点北京兜底。
  */
 import { NextRequest } from 'next/server';
+import { validateReportBirth } from '@/lib/birth-validation';
 import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
 import { getBirthCoords } from '@/data/cities';
 
@@ -16,6 +17,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    if (!validateReportBirth(body)) return Response.json({ error: '出生日期或时间无效，请检查输入。' }, { status: 400 });
     const { year, month, day } = body;
     if (!year || !month || !day) {
       return new Response(JSON.stringify({ error: '请填写完整的出生日期' }), {
@@ -23,7 +25,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const hour = parseInt(body.hour) || 12;
+    const hour = body.hour === undefined || body.hour === null || body.hour === "" ? 12 : parseInt(body.hour);
     const minute = parseInt(body.minute) || 0;
     const timezone = body.timezone || 'Asia/Shanghai';
     // location 可为"省份/城市"文本，解析不到坐标时兜底北京（与排盘页表单一致）

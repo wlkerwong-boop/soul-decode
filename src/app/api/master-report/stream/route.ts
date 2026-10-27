@@ -1,5 +1,6 @@
 // 流式七系统报告 API — 边生成边返回
 import { NextRequest } from 'next/server';
+import { validateReportBirth } from '@/lib/birth-validation';
 import { createRequire } from 'node:module';
 import { getBirthCoords } from '@/data/cities';
 import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
@@ -97,8 +98,9 @@ function calcLiuNian(y: number) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
+  if (!validateReportBirth(body)) return Response.json({ error: '出生日期或时间无效，请检查输入。' }, { status: 400 });
   const { year, month, day, hour, location, gender, timezone } = body;
-  const y = parseInt(year), m = parseInt(month), d = parseInt(day), h = parseInt(hour) || 12;
+  const y = parseInt(year), m = parseInt(month), d = parseInt(day), h = hour === undefined || hour === null || hour === "" ? 12 : parseInt(hour);
   const mi = parseInt(body.minute) || 0;
   const tz = timezone || 'Asia/Shanghai';
   const { lat, lon } = getBirthCoords(body.city, location);
@@ -109,13 +111,12 @@ export async function POST(req: NextRequest) {
     deathDate: body.deathDate,
     analysisDate: body.analysisDate || now,
     lifeStatus: body.lifeStatus,
-    timeConfidence: body.timeConfidence,
+    timeConfidence: hour === undefined || hour === null || hour === '' ? 'unknown' : body.timeConfidence,
   });
-  // 生成日志（监控用）：时间/IP/出生地/结果/字数，输出到 pm2 out.log
-  const clientIp = (req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '').split(',')[0].trim() || 'unknown';
+  // 生成日志仅记录运行状态与耗时，不记录出生资料或 IP。
   const startedAt = Date.now();
   const logLine = (status: string, extra = '') =>
-    console.log(`[report-gen] ${new Date().toISOString()} ip=${clientIp} city=${body.city || '?'} y=${y}-${m}-${d} ${g} status=${status} ${extra} ${Math.round((Date.now() - startedAt) / 1000)}s`);
+    console.log(`[report-gen] ${new Date().toISOString()} status=${status} ${extra} ${Math.round((Date.now() - startedAt) / 1000)}s`);
 
   // 计算所有数据
   const baziResult = calculateReportBazi(y, m, d, h, mi);
@@ -172,7 +173,11 @@ export async function POST(req: NextRequest) {
         const declaration = buildPersonalReportDataDeclaration(reportContext);
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: declaration })}\n\n`));
         reportText += declaration;
-        for (const segment of reportSegments) {
+        for (const [index, segment] of reportSegments.entries()) {
+          if (index > 0) {
+            reportText += '\n\n';
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: '\n\n' })}\n\n`));
+          }
           const res = await fetch(`${baseUrl}/chat/completions`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
@@ -272,7 +277,7 @@ export async function POST(req: NextRequest) {
         })}\n\n`));
         controller.close();
       } catch (e: any) {
-        logLine('error', `err=${(e?.message || 'unknown').slice(0, 80)}`);
+        logLine('error');
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: e.message || 'Stream error' })}\n\n`));
         controller.close();
       }

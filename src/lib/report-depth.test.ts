@@ -10,6 +10,7 @@ import {
   normalizePersonalReportAudience,
   finalizePersonalReport,
   preparePersonalReport,
+  PERSONAL_REPORT_SYSTEM_PROMPT,
 } from './report-depth';
 import { buildLifeContext } from './lifecycle';
 
@@ -93,10 +94,10 @@ describe('personal report prompt', () => {
     expect(full).toContain('已由系统依据排盘数据直接生成');
     expect(full).not.toContain('逐条列出出生信息');
     expect(full).not.toContain('逐条列出');
-    for (const heading of ['核心命盘总览', '交叉印证', '此刻的人生', '天赋与方向', '健康与情绪养护', '实践纲领', '最终寄语']) {
+    for (const heading of ['核心命盘总览', '多视角观察', '此刻的人生', '天赋与方向', '健康与情绪养护', '实践纲领', '最终寄语']) {
       expect(full).toContain(heading);
     }
-    expect(full).toContain('6000-10000');
+    expect(full).toContain('3500-5000');
     expect(full).toContain('18-58');
     expect(full).toContain('紫微');
     // 声明节由引擎注入，含原「命理是地图不是判决书」表述
@@ -134,7 +135,10 @@ describe('personal report prompt', () => {
     const segments = buildPersonalReportSegments({ ...adultContext, age: 11 });
     const full = segments.map(segment => segment.prompt).join('\n');
     expect(full).toContain('家长视角');
-    expect(full).toContain('学习风格');
+    expect(full).toContain('学习环境');
     expect(full).toContain('家长行动清单');
+    expect(full).toContain('不得用于择校录取、能力筛选');
+    expect(PERSONAL_REPORT_SYSTEM_PROMPT).toContain('不能互相验证');
+    expect(PERSONAL_REPORT_SYSTEM_PROMPT).toContain('不作为择校或教育决策的依据');
   });
 });

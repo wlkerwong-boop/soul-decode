@@ -89,7 +89,7 @@ export default function HomePage() {
                 <Link className="btn" href="/master-report">开始建立我的蓝图</Link>
                 <a className="btn ghost" href="#who">我想先了解谁？</a>
               </div>
-              <p className="privacy-note">出生信息仅用于生成您的报告 · 结果由您自己保管</p>
+              <p className="privacy-note">出生资料和排盘数据用于生成报告，并会发送给 AI 服务；报告保存在当前浏览器。</p>
             </div>
             <div className="orbit reveal" aria-label="生命蓝图视觉示意">
               <span className="orbit-dot dot-a" />

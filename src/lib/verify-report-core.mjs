@@ -198,6 +198,15 @@ export function verifyReportText(reportText, truth = null) {
   const issues = [];
   const fail = (rule, message, evidence = '') => issues.push({ rule, message, evidence });
 
+  // 个人报告中，明确的定义中心总数必须与排盘结果一致。合盘成员分别校验，不能套用单人总数。
+  if (!Array.isArray(truth?.members) && Array.isArray(truth?.hd?.definedCenters)) {
+    const digits = { 零: 0, 一: 1, 二: 2, 两: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
+    for (const match of reportText.matchAll(/([0-9零一二两三四五六七八九])\s*个\s*定义中心/g)) {
+      const count = digits[match[1]] ?? Number(match[1]);
+      if (count !== truth.hd.definedCenters.length) fail('CENTER_COUNT', `定义中心数量与排盘数据不一致`, match[0]);
+    }
+  }
+
   // ---- V1 通道条数 ----
   const declaredMatches = [...reportText.matchAll(/(?:定义通道|激活通道|通道)[共]?\s*(\d+)\s*条/g)];
   const listedChannels = new Set();

@@ -1,5 +1,6 @@
 // 七系统融合报告 API — 人生总览
 import { NextRequest, NextResponse } from 'next/server';
+import { validateReportBirth } from '@/lib/birth-validation';
 import { createRequire } from 'node:module';
 import { getBirthCoords } from '@/data/cities';
 import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
@@ -99,8 +100,9 @@ function calcLiuNian(y: number, curYear: number) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    if (!validateReportBirth(body)) return NextResponse.json({ success: false, error: '出生日期或时间无效，请检查输入。' }, { status: 400 });
     const { year, month, day, hour, location, gender, timezone } = body;
-    const y=parseInt(year), m=parseInt(month), d=parseInt(day), h=hour!==undefined?parseInt(hour):12;
+    const y=parseInt(year), m=parseInt(month), d=parseInt(day), h=hour === undefined || hour === null || hour === '' ? 12 : parseInt(hour);
     const mi = parseInt(body.minute) || 0;
     const tz = timezone || 'Asia/Shanghai';
     const { lat, lon } = getBirthCoords(body.city, location);
@@ -111,7 +113,7 @@ export async function POST(req: NextRequest) {
       deathDate: body.deathDate,
       analysisDate: body.analysisDate || now,
       lifeStatus: body.lifeStatus,
-      timeConfidence: body.timeConfidence,
+      timeConfidence: hour === undefined || hour === null || hour === '' ? 'unknown' : body.timeConfidence,
     });
     const age = life.age ?? 0;
 

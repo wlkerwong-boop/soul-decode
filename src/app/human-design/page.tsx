@@ -241,7 +241,7 @@ export default function HumanDesignPage() {
               ))}
             </div>
             <div className="soul-editorial-privacy">
-              出生信息仅用于排盘，绝不外泄
+              出生信息用于排盘；使用 AI 解读时，排盘结果会发送给 AI 服务。
             </div>
           </div>
 
@@ -349,7 +349,7 @@ export default function HumanDesignPage() {
           {/* ===== Bodygraph SVG ===== */}
           <div id="hd-bodygraph" className="card-jade p-6">
             <h3 className="text-lg font-bold gradient-text mb-2">📊 人体图</h3>
-            <p className="text-xs text-[var(--text-secondary)] mb-4">● 金色 = 定义中心  ○ 灰色 = 开放中心  |  金色连线 = 激活通道</p>
+            <p className="text-xs text-[var(--text-secondary)] mb-4">有色中心 = 已定义 · 白色中心 = 开放 · 深色闸门与线段 = 已激活</p>
             <BodygraphSVG
               definedCenters={hd.definedCenters}
               activatedGates={hd.activatedGates}

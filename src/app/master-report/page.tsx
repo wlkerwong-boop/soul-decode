@@ -351,7 +351,7 @@ export default function MasterPage() {
           <h1 className="soul-editorial-title">
             人生<span className="gradient-text">总览</span>
           </h1>
-          <p className="soul-editorial-lead">一次输入 · 七个维度交叉印证，看见完整的您</p>
+          <p className="soul-editorial-lead">一次输入 · 从多个传统视角展开自我观察</p>
           {(report || data) && !showQuickInput && (
             <button
               type="button"
@@ -392,12 +392,12 @@ export default function MasterPage() {
           <div className="soul-editorial-grid mb-10">
             {/* 左：品牌信息（桌面） */}
             <div className="soul-editorial-intro hidden md:block">
-              <p className="soul-editorial-section-label">一次输入，七重印证</p>
+              <p className="soul-editorial-section-label">一次输入，多种视角</p>
               <h2>
-                七套古老智慧，<br />交叉印证<span className="gradient-text">同一件事</span>
+                多种传统视角，<br />提供<span className="gradient-text">自我观察线索</span>
               </h2>
               <p>
-                您的出生信息将同时经由七个系统运算——东方命理与西方能量学彼此校验，输出一份互为印证的完整报告。
+                根据输入生成不同传统体系的象征性解读，供自我观察与沟通参考。不同体系不能互相验证，也不能依据出生资料判断孩子的能力或择校。
               </p>
               <div className="soul-editorial-tags">
                 {['八字','人类图','占星','紫微斗数','五运六气','流年','人生规划'].map(s => (
@@ -407,7 +407,7 @@ export default function MasterPage() {
                 ))}
               </div>
               <div className="soul-editorial-privacy">
-                出生信息仅用于排盘，绝不外泄
+                出生资料和排盘数据用于生成报告，并会发送给 AI 服务；报告保存在当前浏览器。
               </div>
             </div>
 
@@ -512,7 +512,7 @@ export default function MasterPage() {
                 {loading ? '⌛ 正在排盘中...' : '✦ 免费排盘，查看我的出厂配置'}
               </button>
               <p className="text-xs text-[var(--text-tertiary)] text-center mt-4 md:hidden">
-                🔒 出生信息仅用于排盘，绝不外泄
+                🔒 出生资料和排盘数据用于生成报告，并会发送给 AI 服务；报告保存在当前浏览器。
               </p>
               {error && !loading && <p className="text-red-400 text-xs mt-2 text-center">{error}</p>}
             </div>
