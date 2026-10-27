@@ -16,6 +16,7 @@ import {
   validateLifeStory,
 } from '@/lib/life-story';
 import { buildLifeStoryCompanionInviteText } from '@/lib/life-story-growth';
+import { lastMasterReportKey } from '@/lib/master-report-storage';
 import './life-story.css';
 
 const STEPS = [
@@ -81,7 +82,7 @@ function Field({
 
 export default function LifeStoryWizard() {
   const router = useRouter();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   const [story, setStory] = useState<LifeStoryProfile>(() => createEmptyLifeStory());
   const [step, setStep] = useState(0);
   const [summary, setSummary] = useState<LifeScriptSummary | null>(null);
@@ -212,7 +213,8 @@ export default function LifeStoryWizard() {
 
   const birthProfileFromLastReport = () => {
     try {
-      const raw = localStorage.getItem('last_master_report');
+      const key = lastMasterReportKey(user?.id);
+      const raw = key ? localStorage.getItem(key) : null;
       const parsed = raw ? JSON.parse(raw) : null;
       return parsed?.data ?? null;
     } catch {

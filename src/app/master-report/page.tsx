@@ -11,6 +11,7 @@ import ReportWaiting from '@/components/ReportWaiting';
 import { marked } from 'marked';
 import { CHINA_CITIES, INTERNATIONAL_CITIES, CITY_TZ } from '@/data/cities';
 import { beginNewReportView } from '@/lib/master-report-view';
+import { lastMasterReportKey, masterReportHistoryKey } from '@/lib/master-report-storage';
 
 const YEARS = Array.from({length:new Date().getFullYear()-1800+1},(_,i)=>new Date().getFullYear()-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
@@ -20,7 +21,9 @@ const MINUTES = Array.from({length:60},(_,i)=>i);
 
 export default function MasterPage() {
   const router = useRouter();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
+  const historyKey = masterReportHistoryKey(user?.id);
+  const lastReportKey = lastMasterReportKey(user?.id);
   const [year, setYear] = useState(''); const [month, setMonth] = useState('');
   const [day, setDay] = useState(''); const [hour, setHour] = useState(''); const [minute, setMinute] = useState('0');
   const [continent, setContinent] = useState(''); const [country, setCountry] = useState('');
@@ -122,13 +125,18 @@ export default function MasterPage() {
     ziwei: await captureChartImage('ziwei'),
   });
 
-  // Load saved reports on mount
+  // A shared browser can contain several accounts. Never load another account's reports.
   useEffect(() => {
+    setSavedReports([]);
+    setReport('');
+    setData(null);
+    setShowFullReport(false);
+    if (!historyKey) return;
     try {
-      const saved = localStorage.getItem('master_report_history');
+      const saved = localStorage.getItem(historyKey);
       if (saved) setSavedReports(JSON.parse(saved));
     } catch {}
-  }, []);
+  }, [historyKey]);
 
   // ── 登录门禁：未登录点排盘 → 暂存表单 → 去登录；登录回来自动恢复 ──
   const [restoredNotice, setRestoredNotice] = useState('');
@@ -171,8 +179,8 @@ export default function MasterPage() {
     };
     const history = [entry, ...savedReports.filter((r:any) => r.report !== reportText)].slice(0, 10);
     setSavedReports(history);
-    try { localStorage.setItem('master_report_history', JSON.stringify(history)); } catch {}
-    try { localStorage.setItem('last_master_report', JSON.stringify({report: reportText, data: reportData})); } catch {}
+    if (historyKey) try { localStorage.setItem(historyKey, JSON.stringify(history)); } catch {}
+    if (lastReportKey) try { localStorage.setItem(lastReportKey, JSON.stringify({report: reportText, data: reportData})); } catch {}
   };
 
   const continents = useMemo(() => Object.keys(INTERNATIONAL_CITIES), []);
@@ -338,7 +346,7 @@ export default function MasterPage() {
     setIsStreaming(false);
     setStartTime(null);
     setElapsedSeconds(0);
-    try { localStorage.removeItem('last_master_report'); } catch {}
+    if (lastReportKey) try { localStorage.removeItem(lastReportKey); } catch {}
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -853,7 +861,7 @@ export default function MasterPage() {
                         // 报告数据损坏/被清空：提示并移除该条，避免渲染崩溃（手机 Safari reload 问题）
                         const updated = savedReports.filter((x: any) => x.id !== r.id);
                         setSavedReports(updated);
-                        try { localStorage.setItem('master_report_history', JSON.stringify(updated)); } catch {}
+                        if (historyKey) try { localStorage.setItem(historyKey, JSON.stringify(updated)); } catch {}
                         alert('该报告数据已失效，已为您移除，请重新生成。');
                         return;
                       }
@@ -869,7 +877,7 @@ export default function MasterPage() {
                       e.stopPropagation();
                       const updated = savedReports.filter((x: any) => x.id !== r.id);
                       setSavedReports(updated);
-                      try { localStorage.setItem('master_report_history', JSON.stringify(updated)); } catch {}
+                      if (historyKey) try { localStorage.setItem(historyKey, JSON.stringify(updated)); } catch {}
                     }}
                       className="opacity-0 group-hover:opacity-100 text-xs text-red-400 hover:text-red-300 px-2 py-1 rounded transition-all">
                       ✕ 删除
