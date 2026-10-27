@@ -17,9 +17,9 @@ export default function MyPage() {
       return;
     }
     if (isLoggedIn) {
-      setReports(getAllReports());
+      setReports(getAllReports(user?.id || ''));
     }
-  }, [isLoading, isLoggedIn, router]);
+  }, [isLoading, isLoggedIn, router, user?.id]);
 
   if (isLoading || !isLoggedIn || !user) {
     return (

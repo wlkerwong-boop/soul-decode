@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveReport, type ReportType } from '@/lib/report-store';
+import { useAuth } from '@/components/AuthContext';
 
 interface Props {
   content: string;
@@ -13,6 +14,7 @@ interface Props {
 
 export default function SaveToArchive({ content, reportType, defaultTitle, existingId }: Props) {
   const router = useRouter();
+  const { user } = useAuth();
   const [showSave, setShowSave] = useState(false);
   const [password, setPassword] = useState('');
   const [title, setTitle] = useState(defaultTitle);
@@ -30,7 +32,7 @@ export default function SaveToArchive({ content, reportType, defaultTitle, exist
       return;
     }
     try {
-      const report = saveReport(content, reportType, title, password, existingId);
+      const report = saveReport(content, reportType, title, password, existingId, user?.id);
       setReportId(report.meta.id);
       setSaved(true);
       setError('');

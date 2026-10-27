@@ -24,6 +24,7 @@ export interface Report {
   meta: ReportMeta;
   content: string;  // markdown 格式的报告内容
   password: string; // 查看密码
+  ownerId?: string; // 当前登录账号；旧报告没有归属，不在个人中心跨账号展示
 }
 
 // 存储结构
@@ -90,6 +91,7 @@ export function saveReport(
   title: string,
   password: string,
   existingId?: string,
+  ownerId?: string,
 ): Report {
   const store = loadStore();
   const id = existingId || generateId();
@@ -104,6 +106,7 @@ export function saveReport(
     },
     content,
     password,
+    ownerId,
   };
 
   store.reports[id] = report;
@@ -130,9 +133,10 @@ export function getUserReports(password: string): ReportMeta[] {
 }
 
 // 管理员获取所有报告
-export function getAllReports(): ReportMeta[] {
+export function getAllReports(ownerId: string): ReportMeta[] {
   const store = loadStore();
   return Object.values(store.reports)
+    .filter(r => r.ownerId === ownerId)
     .map(r => r.meta)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }

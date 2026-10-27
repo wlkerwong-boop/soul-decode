@@ -65,7 +65,7 @@ export default function MasterPage() {
     fullReport: {
       emoji: '👨‍👩‍👧‍👦',
       title: '想为孩子也解码一份？',
-      desc: '每个孩子的出厂配置都独一无二。看看孩子的天赋、学习风格和成长路径，让教育不再盲人摸象。',
+      desc: '从不同传统视角提出观察问题，结合孩子真实的兴趣、行为和意愿交流。报告不用于判断能力或决定择校。',
       btn: '🔮 亲子合盘 · 两份报告交叉解读 →',
       href: '/compatibility',
     },

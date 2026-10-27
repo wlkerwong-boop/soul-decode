@@ -14,6 +14,7 @@ import DailyFortune from './DailyFortune';
 import PaywallOverlay from './PaywallOverlay';
 import ShareReferral from './ShareReferral';
 import { saveReport } from '@/lib/report-store';
+import { useAuth } from '@/components/AuthContext';
 import { isUserPremium } from '@/lib/access-control';
 
 const CITIES_DB = (citiesData as any).cities as Record<string, { cities: string[]; tags: string[]; description: string }>;
@@ -125,6 +126,7 @@ interface HistoryEntry {
 }
 
 export default function BirthInputForm() {
+  const { user } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     year: '',
     month: '',
@@ -378,7 +380,7 @@ export default function BirthInputForm() {
       });
       // 同时保存到新报告系统
       try {
-        saveReport(fullReport, 'bazi', `八字解读·${summary}`, '', baziData.reportId);
+        saveReport(fullReport, 'bazi', `八字解读·${summary}`, '', baziData.reportId, user?.id);
       } catch { /* ignore */ }
 
     } catch (err: any) {
@@ -393,7 +395,7 @@ export default function BirthInputForm() {
       setLoading(false);
       abortRef.current = null;
     }
-  }, [formData, saveToHistory]);
+  }, [formData, saveToHistory, user?.id]);
 
   const handleReset = useCallback(() => {
     setBaziData(null);
