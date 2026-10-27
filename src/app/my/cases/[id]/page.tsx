@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getReport, getReportAdmin, type Report } from '@/lib/report-store';
+import { getReport, type Report } from '@/lib/report-store';
 import TTSReader from '@/components/TTSReader';
 
 export default function CasePage() {
@@ -22,17 +22,6 @@ export default function CasePage() {
 
     if (savedId === id && savedPwd) {
       const r = getReport(id, savedPwd);
-      if (r) {
-        setReport(r);
-        setLoading(false);
-        return;
-      }
-    }
-
-    // Check if admin (password in session)
-    const adminPwd = sessionStorage.getItem('admin-password');
-    if (adminPwd) {
-      const r = getReport(id, adminPwd);
       if (r) {
         setReport(r);
         setLoading(false);

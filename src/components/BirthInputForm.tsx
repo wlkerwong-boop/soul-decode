@@ -434,7 +434,7 @@ export default function BirthInputForm() {
 
   const handleShareText = useCallback(() => {
     if (!baziData) return;
-    const text = `🔮 灵魂解码 · 我的命盘已开启\n\n八字：${baziData.pillars.filter(p => p !== '--').join(' ')}\n日主：${baziData.dayMaster}（${baziData.dayMasterElement}）\n生肖：${baziData.zodiac}\n${lifeEnergyData ? `能量均值：${lifeEnergyData.averageEnergy}` : ''}\n\n您的呢？输入出生信息，即刻解码 → https://soul-decode.vercel.app`;
+    const text = `🔮 灵魂解码 · 我的命盘已开启\n\n八字：${baziData.pillars.filter(p => p !== '--').join(' ')}\n日主：${baziData.dayMaster}（${baziData.dayMasterElement}）\n生肖：${baziData.zodiac}\n${lifeEnergyData ? `能量均值：${lifeEnergyData.averageEnergy}` : ''}\n\n您的呢？输入出生信息，即刻解码 → https://aisoulcode.cn`;
 
     if (navigator.share) {
       navigator.share({ title: '灵魂解码', text }).catch(() => {
