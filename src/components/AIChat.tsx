@@ -123,17 +123,16 @@ export default function AIChat({ context, maxFreeMessages = 3, isPremium = false
           <div>
             <h3 className="text-sm font-bold text-[var(--text-primary)]">AI 追问</h3>
             <p className="text-[10px] text-[var(--text-secondary)] opacity-70">
-              {isPremium ? '无限畅聊' : `今日剩余 ${maxFreeMessages - totalMessages} 次追问`}
+              {isPremium ? '可继续追问' : `本次剩余 ${Math.max(0, maxFreeMessages - totalMessages)} 次追问`}
             </p>
           </div>
         </div>
         {!isPremium && totalMessages >= maxFreeMessages && (
-          <a
-            href="/payment"
+          <span
             className="text-xs px-3 py-1 rounded-full bg-[var(--text-accent)] text-white font-medium hover:opacity-90 transition-opacity"
           >
-            解锁无限追问
-          </a>
+            付费追问暂未开放
+          </span>
         )}
       </div>
 
@@ -207,15 +206,14 @@ export default function AIChat({ context, maxFreeMessages = 3, isPremium = false
       {!canAsk && !isPremium && (
         <div className="px-5 py-4 border-t border-[var(--border-color)] text-center">
           <p className="text-sm text-[var(--text-secondary)] mb-2">
-            今日免费追问已用完
+            本次免费追问已用完
           </p>
-          <a
-            href="/payment"
+          <span
             className="btn-jade inline-flex items-center justify-center px-6 py-2 text-sm"
             style={{ width: 'auto' }}
           >
-            💎 升级会员 · 无限追问
-          </a>
+            付费追问暂未开放
+          </span>
         </div>
       )}
     </div>

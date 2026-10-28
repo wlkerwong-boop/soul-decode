@@ -11,11 +11,9 @@ import FeedbackForm from './FeedbackForm';
 import TTSReader from './TTSReader';
 import AIChat from './AIChat';
 import DailyFortune from './DailyFortune';
-import PaywallOverlay from './PaywallOverlay';
 import ShareReferral from './ShareReferral';
 import { saveReport } from '@/lib/report-store';
 import { useAuth } from '@/components/AuthContext';
-import { isUserPremium } from '@/lib/access-control';
 
 const CITIES_DB = (citiesData as any).cities as Record<string, { cities: string[]; tags: string[]; description: string }>;
 
@@ -159,11 +157,8 @@ export default function BirthInputForm() {
   // 白话解读状态
   const [plumInterpretText, setPlumInterpretText] = useState('');
   const [plumInterpretLoading, setPlumInterpretLoading] = useState(false);
-  // 免费码
-  const [freeCode, setFreeCode] = useState('');
-  const [codeStatus, setCodeStatus] = useState<{ valid: boolean; message: string } | null>(null);
-  const [codeChecking, setCodeChecking] = useState(false);
-  const [hasAccess, setHasAccess] = useState(false); // 默认需要免费码或打赏解锁，验证通过后 localStorage 记住
+  // 朋友试用期间开放完整八字报告；收费需先有可信的服务端权益系统。
+  const hasAccess = true;
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -408,8 +403,6 @@ export default function BirthInputForm() {
     setGrowthPlanLoading(false);
     setPlumInterpretText('');
     setPlumInterpretLoading(false);
-    setCodeStatus(null);
-    setFreeCode('');
     setError(null);
     setStep('form');
     setShowHistory(false);
@@ -446,36 +439,6 @@ export default function BirthInputForm() {
       navigator.clipboard.writeText(text).catch(() => {});
     }
   }, [baziData, lifeEnergyData]);
-
-  // 免费码验证
-  const handleVerifyCode = useCallback(async () => {
-    if (!freeCode.trim()) return;
-    setCodeChecking(true);
-    setCodeStatus(null);
-    try {
-      const res = await fetch('/api/verify-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: freeCode.trim().toUpperCase() }),
-      });
-      const data = await res.json();
-      setCodeStatus(data);
-      if (data.valid) {
-        setHasAccess(true);
-        localStorage.setItem('soul-decode-access', 'free');
-      }
-    } catch {
-      setCodeStatus({ valid: false, message: '验证失败，请重试' });
-    } finally {
-      setCodeChecking(false);
-    }
-  }, [freeCode]);
-
-  // 检查本地存储的访问权限
-  useEffect(() => {
-    const savedAccess = localStorage.getItem('soul-decode-access');
-    if (savedAccess) setHasAccess(true);
-  }, []);
 
   // 下载报告（PDF - 通过浏览器打印功能）
   const handleDownloadPDF = useCallback(() => {
@@ -760,22 +723,7 @@ export default function BirthInputForm() {
           {/* ── AI追问对话 ── */}
           {reportComplete && reportText && (
             <div className="max-w-3xl mx-auto">
-              {/* 付费墙：非会员只显示报告前30%，加模糊效果 */}
-              {isUserPremium() ? null : (
-                <div className="relative mb-8">
-                  <div className="overflow-hidden max-h-[400px] relative">
-                    <div
-                      className="report-content leading-relaxed blur-sm select-none"
-                      dangerouslySetInnerHTML={{ __html: renderMarkdown(reportText.slice(0, Math.floor(reportText.length * 0.3))) }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--bg-card)]" />
-                  </div>
-                  <PaywallOverlay feature="完整报告" inline={true} />
-                </div>
-              )}
-              {isUserPremium() && (
-                <div className="report-content leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(reportText) }} />
-              )}
+              <div className="report-content leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(reportText) }} />
 
               <div className="gold-divider my-10" />
               <AIChat
@@ -902,11 +850,7 @@ export default function BirthInputForm() {
               </button>
               <button onClick={handleReset} className="btn-gold flex-1 min-w-[140px]">🔄 重新</button>
             </div>
-            {!hasAccess && reportComplete && (
-              <p className="text-xs text-[var(--text-secondary)] mt-2">
-                付费或输入免费码后可下载完整报告
-              </p>
-            )}
+            {reportComplete && <p className="text-xs text-[var(--text-secondary)] mt-2">朋友试用期间可直接下载完整报告</p>}
 
             {/* 打赏区 */}
             <div id="donation-section" className="mt-8 p-5 rounded-xl mx-auto max-w-md"
@@ -937,42 +881,6 @@ export default function BirthInputForm() {
               </div>
               <p className="text-xs text-[var(--text-accent)] text-center mt-3">感谢随喜 🙏</p>
             </div>
-
-            {/* 免费码输入 */}
-            {!hasAccess && (
-              <div className="mt-4 rounded-xl p-4 mx-auto max-w-md text-center"
-                style={{
-                  border: '1px dashed rgba(201,169,110,0.2)',
-                }}
-              >
-                <p className="text-xs text-[var(--text-secondary)] mb-2">
-                  或者输入朋友给您的免费码
-                </p>
-                <div className="flex gap-2 max-w-xs mx-auto">
-                  <input
-                    className="input-gold flex-1 text-sm text-center uppercase"
-                    placeholder="SOUL-GIFT-XXX"
-                    value={freeCode}
-                    onChange={e => setFreeCode(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleVerifyCode()}
-                  />
-                  <button onClick={handleVerifyCode} disabled={codeChecking || !freeCode.trim()}
-                    className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
-                    style={{
-                      background: codeChecking ? 'rgba(201,169,110,0.2)' : 'linear-gradient(135deg, #c9a96e, #b8944e)',
-                      color: codeChecking ? '#c9a96e' : '#0a0a0f',
-                    }}
-                  >
-                    {codeChecking ? '验证中' : '验证'}
-                  </button>
-                </div>
-                {codeStatus && (
-                  <p className={`text-xs mt-2 ${codeStatus.valid ? 'text-green-400' : 'text-red-400'}`}>
-                    {codeStatus.message}
-                  </p>
-                )}
-              </div>
-            )}
 
             {/* 反馈区（测试数据收集） */}
             <FeedbackForm

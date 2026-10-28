@@ -114,10 +114,10 @@ export default function MyPage() {
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <a
-                  href="/health"
+                  href="/master-report"
                   className="px-5 py-2 rounded-lg border border-[var(--border-color)] text-sm hover:border-[var(--text-accent)] transition-colors"
                 >
-                  去做健康评测
+                  生成生命蓝图
                 </a>
                 <a
                   href="/"

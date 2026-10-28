@@ -111,8 +111,8 @@ export default function CasePage() {
             <a href="/my" className="px-4 py-2 border border-[var(--border-color)] text-sm text-[var(--text-secondary)] rounded-lg hover:border-[var(--text-accent)] transition-all">
               ← 返回档案
             </a>
-            <a href="/health" className="px-4 py-2 bg-[var(--text-accent)] text-black text-sm font-bold rounded-lg hover:opacity-90 transition-all">
-              再做健康评测
+            <a href="/master-report" className="px-4 py-2 bg-[var(--text-accent)] text-black text-sm font-bold rounded-lg hover:opacity-90 transition-all">
+              生成生命蓝图
             </a>
           </div>
         </div>
