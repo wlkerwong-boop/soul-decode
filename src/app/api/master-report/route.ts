@@ -186,7 +186,8 @@ export async function POST(req: NextRequest) {
             break;
           }
           const data = await res.json();
-          fullReport += data.choices?.[0]?.message?.content || '';
+          const segmentText = String(data.choices?.[0]?.message?.content || '').trim();
+          if (segmentText) fullReport += `${fullReport ? '\n\n' : ''}${segmentText}`;
         }
         if (fullReport.length > 500) {
           // 引擎注入「## 0. 排盘数据声明」节（K3 加固条款：AI 不写数字/列表）
