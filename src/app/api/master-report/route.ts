@@ -4,7 +4,6 @@ import { validateReportBirth } from '@/lib/birth-validation';
 import { createRequire } from 'node:module';
 import { getBirthCoords } from '@/data/cities';
 import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
-import { describeChannels } from '@/lib/hd-channels-map';
 import {
   buildPersonalReportSegments,
   calculateReportBazi,
@@ -143,95 +142,13 @@ export async function POST(req: NextRequest) {
       liunian: liunianResult,
     };
 
-    // 构建完整提示词（与阿里云 report-api 同步的七系统格式）
-    const prompt = `你是一位修炼数十年的命理导师，精通八字、人类图、占星、紫微斗数、五运六气、流年、人生规划七大体系。你的报告像长辈跟孩子谈心——温暖、直接、有力。每个数据点转化为具体人生场景。交叉印证。禁止AI套话。字数10000-20000字。**必须完整生成所有章节，不得截断。**
-
-【报告格式要求-严格按以下执行】
-- 开头段：直接称呼用户（如"您今年53岁"），简述核心命盘，自然引入
-- 每个系统数据需配表格：八字四柱表（天干/地支/十神/藏干/纳音）、人类图数据表（类型/角色/权威/中心/通道/闸门）、紫微12宫全表（含辅星和意义列）
-- 通道描述要详细：每条通道写Gate名称+两端中心，**连接关系只准引用数据中映射表给出的"X(中心) ↔ Y(中心)"字段**，禁止自行改写或补造；标注引用来源如[(Human Design HD)](https://humandesignhd.com) 或 [(Free Quantum Human Design)](https://freehumandesignchart.com)
-- 紫微部分标注特定格局名称（如"七杀朝斗""紫府同宫"）
-- 占星部分引用经典组合描述（如太阳天秤+上升狮子="优雅的君主"）
-- 七系统交叉印证：Markdown表格，横轴为八字/人类图/占星/紫微，纵轴为核心本质/能量模式/人际/事业/挑战/优势。每格加粗核心词
-- 流年运势：Markdown表格（维度/影响/建议），写出2026丙午年全年运势要点
-- 财富配置：Markdown表格（五行/资产/配置依据/百分比建议）
-- 健康养生：Markdown表格（调理维度/具体建议），包含能量管理策略
-- 大运分析：写出当前大运和下一大运的具体起止年龄，每步大运的核心主题
-- **时间窗口与人生规划**：给出未来1-3年的关键决策节点和最佳行动窗口。结合当年流年和八字大运，给出具体建议——"今年几月适合做重大决定""今年何时适合出差/学习/投资/休息"等
-- **言行指引**：基于用户八字和HD，给出每日的普适性行动计划建议。包括但不限于：一日中各时段的能量走势、适合的工作类型、人际互动建议、决策最佳时间、应避免的行为模式。这部分要写具体，不要只讲概念。
-- 关键风险提示：编号列表1-5项，每项含风险说明+应对建议
-- 字体风格：段落之间空行，表格对齐，重点加粗
-- 能量管理：针对开放中心给出具体保护建议
-- 最后必须有一句「点睛金句」作为收尾（用**加粗**）
-- 报告末尾标注：*本报告基于八字（lunar-javascript）、人类图（Jovian认证v6引擎）、占星（查表法）、紫微斗数（iztro引擎）、五运六气（天干化运/地支化气）七系统融合分析生成。*
-
-请按以下生命周期规则写作：${life.mode === 'historical' ? '这是已故人物历史回顾，只讨论已发生的人生主题，不得生成面向当前年份的未来规划、健康安排或在世行动建议。' : life.mode === 'uncertain' ? '生命周期状态未知，不得断言对象在世或已故，使用条件式表达。' : '这是在世对象的当前人生报告，可以讨论截至分析日期的现实处境和未来行动。'}
-
-请为一位${life.ageLabel}的${g}性出具一份七系统融合人生总览报告。用户未提供姓名，报告中称呼统一用"您"，禁止编造任何名字。数据如下：
-
-【一、八字命盘】
-四柱：${baziResult.pillars.join(' ')}
-日主：${baziResult.dayMaster}
-
-${hdResult ? `【二、人类图】
-类型：${hdResult.type} | 人生角色：${hdResult.profile}
-内在权威：${hdResult.authority}
-策略：${hdResult.strategy} | 签名：${hdResult.signature} | 非自我：${hdResult.notSelfTheme}
-定义中心：${(hdResult.definedCenters||[]).join('、')||'无'} | 未定义：${(hdResult.undefinedCenters||[]).join('、')||'无'}
-通道：${describeChannels(hdResult.channels)}
-激活闸门：${(hdResult.activatedGates||[]).join('、')||'无'}` : '【二、人类图】数据暂缺'}
-
-${ziweiResult ? `【三、紫微斗数】
-${ziweiResult.palaces.map((p:any)=>`${p.name}宫：${p.stars.slice(0,5).join('、')||'无主星'}`).join('\\n')}` : '【三、紫微斗数】数据暂缺'}
-
-【四、西方占星】
-太阳星座：${zodiacResult.zodiac}
-
-【五、五运六气】
-${wuyunResult.description}
-
-【六、流年运势】
-${liunianResult}
-
-请按以下7个章节撰写完整报告。每章必须七系统交叉印证+对比表。字数6000-8000字。
-第一章 天性禀赋与人格底色
-第二章 事业天赋与财富格局（含2026流年事业运势表）
-第三章 人际关系与情感模式
-第四章 学习成长与灵性发展
-第五章 健康体质与养生策略（**最重要章节**：先天体质+五运六气+具体养生方案（饮食/起居/运动/环境）+流年健康风险）
-第六章 人生关键节点与风险提示
-第七章 终极建议（两个核心结论+点睛之言）
-`;
-
-    // 调用DeepSeek V4 Pro
+    // 与流式入口共用同一组分段提示词及事实校验。
     const apiKey = process.env.DEEPSEEK_API_KEY;
     const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
     let report = '';
 
-    // 优先使用阿里云API（无超时限制）
-    const aliyunUrl = 'http://47.102.142.225/api/master-report';
-    // 旧 report-api 不认识生命周期和时辰置信度字段。历史人物、状态未知或时刻不精确时，
-    // 必须走本地统一提示词路径，避免外部兼容服务重新生成“在世年龄”和精确时柱叙事。
-    const canUseLegacyAliyun = life.mode === 'current' && life.timeConfidence === 'exact';
-    try {
-      if (!canUseLegacyAliyun) throw new Error('lifecycle context requires local report path');
-      const aliRes = await fetch(aliyunUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ year, month, day, hour, minute: body.minute || '0', gender, timezone: tz, location, city: body.city, lat, lon }),
-        signal: AbortSignal.timeout(180000), // 180s超时
-      });
-      const aliData = await aliRes.json();
-      if (aliData.success && aliData.report) {
-        report = preparePersonalReport(aliData.report, reportContext);
-      }
-    } catch (e) {
-      console.log('Aliyun API unavailable, falling back to local:', (e as Error).message);
-    }
-
-    // 阿里云API不可用时退回到DeepSeek直连
-    if (!report && !apiKey) console.error('master-report: DEEPSEEK_API_KEY 未配置');
-    if (!report && apiKey) {
+    if (!apiKey) console.error('master-report: DEEPSEEK_API_KEY 未配置');
+    if (apiKey) {
       try {
         // 与 stream 通道完全一致：三段生成 + finalize（2026-08-16 统一手机/桌面质量）
         const modelName = process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
