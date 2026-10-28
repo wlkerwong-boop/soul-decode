@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer, { Browser } from 'puppeteer';
 import { existsSync } from 'node:fs';
-import { isAllowedPdfUrl } from '@/lib/pdf-url-policy';
+import { isAllowedPdfResourceUrl, isAllowedPdfUrl } from '@/lib/pdf-url-policy';
 import { inlinePdfFontSources } from '@/lib/pdf-fonts';
 
 const ALLOWED_ORIGIN = 'https://aisoulcode.cn';
 
 /** 设置 CORS 头 */
 function setCors(response: NextResponse, origin: string | null) {
-  if (origin === ALLOWED_ORIGIN || origin?.endsWith('.aisoulcode.cn')) {
+  if (origin === ALLOWED_ORIGIN || origin === 'https://www.aisoulcode.cn') {
     response.headers.set('Access-Control-Allow-Origin', origin);
-  } else {
-    // 开发环境或本地
-    response.headers.set('Access-Control-Allow-Origin', '*');
   }
   response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
@@ -65,6 +62,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { html, url } = body;
 
+    if (typeof html === 'string' && html.length > 10_000_000) {
+      return NextResponse.json({ error: 'HTML 内容过长' }, { status: 413 });
+    }
+
     if (!html && !url) {
       const res = NextResponse.json(
         { error: '请提供 html 或 url 参数' },
@@ -93,6 +94,15 @@ export async function POST(req: NextRequest) {
 
       browser = await withRetry(() => launchBrowser());
       const page = await browser.newPage();
+      await page.setJavaScriptEnabled(false);
+      await page.setRequestInterception(true);
+      const targetOrigin = url ? new URL(url).origin : undefined;
+      page.on('request', request => {
+        const action = isAllowedPdfResourceUrl(request.url(), targetOrigin)
+          ? request.continue()
+          : request.abort();
+        action.catch(() => {});
+      });
 
       // 设置视口为 A4 近似尺寸
       await page.setViewport({ width: 1240, height: 1754, deviceScaleFactor: 2 });
@@ -113,11 +123,15 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // 中文字体是异步加载的；先等待字体完成，再生成 PDF。
-      await page.evaluate(async () => {
-        if (document.fonts?.ready) await document.fonts.ready;
-      });
-      await new Promise(resolve => setTimeout(resolve, 400));
+      // Page JavaScript is disabled. Poll from Node instead of using in-page timers.
+      for (let attempt = 0; attempt < 25; attempt++) {
+        const ready = await page.evaluate(() =>
+          (!document.fonts || document.fonts.status === 'loaded') &&
+          Array.from(document.images).every(image => image.complete)
+        );
+        if (ready) break;
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
       const fontReady = await page.evaluate(() =>
         document.fonts ? document.fonts.check('16px "LXGW WenKai"') : true
       );
@@ -125,30 +139,8 @@ export async function POST(req: NextRequest) {
         console.warn('[pdf] LXGW WenKai 未完成加载，将使用系统中文字体回退');
       }
 
-      // 等待图表渲染（SVG 和 Canvas）
-      await page.evaluate(() => {
-        return new Promise<void>((resolve) => {
-          // 等待所有图片加载
-          const imgs = Array.from(document.images);
-          const pending = imgs.filter(img => !img.complete);
-          if (pending.length === 0) {
-            // 额外等待 ECharts 等渲染完成
-            setTimeout(resolve, 1000);
-            return;
-          }
-          let loaded = 0;
-          pending.forEach(img => {
-            img.addEventListener('load', () => {
-              loaded++;
-              if (loaded === pending.length) setTimeout(resolve, 1000);
-            });
-            img.addEventListener('error', () => {
-              loaded++;
-              if (loaded === pending.length) setTimeout(resolve, 1000);
-            });
-          });
-        });
-      });
+      // Browser timers are unavailable with JavaScript disabled; SVG is static.
+      await new Promise(resolve => setTimeout(resolve, 400));
 
       // 生成 A4 PDF
       const pdfBuffer = await page.pdf({
