@@ -8,7 +8,6 @@ import { calcPlanetPositions } from '@/lib/astrology';
 import { takeSseLines } from '@/lib/sse';
 import {
   buildPersonalReportSegments,
-  buildChildObservationReport,
   buildPersonalReportDataDeclaration,
   calculateReportBazi,
   calculateWuyunLiuqi,
@@ -81,10 +80,7 @@ export async function POST(req: NextRequest) {
     wuyun: wuyunResult,
     liunian: liunianResult,
   };
-  const childReport = life.mode === 'current' && (life.age ?? 0) < 18
-    ? buildChildObservationReport(reportContext)
-    : null;
-  const reportSegments = childReport ? [] : buildPersonalReportSegments(reportContext);
+  const reportSegments = buildPersonalReportSegments(reportContext);
   const resultData = {
     bazi: baziResult,
     hd: hdResult ? { type: hdResult.type, profile: hdResult.profile, authority: hdResult.authority, strategy: hdResult.strategy, definedCenters: hdResult.definedCenters, channels: hdResult.channels, activatedGates: hdResult.activatedGates } : null,
@@ -103,7 +99,7 @@ export async function POST(req: NextRequest) {
   // （勿用 deepseek-chat 别名：2026-07-24 曾被 DeepSeek 废弃返回 400，随时可能再变。）
   const modelName = process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
 
-  if (!apiKey && !childReport) {
+  if (!apiKey) {
     return new Response(JSON.stringify({ error: 'API key not configured' }), { status: 500 });
   }
 
@@ -112,13 +108,6 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        if (childReport) {
-          assertReportVerified(childReport, { hd: hdResult, bazi: baziResult });
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: childReport })}\n\n`));
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, ...resultData })}\n\n`));
-          controller.close();
-          return;
-        }
         let reportText = '';
         // K3 加固条款：引擎注入「## 0. 排盘数据声明」节，AI 只写第 1 节起叙事
         const declaration = buildPersonalReportDataDeclaration(reportContext);

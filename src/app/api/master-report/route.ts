@@ -7,7 +7,6 @@ import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
 import { calcPlanetPositions } from '@/lib/astrology';
 import {
   buildPersonalReportSegments,
-  buildChildObservationReport,
   calculateReportBazi,
   calculateWuyunLiuqi as calculateReportWuyunLiuqi,
   PERSONAL_REPORT_SYSTEM_PROMPT,
@@ -75,9 +74,7 @@ export async function POST(req: NextRequest) {
     // 与流式入口共用同一组分段提示词及事实校验。
     const apiKey = process.env.DEEPSEEK_API_KEY;
     const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
-    let report = life.mode === 'current' && age < 18
-      ? buildChildObservationReport(reportContext)
-      : '';
+    let report = '';
 
     if (!report && !apiKey) console.error('master-report: DEEPSEEK_API_KEY 未配置');
     if (!report && apiKey) {

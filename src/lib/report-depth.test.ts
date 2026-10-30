@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   buildPersonalReportDataDeclaration,
   buildPersonalReportSegments,
-  buildChildObservationReport,
   calculateReportBazi,
   calculateReportBaziForTimezone,
   calculateWuyunLiuqi,
@@ -134,13 +133,16 @@ describe('personal report prompt', () => {
     expect(result).toContain('仅供自我观察、个人成长与关系沟通参考');
   });
 
-  it('keeps child birth data separate from a bounded observation guide', () => {
-    const report = buildChildObservationReport({ ...adultContext, age: 11 });
-    expect(report.length).toBeLessThan(6000);
-    for (let chapter = 0; chapter <= 7; chapter++) expect(report).toContain(`## ${chapter}.`);
-    expect(report).toContain('本报告不能作为择校、分班或能力筛选依据');
-    expect(report.split('## 1.')[1]).not.toContain('Projector');
-    expect(report.split('## 1.')[1]).not.toContain('壬戌');
-    expect(() => buildPersonalReportSegments({ ...adultContext, age: 11 })).toThrow('buildChildObservationReport');
+  it('keeps the seven-chapter life blueprint for minors without school-led framing', () => {
+    const segments = buildPersonalReportSegments({ ...adultContext, age: 11 });
+    const prompts = segments.map((segment) => segment.prompt).join('\n');
+    expect(segments.map((segment) => segment.id)).toEqual(['foundation', 'direction', 'practice']);
+    expect(prompts).toContain('核心命盘总览');
+    expect(prompts).toContain('多视角观察');
+    expect(prompts).toContain('成长阶段与生命节律');
+    expect(prompts).toContain('兴趣与潜能探索');
+    expect(prompts).toContain('家庭实践清单');
+    expect(prompts).not.toContain('当前学习环境');
+    expect(prompts).not.toContain('探校');
   });
 });

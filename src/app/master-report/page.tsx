@@ -68,7 +68,7 @@ export default function MasterPage() {
     fullReport: {
       emoji: '👨‍👩‍👧‍👦',
       title: '想为孩子也解码一份？',
-      desc: '从不同传统视角提出观察问题，结合孩子真实的兴趣、行为和意愿交流。报告不用于判断能力或决定择校。',
+      desc: '为孩子生成一份生命蓝图，从七个传统视角探索成长节律、兴趣与关系，并结合真实经历交流。',
       btn: '🔮 亲子合盘 · 两份报告交叉解读 →',
       href: '/compatibility',
     },
@@ -405,7 +405,7 @@ export default function MasterPage() {
                 多种传统视角，<br />提供<span className="gradient-text">自我观察线索</span>
               </h2>
               <p>
-                根据输入生成不同传统体系的象征性解读，供自我观察与沟通参考。不同体系不能互相验证，也不能依据出生资料判断孩子的能力或择校。
+                根据输入生成不同传统体系的象征性解读，供自我观察、个人成长与关系沟通参考。不同体系不能互相验证，也不能依据出生资料判断能力或未来。
               </p>
               <div className="soul-editorial-tags">
                 {['八字','人类图','占星','紫微斗数','五运六气','流年','人生规划'].map(s => (
