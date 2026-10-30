@@ -7,9 +7,9 @@ import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
 import { calcPlanetPositions } from '@/lib/astrology';
 import {
   buildPersonalReportSegments,
+  buildChildObservationReport,
   calculateReportBazi,
   calculateWuyunLiuqi as calculateReportWuyunLiuqi,
-  CHILD_REPORT_SYSTEM_PROMPT,
   PERSONAL_REPORT_SYSTEM_PROMPT,
   preparePersonalReport,
 } from '@/lib/report-depth';
@@ -133,10 +133,12 @@ export async function POST(req: NextRequest) {
     // 与流式入口共用同一组分段提示词及事实校验。
     const apiKey = process.env.DEEPSEEK_API_KEY;
     const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
-    let report = '';
+    let report = life.mode === 'current' && age < 18
+      ? buildChildObservationReport(reportContext)
+      : '';
 
-    if (!apiKey) console.error('master-report: DEEPSEEK_API_KEY 未配置');
-    if (apiKey) {
+    if (!report && !apiKey) console.error('master-report: DEEPSEEK_API_KEY 未配置');
+    if (!report && apiKey) {
       try {
         // 与 stream 通道完全一致：三段生成 + finalize（2026-08-16 统一手机/桌面质量）
         const modelName = process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
@@ -159,7 +161,7 @@ export async function POST(req: NextRequest) {
               model: modelName,
               ...(String(modelName).includes('deepseek') || String(modelName).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
               messages: [
-                { role: 'system', content: life.mode === 'current' && age < 18 ? CHILD_REPORT_SYSTEM_PROMPT : PERSONAL_REPORT_SYSTEM_PROMPT },
+                { role: 'system', content: PERSONAL_REPORT_SYSTEM_PROMPT },
                 { role: 'user', content: segment.prompt },
               ],
               max_tokens: segment.maxTokens,

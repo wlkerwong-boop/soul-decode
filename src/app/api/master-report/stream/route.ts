@@ -8,10 +8,10 @@ import { calcPlanetPositions } from '@/lib/astrology';
 import { takeSseLines } from '@/lib/sse';
 import {
   buildPersonalReportSegments,
+  buildChildObservationReport,
   buildPersonalReportDataDeclaration,
   calculateReportBazi,
   calculateWuyunLiuqi,
-  CHILD_REPORT_SYSTEM_PROMPT,
   PERSONAL_REPORT_SYSTEM_PROMPT,
   finalizePersonalReport,
   normalizePersonalReportAudience,
@@ -150,7 +150,19 @@ export async function POST(req: NextRequest) {
     wuyun: wuyunResult,
     liunian: liunianResult,
   };
-  const reportSegments = buildPersonalReportSegments(reportContext);
+  const childReport = life.mode === 'current' && (life.age ?? 0) < 18
+    ? buildChildObservationReport(reportContext)
+    : null;
+  const reportSegments = childReport ? [] : buildPersonalReportSegments(reportContext);
+  const resultData = {
+    bazi: baziResult,
+    hd: hdResult ? { type: hdResult.type, profile: hdResult.profile, authority: hdResult.authority, strategy: hdResult.strategy, definedCenters: hdResult.definedCenters, channels: hdResult.channels, activatedGates: hdResult.activatedGates } : null,
+    ziwei: ziweiResult ? { palaces: ziweiResult.palaces, horoscope: ziweiResult.horoscope, sihua: ziweiResult.sihua } : null,
+    zodiac: astrologyResult,
+    wuyun: wuyunResult,
+    liunian: liunianResult,
+    life,
+  };
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
   const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
@@ -160,7 +172,7 @@ export async function POST(req: NextRequest) {
   // （勿用 deepseek-chat 别名：2026-07-24 曾被 DeepSeek 废弃返回 400，随时可能再变。）
   const modelName = process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
 
-  if (!apiKey) {
+  if (!apiKey && !childReport) {
     return new Response(JSON.stringify({ error: 'API key not configured' }), { status: 500 });
   }
 
@@ -169,6 +181,13 @@ export async function POST(req: NextRequest) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
+        if (childReport) {
+          assertReportVerified(childReport, { hd: hdResult, bazi: baziResult });
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: childReport })}\n\n`));
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, ...resultData })}\n\n`));
+          controller.close();
+          return;
+        }
         let reportText = '';
         // K3 加固条款：引擎注入「## 0. 排盘数据声明」节，AI 只写第 1 节起叙事
         const declaration = buildPersonalReportDataDeclaration(reportContext);
@@ -185,7 +204,7 @@ export async function POST(req: NextRequest) {
             body: JSON.stringify({
               model: modelName,
               messages: [
-                { role: 'system', content: life.mode === 'current' && (life.age ?? 0) < 18 ? CHILD_REPORT_SYSTEM_PROMPT : PERSONAL_REPORT_SYSTEM_PROMPT },
+                { role: 'system', content: PERSONAL_REPORT_SYSTEM_PROMPT },
                 { role: 'user', content: segment.prompt },
               ],
               max_tokens: segment.maxTokens,
@@ -274,16 +293,7 @@ export async function POST(req: NextRequest) {
 
         // Send final data payload
         logLine('success', `chars=${safeReportText.length}`);
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({
-          done: true,
-          bazi: baziResult,
-          hd: hdResult ? { type: hdResult.type, profile: hdResult.profile, authority: hdResult.authority, strategy: hdResult.strategy, definedCenters: hdResult.definedCenters, channels: hdResult.channels, activatedGates: hdResult.activatedGates } : null,
-          ziwei: ziweiResult ? { palaces: ziweiResult.palaces, horoscope: ziweiResult.horoscope, sihua: ziweiResult.sihua } : null,
-          zodiac: astrologyResult,
-          wuyun: wuyunResult,
-          liunian: liunianResult,
-          life,
-        })}\n\n`));
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, ...resultData })}\n\n`));
         controller.close();
       } catch (e: any) {
         logLine('error');
