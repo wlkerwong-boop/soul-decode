@@ -104,6 +104,8 @@ describe('personal report prompt', () => {
     // 声明节由引擎注入，含原「命理是地图不是判决书」表述
     const declaration = buildPersonalReportDataDeclaration(adultContext);
     expect(declaration).toContain('排盘数据声明');
+    expect(declaration).toContain('命宫：');
+    expect(declaration).not.toContain('命宫宫：');
     expect(declaration).toContain('命理是地图不是判决书');
     expect(declaration).toContain('18-58');
   });

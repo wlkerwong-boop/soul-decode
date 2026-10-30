@@ -102,7 +102,7 @@ export function buildPersonalReportDataDeclaration(context: PersonalReportContex
     ? `类型：${context.hd.type}｜人生角色：${context.hd.profile}｜内在权威：${context.hd.authority}｜策略：${context.hd.strategy}｜签名：${context.hd.signature || '—'}｜非自我主题：${context.hd.notSelfTheme || '—'}｜通道：${describeChannels(context.hd.channels)}｜定义中心：${(context.hd.definedCenters || []).join('、') || '无'}`
     : '数据暂缺';
   const ziwei = context.ziwei
-    ? context.ziwei.palaces.map((palace: any) => `${palace.name}宫：${(palace.stars || []).slice(0, 5).join('、') || '无主星'}`).join('；')
+    ? context.ziwei.palaces.map((palace: any) => `${String(palace.name).endsWith('宫') ? palace.name : `${palace.name}宫`}：${(palace.stars || []).slice(0, 5).join('、') || '无主星'}`).join('；')
     : '数据暂缺';
   const planets = context.astrology?.planets?.map((planet: any) => `${planet.name}${planet.sign}座${planet.degree}°`).join('、') || context.astrology?.zodiac || '数据暂缺';
   const life = context.life;
