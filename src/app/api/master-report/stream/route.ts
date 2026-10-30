@@ -206,6 +206,7 @@ export async function POST(req: NextRequest) {
           if (!reader) throw new Error(`No response body (${segment.id})`);
           const decoder = new TextDecoder();
           let buffer = '';
+          let truncated = false;
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -219,6 +220,7 @@ export async function POST(req: NextRequest) {
               if (payload === '[DONE]') continue;
               try {
                 const parsed = JSON.parse(payload);
+                if (parsed.choices?.[0]?.finish_reason === 'length') truncated = true;
                 const content = parsed.choices?.[0]?.delta?.content;
                 if (content) {
                   const safeContent = normalizePersonalReportAudience(content);
@@ -234,6 +236,7 @@ export async function POST(req: NextRequest) {
             if (payload === '[DONE]') continue;
             try {
               const parsed = JSON.parse(payload);
+              if (parsed.choices?.[0]?.finish_reason === 'length') truncated = true;
               const content = parsed.choices?.[0]?.delta?.content;
               if (content) {
                 const safeContent = normalizePersonalReportAudience(content);
@@ -241,6 +244,11 @@ export async function POST(req: NextRequest) {
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content: safeContent })}\n\n`));
               }
             } catch {}
+          }
+          if (truncated) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: `报告章节 ${segment.id} 内容被截断，请重新生成` })}\n\n`));
+            controller.close();
+            return;
           }
         }
 

@@ -212,7 +212,7 @@ export function buildPersonalReportSegments(context: PersonalReportContext): Rep
       },
       {
         id: 'direction',
-        maxTokens: 1400,
+        maxTokens: 1800,
         prompt: `这是第2段，正文约900-1200个中文字符。直接从第3章开始，不重复前文。\n\n## 3. 当前学习环境\n列出家长可亲自核对的课堂、师生沟通、作息和同伴支持问题。说明一次探校只能提供片段，应该怎样做持续观察。\n\n## 4. 兴趣探索与支持\n设计四周小实验：让孩子自己选择两项想尝试的活动，记录意愿、参与、恢复和复盘；不推断天赋、能力或学习风格。\n\n## 5. 情绪与作息\n给出一般性的沟通与休息建议；持续困扰应咨询合适的专业人员，不从出生信息推断健康风险。${shared}`,
       },
       {

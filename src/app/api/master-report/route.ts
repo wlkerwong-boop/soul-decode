@@ -174,6 +174,9 @@ export async function POST(req: NextRequest) {
             break;
           }
           const data = await res.json();
+          if (data.choices?.[0]?.finish_reason === 'length') {
+            throw new Error(`报告章节 ${segment.id} 被模型截断`);
+          }
           const segmentText = String(data.choices?.[0]?.message?.content || '').trim();
           if (segmentText) fullReport += `${fullReport ? '\n\n' : ''}${segmentText}`;
         }

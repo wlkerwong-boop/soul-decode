@@ -142,7 +142,7 @@ describe('personal report prompt', () => {
     expect(full).not.toContain('爻线阶段');
     expect(full).not.toContain('天赋地图');
     expect(full).not.toContain('类型特质');
-    expect(segments.map(segment => segment.maxTokens)).toEqual([1100, 1400, 1100]);
+    expect(segments.map(segment => segment.maxTokens)).toEqual([1100, 1800, 1100]);
     expect(CHILD_REPORT_SYSTEM_PROMPT).toContain('不得从八字、人类图、占星、紫微或五运六气推断孩子');
     expect(PERSONAL_REPORT_SYSTEM_PROMPT).toContain('不能互相验证');
     expect(PERSONAL_REPORT_SYSTEM_PROMPT).toContain('不作为择校或教育决策的依据');
