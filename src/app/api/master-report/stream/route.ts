@@ -11,6 +11,7 @@ import {
   buildPersonalReportDataDeclaration,
   calculateReportBazi,
   calculateWuyunLiuqi,
+  CHILD_REPORT_SYSTEM_PROMPT,
   PERSONAL_REPORT_SYSTEM_PROMPT,
   finalizePersonalReport,
   normalizePersonalReportAudience,
@@ -184,7 +185,7 @@ export async function POST(req: NextRequest) {
             body: JSON.stringify({
               model: modelName,
               messages: [
-                { role: 'system', content: PERSONAL_REPORT_SYSTEM_PROMPT },
+                { role: 'system', content: life.mode === 'current' && (life.age ?? 0) < 18 ? CHILD_REPORT_SYSTEM_PROMPT : PERSONAL_REPORT_SYSTEM_PROMPT },
                 { role: 'user', content: segment.prompt },
               ],
               max_tokens: segment.maxTokens,

@@ -4,10 +4,12 @@ import { validateReportBirth } from '@/lib/birth-validation';
 import { createRequire } from 'node:module';
 import { getBirthCoords } from '@/data/cities';
 import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
+import { calcPlanetPositions } from '@/lib/astrology';
 import {
   buildPersonalReportSegments,
   calculateReportBazi,
   calculateWuyunLiuqi as calculateReportWuyunLiuqi,
+  CHILD_REPORT_SYSTEM_PROMPT,
   PERSONAL_REPORT_SYSTEM_PROMPT,
   preparePersonalReport,
 } from '@/lib/report-depth';
@@ -54,20 +56,6 @@ function calcZiwei(y: number, m: number, d: number, h: number, gender: string) {
       horoscope: r.horoscope || null,
     };
   } catch { return null; }
-}
-
-function calcZodiac(y: number, m: number, d: number) {
-  const signs: [number, number, string][] = [
-    [1,20,'水瓶'],[2,19,'双鱼'],[3,21,'白羊'],[4,20,'金牛'],
-    [5,21,'双子'],[6,21,'巨蟹'],[7,23,'狮子'],[8,23,'处女'],
-    [9,23,'天秤'],[10,23,'天蝎'],[11,22,'射手'],[12,22,'摩羯'],
-  ];
-  for (let i = signs.length - 1; i >= 0; i--) {
-    if (m > signs[i][0] || (m === signs[i][0] && d >= signs[i][1])) {
-      return { sunSign: signs[i][2], zodiac: signs[i][2] + '座' };
-    }
-  }
-  return { sunSign: '摩羯', zodiac: '摩羯座' };
 }
 
 function calcWuyunLiuqi(y: number) {
@@ -121,7 +109,7 @@ export async function POST(req: NextRequest) {
       Promise.resolve(calculateReportBazi(y, m, d, h, mi)),
       Promise.resolve(calcHD(y, m, d, h, mi, tz, lat, lon)),
       Promise.resolve(calcZiwei(y, m, d, h, g)),
-      Promise.resolve(calcZodiac(y, m, d)),
+      calcPlanetPositions(y, m, d, h, mi, lat, lon, tz),
     ]);
     // 不允许在人类图失败时继续生成“数据暂缺”的完整报告。
     assertHumanDesignResult(hdResult);
@@ -171,7 +159,7 @@ export async function POST(req: NextRequest) {
               model: modelName,
               ...(String(modelName).includes('deepseek') || String(modelName).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
               messages: [
-                { role: 'system', content: PERSONAL_REPORT_SYSTEM_PROMPT },
+                { role: 'system', content: life.mode === 'current' && age < 18 ? CHILD_REPORT_SYSTEM_PROMPT : PERSONAL_REPORT_SYSTEM_PROMPT },
                 { role: 'user', content: segment.prompt },
               ],
               max_tokens: segment.maxTokens,

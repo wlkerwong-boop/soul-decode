@@ -11,6 +11,7 @@ import {
   finalizePersonalReport,
   preparePersonalReport,
   PERSONAL_REPORT_SYSTEM_PROMPT,
+  CHILD_REPORT_SYSTEM_PROMPT,
 } from './report-depth';
 import { buildLifeContext } from './lifecycle';
 
@@ -134,10 +135,14 @@ describe('personal report prompt', () => {
   it('switches minors to parent-facing growth and education guidance', () => {
     const segments = buildPersonalReportSegments({ ...adultContext, age: 11 });
     const full = segments.map(segment => segment.prompt).join('\n');
-    expect(full).toContain('家长视角');
+    expect(full).toContain('家长观察版');
     expect(full).toContain('学习环境');
     expect(full).toContain('家长行动清单');
-    expect(full).toContain('不得用于择校录取、能力筛选');
+    expect(full).toContain('本报告不能作为择校、分班或能力筛选依据');
+    expect(full).not.toContain('爻线阶段');
+    expect(full).not.toContain('天赋地图');
+    expect(full).not.toContain('类型特质');
+    expect(CHILD_REPORT_SYSTEM_PROMPT).toContain('不得从八字、人类图、占星、紫微或五运六气推断孩子');
     expect(PERSONAL_REPORT_SYSTEM_PROMPT).toContain('不能互相验证');
     expect(PERSONAL_REPORT_SYSTEM_PROMPT).toContain('不作为择校或教育决策的依据');
   });
