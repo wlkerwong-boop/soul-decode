@@ -17,6 +17,7 @@ import {
   normalizePersonalReportAudience,
 } from '@/lib/report-depth';
 import { buildLifeContext } from '@/lib/lifecycle';
+import { calculateReportZiwei, describeReportYear } from '@/lib/report-chart';
 
 const require = createRequire(import.meta.url);
 const { assertReportVerified } = require('../../../../lib/verify-report-core.mjs');
@@ -25,76 +26,6 @@ async function calcHD(y: number, m: number, d: number, h: number, mi: number, tz
   const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
   const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
   return calculateBodygraph(ds, ts, tz, lat, lon);
-}
-
-function calcZiwei(y: number, m: number, d: number, h: number, gender: string) {
-  try {
-    const iztro = require('iztro');
-    const ti = Math.floor((h + 1) / 2) % 12;
-    const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const r = iztro.astro.bySolar(ds, ti, gender, true, 'zh-CN');
-    if (!r?.palaces) return null;
-
-    // iztro 返回的 palaces 不以命宫为起点，需按标准顺序重排
-    const STD_ORDER = ['命宫','兄弟','夫妻','子女','财帛','疾厄','迁移','交友','官禄','田宅','福德','父母'];
-    function reorderPalaces(rawPalaces: any[]) {
-      const map = new Map<string, any>();
-      for (const p of rawPalaces) {
-        // iztro 部分版本宫名以"宫"结尾（如"命宫宫"），标准化去重
-        const key = p.name === '命宫宫' ? '命宫' : p.name;
-        map.set(key, p);
-      }
-      // "仆役"是 iztro 对"交友"的命名，做映射
-      if (!map.has('交友') && map.has('仆役')) map.set('交友', map.get('仆役'));
-      return STD_ORDER.map(name => {
-        const p = map.get(name);
-        if (!p) return { name, stars: [] };
-        return {
-          name,
-          stars: [...((p.majorStars||[]).map((s:any) => typeof s==='object'?s.name:s)),
-                  ...((p.minorStars||[]).map((s:any) => typeof s==='object'?s.name:s)),
-                  ...((p.adjectiveStars||[]).map((s:any) => typeof s==='object'?s.name:s))].filter(Boolean),
-        };
-      });
-    }
-
-    // Collect 四化 (stars with mutagen: 禄/权/科/忌)
-    const sihua: { star: string; mutagen: string; palace: string }[] = [];
-    for (const p of r.palaces) {
-      for (const s of [...(p.majorStars||[]), ...(p.minorStars||[]), ...(p.adjectiveStars||[])]) {
-        if (s.mutagen) sihua.push({ star: s.name, mutagen: s.mutagen, palace: p.name });
-      }
-    }
-
-    return {
-      palaces: reorderPalaces(r.palaces),
-      horoscope: {
-        mingZhu: r.soul || null,
-        shenZhu: r.body || null,
-        wuXing: r.fiveElementsClass || null,
-      },
-      sihua,
-    };
-  } catch { return null; }
-}
-
-function calcZodiac(y: number, m: number, d: number) {
-  const signs: [number, number, string][] = [
-    [1,20,'水瓶'],[2,19,'双鱼'],[3,21,'白羊'],[4,20,'金牛'],
-    [5,21,'双子'],[6,21,'巨蟹'],[7,23,'狮子'],[8,23,'处女'],
-    [9,23,'天秤'],[10,23,'天蝎'],[11,22,'射手'],[12,22,'摩羯'],
-  ];
-  for (let i = signs.length - 1; i >= 0; i--)
-    if (m > signs[i][0] || (m === signs[i][0] && d >= signs[i][1]))
-      return { zodiac: signs[i][2] + '座' };
-  return { zodiac: '摩羯座' };
-}
-
-function calcLiuNian(y: number) {
-  const stems = '甲乙丙丁戊己庚辛壬癸', branches = '子丑寅卯辰巳午未申酉戌亥';
-  const cy = new Date().getFullYear();
-  const n = (cy - 4) % 60;
-  return `${cy}年: ${stems[n%10]}${branches[n%12]}年 | ${(n%12===6||n%12===0)?'变动之年':'稳健之年'}`;
 }
 
 export async function POST(req: NextRequest) {
@@ -132,10 +63,10 @@ export async function POST(req: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
     });
   }
-  const ziweiResult = calcZiwei(y, m, d, h, g);
+  const ziweiResult = calculateReportZiwei(y, m, d, h, g);
   const astrologyResult = await calcPlanetPositions(y, m, d, h, mi, lat, lon, tz);
   const wuyunResult = calculateWuyunLiuqi(y);
-  const liunianResult = calcLiuNian(y);
+  const liunianResult = describeReportYear(y);
 
   const reportContext = {
     age: life.age ?? 0,
