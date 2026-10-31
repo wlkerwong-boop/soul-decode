@@ -95,6 +95,9 @@ export async function POST(request: NextRequest) {
       members.push({
         label: person.name || labels[index],
         age: ageOnDate(year, month, day, now),
+        birth: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
+        birthPlace: [person.country, person.province, person.city].filter(Boolean).join(' '),
+        timezone,
         bazi: bazi.pillars.join(' '),
         elementDistribution: bazi.elementDistribution,
         hd: hd ? { type: hd.type, profile: hd.profile, authority: hd.authority, channels: hd.channels } : null,

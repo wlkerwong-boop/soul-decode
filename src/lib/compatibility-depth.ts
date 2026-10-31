@@ -4,6 +4,9 @@ import { describeChannels } from './hd-channels-map';
 export interface CompatibilityMember {
   label: string;
   age: number;
+  birth?: string;
+  birthPlace?: string;
+  timezone?: string;
   bazi: string;
   elementDistribution: Record<string, number>;
   hd?: {
@@ -15,6 +18,13 @@ export interface CompatibilityMember {
 }
 
 export type CompatibilityType = 'couple' | 'family' | 'friend';
+
+function elementSummary(distribution: Record<string, number>) {
+  return ['木', '火', '土', '金', '水']
+    .filter(element => distribution[element] > 0)
+    .map(element => `${element}${distribution[element]}`)
+    .join('、') || '数据暂缺';
+}
 
 export function ageOnDate(year: number, month: number, day: number, now: Date) {
   const beforeBirthday = now.getUTCMonth() + 1 < month
@@ -111,7 +121,7 @@ export function shouldRetryCompatibilityVerification(
 function memberData(members: CompatibilityMember[]) {
   return members.map(member => `${member.label}（${member.age}岁）
 - 八字：${member.bazi}
-- 五行：${JSON.stringify(member.elementDistribution)}
+- 五行：${elementSummary(member.elementDistribution)}
 - 人类图：${member.hd ? `类型${member.hd.type}；角色${member.hd.profile}；权威${member.hd.authority}；关键通道${describeChannels(member.hd.channels)}` : '数据暂缺'}`).join('\n\n');
 }
 
@@ -126,7 +136,8 @@ export function buildFamilyDataDeclaration(members: CompatibilityMember[], type:
     const hd = member.hd
       ? `类型：${member.hd.type}｜角色：${member.hd.profile}｜权威：${member.hd.authority}｜关键通道：${describeChannels(member.hd.channels)}`
       : '数据暂缺';
-    return `- **${member.label}**（${member.age}岁）：八字 ${member.bazi}｜五行 ${JSON.stringify(member.elementDistribution)}｜人类图 ${hd}`;
+    const birth = member.birth ? `出生 ${member.birth}（${member.timezone || '时区未提供'}，当地民用时间；${member.birthPlace || '地点未提供'}）｜` : '';
+    return `- **${member.label}**（${member.age}岁）：${birth}八字 ${member.bazi}｜五行 ${elementSummary(member.elementDistribution)}｜人类图 ${hd}`;
   }).join('\n');
   return [
     `## 0. ${heading}`,
@@ -168,13 +179,43 @@ export function buildCompatibilitySegments(members: CompatibilityMember[], type:
   return [
     {
       id: 'compat-foundation',
-      maxTokens: 6500,
-      prompt: `输出家庭合盘报告第1段，约2500-3500字。全篇使用“您”，不要使用“你”。这是“人生传记”式的家庭合盘：把数据编织成这个家独有的故事，而不是罗列数据。每个论断必须紧跟具体数据（成员+字段），禁止无证据的性格套话。只允许讨论系统提供的${members.length}位成员，不得创建额外的父母、孩子或其他成员。注意：「## 0. 家庭排盘数据声明」已由系统依据排盘数据直接生成在报告开头；你只输出以下三章（## 1 至 ## 3），禁止输出任何「## 0」标题或声明节，禁止重复或改写任何排盘数字、列表、通道连接。\n\n## 1. 能量结构对照表\n表头：成员、类型、角色、权威、关键通道、五行重心。\n\n## 2. 一眼看懂这个家（家族能量生态）\n概括这个家的整体气质，分别解读类型组合、权威组合和角色分布。\n\n## 3. 写在血脉里的密码（家族共享印记）\n挖掘至少4组跨系统印记，只使用数据声明中存在的字段，每组印记写成“这个家的饭桌上”可感知的具体画面。\n\n【数据】\n${data}`,
+      maxTokens: 4200,
+      prompt: `输出家庭合盘报告第1段，目标1200-1700个中文字符。全篇用“您”。这是通用生命蓝图的关系附录，供家人讨论相处方式，不定义任何人的性格、能力、责任或未来。只依据排盘字段提出象征性假设；不得编造家庭经历、饭桌对话、孩子表现或健康情况。每个关键解释紧跟成员和字段，并给一句可用真实经历核对的开放问题。只讨论给出的${members.length}位成员。第0章由系统生成；只输出以下三章，不重复声明数据。
+
+## 1. 能量结构对照表
+用简短表格呈现成员、类型、角色、权威和一个待核对问题。完整通道与五行已在第0章，不重复罗列。
+
+## 2. 一眼看懂这个家（家族能量生态）
+提出最多三个可能的节奏差异；每个差异注明只是人类图的解释，不得推断谁必然快慢或拥有家庭决定权。
+
+## 3. 写在血脉里的密码（家族共享印记）
+只选2-3组真实存在于数据中的共同字段，写成可向家人核对的问题。不同传统体系不能互相验证；不编造生活场景。
+
+【数据】
+${data}`,
     },
     {
       id: 'compat-practice',
-      maxTokens: 6500,
-      prompt: `输出家庭合盘报告第2段，不重复排盘声明，约2500-3500字。全篇使用“您”，不要使用“你”。延续“人生传记”风格：温暖、具体、可执行。每一位成员都必须出现一次具体数据作为依据。\n\n## 4. ${pairCount}对关系一张网（关系全景表）\n列出全部${pairCount}对成员关系：关系对、核心密码（类型组合+共享印记）、一句话点睛。不得生成数据中不存在的成员。表格后挑3-4对重点关系展开：张力在哪、如何化解（给可直接说出口的话术）。\n\n## 5. 亲子沟通与养育话术\n只为这${childCount}位已提供的孩子分别分析：结合其类型与权威，给出父母各自“不要说/可以说”的场景话术。不得新增孩子，也不得将成人写成孩子。必须包含这句示范并结合孩子数据解释：“妈妈也觉得这事没劲，我们来看看哪部分值得做”。\n\n## 6. 家庭实践建议\n每日/每周/每月各1-3条，写清频次、执行人和完成标准。结合能量型/非能量型成员的需求。\n\n## 7. 最终寄语（家族金句）\n像长辈对全家说的一段话：回扣每个成员的具体数据，把差异写成互补、把冲突写成淬炼，不粉饰、不宣判。结尾一句点睛金句。\n\n## 8. 使用边界与免责声明\n必须原样写出：仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议。\n\n【数据】\n${data}`,
+      maxTokens: 4200,
+      prompt: `输出家庭合盘报告第2段，目标1500-2100个中文字符。全篇用“您”，不重复第0-3章。每位成员至少出现一次，但不能凭出生数据指定家庭角色、决策权、照护义务或教育路径。建议写成可选择、可退出的尝试，并征求孩子意见。禁止虚构已发生的冲突或对话。
+
+## 4. ${pairCount}对关系一张网（关系全景表）
+用紧凑表格列出全部${pairCount}对成员：关系对、一个真实可问的问题。表格后只选2对说明可尝试的沟通方法，不断言实际关系好坏。
+
+## 5. 亲子沟通与养育话术
+对这${childCount}位孩子各给一个开放问题和一个低成本支持尝试。说明孩子意愿、实际兴趣和教师反馈比排盘更重要；不把类型当行为事实，不推荐具体科目或学校。
+
+## 6. 家庭实践建议
+每日、每周、每月各一项可选沟通尝试，写明开始条件、孩子反馈和退出条件；不按类型分配谁必须做什么。
+
+## 7. 最终寄语（家族金句）
+用一小段话回顾如何用真实体验校验报告，不承诺关系结果，不写未经证实的家庭故事。
+
+## 8. 使用边界与免责声明
+必须原样写出：仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议。
+
+【数据】
+${data}`,
     },
   ];
 }

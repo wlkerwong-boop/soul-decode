@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ageOnDate, birthHourOrNoon, buildCompatibilityPersonPayload, buildCompatibilitySegments, consumeSseChunk, isPronounOnlyVerificationFailure, normalizeCompatibilityAudience, shouldRetryCompatibilityVerification, validateCompatibilityInput } from './compatibility-depth';
+import { ageOnDate, birthHourOrNoon, buildCompatibilityPersonPayload, buildCompatibilitySegments, buildFamilyDataDeclaration, consumeSseChunk, isPronounOnlyVerificationFailure, normalizeCompatibilityAudience, shouldRetryCompatibilityVerification, validateCompatibilityInput } from './compatibility-depth';
 import { buildLocalCompatibilityReport } from './compatibility-fallback';
 import { assertReportVerified } from './verify-report-core.mjs';
 
@@ -19,6 +19,13 @@ describe('compatibility depth prompt', () => {
     expect(birthHourOrNoon('0')).toBe(0);
     expect(birthHourOrNoon('')).toBe(12);
   });
+  it('shows local birth time and timezone in the family data declaration', () => {
+    const declaration = buildFamilyDataDeclaration([{ ...members[0], birth: '2015-06-04 19:52', birthPlace: '美国 洛杉矶', timezone: 'America/Los_Angeles' }], 'family');
+    expect(declaration).toContain('2015-06-04 19:52');
+    expect(declaration).toContain('America/Los_Angeles');
+    expect(declaration).toContain('木1');
+    expect(declaration).not.toContain('{"木":1');
+  });
   it('keeps birthplace and timezone data needed for Human Design', () => {
     const form = {
       a_year: '2015', a_month: '6', a_day: '4', a_hour: '19', a_minute: '45',
@@ -35,13 +42,15 @@ describe('compatibility depth prompt', () => {
 
   it('includes declarations, energy comparison, shared imprints and practice', () => {
     const full = buildCompatibilitySegments(members, 'family').map(x => x.prompt).join('\n');
-    expect(full).toContain('排盘数据声明');
+    expect(full).toContain('第0章由系统生成');
     expect(full).toContain('能量结构对照表');
     expect(full).toContain('家族共享印记');
     expect(full).toContain('3对关系一张网');
     expect(full).toContain('家庭实践建议');
     expect(full).toContain('仅供自我观察与关系沟通参考');
-    expect(full).toContain('妈妈也觉得这事没劲');
+    expect(full).not.toContain('妈妈也觉得这事没劲');
+    expect(full).not.toContain('人生传记');
+    expect(full).toContain('不得编造家庭经历');
     expect(full).toContain('18-58');
   });
 
@@ -143,8 +152,8 @@ describe('compatibility depth prompt', () => {
   it('normalizes model language and asks for evidence-linked writing', () => {
     expect(normalizeCompatibilityAudience('你要先听你的回应，你们再决定。')).toBe('您要先听您的回应，您们再决定。');
     const full = buildCompatibilitySegments(members, 'family').map(x => x.prompt).join('\n');
-    expect(full).toContain('每个论断必须紧跟具体数据');
-    expect(full).toContain('禁止无证据的性格套话');
-    expect(full).toContain('每一位成员都必须出现一次具体数据作为依据');
+    expect(full).toContain('每个关键解释紧跟成员和字段');
+    expect(full).toContain('不得编造家庭经历');
+    expect(full).toContain('每位成员至少出现一次');
   });
 });
