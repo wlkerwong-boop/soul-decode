@@ -46,5 +46,5 @@ export function describeReportYear(birthYear: number, currentYear = new Date().g
   const stems = '甲乙丙丁戊己庚辛壬癸';
   const branches = '子丑寅卯辰巳午未申酉戌亥';
   const yearLabel = (year: number) => `${stems[(year - 4) % 10]}${branches[(year - 4) % 12]}`;
-  return `出生：${yearLabel(birthYear)}年 | 当前流年：${yearLabel(currentYear)}年（${currentYear}年）`;
+  return `出生公历年：${yearLabel(birthYear)}年（八字年柱按立春分界） | 当前流年：${yearLabel(currentYear)}年（${currentYear}年）`;
 }

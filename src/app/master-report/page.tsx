@@ -8,10 +8,10 @@ import BodygraphSVG from '@/components/BodygraphSVG';
 import BaziChart from '@/components/BaziChart';
 import ZiWeiChart from '@/components/ZiWeiChart';
 import ReportWaiting from '@/components/ReportWaiting';
-import { marked } from 'marked';
 import { CHINA_CITIES, INTERNATIONAL_CITIES, CITY_TZ } from '@/data/cities';
 import { beginNewReportView } from '@/lib/master-report-view';
 import { lastMasterReportKey, masterReportHistoryKey } from '@/lib/master-report-storage';
+import { buildPersonalPdfHtml, renderReportMarkdown } from '@/lib/report-export-html';
 
 const YEARS = Array.from({length:new Date().getFullYear()-1800+1},(_,i)=>new Date().getFullYear()-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
@@ -326,11 +326,10 @@ export default function MasterPage() {
   // 2026-08-16 修复：旧内核（微信X5/安卓自带浏览器）在生成结束时若已展开全部
   // 章节，2万字 DOM 一次性布局会卡死页面并触发 reload/back。统一"前3章+继续阅读"。
   const chapterHtml = useMemo(() => {
-    const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character] || character));
     const out: string[] = [];
     for (let i = 0; i < Math.min(visibleChapters, reportSections.length); i++) {
-      try { out.push(marked(escapeHtml(reportSections[i]), { breaks: true, gfm: true }) as string); }
-      catch { out.push(escapeHtml(reportSections[i])); }
+      try { out.push(renderReportMarkdown(reportSections[i])); }
+      catch { out.push(reportSections[i].replace(/&/g, '&amp;').replace(/</g, '&lt;')); }
     }
     return out;
   }, [reportSections, visibleChapters]);
@@ -544,20 +543,20 @@ export default function MasterPage() {
                   人生角色 {data.hd.profile} · {data.hd.authority}
                 </p>
                 <p className="text-xs text-[var(--text-tertiary)] mt-3">
-                  这只是人类图系统的冰山一角——您的完整报告涵盖 7 大古老智慧系统，含深度图文解读。
+                  这是人类图排盘预览。完整报告还会呈现八字、紫微、占星、五运六气及流年视角，并提供实践提问。
                 </p>
               </div>
             )}
 
             <div className="text-center">
               <p className="text-sm text-[var(--text-secondary)] mb-3">
-                这只是您 7 个系统中的 <strong>1 个的 1/10</strong>
+                完整报告已生成，可继续阅读并下载。
               </p>
               <button onClick={() => setShowFullReport(true)}
                 className="px-8 py-4 rounded-xl bg-gradient-to-r from-[var(--text-accent)] to-emerald-500 text-white font-semibold text-base hover:shadow-lg transition-all transform hover:scale-105">
                 📖 领取完整报告（深度图文版）→
               </button>
-              <p className="text-xs text-[var(--text-tertiary)] mt-2">八字 · 人类图 · 占星 · 紫微斗数 · 五运六气 · MBTI · 中医体质</p>
+              <p className="text-xs text-[var(--text-tertiary)] mt-2">八字 · 人类图 · 占星 · 紫微斗数 · 五运六气 · 流年</p>
             </div>
           </div>
         )}
@@ -572,13 +571,13 @@ export default function MasterPage() {
                   灵魂解码 · 人生总览报告
                 </h1>
                 <p style={{fontSize:'10pt', color:'#999', marginBottom:'2cm'}}>
-                  八字 · 人类图 · 占星 · 紫微斗数 · 五运六气 · MBTI · 中医体质
+                  八字 · 人类图 · 占星 · 紫微斗数 · 五运六气 · 流年
                 </p>
                 <p style={{fontSize:'9pt', color:'#aaa', marginTop:'3cm'}}>
                   生成日期：{new Date().toLocaleDateString('zh-CN')}
                 </p>
                 <p style={{fontSize:'8pt', color:'#ccc', marginTop:'1cm'}}>
-                  命理是地图不是判决书，七分天性三分环境
+                  命理是自我观察的地图，不是判决书
                 </p>
               </div>
             </div>
@@ -661,57 +660,8 @@ export default function MasterPage() {
                       try {
                         btn.textContent = '⏳ 生成中...';
                         btn.disabled = true;
-                        // 构建完整 HTML：提取当前页面 DOM + 内联样式
-                        const clone = document.documentElement.cloneNode(true) as HTMLElement;
-                        // 移除所有 script 标签
-                        clone.querySelectorAll('script').forEach(s => s.remove());
-                        // 移除不需要的元素
-                        clone.querySelectorAll('.no-print, nav, .voice-reader-btn').forEach(el => el.remove());
-                        // page.setContent() 使用 about:blank，必须把页面资源改成绝对地址，
-                        // 否则本地字体和样式会加载失败，中文在 PDF 中会变成空白方框。
-                        const head = clone.querySelector('head');
-                        if (head) {
-                          const base = document.createElement('base');
-                          base.href = `${window.location.origin}/`;
-                          head.prepend(base);
-                        }
-                        clone.querySelectorAll<HTMLLinkElement>('link[href]').forEach((link) => {
-                          const href = link.getAttribute('href');
-                          if (href) link.setAttribute('href', new URL(href, window.location.href).href);
-                        });
-                        if (!clone.querySelector('meta[charset]') && head) {
-                          const charset = document.createElement('meta');
-                          charset.setAttribute('charset', 'utf-8');
-                          head.prepend(charset);
-                        }
-                        // 将样式表内联到 PDF 文档，并把其中的字体/图片 URL 改成绝对地址。
-                        // 这样 Puppeteer 在 about:blank 中也能完整保留内页排版。
-                        const stylesheetLinks = Array.from(
-                          clone.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"][href]')
-                        );
-                        await Promise.all(stylesheetLinks.map(async (link) => {
-                          const href = link.getAttribute('href');
-                          if (!href) return;
-                          const absoluteHref = new URL(href, window.location.href).href;
-                          try {
-                            const cssResponse = await fetch(absoluteHref);
-                            if (!cssResponse.ok) return;
-                            const cssText = await cssResponse.text();
-                            const inlinedCss = cssText.replace(/url\(([^)]+)\)/g, (match, rawValue) => {
-                              const raw = String(rawValue).trim();
-                              const quote = raw.startsWith('"') || raw.startsWith("'") ? raw[0] : '';
-                              const value = quote ? raw.slice(1, -1) : raw;
-                              if (/^(data:|https?:|blob:|#)/i.test(value)) return match;
-                              return `url("${new URL(value, absoluteHref).href}")`;
-                            });
-                            const style = document.createElement('style');
-                            style.textContent = inlinedCss;
-                            link.replaceWith(style);
-                          } catch {
-                            // 保留绝对地址的 link 作为回退，避免单个样式表阻断 PDF。
-                          }
-                        }));
-                        const html = '<!DOCTYPE html>' + clone.outerHTML;
+                        // PDF 始终使用完整报告原文，独立排版；阅读区折叠状态不影响下载。
+                        const html = buildPersonalPdfHtml(report, await captureChartImages());
                         const resp = await fetch('/api/pdf', {
                           method: 'POST',
                           headers: { 'Content-Type': 'application/json' },

@@ -115,6 +115,9 @@ describe('personal report prompt', () => {
     expect(result).toContain('仅供自我观察、个人成长与关系沟通参考');
     expect(appendPersonalReportDisclaimer(result)).toBe(result);
     expect(appendPersonalReportDisclaimer('已有免责声明，但没有标准句')).toContain('仅供自我观察、个人成长与关系沟通参考');
+    const duplicated = appendPersonalReportDisclaimer('## 1. 总览\n\n**使用边界与免责声明**：这是一份提前插入的提醒。\n\n## 2. 观察');
+    expect(duplicated).not.toContain('提前插入');
+    expect(duplicated.match(/使用边界与免责声明/g)).toHaveLength(1);
   });
 
   it('normalizes respectful second-person language and adds a data check card when needed', () => {

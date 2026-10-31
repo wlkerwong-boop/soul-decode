@@ -170,8 +170,12 @@ function appendPersonalDataCheck(report: string, context: PersonalReportContext)
 }
 
 export function appendPersonalReportDisclaimer(report: string) {
-  if (report.includes('本报告仅供自我观察、个人成长与关系沟通参考')) return report;
-  return `${report.trimEnd()}${PERSONAL_REPORT_DISCLAIMER}`;
+  const withoutInlineCopies = report
+    .replace(/^\s*(?:\*\*)?使用边界与免责声明(?:\*\*)?[：:][^\n]*$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trimEnd();
+  if (/^##\s*使用边界与免责声明\s*$/m.test(withoutInlineCopies)) return withoutInlineCopies;
+  return `${withoutInlineCopies}${PERSONAL_REPORT_DISCLAIMER}`;
 }
 
 export function finalizePersonalReport(report: string, context: PersonalReportContext) {

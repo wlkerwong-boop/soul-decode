@@ -3,8 +3,8 @@ import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { CHINA_CITIES, INTERNATIONAL_CITIES } from '@/data/cities';
 import { buildCompatibilityPersonPayload, consumeSseChunk } from '@/lib/compatibility-depth';
 import ReportWaiting from '@/components/ReportWaiting';
-import { marked } from 'marked';
 import { normalizeInlineReportHeadings } from '@/lib/normalize-inline-report-headings.mjs';
+import { renderReportMarkdown } from '@/lib/report-export-html';
 
 const YEARS = Array.from({length:new Date().getFullYear()-1800+1},(_,i)=>new Date().getFullYear()-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
@@ -374,7 +374,7 @@ export default function HepanPage() {
                         p { margin: 8px 0; }
                       </style></head><body>
                       <h1>${escapeHtml(reportTitle)}</h1>
-                      <main>${marked(escapeHtml(normalizedReport), { breaks: true, gfm: true })}</main>
+                      <main>${renderReportMarkdown(normalizedReport)}</main>
                     </body></html>`;
                     const resp = await fetch('/api/pdf', {
                       method: 'POST',
@@ -404,7 +404,7 @@ export default function HepanPage() {
             <div className="prose prose-sm md:prose-base max-w-none leading-relaxed overflow-x-auto">
               {report.split(/^(?=## )/m).filter((s: string) => s.trim()).slice(0, visibleChapters).map((section, i) => (
                 <div key={i} style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}
-                  dangerouslySetInnerHTML={{ __html: marked(escapeHtml(section), { breaks: true, gfm: true }) as string }} />
+                  dangerouslySetInnerHTML={{ __html: renderReportMarkdown(section) }} />
               ))}
               {visibleChapters < report.split(/^(?=## )/m).filter((s: string) => s.trim()).length && (
                 <div className="text-center mt-6">
