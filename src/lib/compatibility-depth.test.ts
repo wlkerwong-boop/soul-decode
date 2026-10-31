@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildCompatibilityPersonPayload, buildCompatibilitySegments, consumeSseChunk, isPronounOnlyVerificationFailure, normalizeCompatibilityAudience, shouldRetryCompatibilityVerification, validateCompatibilityInput } from './compatibility-depth';
+import { buildLocalCompatibilityReport } from './compatibility-fallback';
+import { assertReportVerified } from './verify-report-core.mjs';
 
 const members = [
   { label: '家长', age: 44, bazi: '壬戌 庚戌 乙亥 辛巳', elementDistribution: { 木: 1, 金: 0 }, city: '上海', hd: { type: 'Projector', profile: '3/6', authority: 'Splenic', channels: ['18-58'] } },
@@ -107,6 +109,18 @@ describe('compatibility depth prompt', () => {
     const second = consumeSseChunk(first.buffer, '系密码\"}\n\n');
     expect(second.contents).toEqual(['关系密码']);
     expect(second.buffer).toBe('');
+  });
+
+  it('keeps the structured family fallback inside the same fact-check contract', () => {
+    const report = buildLocalCompatibilityReport(members, 'family');
+    const truth = {
+      compatibilityType: 'family',
+      members: members.map(({ label, bazi, elementDistribution, hd }) => ({ label, bazi, elementDistribution, hd })),
+      hd: { channels: members.flatMap((member) => member.hd.channels) },
+      bazi: { pillars: members.flatMap((member) => member.bazi.split(' ')) },
+    };
+    const verify = assertReportVerified as (report: string, truth: unknown) => void;
+    expect(() => verify(report, truth)).not.toThrow();
   });
 
   it('surfaces server-side report verification failures to the client parser', () => {
