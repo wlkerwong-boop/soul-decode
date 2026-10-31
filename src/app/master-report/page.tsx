@@ -83,6 +83,7 @@ export default function MasterPage() {
   };
 
   const charCount = report.length;
+  const exportYear = year || report.match(/出生：(\d{4})-\d{2}-\d{2}/)?.[1] || 'report';
 
   // Word 导出使用当前页面已经验收过的 SVG 图表转成 PNG，保证字体和网页看到的一致。
   const captureChartImage = async (kind: string) => {
@@ -676,7 +677,7 @@ export default function MasterPage() {
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.href = url;
-                        a.download = `人生总览_${year||'report'}.pdf`;
+                        a.download = `人生总览_${exportYear}.pdf`;
                         a.click();
                         URL.revokeObjectURL(url);
                       } catch(e: any) {
@@ -713,7 +714,7 @@ export default function MasterPage() {
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.href = url;
-                        a.download = `人生总览_${year || 'report'}.docx`;
+                        a.download = `人生总览_${exportYear}.docx`;
                         a.click();
                         setTimeout(() => URL.revokeObjectURL(url), 1000);
                       } catch (e: any) {
@@ -741,7 +742,7 @@ export default function MasterPage() {
                       const b=new Blob([toPlain(report)],{type:'text/plain;charset=utf-8'});
                       const a=document.createElement('a');
                       a.href=URL.createObjectURL(b);
-                      a.download=`人生总览_${year||''}.txt`;
+                      a.download=`人生总览_${exportYear}.txt`;
                       a.click();
                     }}
                       className="px-3 py-1.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-color)] text-sm text-[var(--text-secondary)] hover:text-[var(--text-accent)] transition-all">

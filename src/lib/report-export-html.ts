@@ -18,6 +18,7 @@ export function buildPersonalPdfHtml(report: string, images: Record<string, stri
     ? [`<figure><figcaption>${label}</figcaption><img src="${images[key]}" alt="${label}"></figure>`]
     : []);
   return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><title>${escapeReportHtml(title)}</title>
+  <link rel="stylesheet" href="/fonts/lxgwwenkai/lxgwwenkai-regular.css">
   <style>
     @page { size: A4; margin: 15mm; }
     body { font-family: 'LXGW WenKai', 'Noto Serif CJK SC', serif; color: #302b26; font-size: 11pt; line-height: 1.75; }

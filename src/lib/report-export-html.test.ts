@@ -8,6 +8,7 @@ describe('report export', () => {
     expect(html).toContain('<blockquote>');
     expect(html).toContain('<table>');
     expect(html).toContain('完整结尾');
+    expect(html).toContain('/fonts/lxgwwenkai/lxgwwenkai-regular.css');
     expect(html).not.toContain('继续阅读');
   });
 
