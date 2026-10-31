@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ageOnDate, birthHourOrNoon, buildCompatibilityPersonPayload, buildCompatibilitySegments, buildFamilyDataDeclaration, consumeSseChunk, isPronounOnlyVerificationFailure, normalizeCompatibilityAudience, shouldRetryCompatibilityVerification, validateCompatibilityInput } from './compatibility-depth';
+import { ageOnDate, birthHourOrNoon, buildCompatibilityPersonPayload, buildCompatibilitySegments, buildFamilyDataDeclaration, consumeSseChunk, formatCompatibilitySegment, isPronounOnlyVerificationFailure, normalizeCompatibilityAudience, shouldRetryCompatibilityVerification, validateCompatibilityInput } from './compatibility-depth';
 import { buildLocalCompatibilityReport } from './compatibility-fallback';
 import { assertReportVerified } from './verify-report-core.mjs';
 
@@ -128,6 +128,9 @@ describe('compatibility depth prompt', () => {
     const second = consumeSseChunk(first.buffer, '系密码\"}\n\n');
     expect(second.contents).toEqual(['关系密码']);
     expect(second.buffer).toBe('');
+  });
+  it('starts each AI segment and inline heading on a new line', () => {
+    expect(formatCompatibilitySegment('以上内容。## 4. 关系全景').trim()).toBe('以上内容。\n\n## 4. 关系全景');
   });
 
   it('keeps the structured family fallback inside the same fact-check contract', () => {

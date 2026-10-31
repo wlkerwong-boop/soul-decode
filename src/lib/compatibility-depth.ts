@@ -1,5 +1,6 @@
 import type { ReportSegment } from './report-depth';
 import { describeChannels } from './hd-channels-map';
+import { normalizeInlineReportHeadings } from './normalize-inline-report-headings.mjs';
 
 export interface CompatibilityMember {
   label: string;
@@ -62,6 +63,10 @@ export function normalizeCompatibilityAudience(report: string) {
     .replace(/你的/g, '您的')
     .replace(/你自己/g, '您自己')
     .replace(/你/g, '您');
+}
+
+export function formatCompatibilitySegment(raw: string) {
+  return `\n\n${normalizeInlineReportHeadings(raw).trim()}`;
 }
 
 export function buildCompatibilityPersonPayload(form: Record<string, string>, prefix: string) {

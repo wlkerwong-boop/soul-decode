@@ -13,6 +13,7 @@ import {
   birthHourOrNoon,
   buildCompatibilitySegments,
   buildFamilyDataDeclaration,
+  formatCompatibilitySegment,
   COMPATIBILITY_SYSTEM_PROMPT,
   normalizeCompatibilityAudience,
   shouldRetryCompatibilityVerification,
@@ -171,8 +172,9 @@ export async function POST(request: NextRequest) {
               segmentText = segmentText.replace(/\*{0,2}仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议\*{0,2}/g, '');
             }
             if (segmentText) {
-              reportText += segmentText;
-              acceptedChunks.push(segmentText);
+              const chunk = formatCompatibilitySegment(segmentText);
+              reportText += chunk;
+              acceptedChunks.push(chunk);
             }
 
             // DeepSeek occasionally closes an empty streamed segment. Retry the
@@ -211,8 +213,9 @@ export async function POST(request: NextRequest) {
                 // 重试路径同样剥除段 1 的多余免责声明（与上方主路径一致）
                 retryText = retryText.replace(/\*{0,2}仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议\*{0,2}/g, '');
               }
-              reportText += retryText;
-              acceptedChunks.push(retryText);
+              const chunk = formatCompatibilitySegment(retryText);
+              reportText += chunk;
+              acceptedChunks.push(chunk);
             }
           }
           const completionMarker = compatibilityType === 'family' ? '## 7.' : '## 5.';
