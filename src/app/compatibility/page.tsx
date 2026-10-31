@@ -56,6 +56,14 @@ function PersonForm({ label, pfx, data, setData }: {
   return (
     <div className="soul-editorial-person">
       <h3 className="soul-editorial-person-title">{label}</h3>
+      <input
+        className="input-jade text-sm py-2 mb-2 w-full"
+        type="text"
+        maxLength={30}
+        placeholder={`${label}的姓名或称呼（选填）`}
+        value={data[pfx+'_name'] || ''}
+        onChange={e => setData(pfx+'_name', e.target.value)}
+      />
       <div className="soul-editorial-person-grid grid grid-cols-2 sm:grid-cols-5 gap-2">
         <Sel value={data[pfx+'_year']} set={v=>setData(pfx+'_year',v)} opts={YEARS} ph="年份" />
         <Sel value={data[pfx+'_month']} set={v=>setData(pfx+'_month',v)} opts={MONTHS} ph="月" />
@@ -215,7 +223,7 @@ export default function HepanPage() {
         <div className="soul-editorial-header">
           <p className="soul-editorial-eyebrow">Relationship Reading</p>
           <h1 className="soul-editorial-title"><span className="gradient-text">关系合盘</span></h1>
-          <p className="soul-editorial-lead">八字合婚 · 人类图合盘 · 占星比较盘</p>
+          <p className="soul-editorial-lead">八字与人类图视角 · 关系沟通参考</p>
         </div>
 
         <div className="soul-editorial-tabs soul-editorial-tabs--three max-w-xl mx-auto mb-8">

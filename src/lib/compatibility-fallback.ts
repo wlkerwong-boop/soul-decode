@@ -81,6 +81,7 @@ export function buildLocalCompatibilityReport(members: CompatibilityMember[], ty
   return `# ${relationName}合盘报告
 
 > 本报告先锁定可核验的排盘数据，再把差异翻译成日常沟通方式。它不是给家人排序，也不是为关系下结论。
+> 生成方式：系统结构化备用报告；正文由预设规则生成，未经过 AI 个性化写作。
 
 ## 0. ${family ? '家庭' : '双方'}排盘数据声明
 

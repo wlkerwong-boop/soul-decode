@@ -16,6 +16,17 @@ export interface CompatibilityMember {
 
 export type CompatibilityType = 'couple' | 'family' | 'friend';
 
+export function ageOnDate(year: number, month: number, day: number, now: Date) {
+  const beforeBirthday = now.getUTCMonth() + 1 < month
+    || (now.getUTCMonth() + 1 === month && now.getUTCDate() < day);
+  return now.getUTCFullYear() - year - (beforeBirthday ? 1 : 0);
+}
+
+export function birthHourOrNoon(value: string | number | undefined) {
+  const parsed = Number.parseInt(String(value ?? ''), 10);
+  return Number.isFinite(parsed) ? parsed : 12;
+}
+
 export function validateCompatibilityInput(persons: unknown, type: unknown): string | null {
   if (!Array.isArray(persons)) return '需要至少两个人的出生信息';
   if (!['couple', 'family', 'friend'].includes(String(type))) return '合盘类型无效';
@@ -45,6 +56,7 @@ export function normalizeCompatibilityAudience(report: string) {
 
 export function buildCompatibilityPersonPayload(form: Record<string, string>, prefix: string) {
   return {
+    name: (form[`${prefix}_name`] || '').trim(),
     year: form[`${prefix}_year`],
     month: form[`${prefix}_month`],
     day: form[`${prefix}_day`],
@@ -122,6 +134,7 @@ export function buildFamilyDataDeclaration(members: CompatibilityMember[], type:
     rows,
     '',
     '> 本声明节由系统依据排盘数据直接生成，以下解读均以此为准。',
+    '> 生成方式：AI 写作初稿，经系统事实校验；传统体系的解释仍需结合本人实际经历。',
     '',
   ].join('\n');
 }

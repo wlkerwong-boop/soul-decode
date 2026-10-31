@@ -9,6 +9,8 @@ import { createRequire } from 'node:module';
 import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
 import { CITY_TZ } from '@/data/cities';
 import {
+  ageOnDate,
+  birthHourOrNoon,
   buildCompatibilitySegments,
   buildFamilyDataDeclaration,
   COMPATIBILITY_SYSTEM_PROMPT,
@@ -70,7 +72,7 @@ export async function POST(request: NextRequest) {
     const labels = compatibilityType === 'family'
       ? ['本人', '伴侣', ...Array.from({ length: personList.length - 2 }, (_, i) => `孩子${i + 1}`)]
       : personList.map((_: any, i: number) => i === 0 ? '用户A' : `用户${String.fromCharCode(65 + i)}`);
-    const currentYear = new Date().getFullYear();
+    const now = new Date();
     // The HD WASM engine is stateful; concurrent calculations can deadlock on
     // a five-person family request. Calculate one member at a time.
     const members: CompatibilityMember[] = [];
@@ -78,7 +80,7 @@ export async function POST(request: NextRequest) {
       const year = parseInt(person.year);
       const month = parseInt(person.month);
       const day = parseInt(person.day);
-      const hour = parseInt(person.hour) || 12;
+      const hour = birthHourOrNoon(person.hour);
       const minute = parseInt(person.minute) || 0;
       const timezone = person.timezone || CITY_TZ[person.city] || 'Asia/Shanghai';
       const bazi = calculateReportBazi(year, month, day, hour, minute);
@@ -92,7 +94,7 @@ export async function POST(request: NextRequest) {
       assertHumanDesignResult(hd);
       members.push({
         label: person.name || labels[index],
-        age: currentYear - year,
+        age: ageOnDate(year, month, day, now),
         bazi: bazi.pillars.join(' '),
         elementDistribution: bazi.elementDistribution,
         hd: hd ? { type: hd.type, profile: hd.profile, authority: hd.authority, channels: hd.channels } : null,

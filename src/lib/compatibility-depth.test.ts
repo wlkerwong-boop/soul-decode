@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildCompatibilityPersonPayload, buildCompatibilitySegments, consumeSseChunk, isPronounOnlyVerificationFailure, normalizeCompatibilityAudience, shouldRetryCompatibilityVerification, validateCompatibilityInput } from './compatibility-depth';
+import { ageOnDate, birthHourOrNoon, buildCompatibilityPersonPayload, buildCompatibilitySegments, consumeSseChunk, isPronounOnlyVerificationFailure, normalizeCompatibilityAudience, shouldRetryCompatibilityVerification, validateCompatibilityInput } from './compatibility-depth';
 import { buildLocalCompatibilityReport } from './compatibility-fallback';
 import { assertReportVerified } from './verify-report-core.mjs';
 
@@ -10,12 +10,22 @@ const members = [
 ];
 
 describe('compatibility depth prompt', () => {
+  it('uses the actual birthday for the age shown in family reports', () => {
+    const now = new Date('2026-10-31T00:00:00Z');
+    expect(ageOnDate(2010, 12, 4, now)).toBe(15);
+    expect(ageOnDate(2015, 6, 4, now)).toBe(11);
+  });
+  it('keeps midnight as midnight instead of silently changing it to noon', () => {
+    expect(birthHourOrNoon('0')).toBe(0);
+    expect(birthHourOrNoon('')).toBe(12);
+  });
   it('keeps birthplace and timezone data needed for Human Design', () => {
     const form = {
       a_year: '2015', a_month: '6', a_day: '4', a_hour: '19', a_minute: '45',
       a_country: '美国', a_city: '洛杉矶', a_gender: '女',
     };
     expect(buildCompatibilityPersonPayload(form, 'a')).toMatchObject({
+      name: '',
       year: '2015',
       city: '洛杉矶',
       location: '美国',
