@@ -55,21 +55,33 @@ export function buildLocalCompatibilityReport(members: CompatibilityMember[], ty
     ? '家庭不是让每个人变得一样，而是让不同节奏的人拥有可以反复使用的沟通接口。'
     : '关系不是给彼此打分，而是把差异变成可以协商的互动方式。';
 
-  const pairAdvice = (a: CompatibilityMember, b: CompatibilityMember) => {
+  const pairQuestions = [
+    '最近一次共同决定中，双方各希望先确认什么？',
+    '怎样提出请求会让双方都听得清楚？',
+    '意见不同时，怎样知道对方需要时间还是信息？',
+    '哪些支持是对方主动提出的，哪些只是自己的猜测？',
+    '各自希望家庭讨论保留多少独处和表达时间？',
+    '共同做一件小事时，哪一步最需要提前说清？',
+    '一次误解发生后，什么样的复述能帮助重新开始？',
+    '怎样表达拒绝，才不会被误听成否定对方？',
+    '双方都感到自在的一次合作，具体发生了什么？',
+    '下次尝试中，谁希望先听、谁希望先说？',
+  ];
+  const pairAdvice = (a: CompatibilityMember, b: CompatibilityMember, index: number) => {
     const sharedChannel = (a.hd?.channels || []).find(channel => (b.hd?.channels || []).includes(channel));
-    const projectorPresent = a.hd?.type === 'Projector' || b.hd?.type === 'Projector';
-    return `${a.label}进入关系时${interactionEntry(a)}${b.label}进入关系时${interactionEntry(b)}${sharedChannel ? `两人的数据中共同出现${sharedChannel}，适合把“我以为您应该懂”改成一次明确复述。` : '当前数据未显示两人拥有相同完整通道，因此不要把“彼此相似”当作默认前提。'}${projectorPresent ? '关系中若出现投射者，要给其恢复和被看见的空间，不以全家统一节奏衡量价值。' : ''}`;
+    return `${sharedChannel ? `共同完整通道 ${sharedChannel}；` : '未见共同完整通道；'}${pairQuestions[index % pairQuestions.length]}`;
   };
 
   const pairRows: string[] = [];
+  let pairIndex = 0;
   for (let i = 0; i < members.length; i++) {
     for (let j = i + 1; j < members.length; j++) {
-      pairRows.push(`| ${members[i].label} × ${members[j].label} | ${members[i].hd?.type || '—'} × ${members[j].hd?.type || '—'} | ${pairAdvice(members[i], members[j])} |`);
+      pairRows.push(`| ${members[i].label} × ${members[j].label} | ${members[i].hd?.type || '—'} × ${members[j].hd?.type || '—'} | ${pairAdvice(members[i], members[j], pairIndex++)} |`);
     }
   }
   const childRows = children.map(child => {
     const parentNames = parents.map(parent => parent.label).join('、');
-    return `| ${child.label} | ${child.hd?.type || '数据暂缺'} / ${child.hd?.profile || '—'} / ${child.hd?.authority || '—'} | ${parentNames}可以${interactionEntry(child)} | ${authorityGuide(child.hd?.authority || '')} |`;
+    return `| ${child.label} | ${child.hd?.type || '数据暂缺'} / ${child.hd?.profile || '—'} / ${child.hd?.authority || '—'} | ${parentNames}先问孩子目前想讨论什么，并让孩子选择是否尝试。 | ${authorityGuide(child.hd?.authority || '')} |`;
   }).join('\n');
   const siblingRows = children.length > 1
     ? children.slice(0, -1).flatMap((child, index) => children.slice(index + 1).map(other => `| ${child.label} × ${other.label} | ${child.hd?.type || '—'} × ${other.hd?.type || '—'} | 先分别确认各自需求，再谈谁让谁；不使用年龄、成绩或速度做价值排序。 |`)).join('\n')
@@ -93,7 +105,7 @@ ${members.map((member, index) => { const d = details[index]; return `| ${member.
 
 ## 1. 一家人的整体动力
 
-${family ? `这个家有 ${members.filter(m => m.hd?.type === 'Generator' || m.hd?.type === 'Manifesting Generator').length} 位能量型成员，以及 ${members.filter(m => m.hd?.type === 'Projector').length} 位投射者。前者适合在具体事项上等待身体回应，后者需要先被看见、被邀请，再投入观察与引导。家庭会议不能只采用一种速度。` : '双方需要把“我认为对方应该懂”改成可以重复确认的沟通接口。'}
+${family ? `本次排盘中有 ${members.filter(m => m.hd?.type === 'Generator' || m.hd?.type === 'Manifesting Generator').length} 位被人类图系统归为 Generator 或 Manifesting Generator，${members.filter(m => m.hd?.type === 'Projector').length} 位被归为 Projector。这些是体系内的类型名称，不能据此推断各人的体力、学习能力或实际参与意愿。家庭会议可先询问每个人希望如何参与。` : '双方可把“我认为对方应该懂”改成可以重复确认的沟通问题。'}
 
 整体五行统计为：**${elementText(elementTotals)}**。这只是四柱天干与地支的可见元素计数，不等同于完整旺衰结论；它适合观察家庭当前的表达倾向，不适合给任何人贴标签。
 
@@ -107,7 +119,7 @@ ${pairRows.join('\n')}
 
 ## 3. 夫妻/核心关系：把差异变成分工
 
-${parents.length >= 2 ? `${parents[0].label}与${parents[1].label}的核心协作，不是让两个人用同一种方式做事，而是先分别确认“愿不愿意”，再决定“谁来推进”。${pairAdvice(parents[0], parents[1])}` : '关系双方先确认共同目标，再约定各自的回应方式和复盘时间。'}
+${parents.length >= 2 ? `${parents[0].label}与${parents[1].label}可以先分别确认“愿不愿意”，再商量“谁来推进”。${pairAdvice(parents[0], parents[1], 0)}` : '关系双方先确认共同目标，再约定各自的回应方式和复盘时间。'}
 
 建议把共同事项拆成三步：
 
@@ -163,7 +175,7 @@ ${members.map((member, index) => { const d = details[index]; const isProjector =
 |---|---|---|
 | 第1周 | 每次提出要求前，先说清情境和选择 | 一周内至少记录3次“先说明、后请求” |
 | 第2周 | 练习等待回应，不把沉默当同意 | 重要决定至少保留一次重新确认 |
-| 第3周 | 为投射者安排恢复时间，为能量型成员安排回应时间 | 每个人都能说出自己的合适节奏 |
+| 第3周 | 分别询问每个人希望怎样休息、怎样参与 | 每个人都能说出自己的合适节奏 |
 | 第4周 | 召开一次家庭复盘，把一个冲突改写成下一次可用话术 | 形成一张家庭沟通卡 |
 
 ## 9. 最终寄语

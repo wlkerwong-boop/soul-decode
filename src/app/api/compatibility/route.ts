@@ -235,6 +235,12 @@ export async function POST(request: NextRequest) {
           }
         } catch (error: any) {
           if (compatibilityType === 'family') {
+            console.warn('[compatibility] family AI path failed; using structured fallback', {
+              errorType: error?.name || 'unknown',
+              verificationRules: Array.isArray(error?.issues)
+                ? [...new Set(error.issues.map((issue: { rule?: string }) => issue.rule).filter(Boolean))]
+                : [],
+            });
             const fallback = buildLocalCompatibilityReport(members, 'family');
             try {
               if (!fallback.includes('## 7.') || !fallback.includes('仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议')) {

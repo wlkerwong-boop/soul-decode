@@ -142,6 +142,7 @@ describe('compatibility depth prompt', () => {
     expect(() => verify(report, truth)).not.toThrow();
     expect(report).not.toContain('先先');
     expect(report).not.toContain('妈妈也觉得这事没劲');
+    expect(report).not.toContain('进入关系时先让对方对具体事项产生回应');
   });
 
   it('surfaces server-side report verification failures to the client parser', () => {
