@@ -10,7 +10,7 @@ const YEARS = Array.from({length:new Date().getFullYear()-1800+1},(_,i)=>new Dat
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
 const DAYS = Array.from({length:31},(_,i)=>i+1);
 const HOURS = Array.from({length:24},(_,i)=>i);
-const MINUTES = [0,15,30,45];
+const MINUTES = Array.from({ length: 60 }, (_, minute) => minute);
 
 const continents = Object.keys(INTERNATIONAL_CITIES);
 
@@ -374,7 +374,7 @@ export default function HepanPage() {
                         p { margin: 8px 0; }
                       </style></head><body>
                       <h1>${escapeHtml(reportTitle)}</h1>
-                      <main>${marked(normalizedReport, { breaks: true, gfm: true })}</main>
+                      <main>${marked(escapeHtml(normalizedReport), { breaks: true, gfm: true })}</main>
                     </body></html>`;
                     const resp = await fetch('/api/pdf', {
                       method: 'POST',
@@ -401,11 +401,10 @@ export default function HepanPage() {
               </div>
             </div>
             <h2 className="text-2xl font-semibold mb-5">合盘解读</h2>
-            <div className="prose prose-sm md:prose-base whitespace-pre-wrap leading-relaxed">
+            <div className="prose prose-sm md:prose-base max-w-none leading-relaxed overflow-x-auto">
               {report.split(/^(?=## )/m).filter((s: string) => s.trim()).slice(0, visibleChapters).map((section, i) => (
-                <div key={i} style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}>
-                  {section.split('\n').map((line, j) => (<p key={j} className="mb-3">{line || ' '}</p>))}
-                </div>
+                <div key={i} style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}
+                  dangerouslySetInnerHTML={{ __html: marked(escapeHtml(section), { breaks: true, gfm: true }) as string }} />
               ))}
               {visibleChapters < report.split(/^(?=## )/m).filter((s: string) => s.trim()).length && (
                 <div className="text-center mt-6">

@@ -59,7 +59,7 @@ export function calculateWuyunLiuqi(year: number) {
     branch,
     wuyun,
     liuqi,
-    description: `${year}年天干为${stem}，主${wuyun}；地支为${branch}，主${liuqi}。${wuyun}之年，${liuqi}为司天之气。`,
+    description: `按公历出生年份${year}年计算：天干${stem}，主${wuyun}；地支${branch}，主${liuqi}。本节按公历年取值，八字年柱按立春分界，两者在立春前可能不同。`,
   };
 }
 
@@ -123,7 +123,7 @@ export function buildPersonalReportDataDeclaration(context: PersonalReportContex
     `- 五运六气：${context.wuyun.description}`,
     `- 流年：${context.liunian}`,
     '',
-    '> 本声明节由系统依据排盘数据直接生成，以下解读均以此为准。命理是地图不是判决书，七分天性三分环境，与真人不符之处以真人为准。',
+    '> 本声明节由系统依据排盘数据直接生成，以下解读均以此为准。命理是自我观察的地图，不是判决书；与真人经历不符之处，以本人实际体验为准。',
     '',
   ].join('\n');
 }

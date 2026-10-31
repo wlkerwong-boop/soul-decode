@@ -326,10 +326,11 @@ export default function MasterPage() {
   // 2026-08-16 修复：旧内核（微信X5/安卓自带浏览器）在生成结束时若已展开全部
   // 章节，2万字 DOM 一次性布局会卡死页面并触发 reload/back。统一"前3章+继续阅读"。
   const chapterHtml = useMemo(() => {
+    const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character] || character));
     const out: string[] = [];
     for (let i = 0; i < Math.min(visibleChapters, reportSections.length); i++) {
-      try { out.push(marked(reportSections[i], { breaks: true, gfm: true }) as string); }
-      catch { out.push(reportSections[i]); }
+      try { out.push(marked(escapeHtml(reportSections[i]), { breaks: true, gfm: true }) as string); }
+      catch { out.push(escapeHtml(reportSections[i])); }
     }
     return out;
   }, [reportSections, visibleChapters]);

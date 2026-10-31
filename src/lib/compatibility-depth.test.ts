@@ -121,6 +121,8 @@ describe('compatibility depth prompt', () => {
     };
     const verify = assertReportVerified as (report: string, truth: unknown) => void;
     expect(() => verify(report, truth)).not.toThrow();
+    expect(report).not.toContain('先先');
+    expect(report).not.toContain('妈妈也觉得这事没劲');
   });
 
   it('surfaces server-side report verification failures to the client parser', () => {

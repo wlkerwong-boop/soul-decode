@@ -100,12 +100,13 @@ describe('personal report prompt', () => {
     expect(full).toContain('3500-5000');
     expect(full).toContain('18-58');
     expect(full).toContain('紫微');
-    // 声明节由引擎注入，含原「命理是地图不是判决书」表述
+    // 声明节由引擎注入，避免用未经证实的比例解释人。
     const declaration = buildPersonalReportDataDeclaration(adultContext);
     expect(declaration).toContain('排盘数据声明');
     expect(declaration).toContain('命宫：');
     expect(declaration).not.toContain('命宫宫：');
-    expect(declaration).toContain('命理是地图不是判决书');
+    expect(declaration).toContain('命理是自我观察的地图，不是判决书');
+    expect(declaration).not.toContain('七分天性三分环境');
     expect(declaration).toContain('18-58');
   });
 

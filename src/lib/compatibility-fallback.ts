@@ -69,7 +69,7 @@ export function buildLocalCompatibilityReport(members: CompatibilityMember[], ty
   }
   const childRows = children.map(child => {
     const parentNames = parents.map(parent => parent.label).join('、');
-    return `| ${child.label} | ${child.hd?.type || '数据暂缺'} / ${child.hd?.profile || '—'} / ${child.hd?.authority || '—'} | ${parentNames}先${interactionEntry(child)} | ${authorityGuide(child.hd?.authority || '')} |`;
+    return `| ${child.label} | ${child.hd?.type || '数据暂缺'} / ${child.hd?.profile || '—'} / ${child.hd?.authority || '—'} | ${parentNames}可以${interactionEntry(child)} | ${authorityGuide(child.hd?.authority || '')} |`;
   }).join('\n');
   const siblingRows = children.length > 1
     ? children.slice(0, -1).flatMap((child, index) => children.slice(index + 1).map(other => `| ${child.label} × ${other.label} | ${child.hd?.type || '—'} × ${other.hd?.type || '—'} | 先分别确认各自需求，再谈谁让谁；不使用年龄、成绩或速度做价值排序。 |`)).join('\n')
@@ -144,7 +144,7 @@ ${members.map((member, index) => { const d = details[index]; const isProjector =
 |---|---|---|
 | 对方迟迟不行动 | “您怎么又拖延？” | “这件事您现在有回应吗？如果没有，我们晚一点再约一个时间。” |
 | 对方情绪上来 | “这有什么好生气的？” | “我先听您把感受说完，等您平稳后我们再决定。” |
-| 孩子拒绝学习 | “不学以后就落后。” | “妈妈也觉得这事没劲，我们来看看哪部分值得做。” |
+| 孩子暂时不想学习 | “不学以后就落后。” | “您觉得卡在哪里？我们先听听您的想法，再一起找一个可尝试的小步骤。” |
 | 需要改变安排 | “我都安排好了，您照做就行。” | “现在有两个方案，您先说更能接受哪一个。” |
 | 发生误解 | “您根本没听我说。” | “我听到的是……我理解对了吗？” |
 | 需要承担责任 | “这都是您的问题。” | “我们把事实和下一步分开看，先确定谁在什么时候做什么。” |
