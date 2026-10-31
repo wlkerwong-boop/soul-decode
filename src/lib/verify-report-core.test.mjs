@@ -323,6 +323,11 @@ describe('verify-report P1 内容层闸门', () => {
     expect(issues.some((i) => i.rule === 'V8' && i.message.includes('家庭化'))).toBe(true);
   });
 
+  it('does not treat engine-owned IANA timezone metadata as untranslated narrative', () => {
+    const report = COUPLE_VALID_REPORT.replace('## 1. 一眼看懂这段关系', '出生地当地时间：America/Los_Angeles。\n\n## 1. 一眼看懂这段关系');
+    expect(verifyReportText(report, COUPLE_TRUTH).filter((issue) => issue.rule === 'V8')).toEqual([]);
+  });
+
   it('rejects duplicate sections, duplicate disclaimer and oversized reports', () => {
     const duplicated = `${COUPLE_VALID_REPORT}\n## 1. 一眼看懂这段关系\n再次开始。\n仅供自我观察与关系沟通参考，不构成医疗、法律、教育或投资建议。`;
     const duplicateIssues = verifyReportText(duplicated, COUPLE_TRUTH);

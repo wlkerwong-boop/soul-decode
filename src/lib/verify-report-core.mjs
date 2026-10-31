@@ -94,7 +94,10 @@ function reportSectionCounts(reportText) {
 }
 
 function findEnglishTokens(reportText) {
-  return [...new Set((reportText.match(/\b[A-Za-z][A-Za-z-]{2,}\b/g) || [])
+  // The engine-owned section can contain IANA timezone IDs and place names.
+  // V8 checks model-authored prose, not trusted input provenance.
+  const narrative = reportText.replace(/^##\s*0[.、．]\s+[^\n]*\n[\s\S]*?(?=^##\s*1[.、．]\s+)/m, '');
+  return [...new Set((narrative.match(/\b[A-Za-z][A-Za-z-]{2,}\b/g) || [])
     .filter((token) => !NARRATIVE_ENGLISH_WHITELIST.has(token)))];
 }
 
