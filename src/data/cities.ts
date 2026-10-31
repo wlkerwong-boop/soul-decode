@@ -149,7 +149,8 @@ export const CITY_COORDS: Record<string, [number, number]> = {
   '嘉兴':[30.75,120.76],'湖州':[30.89,120.09],'绍兴':[30.03,120.58],'金华':[29.08,119.65],
   '台州':[28.66,121.42],'芜湖':[31.35,118.43],'泉州':[24.87,118.68],'漳州':[24.51,117.65],
   '赣州':[25.83,114.93],'九江':[29.71,116.00],'宜昌':[30.69,111.29],'襄阳':[32.01,112.12],
-  '株洲':[27.83,113.13],'衡阳':[26.89,112.57],'岳阳':[29.37,113.13],'柳州':[24.33,109.42],
+  '株洲':[27.83,113.13],'湘潭':[27.83,112.94],'韶山':[27.90,112.53],'衡阳':[26.89,112.57],'岳阳':[29.37,113.13],'柳州':[24.33,109.42],
+  '广安':[30.47,106.63],
   '汕头':[23.35,116.68],'湛江':[21.27,110.36],'惠州':[23.11,114.42],'高雄':[22.62,120.31],
   '香港':[22.32,114.17],'澳门':[22.20,113.55],'台北':[25.03,121.57],
   // 海外城市
@@ -205,7 +206,7 @@ export function getBirthCoords(city?: string, location?: string): { lat: number;
 
 // 时区映射
 export const CITY_TZ: Record<string, string> = {
-  '北京':'Asia/Shanghai','上海':'Asia/Shanghai','天津':'Asia/Shanghai','重庆':'Asia/Shanghai',
+  '北京':'Asia/Shanghai','上海':'Asia/Shanghai','天津':'Asia/Shanghai','重庆':'Asia/Shanghai','湘潭':'Asia/Shanghai','韶山':'Asia/Shanghai','广安':'Asia/Shanghai',
   '洛杉矶':'America/Los_Angeles','旧金山':'America/Los_Angeles','西雅图':'America/Los_Angeles',
   '纽约':'America/New_York','华盛顿':'America/New_York','波士顿':'America/New_York','迈阿密':'America/New_York','奥兰多':'America/New_York','亚特兰大':'America/New_York',
   '芝加哥':'America/Chicago','休斯顿':'America/Chicago','达拉斯':'America/Chicago','丹佛':'America/Denver',

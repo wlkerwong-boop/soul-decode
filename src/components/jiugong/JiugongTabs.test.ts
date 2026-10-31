@@ -5,9 +5,9 @@ import {
 } from './jiugong-view-state';
 
 describe('jiugong tab view state', () => {
-  it('starts on trait analysis with the current available year', () => {
+  it('starts on the manual report with the current available year', () => {
     expect(createJiugongViewState(2026)).toEqual({
-      tab: 'traits',
+      tab: 'manual',
       year: 2026,
       topic: 'career',
     });

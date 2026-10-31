@@ -57,14 +57,14 @@ export default function MBTIResultPage() {
   };
 
   return (
-    <div className="relative min-h-screen">
-      <div className="relative z-10 py-16 px-6">
+    <div className="inner-page gradient-bg relative min-h-screen">
+      <div className="relative z-10 pt-nav pb-16 px-4 md:px-6">
         <div className="max-w-3xl mx-auto">
           {/* Result Header */}
-          <div className="text-center mb-12">
-            <span className="tag-pill text-xs tracking-widest mb-4 inline-block">你的性格类型</span>
+          <div className="inner-page-header text-center mb-12 md:mb-14">
+            <span className="tag-pill text-xs tracking-widest mb-4 inline-block">您的性格类型</span>
             <div className="text-6xl font-bold text-[var(--text-accent)] mb-4 tracking-widest">{type}</div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">{info.name}</h1>
+            <h1 className="inner-page-title mb-2">{info.name}</h1>
             <p className="text-xl text-[var(--text-secondary)]">{info.title}</p>
             <p className="text-sm opacity-50 mt-1">{info.nickname}</p>
           </div>
@@ -78,12 +78,12 @@ export default function MBTIResultPage() {
               const dominant = pct >= 50 ? v.first : v.second;
               const recessive = pct >= 50 ? v.second : v.first;
               return (
-                <div key={k} className="p-4 rounded-lg border border-[var(--border-color)] bg-black/30">
+                <div key={k} className="inner-page-card p-5 md:p-6">
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-bold">{dominant}</span>
                     <span className="text-xs text-[var(--text-secondary)]">{recessive}</span>
                   </div>
-                  <div className="w-full h-3 bg-black/40 rounded-full overflow-hidden">
+                  <div className="w-full h-3 bg-[var(--bg-highlight)] rounded-full overflow-hidden">
                     <div className="h-full rounded-full transition-all duration-700" style={{ width: pct + '%', backgroundColor: v.color }} />
                   </div>
                   <div className="flex justify-between text-xs text-[var(--text-secondary)] mt-1">
@@ -96,10 +96,10 @@ export default function MBTIResultPage() {
           </div>
 
           {/* Base Description + TTS */}
-          <div className="p-8 rounded-xl border border-[var(--border-color)] bg-black/30 backdrop-blur-sm mb-8">
+          <div className="inner-page-card p-6 md:p-8 mb-8">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-bold text-[var(--text-accent)]">性格描述</h2>
-              <TTSReader text={`你的MBTI类型是${type}，${info.name}型，${info.title}。${info.description}。你的座右铭是：${info.motto}。`} label="听描述" />
+              <TTSReader text={`您的MBTI类型是${type}，${info.name}型，${info.title}。${info.description}。您的座右铭是：${info.motto}。`} label="听描述" />
             </div>
             <p className="text-[var(--text-secondary)] leading-relaxed">{info.description}</p>
             <div className="mt-6 text-center">
@@ -108,14 +108,14 @@ export default function MBTIResultPage() {
           </div>
 
           {/* AI Deep Interpretation */}
-          <div className="p-8 rounded-xl border border-[var(--text-accent)]/30 bg-[var(--text-accent)]/5 backdrop-blur-sm mb-8">
+          <div className="inner-page-card p-6 md:p-8 mb-8 border-[var(--border-accent)] bg-[var(--bg-highlight)]">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-bold text-[var(--text-accent)]">AI 深度解读</h2>
               {aiContent && <TTSReader text={aiContent.replace(/#{1,6}\s/g, '').replace(/\*\*/g, '').replace(/\n/g, '，')} label="听解读" />}
             </div>
             {!aiContent && !aiLoading && (
               <div className="text-center py-6">
-                <p className="text-sm text-[var(--text-secondary)] mb-4">让AI基于你的测试结果，生成一份深度的性格分析报告</p>
+                <p className="text-sm text-[var(--text-secondary)] mb-4">让AI基于您的测试结果，生成一份深度的性格分析报告</p>
                 <button onClick={generateAIInterpretation} className="px-6 py-3 bg-[var(--text-accent)] text-black font-bold rounded-lg hover:opacity-90 transition-all">
                   生成AI深度解读
                 </button>
@@ -124,7 +124,7 @@ export default function MBTIResultPage() {
             {aiLoading && (
               <div className="text-center py-6">
                 <div className="inline-block w-6 h-6 border-2 border-[var(--text-accent)] border-t-transparent rounded-full animate-spin mb-2" />
-                <p className="text-sm text-[var(--text-secondary)]">AI正在解读你的性格...</p>
+                <p className="text-sm text-[var(--text-secondary)]">AI正在解读您的性格...</p>
               </div>
             )}
             {aiError && (
@@ -142,7 +142,7 @@ export default function MBTIResultPage() {
 
           {/* Strengths & Weaknesses */}
           <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <div className="p-6 rounded-xl border border-emerald-800/30 bg-emerald-900/10">
+            <div className="inner-page-card p-6 border-emerald-800/30 bg-emerald-900/5">
               <h3 className="font-bold text-emerald-400 mb-3">优势</h3>
               <ul className="space-y-2">
                 {info.strengths?.map((s: string, i: number) => (
@@ -152,7 +152,7 @@ export default function MBTIResultPage() {
                 ))}
               </ul>
             </div>
-            <div className="p-6 rounded-xl border border-red-800/30 bg-red-900/10">
+            <div className="inner-page-card p-6 border-red-800/30 bg-red-900/5">
               <h3 className="font-bold text-red-400 mb-3">劣势</h3>
               <ul className="space-y-2">
                 {info.weaknesses?.map((w: string, i: number) => (
@@ -165,7 +165,7 @@ export default function MBTIResultPage() {
           </div>
 
           {/* Careers */}
-          <div className="p-8 rounded-xl border border-[var(--border-color)] bg-black/30 backdrop-blur-sm mb-12">
+          <div className="inner-page-card p-6 md:p-8 mb-12">
             <div className="flex justify-between items-start mb-4">
               <h2 className="text-xl font-bold text-[var(--text-accent)]">适合职业方向</h2>
               {info.careers && <TTSReader text={`适合的职业方向有：${info.careers.join('、')}`} label="听职业" />}

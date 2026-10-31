@@ -11,10 +11,9 @@ import FeedbackForm from './FeedbackForm';
 import TTSReader from './TTSReader';
 import AIChat from './AIChat';
 import DailyFortune from './DailyFortune';
-import PaywallOverlay from './PaywallOverlay';
 import ShareReferral from './ShareReferral';
 import { saveReport } from '@/lib/report-store';
-import { isUserPremium } from '@/lib/access-control';
+import { useAuth } from '@/components/AuthContext';
 
 const CITIES_DB = (citiesData as any).cities as Record<string, { cities: string[]; tags: string[]; description: string }>;
 
@@ -38,14 +37,14 @@ const GENDER_OPTIONS = [
 
 const TIMEZONE_OPTIONS = [
   { value: '', label: '选择时区' },
-  { value: '中国标准时间(CST, UTC+8)', label: '中国标准时间(CST, UTC+8)' },
-  { value: '美国东部(EST, UTC-5)', label: '美国东部(EST, UTC-5)' },
-  { value: '美国西部(PST, UTC-8)', label: '美国西部(PST, UTC-8)' },
-  { value: '英国(GMT, UTC+0)', label: '英国(GMT, UTC+0)' },
-  { value: '澳洲东部(AEST, UTC+10)', label: '澳洲东部(AEST, UTC+10)' },
-  { value: '日本(JST, UTC+9)', label: '日本(JST, UTC+9)' },
-  { value: '欧洲中部(CET, UTC+1)', label: '欧洲中部(CET, UTC+1)' },
-  { value: '其他', label: '其他' },
+  { value: 'Asia/Shanghai', label: '中国标准时间（UTC+8）' },
+  { value: 'America/New_York', label: '美国东部当地时间' },
+  { value: 'America/Los_Angeles', label: '美国西部当地时间' },
+  { value: 'Pacific/Honolulu', label: '夏威夷当地时间' },
+  { value: 'Europe/London', label: '英国当地时间' },
+  { value: 'Australia/Sydney', label: '澳大利亚悉尼当地时间' },
+  { value: 'Asia/Tokyo', label: '日本当地时间' },
+  { value: 'Europe/Paris', label: '法国当地时间' },
 ];
 
 const HOUR_OPTIONS = [
@@ -125,6 +124,7 @@ interface HistoryEntry {
 }
 
 export default function BirthInputForm() {
+  const { user } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     year: '',
     month: '',
@@ -157,11 +157,8 @@ export default function BirthInputForm() {
   // 白话解读状态
   const [plumInterpretText, setPlumInterpretText] = useState('');
   const [plumInterpretLoading, setPlumInterpretLoading] = useState(false);
-  // 免费码
-  const [freeCode, setFreeCode] = useState('');
-  const [codeStatus, setCodeStatus] = useState<{ valid: boolean; message: string } | null>(null);
-  const [codeChecking, setCodeChecking] = useState(false);
-  const [hasAccess, setHasAccess] = useState(false); // 默认需要免费码或打赏解锁，验证通过后 localStorage 记住
+  // 朋友试用期间开放完整八字报告；收费需先有可信的服务端权益系统。
+  const hasAccess = true;
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -254,7 +251,7 @@ export default function BirthInputForm() {
   }, []);
 
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 100 }, (_, i) => String(currentYear - i));
+  const years = Array.from({ length: currentYear - 1800 + 1 }, (_, i) => String(currentYear - i));
   const months = Array.from({ length: 12 }, (_, i) => String(i + 1));
   const days = Array.from({ length: 31 }, (_, i) => String(i + 1));
 
@@ -378,7 +375,7 @@ export default function BirthInputForm() {
       });
       // 同时保存到新报告系统
       try {
-        saveReport(fullReport, 'bazi', `八字解读·${summary}`, '', baziData.reportId);
+        saveReport(fullReport, 'bazi', `八字解读·${summary}`, '', baziData.reportId, user?.id);
       } catch { /* ignore */ }
 
     } catch (err: any) {
@@ -393,7 +390,7 @@ export default function BirthInputForm() {
       setLoading(false);
       abortRef.current = null;
     }
-  }, [formData, saveToHistory]);
+  }, [formData, saveToHistory, user?.id]);
 
   const handleReset = useCallback(() => {
     setBaziData(null);
@@ -406,8 +403,6 @@ export default function BirthInputForm() {
     setGrowthPlanLoading(false);
     setPlumInterpretText('');
     setPlumInterpretLoading(false);
-    setCodeStatus(null);
-    setFreeCode('');
     setError(null);
     setStep('form');
     setShowHistory(false);
@@ -434,7 +429,7 @@ export default function BirthInputForm() {
 
   const handleShareText = useCallback(() => {
     if (!baziData) return;
-    const text = `🔮 灵魂解码 · 我的命盘已开启\n\n八字：${baziData.pillars.filter(p => p !== '--').join(' ')}\n日主：${baziData.dayMaster}（${baziData.dayMasterElement}）\n生肖：${baziData.zodiac}\n${lifeEnergyData ? `能量均值：${lifeEnergyData.averageEnergy}` : ''}\n\n您的呢？输入出生信息，即刻解码 → https://soul-decode.vercel.app`;
+    const text = `🔮 灵魂解码 · 我的命盘已开启\n\n八字：${baziData.pillars.filter(p => p !== '--').join(' ')}\n日主：${baziData.dayMaster}（${baziData.dayMasterElement}）\n生肖：${baziData.zodiac}\n${lifeEnergyData ? `能量均值：${lifeEnergyData.averageEnergy}` : ''}\n\n您的呢？输入出生信息，即刻解码 → https://aisoulcode.cn`;
 
     if (navigator.share) {
       navigator.share({ title: '灵魂解码', text }).catch(() => {
@@ -444,36 +439,6 @@ export default function BirthInputForm() {
       navigator.clipboard.writeText(text).catch(() => {});
     }
   }, [baziData, lifeEnergyData]);
-
-  // 免费码验证
-  const handleVerifyCode = useCallback(async () => {
-    if (!freeCode.trim()) return;
-    setCodeChecking(true);
-    setCodeStatus(null);
-    try {
-      const res = await fetch('/api/verify-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: freeCode.trim().toUpperCase() }),
-      });
-      const data = await res.json();
-      setCodeStatus(data);
-      if (data.valid) {
-        setHasAccess(true);
-        localStorage.setItem('soul-decode-access', 'free');
-      }
-    } catch {
-      setCodeStatus({ valid: false, message: '验证失败，请重试' });
-    } finally {
-      setCodeChecking(false);
-    }
-  }, [freeCode]);
-
-  // 检查本地存储的访问权限
-  useEffect(() => {
-    const savedAccess = localStorage.getItem('soul-decode-access');
-    if (savedAccess) setHasAccess(true);
-  }, []);
 
   // 下载报告（PDF - 通过浏览器打印功能）
   const handleDownloadPDF = useCallback(() => {
@@ -758,22 +723,7 @@ export default function BirthInputForm() {
           {/* ── AI追问对话 ── */}
           {reportComplete && reportText && (
             <div className="max-w-3xl mx-auto">
-              {/* 付费墙：非会员只显示报告前30%，加模糊效果 */}
-              {isUserPremium() ? null : (
-                <div className="relative mb-8">
-                  <div className="overflow-hidden max-h-[400px] relative">
-                    <div
-                      className="report-content leading-relaxed blur-sm select-none"
-                      dangerouslySetInnerHTML={{ __html: renderMarkdown(reportText.slice(0, Math.floor(reportText.length * 0.3))) }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--bg-card)]" />
-                  </div>
-                  <PaywallOverlay feature="完整报告" inline={true} />
-                </div>
-              )}
-              {isUserPremium() && (
-                <div className="report-content leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(reportText) }} />
-              )}
+              <div className="report-content leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(reportText) }} />
 
               <div className="gold-divider my-10" />
               <AIChat
@@ -900,11 +850,7 @@ export default function BirthInputForm() {
               </button>
               <button onClick={handleReset} className="btn-gold flex-1 min-w-[140px]">🔄 重新</button>
             </div>
-            {!hasAccess && reportComplete && (
-              <p className="text-xs text-[var(--text-secondary)] mt-2">
-                付费或输入免费码后可下载完整报告
-              </p>
-            )}
+            {reportComplete && <p className="text-xs text-[var(--text-secondary)] mt-2">朋友试用期间可直接下载完整报告</p>}
 
             {/* 打赏区 */}
             <div id="donation-section" className="mt-8 p-5 rounded-xl mx-auto max-w-md"
@@ -913,7 +859,7 @@ export default function BirthInputForm() {
                 border: '1px solid rgba(201,169,110,0.15)',
               }}
             >
-              <p className="text-sm text-[var(--text-accent)] mb-1 text-center">☕ 如果这份报告对你有帮助</p>
+              <p className="text-sm text-[var(--text-accent)] mb-1 text-center">☕ 如果这份报告对您有帮助</p>
               <p className="text-xs text-[var(--text-secondary)] mb-4 text-center">
                 打赏一杯咖啡，支持我们持续精进算法
               </p>
@@ -935,42 +881,6 @@ export default function BirthInputForm() {
               </div>
               <p className="text-xs text-[var(--text-accent)] text-center mt-3">感谢随喜 🙏</p>
             </div>
-
-            {/* 免费码输入 */}
-            {!hasAccess && (
-              <div className="mt-4 rounded-xl p-4 mx-auto max-w-md text-center"
-                style={{
-                  border: '1px dashed rgba(201,169,110,0.2)',
-                }}
-              >
-                <p className="text-xs text-[var(--text-secondary)] mb-2">
-                  或者输入朋友给你的免费码
-                </p>
-                <div className="flex gap-2 max-w-xs mx-auto">
-                  <input
-                    className="input-gold flex-1 text-sm text-center uppercase"
-                    placeholder="SOUL-GIFT-XXX"
-                    value={freeCode}
-                    onChange={e => setFreeCode(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleVerifyCode()}
-                  />
-                  <button onClick={handleVerifyCode} disabled={codeChecking || !freeCode.trim()}
-                    className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap"
-                    style={{
-                      background: codeChecking ? 'rgba(201,169,110,0.2)' : 'linear-gradient(135deg, #c9a96e, #b8944e)',
-                      color: codeChecking ? '#c9a96e' : '#0a0a0f',
-                    }}
-                  >
-                    {codeChecking ? '验证中' : '验证'}
-                  </button>
-                </div>
-                {codeStatus && (
-                  <p className={`text-xs mt-2 ${codeStatus.valid ? 'text-green-400' : 'text-red-400'}`}>
-                    {codeStatus.message}
-                  </p>
-                )}
-              </div>
-            )}
 
             {/* 反馈区（测试数据收集） */}
             <FeedbackForm

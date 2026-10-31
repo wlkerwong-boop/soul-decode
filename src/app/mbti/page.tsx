@@ -32,8 +32,8 @@ export default function MBTIPage() {
 
   if (showStart) {
     return (
-      <div className="relative min-h-screen">
-        <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
+      <div className="inner-page gradient-bg relative min-h-screen">
+        <div className="relative z-10 min-h-screen flex items-center justify-center px-6 pt-nav pb-12">
           <div className="max-w-2xl text-center">
             <span className="tag-pill text-xs tracking-widest mb-6 inline-block">心理学测评</span>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight mb-6">
@@ -41,8 +41,8 @@ export default function MBTIPage() {
               <span className="text-[var(--text-accent)]">深度测试</span>
             </h1>
             <p className="text-lg text-[var(--text-secondary)] leading-relaxed mb-8">
-              48道精心设计的选择题，揭示你的性格密码。
-              了解你的能量来源、认知方式、决策模式和生活风格。<br />
+              48道精心设计的选择题，揭示您的性格密码。
+              了解您的能量来源、认知方式、决策模式和生活风格。<br />
               <span className="text-sm opacity-60">约需 5-8 分钟完成</span>
             </p>
             <div className="grid grid-cols-4 gap-4 mb-10 text-sm">
@@ -65,12 +65,12 @@ export default function MBTIPage() {
   const q = mbtiQuestions[current];
 
   return (
-    <div className="relative min-h-screen">
+    <div className="inner-page gradient-bg relative min-h-screen">
       <div className="relative z-10 min-h-screen flex flex-col">
         <div className="w-full h-1 bg-black/30">
           <div className="h-full bg-[var(--text-accent)] transition-all duration-300" style={{ width: progress + '%' }} />
         </div>
-        <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="flex-1 flex items-center justify-center px-6 pt-nav pb-12">
           <div className="max-w-2xl w-full">
             <div className="text-center mb-6">
               <span className="text-sm text-[var(--text-secondary)]">第 {current + 1} / {total} 题</span>

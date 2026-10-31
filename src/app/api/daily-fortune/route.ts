@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         model: config.model,
+...(String(config.model).includes('deepseek') || String(config.model).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
         messages: [
           { role: 'system', content: '你是每日运势师，给出温暖实用的当日指引。' },
           { role: 'user', content: prompt },

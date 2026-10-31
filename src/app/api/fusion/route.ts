@@ -6,7 +6,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Solar } from 'lunar-javascript';
 import { getBirthCoords } from '@/data/cities';
-import { calculateBodygraph } from '@/lib/hd';
+import { assertHumanDesignResult, calculateBodygraph } from '@/lib/hd';
+import { describeChannels } from '@/lib/hd-channels-map';
 
 export const runtime = 'nodejs';
 
@@ -75,6 +76,7 @@ function buildPrompt(
 - 三系统要真正融合，找到内在联系，不要分三段机械罗列
 - 每部分给出具体的、可操作的建议
 - 最后给出一句非常点睛的话，让人读完后反复回味
+- 通道与中心的连接关系只准引用数据中映射表给出的“X(中心) ↔ Y(中心)”字段，禁止自行改写或补造任何通道-中心连接
 
 【用户数据】
 - 出生：${y}年${m}月${d}日 ${String(h).padStart(2,'0')}时${tz && tz !== 'Asia/Shanghai' ? '（出生地当地时间，时区：'+tz+'）' : ''}（当前日期：${now.getFullYear()}年${now.getMonth()+1}月，当前${age}岁）
@@ -83,7 +85,7 @@ function buildPrompt(
     - 人类图：${hd.type}（类型），人生角色${hd.profile}，内在权威${hd.authority}
     - 策略：${hd.strategy} | 签名：${hd.signature} | 非自我：${hd.notSelfTheme}
     - 定义中心：${(hd.definedCenters||[]).join('、') || '无'}
-    - 激活通道：${(hd.channels||[]).join('、') || '无'}
+    - 激活通道：${describeChannels(hd.channels)}
     - 太阳星座：${zodiac}
 
     【报告要求】
@@ -144,15 +146,16 @@ export async function POST(request: NextRequest) {
     const ds = `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const ts = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
     const hdResult = await calculateBodygraph(ds, ts, tz, lat, lon);
-    // HD 引擎失败时降级：提示词用占位对象、响应 humanDesign 置 null，不再 500
-    const hdSafe = hdResult || { type: '数据暂缺', profile: '—', authority: '—', strategy: '—', signature: '—', notSelfTheme: '—', definedCenters: [], channels: [] };
+    // 人类图是本报告的核心输入，失败时必须停止，不能继续生成缺项报告。
+    assertHumanDesignResult(hdResult);
+    const hdSafe = hdResult;
 
     const prompt = buildPrompt(y, m, d, h, bazi, hdSafe, zodiac, tz);
 
     // 调用DeepSeek
     const apiKey = process.env.DEEPSEEK_API_KEY;
     const baseUrl = process.env.AI_BASE_URL || 'https://api.deepseek.com/v1';
-    const model = process.env.AI_MODEL || 'deepseek-v4-pro';
+    const model = process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash';
     let fusion = '';
     let aiUsed = false;
 
@@ -163,6 +166,7 @@ export async function POST(request: NextRequest) {
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
           body: JSON.stringify({
             model,
+            ...(String(model).includes('deepseek') || String(model).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
             messages: [
               { role: 'system', content: '你是顶级的三系统命理导师，融合八字、人类图、占星三大体系给出来访者的人生指导。你的语言温暖、精准、有深度。' },
               { role: 'user', content: prompt }

@@ -56,7 +56,7 @@ function getConfig() {
     deepseek: {
       baseUrl: 'https://api.deepseek.com/v1',
       apiKey: process.env.DEEPSEEK_API_KEY || '',
-      model: process.env.AI_MODEL || 'deepseek-v4-pro',
+      model: process.env.AI_MODEL || process.env.DEEPSEEK_MODEL || 'deepseek-v4-flash',
     },
     openai: {
       baseUrl: 'https://api.openai.com/v1',
@@ -200,6 +200,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         model: config.model,
+...(String(config.model).includes('deepseek') || String(config.model).includes('v4') ? { thinking: { type: 'disabled' } } : {}),
         messages: [
           { role: 'system', content: MASTER_SYSTEM_PROMPT },
           { role: 'user', content: prompt },

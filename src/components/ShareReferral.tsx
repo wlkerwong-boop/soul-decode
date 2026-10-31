@@ -17,18 +17,18 @@ export default function ShareReferral() {
     if (!user) return;
     const extraTokens = getExtraFollowUps();
     setExtra(extraTokens);
-    const existingCode = getMyShareCode(user.phone);
+    const existingCode = getMyShareCode(user.email);
     if (existingCode) {
       setShareCode(existingCode);
-      setStats(getShareStats(user.phone));
+      setStats(getShareStats(user.email));
     }
   }, [user]);
 
   const handleGenerateCode = () => {
     if (!user) return;
-    const code = createShareRecord(user.phone);
+    const code = createShareRecord(user.email);
     setShareCode(code);
-    setStats(getShareStats(user.phone));
+    setStats(getShareStats(user.email));
   };
 
   const handleCopy = async () => {
@@ -44,11 +44,11 @@ export default function ShareReferral() {
 
   const handleRedeem = () => {
     if (!user || !referralInput.trim()) return;
-    const result = useReferralCode(referralInput.trim(), user.phone);
+    const result = useReferralCode(referralInput.trim(), user.email);
     setReferralResult(result);
     if (result.ok) {
       setExtra(getExtraFollowUps());
-      setStats(getShareStats(user.phone));
+      setStats(getShareStats(user.email));
     }
   };
 
@@ -71,7 +71,7 @@ export default function ShareReferral() {
         {/* Share section */}
         {shareCode ? (
           <div>
-            <p className="text-xs text-[var(--text-secondary)] mb-2">你的分享码：</p>
+            <p className="text-xs text-[var(--text-secondary)] mb-2">您的分享码：</p>
             <div className="flex gap-2">
               <div className="flex-1 px-4 py-2.5 rounded-lg bg-[var(--bg-highlight)] border border-[var(--border-accent)] text-center font-mono font-bold text-lg tracking-widest text-[var(--text-primary)]">
                 {shareCode}

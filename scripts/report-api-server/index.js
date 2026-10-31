@@ -12,7 +12,7 @@ const AI_BASE = "https://api.deepseek.com/v1";
 // ===== Input validation =====
 function validateYear(y) {
   const n = parseInt(y);
-  if (isNaN(n) || n < 1900 || n > 2100) return null;
+  if (isNaN(n) || n < 1800 || n > 2100) return null;
   return n;
 }
 function validateMonth(m) {
@@ -60,14 +60,15 @@ function calcBazi(y, m, d, h) {
     const { Solar } = require('lunar-javascript');
     const solar = Solar.fromYmdHms(y, m, d, h, 0, 0);
     const lunar = solar.getLunar();
-    const pillars = [];
-    ['YEAR','MONTH','DAY','HOUR'].forEach(p => {
-      const gz = lunar['get' + p + 'InGanZhi']();
-      pillars.push(gz);
-    });
-    const dayGZ = lunar.getDayInGanZhi();
-    const dayMaster = dayGZ[0] + '金';
-    return { pillars, dayMaster, elements: ['金','金','金','火'] };
+    const pillars = [
+      lunar.getYearInGanZhiExact(),
+      lunar.getMonthInGanZhiExact(),
+      lunar.getDayInGanZhiExact(),
+      lunar.getTimeInGanZhi(),
+    ];
+    const elementMap = {甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
+    const dayMaster = pillars[2][0];
+    return { pillars, dayMaster: dayMaster + '（' + elementMap[dayMaster] + '）', elements: pillars.map(p => elementMap[p[0]]) };
   } catch(e) { return null; }
 }
 
@@ -77,14 +78,35 @@ function calcZodiac(y, m, d) {
   return{sunSign:"摩羯",zodiac:"摩羯座"};
 }
 
-function calcZW(y, m, d, h, g, by, bm, bd, bjH) {
+function calcZW(y, m, d, h, g) {
   try {
-    const ds = by ? String(by).padStart(4,'0')+'-'+String(bm).padStart(2,'0')+'-'+String(bd).padStart(2,'0') : String(y).padStart(4,'0')+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const ti = bjH!==undefined ? Math.floor((bjH+1)/2)%12 : Math.floor((h+1)/2)%12;
+    const ds = String(y).padStart(4,'0')+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const ti = Math.floor((h+1)/2)%12;
     const iz = require('iztro');
     const r = iz.astro.bySolar(ds, ti, g, true, 'zh-CN');
     return { palaces: r.palaces.map(function(p) { return {name:p.name, stars:(p.majorStars||[])||[]}; }) };
   } catch(e) { return null; }
+}
+
+function ensureLegacyReportDeclaration(report, data) {
+  if (/##\s*0[.、．]\s*(?:排盘数据声明|家庭排盘数据声明|双方排盘数据声明)/.test(report)) return report;
+  const pillars = data.bazi?.pillars || [];
+  const channels = data.hd?.channels || [];
+  const declaration = [
+    '## 0. 排盘数据声明',
+    '',
+    `- 出生：${data.year}-${String(data.month).padStart(2, '0')}-${String(data.day).padStart(2, '0')} ${String(data.hour).padStart(2, '0')}:${String(data.minute).padStart(2, '0')}｜出生地：${data.location || '未提供'}｜性别：${data.gender}`,
+    `- 八字四柱：${pillars.join(' ')}｜日主：${data.bazi?.dayMaster || '数据暂缺'}`,
+    `- 人类图：类型：${data.hd?.type || '数据暂缺'}｜人生角色：${data.hd?.profile || '数据暂缺'}｜内在权威：${data.hd?.authority || '数据暂缺'}｜通道：${channels.join('、') || '无完整通道'}`,
+    `- 紫微斗数：${data.ziwei?.palaces?.map(p => `${p.name}宫：${(p.stars || []).slice(0, 5).join('、') || '无主星'}`).join('；') || '数据暂缺'}`,
+    `- 占星：${data.zodiac?.zodiac || '数据暂缺'}`,
+    `- 五运六气：${data.wuyun?.description || '数据暂缺'}`,
+    `- 流年：${data.liunian || '数据暂缺'}`,
+    '',
+    '> 本声明节由系统依据排盘数据直接生成，以下解读均以此为准。命理是地图不是判决书，与真人不符之处以真人为准。',
+    '',
+  ].join('\n');
+  return `${declaration}\n${report.trimStart()}`;
 }
 
 function calcHD(y, m, d, h, mi, tz) {
@@ -150,13 +172,10 @@ app.post('/api/master-report', async (req, res) => {
     }
     const g = gender||'男';
 
-    // Beijing time for bazi/ziwei
-    const tzo = timezone==='America/Los_Angeles'?-7:timezone==='America/New_York'?-4:timezone==='Europe/London'?0:timezone==='Asia/Tokyo'?9:timezone==='Australia/Sydney'?10:8;
-    const bi = (h*60+mi)+(8-tzo)*60;
-    const bjH = Math.floor(((bi%1440)+1440)%1440/60);
-    const bjD = Math.floor((bi+1440)/1440)-1;
-
-    const [ba, zo, zw, wy, ln] = [calcBazi(y,m,d,bjH), calcZodiac(y,m,d), calcZW(y,m,d,h,g, y,m+((bjH>h||bjD>0)?1:0),d+bjD,bjH), calcWY(y), calcLN(y)];
+    // Product contract: use the birthplace's local civil date and clock for
+    // Bazi and Ziwei. Human Design still receives the same local clock plus
+    // the IANA timezone above when it needs an absolute instant.
+    const [ba, zo, zw, wy, ln] = [calcBazi(y,m,d,h), calcZodiac(y,m,d), calcZW(y,m,d,h,g), calcWY(y), calcLN(y)];
     let hd = calcHD(y,m,d,h,mi,timezone||'Asia/Shanghai');
     if (!hd) { hd = {type:'计算中',profile:'HD引擎加载中', centers:[], gates:[], channels:[]}; }
 
@@ -180,7 +199,11 @@ app.post('/api/master-report', async (req, res) => {
       fullReport += '\n\n' + part2;
     }
 
-    res.json({success:true, report:fullReport, data:{bazi:ba, zodiac:zo, hd, ziwei:zw, wuyun:wy, liunian:ln}});
+    const report = ensureLegacyReportDeclaration(fullReport, {
+      year: y, month: m, day: d, hour: h, minute: mi, location, gender: g,
+      bazi: ba, zodiac: zo, hd, ziwei: zw, wuyun: wy, liunian: ln,
+    });
+    res.json({success:true, report, data:{bazi:ba, zodiac:zo, hd, ziwei:zw, wuyun:wy, liunian:ln}});
   } catch(e) {
     res.json({success:false, error:e.message||'生成失败'});
   }
