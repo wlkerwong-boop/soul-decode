@@ -65,7 +65,8 @@ describe('personal report prompt', () => {
     };
     const declaration = buildPersonalReportDataDeclaration(historical);
     expect(declaration).toContain('享年：32岁（已故）');
-    expect(declaration).toContain('分析模式：historical');
+    expect(declaration).toContain('分析模式：历史回顾');
+    expect(declaration).not.toContain('deceased');
     expect(buildPersonalReportSegments(historical).map(segment => segment.prompt).join('\n'))
       .toContain('不得生成面向当前年份的未来规划');
   });

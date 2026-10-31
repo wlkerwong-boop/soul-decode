@@ -107,9 +107,11 @@ export function buildPersonalReportDataDeclaration(context: PersonalReportContex
   const planets = context.astrology?.planets?.map((planet: any) => `${planet.name}${planet.sign}座${planet.degree}°`).join('、') || context.astrology?.zodiac || '数据暂缺';
   const life = context.life;
   const ageLabel = life?.ageLabel || `当前年龄：${context.age}岁`;
+  const statusLabel = { alive: '在世', deceased: '已故', unknown: '未知' } as const;
+  const modeLabel = { current: '当前观察', historical: '历史回顾', uncertain: '状态待确认' } as const;
   const lifeLine = life
-    ? `- 生命周期：${life.status}｜分析模式：${life.mode}｜出生时刻可信度：${getTimeConfidenceLabel(life.timeConfidence)}｜分析日期：${life.analysisDate}`
-    : '- 生命周期：alive｜分析模式：current｜出生时刻可信度：精确';
+    ? `- 生命周期：${statusLabel[life.status]}｜分析模式：${modeLabel[life.mode]}｜出生时刻可信度：${getTimeConfidenceLabel(life.timeConfidence)}｜分析日期：${life.analysisDate}`
+    : '- 生命周期：在世｜分析模式：当前观察｜出生时刻可信度：精确';
   const notices = life?.notices?.length ? `\n- 重要边界：${life.notices.join('；')}` : '';
   return [
     '## 0. 排盘数据声明',
