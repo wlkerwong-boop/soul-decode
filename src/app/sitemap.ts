@@ -1,7 +1,9 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://aisoulcode.cn';
+  const baseUrl = process.env.VERCEL_URL 
+    ? `https://${process.env.VERCEL_URL}`
+    : 'https://aisoulcode.cn';
 
   return [
     { url: baseUrl, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },

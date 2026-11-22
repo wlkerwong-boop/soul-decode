@@ -35,7 +35,7 @@ export default function ShareReferral() {
     if (!shareCode) return;
     try {
       await navigator.clipboard.writeText(
-        `🔮 我刚刚在灵魂解码做了人生解读！\n输入我的分享码「${shareCode}」可额外获得3次AI追问机会\n👉 https://soul-decode.vercel.app`
+        `🔮 我刚刚在灵魂解码做了人生解读！\n输入我的分享码「${shareCode}」可额外获得3次AI追问机会\n👉 https://aisoulcode.cn`
       );
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
