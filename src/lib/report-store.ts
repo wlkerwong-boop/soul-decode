@@ -24,16 +24,16 @@ export interface Report {
   meta: ReportMeta;
   content: string;  // markdown 格式的报告内容
   password: string; // 查看密码
+  ownerId?: string; // 当前登录账号；旧报告没有归属，不在个人中心跨账号展示
 }
 
 // 存储结构
 interface ReportStore {
   reports: Record<string, Report>; // key = reportId
-  password: string;                // 管理员密码（用于普光/普明预设数据）
+  password?: string;               // 旧格式兼容字段；不再授予管理员访问权
 }
 
 const STORAGE_KEY = 'soulcode-reports';
-const ADMIN_PASSWORD = '8888';
 
 // 生成短ID
 function generateId(): string {
@@ -48,18 +48,18 @@ function generateId(): string {
 // 读取存储
 function loadStore(): ReportStore {
   if (typeof window === 'undefined') {
-    return { reports: {}, password: ADMIN_PASSWORD };
+    return { reports: {} };
   }
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const data = JSON.parse(raw);
-      return { reports: data.reports || {}, password: data.password || ADMIN_PASSWORD };
+      return { reports: data.reports || {} };
     }
   } catch (e) {
     console.error('Failed to load reports:', e);
   }
-  return { reports: {}, password: ADMIN_PASSWORD };
+  return { reports: {} };
 }
 
 // 写入存储
@@ -91,6 +91,7 @@ export function saveReport(
   title: string,
   password: string,
   existingId?: string,
+  ownerId?: string,
 ): Report {
   const store = loadStore();
   const id = existingId || generateId();
@@ -105,6 +106,7 @@ export function saveReport(
     },
     content,
     password,
+    ownerId,
   };
 
   store.reports[id] = report;
@@ -117,70 +119,24 @@ export function getReport(id: string, password: string): Report | null {
   const store = loadStore();
   const report = store.reports[id];
   if (!report) return null;
-  if (report.password !== password && password !== store.password) return null;
+  if (report.password !== password) return null;
   return report;
-}
-
-// 管理员直接获取报告（不验证密码）
-export function getReportAdmin(id: string): Report | null {
-  const store = loadStore();
-  return store.reports[id] || null;
 }
 
 // 获取用户的所有报告列表（需要密码）
 export function getUserReports(password: string): ReportMeta[] {
   const store = loadStore();
-  const isAdmin = password === store.password;
   return Object.values(store.reports)
-    .filter(r => isAdmin || r.password === password)
+    .filter(r => r.password === password)
     .map(r => r.meta)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 // 管理员获取所有报告
-export function getAllReports(): ReportMeta[] {
+export function getAllReports(ownerId: string): ReportMeta[] {
   const store = loadStore();
   return Object.values(store.reports)
+    .filter(r => r.ownerId === ownerId)
     .map(r => r.meta)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-}
-
-// 检查是否为管理员密码
-export function isAdminPassword(password: string): boolean {
-  return password === ADMIN_PASSWORD;
-}
-
-// 预设普光/普明的案例数据（管理员可见）
-export function getPresetCases(password: string): ReportMeta[] {
-  if (password !== ADMIN_PASSWORD) return [];
-  return [
-    {
-      id: 'ADMIN-001',
-      type: 'health',
-      title: '普光·四圣心源辨证',
-      date: '2026-06-09T20:00:00Z',
-      summary: '脾肾阳虚、水寒土湿木郁、上热下寒格局。温潜黄芽天魂汤...',
-    },
-    {
-      id: 'ADMIN-002',
-      type: 'health',
-      title: '普明·围绝经期辨证',
-      date: '2026-06-09T21:00:00Z',
-      summary: '脾肾两虚、肝郁血虚、围绝经期综合征。补中益气汤合六味...',
-    },
-    {
-      id: 'ADMIN-003',
-      type: 'bazi',
-      title: '普光·八字深层分析',
-      date: '2026-06-09T22:00:00Z',
-      summary: '壬戌年 壬寅月 己亥日 癸丑时。水寒土湿，中气不足...',
-    },
-    {
-      id: 'ADMIN-004',
-      type: 'bazi',
-      title: '普明·八字深层分析',
-      date: '2026-06-09T22:30:00Z',
-      summary: '辛酉年 辛卯月 丙午日 戊子时。金木交战，火旺水弱...',
-    },
-  ];
 }

@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
           body: JSON.stringify({
             model: 'deepseek-v4-pro',
+...(String('deepseek-v4-pro').includes('deepseek') || String('deepseek-v4-pro').includes('v4') ? { thinking: { type: 'disabled' } } : {}),
             messages: [
               { role: 'system', content: SYSTEM_PROMPT + '\n\n参考知识：\n' + context },
               { role: 'user', content: query }

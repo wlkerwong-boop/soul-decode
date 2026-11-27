@@ -1,5 +1,13 @@
 // 九宫学理 · 引擎 v6 — 复姓天格+1, 详细数据来自jiugong-data.ts
 import { JU_FULL, XINGYUN as XYN, MGT_FULL, ENERGY_FULL, SUIZHI_FULL, WX_CHAR_FULL, XIANG_STRATEGY_FULL } from './jiugong-data';
+import {
+  JU_INDEX, ZHI_FULL, MARRIAGE_TEMPLATES, MARRIAGE_BREAK, PERS_ACTION,
+  STAR_TABLE as STAR_TABLE_V2, STAR_FORTUNE_FULL, FOUR_GRID_CE, GUAXIAN_FANXIANG,
+  LIUNIAN_DETAIL, CAREER_DIR, CAREER_HEALTH, SUB_SUPPORT, ARROW_TEXT,
+  CAIKU_FULL, CAIKU_JIA3, CAIKU_JIA3_NOTE, CAIGONG_XIE, CAIGONG_XIE_NOTE,
+  GRID_QI, GRID_ENERGY, SUIZHI_FULL as SUIZHI_FULL_V3, ANNUAL_STRATEGY, GUAXIAN_REF,
+  COLLISION_FULL, MOTHER_QI, ZHI_FAMILY, INTERNAL_ENERGY,
+} from './jiugong-data-v2';
 import kangxiData from './data/kangxi-strokes.json';
 
 let kangxi: Map<string,number> | null = null;
@@ -17,19 +25,29 @@ function radStroke(c: string): number {
 }
 
 // ── 简繁映射3666条 ──
-const S2T: Record<string,string> = {"万":"萬","与":"與","个":"個","习":"習","乡":"鄉","书":"書","云":"雲","产":"產","亲":"親","亿":"億","仅":"僅","仆":"僕","从":"從","仑":"侖","仓":"倉","仪":"儀","们":"們","价":"價","众":"眾","优":"優","会":"會","伟":"偉","传":"傳","伤":"傷","伦":"倫","伪":"偽","体":"體","余":"餘","佣":"傭","侠":"俠","侣":"侶","侦":"偵","侧":"側","侨":"僑","侥":"僥","侯":"侯","债":"債","倾":"傾","偿":"償","储":"儲","儿":"兒","兑":"兌","兴":"興","养":"養","兰":"蘭","关":"關","兽":"獸","内":"內","册":"冊","写":"寫","军":"軍","农":"農","冯":"馮","冲":"沖","决":"決","冻":"凍","净":"淨","凄":"淒","减":"減","几":"幾","凤":"鳳","凯":"凱","击":"擊","刘":"劉","则":"則","刚":"剛","创":"創","别":"彆","剧":"劇","动":"動","勋":"勳","劳":"勞","势":"勢","务":"務","励":"勵","胜":"勝","华":"華","协":"協","单":"單","卖":"賣","卫":"衛","厂":"廠","厅":"廳","历":"歷","厉":"厲","压":"壓","厌":"厭","县":"縣","发":"發","变":"變","叠":"疊","叶":"葉","号":"號","叹":"嘆","吓":"嚇","吗":"嗎","员":"員","启":"啟","呜":"嗚","响":"響","唤":"喚","啸":"嘯","园":"園","围":"圍","图":"圖","圆":"圓","圣":"聖","场":"場","块":"塊","坚":"堅","坛":"壇","坝":"壩","垒":"壘","垦":"墾","堕":"墮","壮":"壯","声":"聲","处":"處","备":"備","复":"復","头":"頭","奋":"奮","奖":"獎","妇":"婦","妈":"媽","孙":"孫","学":"學","宁":"寧","实":"實","审":"審","宪":"憲","宫":"宮","宽":"寬","宾":"賓","对":"對","寻":"尋","导":"導","寿":"壽","将":"將","尘":"塵","尝":"嘗","尧":"堯","层":"層","属":"屬","岁":"歲","岂":"豈","岭":"嶺","岛":"島","峡":"峽","岗":"崗","崭":"嶄","币":"幣","师":"師","帘":"簾","带":"帶","帮":"幫","干":"幹","并":"並","广":"廣","庄":"莊","庆":"慶","庐":"廬","库":"庫","应":"應","庙":"廟","庞":"龐","废":"廢","异":"異","弃":"棄","张":"張","弹":"彈","录":"錄","归":"歸","当":"當","灵":"靈","灿":"燦","烂":"爛","爷":"爺","牵":"牽","犹":"猶","独":"獨","猎":"獵","获":"獲","献":"獻","毕":"畢","疗":"療","监":"監","盘":"盤","卢":"盧","盐":"鹽","盖":"蓋","瞒":"瞞","硕":"碩","码":"碼","矿":"礦","砚":"硯","础":"礎","礼":"禮","社":"社","祈":"祈","祷":"禱","祸":"禍","离":"離","种":"種","积":"積","称":"稱","稳":"穩","穷":"窮","窃":"竊","窑":"窯","窜":"竄","笔":"筆","简":"簡","签":"簽","节":"節","范":"範","荡":"蕩","药":"藥","艺":"藝","苏":"蘇","荣":"榮","落":"落","著":"著","萧":"蕭","蓝":"藍","藏":"藏","虫":"蟲","蛮":"蠻","蝉":"蟬","蜡":"蠟","袭":"襲","补":"補","装":"裝","裤":"褲","观":"觀","觉":"覺","览":"覽","触":"觸","订":"訂","认":"認","记":"記","讲":"講","证":"證","评":"評","识":"識","诉":"訴","诊":"診","词":"詞","诗":"詩","诚":"誠","话":"話","该":"該","详":"詳","语":"語","误":"誤","说":"說","请":"請","诸":"諸","课":"課","谁":"誰","调":"調","谈":"談","谋":"謀","谢":"謝","谷":"穀","财":"財","货":"貨","贪":"貪","购":"購","贮":"貯","贯":"貫","费":"費","贾":"賈","资":"資","赋":"賦","赌":"賭","赏":"賞","赔":"賠","赖":"賴","赚":"賺","赛":"賽","赞":"贊","赵":"趙","趋":"趨","跃":"躍","车":"車","转":"轉","轮":"輪","软":"軟","轻":"輕","轴":"軸","输":"輸","边":"邊","辽":"遼","达":"達","过":"過","运":"運","还":"還","进":"進","远":"遠","连":"連","选":"選","遗":"遺","邓":"鄧","邮":"郵","郑":"鄭","邻":"鄰","郁":"鬱","酸":"酸","铁":"鐵","铜":"銅","银":"銀","铸":"鑄","锁":"鎖","错":"錯","钱":"錢","钟":"鐘","鉴":"鑑","长":"長","门":"門","闭":"閉","问":"問","闹":"鬧","闻":"聞","阅":"閱","队":"隊","阳":"陽","阴":"陰","陈":"陳","陆":"陸","际":"際","险":"險","难":"難","电":"電","风":"風","飒":"颯","飞":"飛","食":"食","饭":"飯","饮":"飲","饱":"飽","饰":"飾","马":"馬","驾":"駕","骑":"騎","骗":"騙","鱼":"魚","鲁":"魯","鸟":"鳥","鸡":"雞","鸭":"鴨","鹅":"鵝","鹤":"鶴","鹂":"鸝","麦":"麥","黄":"黃","黑":"黑","齐":"齊","齿":"齒","龙":"龍","龟":"龜","晓":"曉"};
+const S2T: Record<string,string> = {"万":"萬","与":"與","个":"個","习":"習","乡":"鄉","书":"書","云":"雲","产":"產","亲":"親","亿":"億","仅":"僅","仆":"僕","从":"從","仑":"侖","仓":"倉","仪":"儀","们":"們","价":"價","众":"眾","优":"優","会":"會","伟":"偉","传":"傳","伤":"傷","伦":"倫","伪":"偽","体":"體","余":"餘","佣":"傭","侠":"俠","侣":"侶","侦":"偵","侧":"側","侨":"僑","侥":"僥","侯":"侯","债":"債","倾":"傾","偿":"償","储":"儲","儿":"兒","兑":"兌","兴":"興","养":"養","兰":"蘭","关":"關","兽":"獸","内":"內","册":"冊","写":"寫","军":"軍","农":"農","冯":"馮","冲":"沖","决":"決","冻":"凍","净":"淨","凄":"淒","减":"減","几":"幾","凤":"鳳","凯":"凱","击":"擊","刘":"劉","则":"則","刚":"剛","创":"創","别":"彆","剧":"劇","动":"動","勋":"勳","劳":"勞","势":"勢","务":"務","励":"勵","胜":"勝","华":"華","协":"協","单":"單","卖":"賣","卫":"衛","厂":"廠","厅":"廳","历":"歷","厉":"厲","压":"壓","厌":"厭","县":"縣","发":"發","变":"變","叠":"疊","叶":"葉","号":"號","叹":"嘆","吓":"嚇","吗":"嗎","员":"員","启":"啟","呜":"嗚","响":"響","唤":"喚","啸":"嘯","园":"園","围":"圍","图":"圖","圆":"圓","圣":"聖","场":"場","块":"塊","坚":"堅","坛":"壇","坝":"壩","垒":"壘","垦":"墾","堕":"墮","壮":"壯","声":"聲","处":"處","备":"備","复":"復","头":"頭","奋":"奮","奖":"獎","妇":"婦","妈":"媽","孙":"孫","学":"學","宁":"寧","实":"實","审":"審","宪":"憲","宫":"宮","宽":"寬","宾":"賓","对":"對","寻":"尋","导":"導","寿":"壽","将":"將","尘":"塵","尝":"嘗","尧":"堯","层":"層","属":"屬","岁":"歲","岂":"豈","岭":"嶺","岛":"島","峡":"峽","岗":"崗","崭":"嶄","币":"幣","师":"師","帘":"簾","带":"帶","帮":"幫","干":"幹","并":"並","广":"廣","庄":"莊","庆":"慶","庐":"廬","库":"庫","应":"應","庙":"廟","庞":"龐","废":"廢","异":"異","弃":"棄","张":"張","弹":"彈","录":"錄","归":"歸","当":"當","灵":"靈","灿":"燦","烂":"爛","爷":"爺","牵":"牽","犹":"猶","独":"獨","猎":"獵","获":"獲","献":"獻","毕":"畢","疗":"療","监":"監","盘":"盤","卢":"盧","盐":"鹽","盖":"蓋","瞒":"瞞","硕":"碩","码":"碼","矿":"礦","砚":"硯","础":"礎","礼":"禮","社":"社","祈":"祈","祷":"禱","祸":"禍","离":"離","种":"種","积":"積","称":"稱","稳":"穩","穷":"窮","窃":"竊","窑":"窯","窜":"竄","笔":"筆","简":"簡","签":"簽","节":"節","范":"範","荡":"蕩","药":"藥","艺":"藝","苏":"蘇","荣":"榮","落":"落","著":"著","萧":"蕭","蓝":"藍","藏":"藏","虫":"蟲","蛮":"蠻","蝉":"蟬","蜡":"蠟","袭":"襲","补":"補","装":"裝","裤":"褲","观":"觀","觉":"覺","览":"覽","触":"觸","订":"訂","认":"認","记":"記","讲":"講","证":"證","评":"評","识":"識","诉":"訴","诊":"診","词":"詞","诗":"詩","诚":"誠","话":"話","该":"該","详":"詳","语":"語","误":"誤","说":"說","请":"請","诸":"諸","课":"課","谁":"誰","调":"調","谈":"談","谋":"謀","谢":"謝","谷":"穀","财":"財","货":"貨","贪":"貪","购":"購","贮":"貯","贯":"貫","费":"費","贾":"賈","资":"資","赋":"賦","赌":"賭","赏":"賞","赔":"賠","赖":"賴","赚":"賺","赛":"賽","赞":"贊","赵":"趙","趋":"趨","跃":"躍","车":"車","转":"轉","轮":"輪","软":"軟","轻":"輕","轴":"軸","输":"輸","边":"邊","辽":"遼","达":"達","过":"過","运":"運","还":"還","进":"進","远":"遠","连":"連","选":"選","遗":"遺","邓":"鄧","邮":"郵","郑":"鄭","邻":"鄰","郁":"鬱","酸":"酸","铁":"鐵","铜":"銅","银":"銀","铸":"鑄","锁":"鎖","错":"錯","钱":"錢","钟":"鐘","鉴":"鑑","长":"長","门":"門","闭":"閉","问":"問","闹":"鬧","闻":"聞","阅":"閱","队":"隊","阳":"陽","阴":"陰","陈":"陳","陆":"陸","际":"際","险":"險","难":"難","电":"電","风":"風","飒":"颯","飞":"飛","食":"食","饭":"飯","饮":"飲","饱":"飽","饰":"飾","马":"馬","驾":"駕","骑":"騎","骗":"騙","鱼":"魚","鲁":"魯","鸟":"鳥","鸡":"雞","鸭":"鴨","鹅":"鵝","鹤":"鶴","鹂":"鸝","麦":"麥","黄":"黃","黑":"黑","齐":"齊","齿":"齒","龙":"龍","龟":"龜","晓":"曉","罗":"羅","烨":"燁"};
 
 export function getStroke(c: string): number {
+  return getStrokeInfo(c).n;
+}
+
+/** 返回笔画数 + 是否完全命中字典（未命中=估算，须前端显著提示） */
+export function getStrokeInfo(c: string): { n: number; known: boolean } {
   // 优先繁体
   const trad = S2T[c];
-  if (trad && kangxi?.has(trad)) return kangxi.get(trad)!;
+  if (trad && kangxi?.has(trad)) return { n: kangxi.get(trad)!, known: true };
   // 整字直接查
   const full = kangxi?.get(c);
-  if (full !== undefined) return full;
-  // 部首拆分
+  if (full !== undefined) return { n: full, known: true };
+  // 部首拆分（部首已知但余部未知 → 估算，标记 unknown）
   const r = radStroke(c);
-  if (r>0) { const rest=c.replace(/^[氵扌忄犭王礻衤月艹辶阝]/,'').replace(/阝$/,''); return r+(rest?(kangxi?.get(rest)??10):0); }
-  return 10;
+  if (r > 0) {
+    const rest = c.replace(/^[氵扌忄犭王礻衤月艹辶阝]/, '').replace(/阝$/, '');
+    const restN = rest ? kangxi?.get(rest) : undefined;
+    if (restN !== undefined) return { n: r + restN, known: true };
+    return { n: r + (rest ? 10 : 0), known: false };
+  }
+  return { n: 10, known: false };
 }
 
 // ── 基础 ──
@@ -39,6 +57,18 @@ const dsum=(n:number)=>{let s=String(n);while(s.length>1)s=String([...s].reduce(
 // ── 十种能量 ──
 const YUN=['冠带','临官','帝旺','衰','病','死','绝','胎','养','长生'];
 const COLLISION_ENERGY=['帝旺','临官','冠带','长生','养','胎','绝','死','病','衰'];
+// ── 关键年卦象（v3.0：翻身/奇迹/接替/转机/层级/野心/转世/贵人/机运/实虚，卷轴 ★ 标注）──
+const KEY_GUAXIAN=['翻身','奇迹','接替','转机','层级','野心','转世','贵人','机运','实虚'];
+// ── v4.0 碰撞期推演（《推算碰撞》讲义 6.3：磁场从1起，往后格数+1起步每+9一遇；往前格数-10，再每-9）──
+function collisionYearsOf(gridNum:number,maxAge=90):number[]{
+  const years=new Set<number>();
+  let base=gridNum+1;
+  while(base<=maxAge){years.add(base);base+=9;}
+  let back=gridNum-10;
+  while(back>=1){years.add(back);back-=9;}
+  return [...years].sort((a,b)=>a-b);
+}
+const isCollisionYear=(gridNum:number,xusui:number)=>collisionYearsOf(gridNum).includes(xusui);
 
 // ── 局差简版 ──
 const JU_DESC=['先求稳定与平安，更上一层楼需名气靠山','紧跟贵人得第一，不可独闯','兢兢业业得天下，劳碌辛苦','士农工商皆通，用心惜福','志向远大，求功名'];
@@ -109,7 +139,36 @@ export interface JiugongFull {
     lowerQi:string;lowerEnergy:string;
     outerQi:string;outerEnergy:string;
     ageStar:string;ageStarDesc:string;
+    keyYear?:boolean;              // v3.0 关键年卦象（卷轴 ★ 标注）
   }[];
+  // ── v2 增量（2026-08-20 移植老唐 v2.0）──
+  marriageSub?:string;                 // 双象细分：平双/阴阳双
+  marriageBreakKey?:string;            // 破象克型（如水克火）
+  marriageFull?:{总述?:string;缘起?:string;缘续?:string;缘灭?:string;建议?:string;要点?:string[];别名?:string;注意?:string};
+  zhiMeaning?:string;zhiCaution?:string;zhiTips?:number[];           // 质三段式
+  xingyunPoints?:string[];xingyunTrait?:string;xingyunMeaning?:string;xingyunCaution?:string;xingyunTips?:string;
+  careerDir?:{达人:string;特质:string;职业:string};careerHealth?:string;  // 事业趋向
+  arrowUp?:string;arrowDown?:string;arrowSummary?:string;             // 上下助力（箭头法）
+  subSupportNum?:number;subSupport?:{要点:string;说明:string};        // 属下助力（地格合并数）
+  mainFuncAction?:string;mainFuncMethod?:string;                     // 动作力/处事方法
+  liunianState?:string;liunianDetail?:{副名:string;磁场?:string;动能?:string;生命力?:string;心态?:string;发展现象?:string;运用法则?:string};
+  guaName?:string;guaKoujue?:string;guaJiedu?:string;guaPositive?:string;guaReverse?:string;guaShixu?:boolean;
+  upperCaution?:string;upperNote?:string;selfCaution?:string;selfNote?:string;lowerCaution?:string;lowerNote?:string;outerCaution?:string;outerNote?:string;
+  caiKuFull?:{类型:string;描述:string;详解:string[]};caiKuJia3?:string[];caiKuJia3Note?:string;
+  caigongXie?:string[];caigongXieNote?:string;
+  unknownChars:string[];          // 未收录字（笔画为估算，前端须显著提示）
+  // ── v3.0 增量（2026-08-22 老唐 v3.0 移植）──
+  gridQi?:Record<string,Record<string,{解释?:string;现象?:string;操作?:string}>>; // 5.1 此象在该格的意义/产生现象/操作（上层/自我/下层 × 9象）
+  gridEnergy?:Record<string,{代表?:string;实例?:string;碰撞?:string;应变?:string}>; // 5.1 能量解读（4格）
+  suizhiNote?:string;             // 5.2 岁值星注意（v3 全文补充）
+  annualStrategy?:{阶段:string;标题:string;月份:string;文案:string[]}[];  // 5.2 年度经营策略（生日前后四期）
+  guaRef?:{口诀?:string;意义?:string;启示?:string;切记?:string;反向?:string};  // 卦签参考（投机/名望卦）
+  // ── v4.0 增量（2026-08-22 老唐 v4.0 移植）──
+  zhiFamily?:[string,string,string,string];   // 十大家族：质名/五行/家族/特质描述
+  motherQi?:string;                            // 九宫母气（质个位数）
+  collisions:{格:string;数:number;命中:boolean;解说:string;现象:string;提示:string}[]; // 四格碰撞期
+  collisionYears:Record<string,number[]>;      // 各格碰撞期虚岁全表
+  internalEnergy?:Record<string,unknown>;      // 内部能量（上层/自我/下层，第十四课）
 }
 
 export interface JiugongInput {
@@ -121,7 +180,11 @@ export interface JiugongInput {
 
 // ══════════ 主计算 ══════════
 function calcFull(name:string,year:number,month:number,day:number,now=new Date()):JiugongFull {
-  const chars=Array.from(name), strokes=chars.map(getStroke), total=strokes.reduce((a,b)=>a+b,0);
+  const chars=Array.from(name);
+  const strokeInfos=chars.map(getStrokeInfo);
+  const strokes=strokeInfos.map(s=>s.n);
+  const total=strokes.reduce((a,b)=>a+b,0);
+  const unknownChars=chars.filter((_,i)=>!strokeInfos[i].known);
   
   // 五格 (复姓天格=姓之和+1)
   const isDouble=strokes.length>=4;
@@ -130,11 +193,8 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
   const di=strokes.length>=3?strokes[1]+strokes[2]:(strokes[1]||1)+1;
   const zong=total,wai=isDouble?zong-ren:zong-ren+1;
   
-  // 虚岁
-  const birth=new Date(year,month-1,day);
-  let age=now.getFullYear()-birth.getFullYear();
-  if(now.getMonth()<birth.getMonth()||(now.getMonth()===birth.getMonth()&&now.getDate()<birth.getDate()))age--;
-  const xuAge=age+1;
+  // 虚岁：年份口径（九宫只用年份，不按月日打折——老唐 CLI/规则表口径）
+  const xuAge=now.getFullYear()-year+1;
   
   // 局差
   const tens=Math.floor(total/10),ones=total%10;
@@ -143,46 +203,81 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
   // 质
   const zhi=total%10,zhiD=ZHI[zhi]||ZHI[5];
   
-  // 星运
+  // 星运（10–53 查表；超出回退质描述——规则表 §一）
   const xy=XYN[total];
+  const xingyunFallback=`${zhiD.name}（${zhiD.element}）：${zhiD.desc}`;
+  const xingyunName=xy?.name||xingyunFallback;
+  const xingyunFull=xy?.desc||xingyunFallback;
   
   // 管理IQ — 名字第二字
   const mgtKey=(strokes[1]??strokes[0])>9?dsum(strokes[1]??strokes[0]):(strokes[1]??strokes[0]);
   const mgt=MGT_FULL[mgtKey]||MGT_FULL[1];
   
-  // 五行性格
+  // 五行作用方向（统一语义：a 对 b 的正向作用；反向作用力记作平——规则表 §一/老唐 relation）
   const tw=WX[tian%10],rw=WX[ren%10],dw=WX[di%10];
   const wxOrder=(a:string)=>({木:1,火:2,土:3,金:4,水:5}as Record<string,number>)[a]||0;
-  const wxRel=(a:string,b:string)=>a===b?'平':((wxOrder(b)-wxOrder(a)+5)%5===1?'生':'克');
-  const thinkRel=`${rw}${wxRel(rw,tw)}${tw}`,actionRel=`${dw}${wxRel(dw,rw)}${rw}`;
-  const thinkDesc=WX_CHAR_FULL[thinkRel]||'';
-  const actionDesc=WX_CHAR_FULL[actionRel]||'';
-  const gen=(wxOrder(rw)-wxOrder(dw)+5)%5;
-  const mainFunc=gen===1||gen===3?'主功能':'副功能';
-  const mainFuncDesc=mainFunc==='主功能'?'主动性强、勤劳踏实、白手起家，适合操作流年':'善用头脑、人际关系、机会点，需要合作不能独闯';
+  const wxRel=(a:string,b:string):'生'|'克'|'平'=>{
+    if(a===b)return'平';
+    const diff=(wxOrder(b)-wxOrder(a)+5)%5;
+    if(diff===1)return'生';   // a 生 b
+    if(diff===2)return'克';   // a 克 b
+    return'平';               // 反向（b 生/克 a）记作平
+  };
+  // 思想 = 天→人；行动 = 人→地（老唐 analyze_personality）
+  const thinkRelWx=wxRel(tw,rw), actionRelWx=wxRel(rw,dw);
+  const thinkRel=thinkRelWx==='平'?'平':`${thinkRelWx}(${tw}→${rw})`;
+  const actionRel=actionRelWx==='平'?'平':`${actionRelWx}(${rw}→${dw})`;
+  const thinkDesc=thinkRelWx==='平'
+    ?'天格与人格五行无正向生克（反向作用力记作平），思想与上层磁场平顺自然，不受天格压制亦不借其力。'
+    :(WX_CHAR_FULL[`${tw}${thinkRelWx}${rw}`]||'');
+  const actionDesc=actionRelWx==='平'
+    ?'人格与地格五行无正向生克（反向作用力记作平），行动与下层磁场平顺自然，不压迫下属亦不受其拖累。'
+    :(WX_CHAR_FULL[`${rw}${actionRelWx}${dw}`]||'');
+  // 主副功能：人→地 生/克=主功能；地→人 生/克=副功能；等同=平功能
+  const mainFunc=actionRelWx==='生'||actionRelWx==='克'?'主功能':wxRel(dw,rw)==='生'||wxRel(dw,rw)==='克'?'副功能':'平功能';
+  const mainFuncDesc=mainFunc==='主功能'
+    ?'主动性强、勤劳踏实、白手起家，适合操作流年'
+    :mainFunc==='副功能'
+    ?'善用头脑、人际关系、机会点，需要合作不能独闯'
+    :'主副功能均衡型，人格与地格五行相同，呈并行线（库平）；既能主动实干也能借力合作，不偏独闯亦不偏依附。';
   
-  // 财富
-  const pdiff=Math.abs(ren-di);const pnum=pdiff>4?(Math.min(ren,di)+9)-Math.max(ren,di):pdiff;
+  // 财富（v2 修正：先数字根再差——老唐 analyze_wealth 口径）
+  const rd=dsum(ren), dd=dsum(di);
+  const pdiff=Math.abs(rd-dd);const pnum=pdiff>4?(Math.min(rd,dd)+9)-Math.max(rd,dd):pdiff;
   const PATH_DESC=['局平（名气暗财型）：靠专业成名','加1（能力暗财型）：白手起家，财库最旺','加2（能力正财型）：实力派，不能投机','加3（机运暗财型）：受栽培，赚钱无人知','加4（机运正财型）：人际关系为本，适合组织'];
-  const PALACE=gen===0?['库平','从商格，说话婉转']:gen===1||gen===3?['库泄','大方型，钱留不住']:gen===4?['库旺','守财型，企业家标配']:['库破','冲动型，冲动时破财'];
+  // 财宫：人生地=库泄 / 人克地=库破 / 地生人=库旺 / 其余(含地克人)=库平
+  const rDw=wxRel(rw,dw), dRw=wxRel(dw,rw);
+  const PALACE=rDw==='生'?['库泄','大方型，钱留不住']:rDw==='克'?['库破','冲动型，冲动时破财']:dRw==='生'?['库旺','守财型，企业家标配']:['库平','从商格，说话婉转'];
   
-  // 婚姻
-  const mar=gen===0?['双象','势均力敌']:gen===1?['淡象','平淡自然']:gen===4?['旺象','感情兴旺']:['破象','感情有波折'];
+  // 婚姻（老唐 analyze_marriage：地生人=淡 / 人生地=旺 / 双向克=破·克型 / 等同=双象·平双|阴阳双）
+  let mar: [string,string];
+  let marriageSub: string|undefined, marriageBreakKey: string|undefined;
+  if (dRw==='生') mar=['淡象','平淡自然（地格生人格）'];
+  else if (rDw==='生') mar=['旺象','感情兴旺（人格生地格）'];
+  else if (dRw==='克') { marriageBreakKey=`${dw}克${rw}`; mar=['破象',`感情有波折（地格${dw}克人格${rw}）`]; }
+  else if (rDw==='克') { marriageBreakKey=`${rw}克${dw}`; mar=['破象',`感情有波折（人格${rw}克地格${dw}）`]; }
+  else {
+    marriageSub = (ren % 2) === (di % 2) ? '平双' : '阴阳双';
+    mar=[marriageSub, marriageSub==='平双'?'势均力敌（人格与地格五行等同、阴阳相同）':'势均力敌（人格与地格五行等同、一阴一阳）'];
+  }
   
   // 主数
   const mainNum=dsum(now.getFullYear()-1111);
   
   // 四格气场
-  function qiEnergy(n:number,grid:number,age=xuAge):{qi:string;energy:string;gua:string;strategy:string}{
+  // 能量循环（规则表 §二）：天格专用循环 0=帝旺；人/地/总普通循环 0=冠带
+  const CYCLE_TIANGAN=['帝旺','衰','病','死','绝','胎','养','长生','冠带','临官'];
+  const CYCLE_NORMAL=['冠带','临官','帝旺','衰','病','死','绝','胎','养','长生'];
+  function qiEnergy(n:number,grid:number,age=xuAge,isTiange=false):{qi:string;energy:string;gua:string;strategy:string}{
     const qiNum=((n-grid)%9+9)%9;
     const qi=XIANG[qiNum]||'名望';
     const yunIdx=(age-grid%10+10)%10;
-    const energy=YUN[yunIdx%10];
+    const energy=(isTiange?CYCLE_TIANGAN:CYCLE_NORMAL)[yunIdx%10];
     const gua=`${qi}${energy}`;
     const st=XIANG_STRATEGY_FULL[qi]||{upper:'',self:'',lower:'',outer:'',caution:''};
     return{qi,energy,gua,strategy:st.upper};
   }
-  const upper=qiEnergy(mainNum,tian),self=qiEnergy(mainNum,ren);
+  const upper=qiEnergy(mainNum,tian,xuAge,true),self=qiEnergy(mainNum,ren);
   const lower=qiEnergy(mainNum,di),outer=qiEnergy(mainNum,zong);
 
   // 碰撞周期：恢复 v5 已验收规则（每 10 年一次）
@@ -213,6 +308,7 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
     const yearOuter=qiEnergy(yearMainNum,zong,a);
     return{
       age:a,year:year+i,yun:row.yun,chance:row.chance,gua:row.gua,koujue:row.koujue,jiedu:row.jiedu,
+      keyYear:KEY_GUAXIAN.includes(row.gua),
       upperQi:yearUpper.qi,upperEnergy:yearUpper.energy,
       selfQi:yearSelf.qi,selfEnergy:yearSelf.energy,
       lowerQi:yearLower.qi,lowerEnergy:yearLower.energy,
@@ -224,14 +320,89 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
   const ages=['1-9岁','10-18岁','19-27岁','28-36岁','37-45岁','46-54岁','55-63岁','64-72岁','73-81岁','82-90岁'];
   const reordered=ALL_GROUPS.slice(5).concat(ALL_GROUPS.slice(0,5));
   const groups=reordered.map((g,i)=>({name:g.name,ages:ages[i],count:9}));
+
+  // ═══ v2 增量计算（2026-08-20 老唐 v2.0 移植）═══
+  const mergeDigits=(n:number)=>{while(n>9)n=[...String(n)].reduce((a,b)=>a+ +b,0);return n;};
+  // 婚姻全文模板
+  let marriageFull: JiugongFull['marriageFull'];
+  if (marriageSub) marriageFull = MARRIAGE_TEMPLATES[marriageSub];
+  else if (marriageBreakKey) marriageFull = MARRIAGE_BREAK[marriageBreakKey] || MARRIAGE_TEMPLATES['破'];
+  else {
+    const mk = mar[0]==='破象'?'破':mar[0]==='淡象'?'淡':mar[0]==='旺象'?'旺':undefined;
+    if (mk) marriageFull = MARRIAGE_TEMPLATES[mk];
+  }
+  // 质三段式（特质/意义/切记/转折年）
+  const zfV2 = ZHI_FULL[zhiD.name];
+  // 星运详情（要点/特质/意义/切记/提示）
+  const stV2 = STAR_TABLE_V2[total];
+  const sffV2 = STAR_FORTUNE_FULL[total];
+  // 事业趋向（人格五行×个位数）
+  const cdV2 = CAREER_DIR[`${rw}:${ren%10}`];
+  // 上下助力（箭头法：箭头指向受方——老唐 report 2.5）
+  // 天/地 对人格正向生克 → 向内（对方箭头向着你）；反向（人对天/地生克）→ 向外（你的箭头指向对方）
+  const relUpV2 = wxRel(tw,rw);       // 天→人 正向
+  const relDownV2 = wxRel(dw,rw);     // 地→人 正向
+  const upDir = (relUpV2==='生'||relUpV2==='克')?'向内':((wxRel(rw,tw)==='生'||wxRel(rw,tw)==='克')?'向外':'无');
+  const downDir = (relDownV2==='生'||relDownV2==='克')?'向内':((wxRel(rw,dw)==='生'||wxRel(rw,dw)==='克')?'向外':'无');
+  // 属下助力（地格合并数 1-9）
+  const hbV2 = mergeDigits(di);
+  // 性格动作力/处事方法
+  const paV2 = PERS_ACTION[mainFunc];
+  // 流年能量四段法（(虚岁-质)%10）
+  const lnStateV2 = YUN[(xuAge - zhi + 10) % 10];
+  // 卦签双向（对外总格象+能量 → 90卦 → 正向/反向）
+  const outerGuaRec = SCROLL_LUT.find(r=>r.chance===outer.qi&&r.yun===outer.energy)||SCROLL_LUT[0];
+  const fxV2 = GUAXIAN_FANXIANG[outerGuaRec.gua];
+  // 四格对策/注意事项
+  const ceV2 = (x:string)=>FOUR_GRID_CE[x];
+  // 财运全文（财库五型详解 + 加3八条 + 库泄/库破七条）
+  const ckFullV2 = CAIKU_FULL[pnum];
+  const cgXie = (PALACE[0].includes('泄')||PALACE[0].includes('破')) ? CAIGONG_XIE : undefined;
+
+  // ═══ v3.0 增量计算（2026-08-22 老唐 v3.0 移植）═══
+  const ageStarV = STAR[xuAge%10];
+  // 5.1 四格气场解读：GRID_QI（上/自/下三格 此象意义/现象/操作）+ GRID_ENERGY（4格 代表/实例/碰撞/应变）
+  const gridQi = GRID_QI as Record<string, Record<string, {解释?:string;现象?:string;操作?:string}>>;
+  const gridEnergy = GRID_ENERGY as Record<string, {代表?:string;实例?:string;碰撞?:string;应变?:string}>;
+  // 5.2 岁值星注意（v3 全文补充：键=全角星名，匹配网站的 ageStar 半角格式）
+  const szV3Key = Object.keys(SUIZHI_FULL_V3).find(
+    (k) => k.replace(/（/g,'(').replace(/）/g,')') === ageStarV,
+  );
+  const suizhiNote = szV3Key ? SUIZHI_FULL_V3[szV3Key]?.注意 : undefined;
+  // 5.2 年度经营策略（生日前后四期：结算期/产值检验期/机会点/附加价值期）
+  const annualStrategy = (ANNUAL_STRATEGY as Record<string,{偏移:[number,number];标题:string;文案:string[]}>)
+    ? Object.entries(ANNUAL_STRATEGY).map(([stage, s]) => ({
+        阶段: stage,
+        标题: s.标题,
+        月份: `${(month + s.偏移[0] - 1 + 12) % 12 + 1}月~${(month + s.偏移[1] - 1 + 12) % 12 + 1}月`,
+        文案: s.文案 as string[],
+      }))
+    : undefined;
+  // 卦签参考（投机卦/名望卦补充：口诀/意义/启示/切记）
+  const guaRef = GUAXIAN_REF[outerGuaRec.gua] as {口诀?:string;意义?:string;启示?:string;切记?:string;反向?:string} | undefined;
+
+  // ═══ v4.0 增量计算（2026-08-22 老唐 v4.0 移植）═══
+  // 十大家族 + 九宫母气（2.1 特质）
+  const zhiFamily = (ZHI_FAMILY as Record<string,[string,string,string,string]>)[zhi];
+  const motherQi = (MOTHER_QI as Record<string,string>)[String(((zhi%9)+9)%9 || 9)];
+  // 碰撞期（《推算碰撞》讲义 6.3）：四格各自推演，标注当前虚岁是否命中
+  const CF = COLLISION_FULL as Record<string,{解说:string;现象:string;提示:string}>;
+  const gridDefs:[string,number][]=[['上层',tian],['自我',ren],['下层',di],['对外',zong]];
+  const collisions = gridDefs.map(([g,n])=>({
+    格:g,数:n,命中:isCollisionYear(n,xuAge),
+    解说:CF[g]?.解说||'',现象:CF[g]?.现象||'',提示:CF[g]?.提示||'',
+  }));
+  const collisionYears:Record<string,number[]> = Object.fromEntries(gridDefs.map(([g,n])=>[g,collisionYearsOf(n)] as [string,number[]]));
+  // 内部能量（第十四课：上层/自我/下层）
+  const internalEnergy = INTERNAL_ENERGY as Record<string,unknown>;
   
   return{name,year,month,day,total,tian,ren,di,zong,wai,tianWx:tw,renWx:rw,diWx:dw,xuAge,
     ju,juDesc:JU_DESC[ju],juFull:JU_FULL[ju]||JU_DESC[ju],
     zhi,zhiName:zhiD.name,zhiElement:zhiD.element,zhiDesc:zhiD.desc,zhiFull:zhiD.desc,
-    xingyunName:xy?.name||`${total}画`,xingyunFull:xy?.desc||'',
+    xingyunName,xingyunFull,
     thinkRel,thinkDesc,actionRel,actionDesc,
-    wxThinkFull:WX_CHAR_FULL[thinkRel]||thinkDesc,
-    wxActionFull:WX_CHAR_FULL[actionRel]||actionDesc,
+    wxThinkFull: thinkRelWx==='平'?thinkDesc:(WX_CHAR_FULL[`${tw}${thinkRelWx}${rw}`]||thinkDesc),
+    wxActionFull: actionRelWx==='平'?actionDesc:(WX_CHAR_FULL[`${rw}${actionRelWx}${dw}`]||actionDesc),
     mainFunc,mainFuncDesc,
     wealthPath:PATH_DESC[pnum],wealthPalace:PALACE[0],wealthPalaceDesc:PALACE[1],
     marriage:mar[0],marriageDesc:mar[1],
@@ -244,7 +415,32 @@ function calcFull(name:string,year:number,month:number,day:number,now=new Date()
     outerQi:outer.qi,outerEnergy:outer.energy,outerGua:outer.gua,outerStrategy:outer.strategy,
     energyFull:ENERGY_FULL,xiangStrategy:XIANG_STRATEGY_FULL,
     upperColl,selfColl,lowerColl,
-    groups,years};
+    groups,years,
+    // v2 增量
+    marriageSub,marriageBreakKey,marriageFull,
+    zhiMeaning:zfV2?.意义,zhiCaution:zfV2?.切记,zhiTips:zfV2?.提示,
+    xingyunPoints:stV2?.要点,xingyunTrait:stV2?.特质,
+    xingyunMeaning:sffV2?.意义||stV2?.意义,xingyunCaution:sffV2?.切记||stV2?.切记,xingyunTips:sffV2?.提示||stV2?.提示,
+    careerDir:cdV2,careerHealth:CAREER_HEALTH[rw],
+    arrowUp:ARROW_TEXT[`上:${upDir}`],arrowDown:ARROW_TEXT[`下:${downDir}`],arrowSummary:ARROW_TEXT['总结'],
+    subSupportNum:hbV2,subSupport:SUB_SUPPORT[hbV2],
+    mainFuncAction:paV2?.动作力,mainFuncMethod:paV2?.处事方法,
+    liunianState:lnStateV2,liunianDetail:LIUNIAN_DETAIL[lnStateV2],
+    guaName:outerGuaRec.gua,guaKoujue:outerGuaRec.koujue,guaJiedu:outerGuaRec.jiedu,
+    guaPositive:fxV2?.正向,guaReverse:fxV2?.反向,guaShixu:outerGuaRec.gua==='实虚',
+    upperCaution:ceV2(upper.qi)?.对策,upperNote:ceV2(upper.qi)?.注意事项,
+    selfCaution:ceV2(self.qi)?.对策,selfNote:ceV2(self.qi)?.注意事项,
+    lowerCaution:ceV2(lower.qi)?.对策,lowerNote:ceV2(lower.qi)?.注意事项,
+    outerCaution:ceV2(outer.qi)?.对策,outerNote:ceV2(outer.qi)?.注意事项,
+    caiKuFull:ckFullV2,
+    caiKuJia3:pnum===3?CAIKU_JIA3:undefined,caiKuJia3Note:pnum===3?CAIKU_JIA3_NOTE:undefined,
+    caigongXie:cgXie,caigongXieNote:cgXie?CAIGONG_XIE_NOTE:undefined,
+    unknownChars,
+    // v3.0 增量
+    gridQi,gridEnergy,suizhiNote,annualStrategy,guaRef,
+    // v4.0 增量
+    zhiFamily,motherQi,collisions,collisionYears,internalEnergy,
+};
 }
 
 export async function getJiugongStroke(character:string):Promise<number> {

@@ -241,7 +241,7 @@ export default function ReportShareCard({ data, onClose }: { data: ShareCardData
     ctx.fillStyle = 'rgba(154,152,148,0.35)';
     ctx.font = '11px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('soul-decode.vercel.app · AI深度解读', w / 2, h - 38);
+    ctx.fillText('aisoulcode.cn · AI深度解读', w / 2, h - 38);
   }, [data]);
 
   useEffect(() => {

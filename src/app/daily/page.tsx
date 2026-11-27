@@ -47,11 +47,10 @@ export default function DailyPage() {
   };
 
   return (
-    <div className="py-8 md:py-16 px-4 max-w-3xl mx-auto">
+    <div className="inner-page py-8 md:py-16 px-4 max-w-3xl mx-auto pt-nav">
       {/* Header */}
       <div className="text-center mb-10">
-        <div className="text-3xl mb-3">🌅</div>
-        <h1 className="text-2xl md:text-3xl font-bold gradient-text mb-2">每日运势</h1>
+        <h1 className="text-3xl md:text-4xl font-bold gradient-text mb-2">每日运势</h1>
         <p className="text-sm text-[var(--text-secondary)]">
           {today || '加载中...'} · 基于生肖的每日指引
         </p>
@@ -80,7 +79,7 @@ export default function DailyPage() {
       {zodiac && !fortune && !loading && (
         <div className="text-center mb-8">
           <button onClick={handleGenerate} className="btn-jade max-w-xs mx-auto inline-flex" style={{ width: 'auto' }}>
-            🌅 查看{['rat','ox','tiger','rabbit','dragon','snake','horse','goat','monkey','rooster','dog','pig'][zodiacData.findIndex(z=>z.sign===zodiac)]}今日运势
+            🌅 查看{zodiacData.find(z=>z.sign===zodiac)?.label ?? ''}今日运势
           </button>
         </div>
       )}

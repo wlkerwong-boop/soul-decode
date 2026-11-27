@@ -1,18 +1,26 @@
 // 星座与占星模块 — swisseph-wasm 精确版
 
 import { getBirthCoords } from '@/data/cities';
-import path from 'path';
-import { createRequire } from 'node:module';
 
-// swisseph-wasm 加载（与 hd.ts 同款）：createRequire + 变量调用对 Turbopack 不透明，
-// 避免被改写成带哈希的虚拟外部模块（线上 ERR_MODULE_NOT_FOUND 的根因）。单例缓存。
+type RuntimeImport = <T = unknown>(specifier: string) => Promise<T>;
+
+function getRuntimeImport(): RuntimeImport {
+  return new Function('specifier', 'return import(specifier)') as RuntimeImport;
+}
+
+// swisseph-wasm 加载（与 hd.ts 同款）：运行时动态 import，避免被构建器改写成
+// 带哈希的虚拟外部模块（线上 ERR_MODULE_NOT_FOUND 的根因）。单例缓存。
 let swCache: any = null;
-function getSwisseph() {
-  if (!swCache) {
-    const nodeRequire = createRequire(path.join(process.cwd(), 'noop.js'));
-    swCache = nodeRequire('@fusionstrings/swisseph-wasm');
+let swLoading: Promise<any> | null = null;
+async function getSwisseph() {
+  if (swCache) return swCache;
+  if (!swLoading) {
+    swLoading = getRuntimeImport()('@fusionstrings/swisseph-wasm').then((loaded) => {
+      swCache = (loaded as { default?: unknown }).default ?? loaded;
+      return swCache;
+    });
   }
-  return swCache;
+  return swLoading;
 }
 
 export interface ZodiacInfo {
@@ -98,6 +106,34 @@ function signFromLongitude(lon: number): { sign: string; degree: number } {
   return { sign: SIGN_NAMES[idx], degree: Math.round((lon % 30) * 10) / 10 };
 }
 
+function getTimeZoneOffsetMinutes(instant: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+  }).formatToParts(instant);
+  const values: Record<string, number> = {};
+  for (const part of parts) {
+    if (part.type !== 'literal') values[part.type] = Number(part.value);
+  }
+  const renderedAsUtc = Date.UTC(values.year, values.month - 1, values.day, values.hour, values.minute, values.second);
+  return Math.round((renderedAsUtc - instant.getTime()) / 60000);
+}
+
+/** Convert a birthplace-local civil clock to the UTC instant expected by Swiss Ephemeris. */
+export function localCivilTimeToUtc(
+  year: number, month: number, day: number, hour: number, minute: number, timeZone = 'UTC',
+) {
+  const localClockAsUtc = Date.UTC(year, month - 1, day, hour, minute, 0);
+  let utcMs = localClockAsUtc;
+  for (let i = 0; i < 3; i++) {
+    utcMs = localClockAsUtc - getTimeZoneOffsetMinutes(new Date(utcMs), timeZone) * 60000;
+  }
+  return new Date(utcMs);
+}
+
 /**
  * 使用 swisseph-wasm 精确计算行星位置
  * 返回太阳/月亮/水星/金星/火星的星座和度数
@@ -105,15 +141,19 @@ function signFromLongitude(lon: number): { sign: string; degree: number } {
 export async function calcPlanetPositions(
   year: number, month: number, day: number,
   hour: number, minute: number,
-  lat: number, lon: number
+  lat: number, lon: number, timeZone = 'UTC'
 ): Promise<{ planets: PlanetPosition[]; zodiac: string }> {
   const fallbackSign = getZodiacByDate(month, day)?.name || '双子';
 
   try {
-    const swisseph = getSwisseph();
+    const swisseph = await getSwisseph();
 
-    // 计算儒略日（UTC）
-    const jd = swisseph.swe_julday(year, month, day, hour + minute / 60, 1);
+    // 用户输入的是出生地当地民用时间；Swiss Ephemeris 接收 UTC。
+    const utc = localCivilTimeToUtc(year, month, day, hour, minute, timeZone);
+    const jd = swisseph.swe_julday(
+      utc.getUTCFullYear(), utc.getUTCMonth() + 1, utc.getUTCDate(),
+      utc.getUTCHours() + utc.getUTCMinutes() / 60, 1,
+    );
 
     const planetIds: [number, string][] = [
       [0, '太阳'], [1, '月亮'], [2, '水星'], [3, '金星'], [4, '火星']

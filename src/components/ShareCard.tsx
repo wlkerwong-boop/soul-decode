@@ -134,7 +134,7 @@ export default function ShareCard({ userName, pillars, tagline }: ShareCardProps
         <div style={{ textAlign: 'center' }}>
           <div style={{ display: 'inline-block', padding: '12px 40px', borderRadius: '50px', border: '1px solid rgba(74, 124, 111, 0.3)', background: 'rgba(74, 124, 111, 0.08)' }}>
             <span style={{ fontSize: '20px', color: '#4a7c6f' }}>◈</span>
-            <span style={{ fontSize: '18px', color: '#6a9c8f', marginLeft: '10px' }}>扫码生成你的专属报告</span>
+            <span style={{ fontSize: '18px', color: '#6a9c8f', marginLeft: '10px' }}>扫码生成您的专属报告</span>
           </div>
           <div style={{ marginTop: '16px', fontSize: '14px', color: '#6b6258' }}>
             aisoulcode.cn

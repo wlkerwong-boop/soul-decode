@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveReport, type ReportType } from '@/lib/report-store';
+import { useAuth } from '@/components/AuthContext';
 
 interface Props {
   content: string;
@@ -13,6 +14,7 @@ interface Props {
 
 export default function SaveToArchive({ content, reportType, defaultTitle, existingId }: Props) {
   const router = useRouter();
+  const { user } = useAuth();
   const [showSave, setShowSave] = useState(false);
   const [password, setPassword] = useState('');
   const [title, setTitle] = useState(defaultTitle);
@@ -30,7 +32,7 @@ export default function SaveToArchive({ content, reportType, defaultTitle, exist
       return;
     }
     try {
-      const report = saveReport(content, reportType, title, password, existingId);
+      const report = saveReport(content, reportType, title, password, existingId, user?.id);
       setReportId(report.meta.id);
       setSaved(true);
       setError('');
@@ -77,7 +79,7 @@ export default function SaveToArchive({ content, reportType, defaultTitle, exist
                 type="password"
                 value={password}
                 onChange={e => { setPassword(e.target.value); setError(''); }}
-                placeholder="例如：你的生日或自定义密码"
+                placeholder="例如：您的生日或自定义密码"
                 className="w-full p-2.5 rounded-lg bg-black/40 border border-[var(--border-color)] text-white text-sm focus:border-[var(--text-accent)] outline-none"
               />
             </div>

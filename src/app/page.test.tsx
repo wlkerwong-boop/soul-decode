@@ -4,30 +4,32 @@ import { describe, expect, it } from 'vitest';
 import HomePage from './page';
 
 describe('SoulCode homepage production contract', () => {
-  it('keeps the homepage CSS class structure in the rendered page', () => {
+  it('keeps the approved display-draft structure in the rendered page', () => {
     const html = renderToStaticMarkup(<HomePage />);
 
     expect(html).toContain('class="hero"');
-    expect(html).toContain('class="cards"');
-    expect(html).toContain('class="report"');
-    expect(html).toContain('class="explore-track reveal"');
-    expect(html).toContain('class="about about-text-only reveal"');
+    expect(html).toContain('class="who-grid"');
+    expect(html).toContain('class="path-grid"');
+    expect(html).toContain('class="preview reveal"');
+    expect(html).toContain('class="ecosystem-grid"');
+    expect(html).toContain('class="nav-toggle"');
   });
 
-  it('links the Changning star-map activity to its live tools page', () => {
+  it('links the three primary paths and partner sites to live destinations', () => {
     const html = renderToStaticMarkup(<HomePage />);
 
+    expect(html).toContain('href="/master-report"');
+    expect(html).toContain('href="/compatibility"');
     expect(html).toContain('href="/tools"');
-    expect(html).toContain('点亮星图');
-    expect(html).toContain('昌宁茶乡精神图谱共建行动 · 亲子互动工具包');
-    expect(html).not.toContain('即将推出');
-    expect(html).not.toContain('explore-badge');
+    expect(html).toContain('https://www.stella-aiedu.com/');
+    expect(html).toContain('https://jianjixueyuan.com/');
+    expect(html).not.toContain('href="#"');
   });
 
-  it('uses 您 throughout the homepage copy', () => {
+  it('uses a consistent second-person voice throughout the homepage copy', () => {
     const html = renderToStaticMarkup(<HomePage />);
 
-    expect(html).not.toContain('你');
     expect(html).toContain('您的');
+    expect(html).not.toContain('你的');
   });
 });

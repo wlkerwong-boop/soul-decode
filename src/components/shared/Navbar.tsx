@@ -5,6 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 export interface NavbarProps {
   logo?: React.ReactNode;
   links?: { label: string; href: string }[];
+  secondaryCta?: { label: string; href: string };
   cta?: { label: string; href: string };
   className?: string;
 }
@@ -14,6 +15,7 @@ const NAV_SCROLL_THRESHOLD = 100;
 export const Navbar: React.FC<NavbarProps> = ({
   logo,
   links = [],
+  secondaryCta,
   cta,
   className = '',
 }) => {
@@ -57,9 +59,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             {logo || <span className="text-[var(--color-accent)]">JiànJǐ</span>}
           </a>
 
-          {/* Links — desktop */}
+          {/* Links — desktop (xl 1280px+ 才显示；以下宽度用汉堡菜单避免挤压) */}
           {links.length > 0 && (
-            <ul className="hidden items-center gap-1 md:flex">
+            <ul className="hidden items-center gap-1 xl:flex">
               {links.map((link) => (
                 <li key={link.href}>
                   <a
@@ -75,6 +77,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* CTA + hamburger */}
           <div className="flex items-center gap-4">
+            {secondaryCta && (
+              <a
+                href={secondaryCta.href}
+                className="hidden md:inline-flex items-center rounded-[var(--radius-full)] border border-[var(--color-border-hover)] px-4 py-2 text-sm font-medium text-[var(--color-accent)] transition-colors hover:bg-[var(--color-bg-card)]"
+              >
+                {secondaryCta.label}
+              </a>
+            )}
             {cta && (
               <a
                 href={cta.href}
@@ -86,7 +96,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="inline-flex items-center md:hidden z-50"
+              className="inline-flex items-center xl:hidden z-50"
               aria-label="Toggle menu"
             >
               {mobileOpen ? (
@@ -109,7 +119,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Mobile full-screen overlay menu */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 flex flex-col items-center justify-center md:hidden"
+          className="fixed inset-0 z-40 flex flex-col items-center justify-center xl:hidden"
           style={{
             background: 'var(--color-bg)',
             backdropFilter: 'saturate(180%) blur(20px)',
@@ -136,6 +146,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className="inline-flex items-center rounded-[var(--radius-full)] bg-[var(--color-accent)] px-8 py-3 text-lg font-semibold text-[var(--color-primary)]"
                 >
                   {cta.label}
+                </a>
+              </li>
+            )}
+            {secondaryCta && (
+              <li>
+                <a
+                  href={secondaryCta.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="inline-flex items-center rounded-[var(--radius-full)] border border-[var(--color-border-hover)] px-8 py-3 text-lg font-medium text-[var(--color-accent)]"
+                >
+                  {secondaryCta.label}
                 </a>
               </li>
             )}

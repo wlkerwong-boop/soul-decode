@@ -17,9 +17,9 @@ export default function MyPage() {
       return;
     }
     if (isLoggedIn) {
-      setReports(getAllReports());
+      setReports(getAllReports(user?.id || ''));
     }
-  }, [isLoading, isLoggedIn, router]);
+  }, [isLoading, isLoggedIn, router, user?.id]);
 
   if (isLoading || !isLoggedIn || !user) {
     return (
@@ -41,16 +41,14 @@ export default function MyPage() {
     });
   };
 
-  const maskPhone = (phone: string) => `${phone.slice(0, 3)}****${phone.slice(-4)}`;
-
   return (
-    <div className="py-12 md:py-16 px-4 md:px-6">
+    <div className="inner-page py-12 md:py-16 px-4 md:px-6 pt-nav">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
           <span className="tag-pill text-xs tracking-widest mb-4 inline-block">📁 我的灵魂档案</span>
           <h1 className="text-3xl md:text-4xl font-bold mb-2">个人中心</h1>
-          <p className="text-sm text-[var(--text-secondary)]">管理你的账号信息与历史报告</p>
+          <p className="text-sm text-[var(--text-secondary)]">管理您的账号信息与历史报告</p>
         </div>
 
         {/* Profile Card */}
@@ -69,7 +67,7 @@ export default function MyPage() {
             <div className="flex-1 min-w-0">
               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mb-3">
                 <h2 className="text-xl font-bold">{user.nickname}</h2>
-                <span className="text-sm text-[var(--text-secondary)]">{maskPhone(user.phone)}</span>
+                <span className="text-sm text-[var(--text-secondary)] break-all">{user.email}</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div className="px-3 py-2 rounded-lg bg-[var(--bg-highlight)]">
@@ -91,6 +89,15 @@ export default function MyPage() {
           </div>
         </div>
 
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          {['我的收藏', '我的课程', '我的订单', '健康档案'].map((item) => (
+            <div key={item} className="card-jade px-4 py-5 text-center">
+              <p className="text-sm font-medium">{item}</p>
+              <p className="mt-1 text-xs text-[var(--text-secondary)]">暂无内容</p>
+            </div>
+          ))}
+        </div>
+
         {/* Reports Section */}
         <div className="mb-6 flex items-center justify-between">
           <h3 className="text-lg font-bold">历史报告</h3>
@@ -107,10 +114,10 @@ export default function MyPage() {
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <a
-                  href="/health"
+                  href="/master-report"
                   className="px-5 py-2 rounded-lg border border-[var(--border-color)] text-sm hover:border-[var(--text-accent)] transition-colors"
                 >
-                  去做健康评测
+                  生成生命蓝图
                 </a>
                 <a
                   href="/"

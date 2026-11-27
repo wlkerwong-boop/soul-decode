@@ -279,7 +279,7 @@ export default function PlumBlossomCard({ data, interpretText, interpretLoading 
             <span className="text-xl">🗣️</span>
           </div>
           <p className="text-xs text-[var(--text-secondary)] opacity-60">
-            把卦象翻译成你听得懂的生活语言
+            把卦象翻译成您听得懂的生活语言
             {!hasAccess && <span className="text-[var(--text-accent)] ml-1">· 免费预览部分</span>}
           </p>
         </div>

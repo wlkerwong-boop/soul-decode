@@ -39,11 +39,28 @@ function parseJiugongInput(body: unknown): JiugongInput {
   return { name, year, month, day };
 }
 
+// 接口级内存缓存：确定性计算，同一输入 1 小时内直接返回（防极端链路/重复查询）
+const resultCache = new Map<string, { t: number; body: unknown }>();
+const CACHE_TTL_MS = 60 * 60 * 1000;
+const CACHE_MAX = 500;
+
 export async function POST(request: NextRequest) {
   try {
     const input = parseJiugongInput(await request.json());
+    const cacheKey = `${input.name}|${input.year}|${input.month}|${input.day}`;
+    const hit = resultCache.get(cacheKey);
+    if (hit && Date.now() - hit.t < CACHE_TTL_MS) {
+      return NextResponse.json(hit.body);
+    }
     const data = await calculateJiugongV6(input);
-    return NextResponse.json({ success: true, engine: 'jiugong-v6', data });
+    const body = { success: true, engine: 'jiugong-v6', data };
+    resultCache.set(cacheKey, { t: Date.now(), body });
+    if (resultCache.size > CACHE_MAX) {
+      // 简单清理：清掉最老的一半
+      const entries = [...resultCache.entries()].sort((a, b) => a[1].t - b[1].t);
+      for (let i = 0; i < CACHE_MAX / 2; i++) resultCache.delete(entries[i][0]);
+    }
+    return NextResponse.json(body);
   } catch (error) {
     if (
       error instanceof JiugongInputError
